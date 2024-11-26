@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Select Range</title>
+  <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    #rangeInput {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
+      box-sizing: border-box;
+    }
+    #submitBtn {
+      padding: 10px 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Select a Range</h1>
+  <input type="text" id="rangeInput" placeholder="e.g., A1:D5" />
+  <button id="submitBtn">Submit</button>
+
+  <script>
+    Office.onReady(() => {
+      console.log('Range Selection Dialog Ready');
+      document.getElementById('submitBtn').onclick = async () => {
+        const rangeAddress = document.getElementById('rangeInput').value.trim();
+        console.log('User entered range:', rangeAddress);
+        if (rangeAddress) {
+          Office.context.ui.messageParent(rangeAddress);
+        } else {
+          Office.context.ui.messageParent('Error');
+        }
+      };
+    });
+  </script>
+</body>
+</html>

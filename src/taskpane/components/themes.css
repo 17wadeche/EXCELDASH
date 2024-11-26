@@ -1,0 +1,20 @@
+/* themes.css */
+
+.light-theme {
+  --background-color: #ffffff;
+  --text-color: #000000;
+  --card-background: #ffffff;
+}
+
+.dashboard-container {
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+.ant-card {
+  background-color: var(--card-background) !important;
+}
+
+.ant-layout {
+  background-color: var(--background-color) !important;
+}

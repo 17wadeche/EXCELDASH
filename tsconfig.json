@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "allowUnusedLabels": false,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "jsx": "react-jsx",
+    "moduleResolution": "node",
+    "allowJs": true,
+    "noImplicitReturns": true,
+    "noUnusedParameters": true,
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "module": "esnext",
+    "resolveJsonModule": true,
+    "noEmit": false,
+    "outDir": "dist",
+    "removeComments": false,
+    "sourceMap": true,
+    "target": "es2015",
+    "baseUrl": ".",
+    "paths": {
+      "office-js": ["node_modules/office-js/index.d.ts"]
+    },
+    "types": ["office-js", "node"],
+    "lib": ["dom", "dom.iterable", "es6", "esnext", "es2015", "es2016", "es2017" ],
+    "pretty": true,
+  },
+  "include": ["src/**/*", "src/types/**/*", "node_modules/@types/office-js/index.d.ts"],
+  "compileOnSave": false,
+  "buildOnSave": false
+}
