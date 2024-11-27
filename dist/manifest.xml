@@ -13,7 +13,7 @@
     <Host Name="Workbook"/>
   </Hosts>
   <DefaultSettings>
-    <SourceLocation DefaultValue="https://exceladdinstoragecw.z13.web.core.windows.net//taskpane.html"/>
+    <SourceLocation DefaultValue="https://exceladdinstoragecw.z13.web.core.windows.net/taskpane.html"/>
   </DefaultSettings>
   <Permissions>ReadWriteDocument</Permissions>
   <VersionOverrides xmlns="http://schemas.microsoft.com/office/taskpaneappversionoverrides" xsi:type="VersionOverridesV1_0">
@@ -65,8 +65,8 @@
       </bt:Images>
       <bt:Urls>
         <bt:Url id="GetStarted.LearnMoreUrl" DefaultValue="https://go.microsoft.com/fwlink/?LinkId=276812"/>
-        <bt:Url id="Commands.Url" DefaultValue="https://exceladdinstoragecw.z13.web.core.windows.net//commands.html"/>
-        <bt:Url id="Taskpane.Url" DefaultValue="https://exceladdinstoragecw.z13.web.core.windows.net//taskpane.html"/>
+        <bt:Url id="Commands.Url" DefaultValue="https://exceladdinstoragecw.z13.web.core.windows.net/commands.html"/>
+        <bt:Url id="Taskpane.Url" DefaultValue="https://exceladdinstoragecw.z13.web.core.windows.net/taskpane.html"/>
       </bt:Urls>
       <bt:ShortStrings>
         <bt:String id="GetStarted.Title" DefaultValue="Build a custom Excel Dashboard!"/>
