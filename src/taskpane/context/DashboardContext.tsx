@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Breakpoint, GRID_COLS, WIDGET_SIZES } from '../components/layoutConstants';
 import { message, Select } from 'antd';
 import html2canvas from 'html2canvas';
+import SalesChart from '../components/widgets/SalesChart';
 import isEqual from 'lodash.isequal'
 import jsPDF from 'jspdf';
 import PromptWidgetDetailsModal from '../components/PromptWidgetDetailsModal';

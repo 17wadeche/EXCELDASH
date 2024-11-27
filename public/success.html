@@ -1,0 +1,20 @@
+<!-- public/success.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Subscription Successful</title>
+  <script>
+    // Optionally, communicate with the add-in to refresh subscription status
+    window.onload = function() {
+      Office.context.ui.messageParent(JSON.stringify({ type: 'subscriptionSuccess' }));
+    };
+  </script>
+</head>
+<body>
+  <h1>Thank you for your subscription!</h1>
+  <p>Your subscription was successful. You can now return to the add-in.</p>
+</body>
+</html>

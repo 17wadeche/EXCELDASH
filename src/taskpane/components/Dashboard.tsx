@@ -27,6 +27,8 @@ import { debounce } from 'lodash';
 import LineWidget from './widgets/LineWidget';
 import html2canvas from 'html2canvas';
 import PresentationDashboard from './PresentationDashboard';
+import { getOrCreateLicenseKey } from './../utils/licenseUtils';
+import { createCheckoutSession, checkSubscription } from './../utils/api';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 const defaultTitleWidget: Widget = {
@@ -67,6 +69,11 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
   const isUpdatingFromItem = useRef(false);
   const prevLayoutsRef = useRef<{ [key: string]: GridLayoutItem[] }>({});
   const [isPresentationMode, setIsPresentationMode] = useState(false);
+  const [licenseKey, setLicenseKey] = useState<string>('');
+  const [isSubscribed, setIsSubscribed] = useState<boolean>(false);
+  const [subscriptionPlan, setSubscriptionPlan] = useState<'monthly' | 'yearly' | null>(null);
+  const [isSubscriptionModalVisible, setIsSubscriptionModalVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const isOfficeInitialized =
     typeof Office !== 'undefined' &&
     Office.context &&
@@ -80,6 +87,99 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
     await refreshAllCharts();
     setIsRefreshing(false);
   };
+  useEffect(() => {
+    const initialize = async () => {
+      try {
+        const key = await getOrCreateLicenseKey();
+        setLicenseKey(key);
+
+        const verifySubscription = async () => {
+          try {
+            const result = await checkSubscription(key);
+            setIsSubscribed(result.subscribed);
+            setSubscriptionPlan(result.plan);
+          } catch (error) {
+            console.error('Error checking subscription:', error);
+            message.error('Failed to verify subscription status.');
+          }
+        };
+
+        verifySubscription();
+      } catch (error) {
+        console.error('Error initializing license key:', error);
+        message.error('Failed to initialize license key.');
+      }
+    };
+
+    initialize();
+  }, []);
+
+  const handleSubscribe = () => {
+    setIsSubscriptionModalVisible(true);
+  };
+
+  const initiateCheckout = async (plan: 'monthly' | 'yearly') => {
+    setIsLoading(true);
+    try {
+      const checkoutUrl = await createCheckoutSession(licenseKey, plan);
+      window.open(checkoutUrl, '_blank');
+    } catch (error: any) {
+      console.error('Error initiating checkout:', error);
+      message.error('Failed to initiate checkout.');
+    } finally {
+      setIsLoading(false);
+      setIsSubscriptionModalVisible(false);
+    }
+  };
+
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      try {
+        const result = await checkSubscription(licenseKey);
+        setIsSubscribed(result.subscribed);
+        setSubscriptionPlan(result.plan);
+      } catch (error) {
+        console.error('Error checking subscription:', error);
+      }
+    }, 60000); // Every 60 seconds
+
+    return () => clearInterval(interval);
+  }, [licenseKey]);
+
+  if (!isSubscribed) {
+    return (
+      <div className="dashboard-wrapper">
+        <Button type="primary" onClick={handleSubscribe}>
+          Subscribe Now
+        </Button>
+
+        <Modal
+          title="Choose a Subscription Plan"
+          visible={isSubscriptionModalVisible}
+          onCancel={() => setIsSubscriptionModalVisible(false)}
+          footer={null}
+        >
+          <Button
+            type="primary"
+            block
+            style={{ marginBottom: '10px' }}
+            onClick={() => initiateCheckout('monthly')}
+            disabled={isLoading}
+          >
+            Monthly - $10
+          </Button>
+          <Button
+            type="primary"
+            block
+            onClick={() => initiateCheckout('yearly')}
+            disabled={isLoading}
+          >
+            Yearly - $110
+          </Button>
+        </Modal>
+      </div>
+    );
+  }
 
   const [fullScreenDialog, setFullScreenDialog] = useState<
     Office.Dialog | null

@@ -6,6 +6,7 @@ import {
   LinearScale,
   BarElement,
   LineElement,
+  BarController,
   PointElement,
   ArcElement,
   Title,
@@ -23,8 +24,8 @@ Chart.register(
   LineElement,
   PointElement,
   ArcElement,
-  RadialLinearScale, // Added RadialLinearScale for Radar and PolarArea charts
-  Title,
+  RadialLinearScale,
+  BarController,
   Tooltip,
   Legend,
   Filler

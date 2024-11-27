@@ -6,6 +6,9 @@ import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
+  BarController,
+  LineController,
+  PieController,
   BarElement,
   PointElement,
   LineElement,
@@ -16,7 +19,7 @@ import {
   ChartOptions,
   ChartDataset,
   ChartType,
-  TimeScale, // Import TimeScale
+  TimeScale,
 } from 'chart.js';
 import { Chart } from 'react-chartjs-2';
 import 'chartjs-adapter-moment'; // Ensure the adapter is imported
@@ -27,17 +30,20 @@ import ChartDataLabels from 'chartjs-plugin-datalabels';
 ChartJS.register(
   CategoryScale,
   LinearScale,
-  TimeScale, // Register TimeScale
+  TimeScale,
   BarElement,
-  ChartDataLabels,
+  BarController,
+  LineController,
+  PieController,
   PointElement,
   LineElement,
   ArcElement,
   Tooltip,
   Legend,
-  zoomPlugin
 );
 
+ChartJS.register(zoomPlugin);
+ChartJS.register(ChartDataLabels);
 interface ChartData extends ChartJSData {
   title?: string;
   titleAlignment?: 'left' | 'center' | 'right';
