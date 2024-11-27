@@ -2,49 +2,22 @@
 
 import React, { useRef, useEffect } from 'react';
 import Draggable from 'react-draggable';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarController,
-  LineController,
-  PieController,
-  BarElement,
-  PointElement,
-  LineElement,
-  ArcElement,
-  Tooltip,
-  Legend,
-  ChartData as ChartJSData,
-  ChartOptions,
-  ChartDataset,
-  ChartType,
-  TimeScale,
-} from 'chart.js';
+import { Chart as ChartJS } from 'chart.js/auto';
 import { Chart } from 'react-chartjs-2';
 import 'chartjs-adapter-moment'; // Ensure the adapter is imported
 import zoomPlugin from 'chartjs-plugin-zoom';
 import isEqual from 'lodash/isEqual';
+import type {
+  ChartData,
+  ChartOptions,
+  ChartDataset,
+  ChartType,
+} from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
-
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  TimeScale,
-  BarElement,
-  BarController,
-  LineController,
-  PieController,
-  PointElement,
-  LineElement,
-  ArcElement,
-  Tooltip,
-  Legend,
-);
 
 ChartJS.register(zoomPlugin);
 ChartJS.register(ChartDataLabels);
-interface ChartData extends ChartJSData {
+interface ExtendedChartData<TType extends ChartType = ChartType, TData = unknown> extends ChartData<TType, TData> {
   title?: string;
   titleAlignment?: 'left' | 'center' | 'right';
   scales?: {
@@ -87,13 +60,13 @@ interface ChartData extends ChartJSData {
   };
   backgroundColor?: string;
   gridLineColor?: string;
-  datasets: ChartDataset[];
+  datasets: ChartDataset<TType, TData>[];
   associatedRange?: string; // Added property
   chartIndex?: number; // Existing property
 }
 
 interface SalesChartProps {
-  data: ChartData;
+  data: ExtendedChartData;
   type: ChartType;
   isPresenterMode?: boolean;
 }
@@ -104,7 +77,7 @@ const SalesChart = ({ data, type }: SalesChartProps) => {
   useEffect(() => {
     return () => {
       if (chartRef.current) {
-        chartRef.current.destroy(); // Properly destroy the chart instance on unmount
+        chartRef.current.destroy();
       }
     };
   }, []);

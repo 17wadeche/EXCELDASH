@@ -403,7 +403,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
             ]}
           >
             <Select onChange={(value) => setChartType(value)}>
-              <Option value="bar">Bar</Option>
+              <Option value="line">Bar</Option>
               <Option value="line">Line</Option>
               <Option value="pie">Pie</Option>
               <Option value="doughnut">Doughnut</Option>
@@ -542,10 +542,10 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                             'Please select chart type for this dataset',
                         },
                       ]}
-                      initialValue="bar"
+                      initialValue="line"
                     >
                       <Select>
-                        <Option value="bar">Bar</Option>
+                        <Option value="line">Bar</Option>
                         <Option value="line">Line</Option>
                         <Option value="pie">Pie</Option>
                         <Option value="doughnut">Doughnut</Option>
