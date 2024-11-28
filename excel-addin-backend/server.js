@@ -25,12 +25,24 @@ if (process.env.NODE_ENV !== 'production') {
     format: winston.format.simple(),
   }));
 }
-app.use(morgan('combined', { stream: { write: message => logger.info(message.trim()) } }));
+const allowedOrigins = [
+  'https://exceladdinstoragecw.z13.web.core.windows.net', // Frontend
+  'http://localhost:3000', // Local development
+];
+
 const corsOptions = {
-  origin: 'https://exceladdinstoragecw.z13.web.core.windows.net/taskpane.html',
-  optionsSuccessStatus: 200,
+  origin: function (origin, callback) {
+    if (allowedOrigins.includes(origin) || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
 };
-app.use(cors(corsOptions));
+
+app.use(cors(corsOptions)); // Enable CORS for specified origins
+app.options('*', cors(corsOptions)); 
+app.use(morgan('combined', { stream: { write: message => logger.info(message.trim()) } }));
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // Limit each IP to 100 requests per windowMs
@@ -110,44 +122,6 @@ const initialize = async () => {
         logger.error('Error handling webhook event:', err);
         res.status(500).send('Internal Server Error');
       }
-    });
-    app.post('/api/create-checkout-session', async (req, res) => {
-        console.log('Incoming Request Body:', req.body);
-        const schema = Joi.object({
-            licenseKey: Joi.string().required(),
-            plan: Joi.string().valid('monthly', 'yearly').required(),
-        });
-        const { error, value } = schema.validate(req.body);
-        if (error) {
-            logger.warn('Validation error:', error.details[0].message);
-            return res.status(400).json({ error: error.details[0].message });
-        }
-        const { licenseKey, plan } = value;
-        let priceId;
-        if (plan === 'monthly') {
-            priceId = process.env.PRICE_ID_MONTHLY;
-        } else if (plan === 'yearly') {
-            priceId = process.env.PRICE_ID_YEARLY;
-        }
-        try {
-            const session = await stripe.checkout.sessions.create({
-                payment_method_types: ['card'],
-                mode: 'subscription',
-                line_items: [{
-                price: priceId,
-                quantity: 1,
-            }],
-            metadata: {
-                licenseKey,
-            },
-            success_url: process.env.SUCCESS_URL,
-            cancel_url: process.env.CANCEL_URL,
-            });
-            res.json({ url: session.url });
-        } catch (error) {
-            logger.error('Error creating checkout session:', error);
-            res.status(500).json({ error: 'Internal Server Error' });
-        }
     });
     app.get('/api/check-subscription', async (req, res) => {
       const { licenseKey } = req.query;
