@@ -11,7 +11,8 @@ const morgan = require('morgan');
 const winston = require('winston');
 
 const app = express();
-
+const EventEmitter = require('events');
+EventEmitter.defaultMaxListeners = 100; 
 const logger = winston.createLogger({
   level: 'info',
   format: winston.format.json(),
