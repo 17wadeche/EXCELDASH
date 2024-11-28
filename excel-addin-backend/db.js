@@ -1,4 +1,3 @@
-// db.js
 const { Sequelize } = require('sequelize');
 const { ClientSecretCredential } = require('@azure/identity');
 require('dotenv').config();
@@ -9,8 +8,8 @@ const clientId = process.env.AZURE_CLIENT_ID;
 const clientSecret = process.env.AZURE_CLIENT_SECRET;
 
 // Azure SQL Configuration
-const sqlServer = process.env.SQL_SERVER; // e.g., "exceladdinserver.database.windows.net"
-const sqlDatabase = process.env.SQL_DATABASE; // e.g., "ExcelAddinDB"
+const sqlServer = process.env.SQL_SERVER;
+const sqlDatabase = process.env.SQL_DATABASE;
 
 // Initialize Azure AD Credential
 const credential = new ClientSecretCredential(tenantId, clientId, clientSecret);
@@ -40,13 +39,13 @@ async function initializeSequelize() {
           token: accessToken,
         },
       },
-      encrypt: true, // Required for Azure
-      trustServerCertificate: false, // Set to true if using self-signed certs (not recommended for production)
+      encrypt: true,
+      trustServerCertificate: false,
       options: {
-        connectTimeout: 30000, // 30 seconds
+        connectTimeout: 30000,
       },
     },
-    logging: false, // Set to console.log for detailed logging during troubleshooting
+    logging: false,
   });
 
   try {
@@ -54,7 +53,7 @@ async function initializeSequelize() {
     console.log('Azure AD Authentication: Connection has been established successfully.');
   } catch (error) {
     console.error('Unable to connect to the database:', error);
-    process.exit(1); // Exit process with failure
+    process.exit(1);
   }
 
   return sequelize;

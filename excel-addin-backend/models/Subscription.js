@@ -1,10 +1,9 @@
-// models/Subscription.js
 const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
   const Subscription = sequelize.define('Subscription', {
     id: {
-      type: DataTypes.STRING, // Stripe subscription ID
+      type: DataTypes.STRING,
       primaryKey: true,
     },
     licenseId: {
@@ -15,11 +14,11 @@ module.exports = (sequelize) => {
       },
     },
     status: {
-      type: DataTypes.STRING, // 'active', 'past_due', 'canceled', etc.
+      type: DataTypes.STRING,
       allowNull: false,
     },
     plan: {
-      type: DataTypes.STRING, // 'monthly', 'yearly', etc.
+      type: DataTypes.STRING,
       allowNull: false,
     },
     currentPeriodEnd: {
@@ -30,6 +29,6 @@ module.exports = (sequelize) => {
     tableName: 'Subscriptions',
     timestamps: true,
   });
-  
+
   return Subscription;
 };

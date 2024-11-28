@@ -1,4 +1,3 @@
-// models/User.js
 const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
@@ -18,6 +17,6 @@ module.exports = (sequelize) => {
     tableName: 'Users',
     timestamps: true,
   });
-  
+
   return User;
 };

@@ -1,4 +1,3 @@
-// models/License.js
 const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
@@ -13,7 +12,7 @@ module.exports = (sequelize) => {
       allowNull: false,
       unique: true,
     },
-    userId: { // Foreign key to Users table
+    userId: {
       type: DataTypes.UUID,
       references: {
         model: 'Users',
@@ -21,15 +20,15 @@ module.exports = (sequelize) => {
       },
     },
     subscriptionId: {
-      type: DataTypes.STRING, // Stripe subscription ID
+      type: DataTypes.STRING,
       allowNull: true,
     },
     subscriptionStatus: {
-      type: DataTypes.STRING, // 'active', 'past_due', 'canceled', etc.
+      type: DataTypes.STRING,
       allowNull: true,
     },
     plan: {
-      type: DataTypes.STRING, // 'monthly', 'yearly', etc.
+      type: DataTypes.STRING,
       allowNull: true,
     },
     createdAt: {
@@ -40,6 +39,6 @@ module.exports = (sequelize) => {
     tableName: 'Licenses',
     timestamps: true,
   });
-  
+
   return License;
 };

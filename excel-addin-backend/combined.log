@@ -17,3 +17,12 @@
 {"level":"info","message":"::1 - - [27/Nov/2024:19:03:45 +0000] \"POST /api/create-checkout-session HTTP/1.1\" 200 369 \"-\" \"PostmanRuntime/7.42.0\""}
 {"level":"info","message":"::1 - - [27/Nov/2024:19:13:44 +0000] \"GET /api/check-subscription?licenseKey=a1b2c3d4-e5f6-7890-abcd-1234567890ef HTTP/1.1\" 200 20 \"-\" \"PostmanRuntime/7.42.0\""}
 {"level":"info","message":"Server is running on port 5000"}
+{"level":"info","message":"Server is running on port 5000"}
+{"level":"info","message":"Server is running on port 5000"}
+{"level":"info","message":"Server is running on port 5000"}
+{"level":"info","message":"Server is running on port 5000"}
+{"level":"info","message":"Server is running on port 5000"}
+{"level":"info","message":"Server is running on port 5000"}
+{"level":"info","message":"Server is running on port 5000"}
+{"level":"info","message":"Server is running on port 5000"}
+{"level":"info","message":"Server is running on port 5000"}

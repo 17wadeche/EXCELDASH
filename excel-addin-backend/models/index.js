@@ -1,4 +1,3 @@
-// models/index.js
 const initializeSequelize = require('../db'); // Adjust the path as necessary
 
 const defineUser = require('./User');
@@ -26,7 +25,7 @@ async function initializeModels() {
     console.log('All models were synchronized successfully.');
   } catch (error) {
     console.error('Unable to sync models:', error);
-    process.exit(1); // Exit process with failure
+    process.exit(1);
   }
 
   return {
