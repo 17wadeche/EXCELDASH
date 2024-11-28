@@ -4,7 +4,7 @@ import axios from 'axios';
 const API_BASE_URL = 'https://exceladdinbackend-d6a4haekdehchncx.canadacentral-01.azurewebsites.net';
 
 export const createCheckoutSession = async (licenseKey: string, plan: 'monthly' | 'yearly') => {
-  const response = await axios.post(`${API_BASE_URL}/create-checkout-session`, {
+  const response = await axios.post(`${API_BASE_URL}/api/create-checkout-session`, {
     licenseKey,
     plan,
   });
