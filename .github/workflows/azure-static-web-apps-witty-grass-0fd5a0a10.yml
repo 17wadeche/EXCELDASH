@@ -43,7 +43,6 @@ jobs:
       - name: Build Backend
         run: |
           cd excel-addin-backend
-          # Add any build commands if needed, e.g., npm run build
 
       # 10. Build And Deploy
       - name: Build And Deploy
