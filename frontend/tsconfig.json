@@ -17,7 +17,7 @@
     "outDir": "dist",
     "removeComments": false,
     "sourceMap": true,
-    "target": "es2015",
+    "target": "ES6",
     "baseUrl": ".",
     "paths": {
       "office-js": ["node_modules/office-js/index.d.ts"]

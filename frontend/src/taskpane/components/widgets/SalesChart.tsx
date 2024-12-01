@@ -2,22 +2,70 @@
 
 import React, { useRef, useEffect } from 'react';
 import Draggable from 'react-draggable';
-import { Chart as ChartJS } from 'chart.js/auto';
-import { Chart } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  LineElement,
+  PointElement,
+  Title,
+  Tooltip,
+  Legend,
+  TimeScale,
+} from 'chart.js';
+import {
+  Bar,
+  Line,
+  Pie,
+  Doughnut,
+  Radar,
+  Scatter,
+  Bubble,
+  PolarArea,
+  // Add other chart types as needed
+} from 'react-chartjs-2';
 import 'chartjs-adapter-moment'; // Ensure the adapter is imported
 import zoomPlugin from 'chartjs-plugin-zoom';
 import isEqual from 'lodash/isEqual';
 import type {
   ChartData,
   ChartOptions,
-  ChartDataset,
   ChartType,
+  ChartDataset,
 } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 
-ChartJS.register(zoomPlugin);
-ChartJS.register(ChartDataLabels);
-interface ExtendedChartData<TType extends ChartType = ChartType, TData = unknown> extends ChartData<TType, TData> {
+// Register chart components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  LineElement,
+  PointElement,
+  Title,
+  Tooltip,
+  Legend,
+  TimeScale,
+  zoomPlugin,
+  ChartDataLabels
+);
+
+// Define a mapping from chart type to component
+const chartComponents: Record<string, React.FC<any>> = {
+  bar: Bar,
+  line: Line,
+  pie: Pie,
+  doughnut: Doughnut,
+  radar: Radar,
+  scatter: Scatter,
+  bubble: Bubble,
+  polarArea: PolarArea,
+  // Add other mappings as needed
+};
+
+interface ExtendedChartData<TType extends ChartType = ChartType, TData = unknown>
+  extends ChartData<TType, TData> {
   title?: string;
   titleAlignment?: 'left' | 'center' | 'right';
   scales?: {
@@ -115,9 +163,12 @@ const SalesChart = ({ data, type }: SalesChartProps) => {
     scales: {
       x: {
         type: data.scales?.x?.type || 'category',
-        time: data.scales?.x?.type === 'time' ? {
-          unit: 'day', // Adjust based on your data granularity
-        } : undefined,
+        time:
+          data.scales?.x?.type === 'time'
+            ? {
+                unit: 'day', // Adjust based on your data granularity
+              }
+            : undefined,
         title: {
           display: data.scales?.x?.title?.display !== false,
           text: data.scales?.x?.title?.text || '',
@@ -143,7 +194,8 @@ const SalesChart = ({ data, type }: SalesChartProps) => {
         },
         ticks: {
           color: 'black',
-          callback: (value: number | string) => Number(value).toLocaleString(),
+          callback: (value: number | string) =>
+            Number(value).toLocaleString(),
         },
         grid: {
           color: data.gridLineColor || 'rgba(0, 0, 0, 0.2)',
@@ -185,6 +237,9 @@ const SalesChart = ({ data, type }: SalesChartProps) => {
     }
   };
 
+  // Select the appropriate chart component based on the 'type' prop
+  const SelectedChart = chartComponents[type] || Bar; // Default to Bar if type is unknown
+
   return (
     <Draggable handle=".drag-handle">
       <div
@@ -201,8 +256,7 @@ const SalesChart = ({ data, type }: SalesChartProps) => {
         }}
       >
         <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-          <Chart
-            type={type}
+          <SelectedChart
             data={data}
             options={chartOptions}
             ref={chartRef}

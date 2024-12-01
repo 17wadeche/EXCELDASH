@@ -1,4 +1,3 @@
-// src/utils/licenseUtils.ts
 import { v4 as uuidv4 } from 'uuid';
 
 export const getOrCreateLicenseKey = async (): Promise<string> => {
@@ -9,18 +8,19 @@ export const getOrCreateLicenseKey = async (): Promise<string> => {
     !Office.context.document.settings
   ) {
     // Office is not available, use localStorage for development/testing
-    let licenseKey = localStorage.getItem('excel_addin_license_key');
+    let licenseKey: string | null = localStorage.getItem('excel_addin_license_key');
     if (!licenseKey) {
       licenseKey = uuidv4();
-      localStorage.setItem('excel_addin_license_key', licenseKey);
+      localStorage.setItem('excel_addin_license_key', licenseKey as string);
     }
-    return licenseKey;
+    // Assert that licenseKey is now a string
+    return licenseKey as string;
   }
 
   // Wait for Office to be ready
   await Office.onReady();
 
-  let licenseKey = Office.context.document.settings.get('licenseKey');
+  let licenseKey: string | null = Office.context.document.settings.get('licenseKey');
   if (!licenseKey) {
     licenseKey = uuidv4();
     Office.context.document.settings.set('licenseKey', licenseKey);
@@ -36,5 +36,6 @@ export const getOrCreateLicenseKey = async (): Promise<string> => {
       });
     });
   }
-  return licenseKey;
+  // Assert that licenseKey is now a string
+  return licenseKey as string;
 };
