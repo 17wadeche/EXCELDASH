@@ -2,19 +2,21 @@
 node_modules/
 
 # Logs
-logs
 *.log
 
 # Environment variables
 .env
-api/local.settings.json
+local.settings.json
 
-# Build output
-**/build
-**/dist
+# Build outputs
+**/build/
+**/dist/
 
-# OS files
-.DS_Store
-
-# Others
-.vscode/
+# Azure Functions artifacts
+excel-addin-backend/**/*.js.map
+excel-addin-backend/**/*.ts
+excel-addin-backend/.vscode
+excel-addin-backend/.gitignore
+excel-addin-backend/local.settings.json
+excel-addin-backend/test
+excel-addin-backend/getting_started.md
