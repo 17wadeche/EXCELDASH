@@ -10,6 +10,7 @@ const urlDev = "https://localhost:3000/";
 const urlProd = "https://www.contoso.com/"; // CHANGE THIS TO YOUR PRODUCTION DEPLOYMENT LOCATION
 
 async function getHttpsOptions() {
+  const devCerts = require("office-addin-dev-certs");
   const httpsOptions = await devCerts.getHttpsServerOptions();
   return { ca: httpsOptions.ca, key: httpsOptions.key, cert: httpsOptions.cert };
 }
@@ -136,7 +137,9 @@ module.exports = async (env, options) => {
         options:
           env.WEBPACK_BUILD || options.https !== undefined
             ? options.https
-            : await getHttpsOptions(),
+            : dev
+            ? await getHttpsOptions()
+            : undefined,
       },
       port: process.env.npm_package_config_dev_server_port || 3000,
     },
