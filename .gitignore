@@ -1,18 +1,7 @@
-# Node modules
 node_modules/
-
-# Logs
 *.log
-
-# Environment variables
 .env
 local.settings.json
-
-# Build outputs
-**/build/
-**/dist/
-
-# Azure Functions artifacts
 excel-addin-backend/**/*.js.map
 excel-addin-backend/**/*.ts
 excel-addin-backend/.vscode
