@@ -27,15 +27,6 @@ jobs:
           node-version: '22' # Ensure this matches your project's Node.js version
           cache: 'npm' # Enable caching for faster builds
 
-      # 3. Cache Frontend Dependencies
-      - name: Cache Frontend node_modules
-        uses: actions/cache@v3
-        with:
-          path: frontend/node_modules
-          key: ${{ runner.os }}-frontend-${{ hashFiles('frontend/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-frontend-
-
       # 4. Install Frontend Dependencies
       - name: Install Frontend Dependencies
         run: |
@@ -47,23 +38,6 @@ jobs:
         run: |
           cd frontend
           npm run build
-
-      # 6. Setup Node.js for Backend (if necessary)
-      - name: Setup Node.js for Backend
-        uses: actions/setup-node@v3
-        with:
-          node-version: '22' # Ensure this matches your project's Node.js version
-          cache: 'npm'
-
-      # 7. Cache Backend Dependencies (Optional)
-      - name: Cache Backend node_modules
-        uses: actions/cache@v3
-        with:
-          path: excel-addin-backend/node_modules
-          key: ${{ runner.os }}-backend-${{ hashFiles('excel-addin-backend/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-backend-
-
       # 8. Install Backend Dependencies
       - name: Install Backend Dependencies
         run: |
