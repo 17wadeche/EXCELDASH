@@ -21,11 +21,6 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: false
-      - name: Setup Node.js for Frontend
-        uses: actions/setup-node@v3
-        with:
-          node-version: '22' # Ensure this matches your project's Node.js version
-          cache: 'npm' # Enable caching for faster builds
 
       # 4. Install Frontend Dependencies
       - name: Install Frontend Dependencies
