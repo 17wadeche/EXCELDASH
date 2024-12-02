@@ -1,0 +1,78 @@
+
+.fixed-sider {
+  position: fixed !important; /* Fixes the sider relative to the viewport */
+  top: 0;
+  left: 0;
+  height: 100vh; /* Full viewport height */
+  overflow: auto; /* Enable scrolling within the sider if content overflows */
+  z-index: 1000; /* Ensure the sider stays above other elements */
+}
+
+.ant-layout {
+  transition: margin-left 0.2s; /* Smooth transition when sider collapses */
+}
+
+.ant-layout-sider-collapsed ~ .ant-layout {
+  margin-left: 80px; /* Adjust margin when sider is collapsed */
+}
+
+.custom-layout.light-theme {
+  --background-color: #f0f2f5; /* Light grey for a clean background */
+  --text-color: #000000; /* Black text for readability */
+  --primary-color: #1890ff; /* Ant Design primary blue */
+  --sider-background-color: #ffffff; /* White sidebar */
+  --menu-item-active-bg: #e6f7ff; /* Light blue highlight */
+  --menu-item-hover-bg: #e6f7ff; /* Light blue on hover */
+  --menu-item-color: #000000; /* Black menu text */
+  --menu-item-active-color: var(--primary-color); /* Primary color on active */
+}
+
+.custom-layout.dark-theme {
+  --background-color: #141414; /* Dark background */
+  --text-color: #ffffff; /* White text */
+  --primary-color: #1890ff; /* Ant Design primary blue */
+  --sider-background-color: #001529; /* Dark sider background */
+  --menu-item-active-bg: #1890ff; /* Blue highlight */
+  --menu-item-hover-bg: #40a9ff; /* Lighter blue on hover */
+  --menu-item-color: #ffffff; /* White menu text */
+  --menu-item-active-color: var(--text-color); /* White text on active */
+}
+
+.ant-layout {
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+.ant-layout-sider {
+  background-color: var(--sider-background-color);
+}
+
+.ant-menu {
+  background-color: var(--sider-background-color);
+  color: var(--menu-item-color);
+}
+
+.ant-menu-item,
+.ant-menu-submenu-title {
+  color: var(--menu-item-color);
+}
+
+.ant-menu-item-selected,
+.ant-menu-item-active,
+.ant-menu-submenu-title:hover {
+  background-color: var(--menu-item-active-bg);
+  color: var(--menu-item-active-color);
+}
+
+.ant-menu-item:hover {
+  background-color: var(--menu-item-hover-bg);
+  color: var(--menu-item-active-color);
+}
+
+.logo {
+  height: 32px;
+  margin: 16px;
+  text-align: center;
+  font-size: 18px;
+  color: var(--primary-color);
+}

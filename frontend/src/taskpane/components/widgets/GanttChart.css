@@ -1,0 +1,57 @@
+/* src/taskpane/components/widgets/GanttChart.css */
+
+.gantt-chart-container,
+.gantt-chart-wrapper,
+.frappe-gantt,
+.frappe-gantt svg {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.gantt-chart-wrapper {
+  width: 100%;
+  height: 100%;
+}
+
+.frappe-gantt {
+  width: 100%;
+  height: 100%;
+}
+
+.frappe-gantt svg {
+    overflow: hidden;
+  }
+
+.frappe-gantt .bar {
+  height: 20px !important; 
+}
+
+.frappe-gantt .grid-row,
+.frappe-gantt .bar-wrapper {
+  height: 30px !important; 
+}
+
+.frappe-gantt .grid-background {
+  height: auto !important; 
+}
+
+.frappe-gantt .bar-group {
+  margin-bottom: 0 !important;
+}
+
+.custom-tooltip {
+  background-color: #fff;
+  border: 1px solid #ccc;
+  padding: 8px;
+}
+
+.drag-handle {
+  cursor: move;
+  padding: 8px;
+  background-color: #f0f0f0;
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}

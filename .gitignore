@@ -1,0 +1,11 @@
+node_modules/
+*.log
+.env
+local.settings.json
+excel-addin-backend/**/*.js.map
+excel-addin-backend/**/*.ts
+excel-addin-backend/.vscode
+excel-addin-backend/.gitignore
+excel-addin-backend/local.settings.json
+excel-addin-backend/test
+excel-addin-backend/getting_started.md
