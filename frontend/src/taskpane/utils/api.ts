@@ -13,8 +13,10 @@ export const createCheckoutSession = async (licenseKey: string, plan: 'monthly' 
 
 export const checkSubscription = async (licenseKey: string) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/check-subscription?licenseKey=${licenseKey}`);
-    return await response.json();
+    const response = await axios.get(`${API_BASE_URL}/check-subscription`, {
+      params: { licenseKey },
+    });
+    return response.data;
   } catch (error) {
     console.error('Error in checkSubscription:', error);
     throw error;

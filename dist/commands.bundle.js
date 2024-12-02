@@ -1,2 +1,0 @@
-!function(){"use strict";Office.onReady((()=>{})),Office.actions.associate("action",(function(e){const i={type:Office.MailboxEnums.ItemNotificationMessageType.InformationalMessage,message:"Performed action.",icon:"Icon.80x80",persistent:!0};Office.context.mailbox.item?Office.context.mailbox.item.notificationMessages.replaceAsync("ActionPerformanceNotification",i):console.error("No mailbox item found to display the notification."),e.completed()}))}();
-//# sourceMappingURL=commands.bundle.js.map
