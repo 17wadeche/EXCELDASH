@@ -99,7 +99,7 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
             setIsSubscribed(result.subscribed);
             setSubscriptionPlan(result.plan);
           } catch (error) {
-            console.error('Error checking subscription:', error);
+            console.error('Error checking subscription:', error.message, error.response?.data);
             message.error('Failed to verify subscription status.');
           }
         };

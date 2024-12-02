@@ -5,18 +5,19 @@ const defineLicense = require('./License');
 const defineSubscription = require('./Subscription');
 
 let modelsInitialized = false;
+let User, License, Subscription;
 
 async function initializeModels() {
   if (modelsInitialized) {
-    return { User, License, Subscription };
+    return { sequelize, User, License, Subscription };
   }
 
   const sequelize = await initializeSequelize();
 
   // Define models
-  const User = defineUser(sequelize);
-  const License = defineLicense(sequelize);
-  const Subscription = defineSubscription(sequelize);
+  User = defineUser(sequelize);
+  License = defineLicense(sequelize);
+  Subscription = defineSubscription(sequelize);
 
   // Define relationships
   User.hasMany(License, { foreignKey: 'userId' });

@@ -17,6 +17,7 @@ module.exports = async function (context, req) {
     const { License } = await initializeModels();
     const license = await License.findOne({ where: { licenseKey } });
     if (!license) {
+      context.log.info(`License key ${licenseKey} not found.`);
       context.res = {
         status: 200,
         body: { subscribed: false },
@@ -25,6 +26,7 @@ module.exports = async function (context, req) {
     }
 
     const isActive = license.subscriptionStatus === 'active';
+    context.log.info(`License key ${licenseKey} is ${isActive ? 'active' : 'inactive'}.`);
     context.res = {
       status: 200,
       body: {
