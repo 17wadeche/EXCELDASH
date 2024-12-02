@@ -35,7 +35,7 @@ jobs:
           npm install
       - name: Build And Deploy
         id: builddeploy
-        uses: Azure/static-web-apps-deploy@v1.1.0
+        uses: Azure/static-web-apps-deploy@v1
         with:
           login_with_github: true
           action: "upload"                          
@@ -49,6 +49,6 @@ jobs:
     steps:
       - name: Close Pull Request
         id: closepullrequest
-        uses: Azure/static-web-apps-deploy@v1.1.0
+        uses: Azure/static-web-apps-deploy@v1
         with:
           action: "close"
