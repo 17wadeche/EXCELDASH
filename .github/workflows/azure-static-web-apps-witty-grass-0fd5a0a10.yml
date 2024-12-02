@@ -35,7 +35,7 @@ jobs:
           npm install
       - name: Build And Deploy
         id: builddeploy
-        uses: Azure/static-web-apps-deploy@v1.3.0
+        uses: Azure/static-web-apps-deploy@v1
         with:
           action: "deploy"                          
           app_location: "frontend"
@@ -48,6 +48,6 @@ jobs:
     steps:
       - name: Close Pull Request
         id: closepullrequest
-        uses: Azure/static-web-apps-deploy@v1.3.0
+        uses: Azure/static-web-apps-deploy@v1
         with:
           action: "close"
