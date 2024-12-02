@@ -37,10 +37,17 @@ jobs:
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1.3.0
         with:
+<<<<<<< HEAD
           action: "deploy"                          
           app_location: "frontend"
           api_location: "excel-addin-backend"
           output_location: "dist" 
+=======
+          action: "deploy"                           # Specify the deployment action
+          app_location: "frontend"                   # App source code path
+          api_location: "excel-addin-backend"        # Api source code path - optional
+          output_location: "dist"  
+>>>>>>> 3799d3c0d002f079987c202e94e5a9a75988c2c2
   
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
