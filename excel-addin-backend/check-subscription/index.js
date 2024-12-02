@@ -16,6 +16,7 @@ module.exports = async function (context, req) {
   try {
     const { License } = await initializeModels();
     const license = await License.findOne({ where: { licenseKey } });
+
     if (!license) {
       context.log.info(`License key ${licenseKey} not found.`);
       context.res = {
@@ -38,7 +39,8 @@ module.exports = async function (context, req) {
     context.log.error('Error checking subscription:', error);
     context.res = {
       status: 500,
-      body: { error: 'Internal Server Error' },
+      body: { error: error.message },
     };
   }
 };
+
