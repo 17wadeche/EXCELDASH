@@ -98,14 +98,14 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
             const result = await checkSubscription(key);
             setIsSubscribed(result.subscribed);
             setSubscriptionPlan(result.plan);
-          } catch (error) {
+          } catch (error: any) { // Explicitly type error as 'any'
             console.error('Error checking subscription:', error.message, error.response?.data);
             message.error('Failed to verify subscription status.');
           }
         };
   
         verifySubscription();
-      } catch (error) {
+      } catch (error: any) { // Explicitly type error as 'any'
         console.error('Error initializing license key:', error);
         message.error('Failed to initialize license key.');
       }

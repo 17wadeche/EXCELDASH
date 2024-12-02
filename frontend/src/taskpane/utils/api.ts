@@ -1,4 +1,3 @@
-// src/utils/api.ts
 import axios from 'axios';
 
 const API_BASE_URL = '/api';
@@ -17,7 +16,7 @@ export const checkSubscription = async (licenseKey: string) => {
       params: { licenseKey },
     });
     return response.data;
-  } catch (error) {
+  } catch (error: any) { // Explicitly type error as 'any'
     console.error('Error in checkSubscription:', error.message, error.response?.data);
     throw error;
   }
