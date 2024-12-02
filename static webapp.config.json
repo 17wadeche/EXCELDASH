@@ -1,0 +1,11 @@
+{
+  "routes": [
+    {
+      "route": "/",
+      "rewrite": "/taskpane.html"
+    }
+  ],
+  "platform": {
+    "nodeVersion": "22.11.0"
+  }
+}

@@ -30,6 +30,7 @@ module.exports = async (env, options) => {
       commands: "./src/commands/commands.ts",
       screenshot: "./src/screenshot.tsx",
       fullScreenDashboard: "./src/fullScreenDashboard.tsx",
+      index: "./src/index.tsx",
     },
     output: {
       path: path.resolve(__dirname, "dist"),
@@ -101,6 +102,12 @@ module.exports = async (env, options) => {
         template: "./src/screenshot.html",
         chunks: ["polyfill", "vendor", "screenshot"],
         inject: true, // Ensure scripts are injected automatically
+      }),
+      new HtmlWebpackPlugin({
+        filename: "index.html",
+        template: "./src/index.html", // Create this template file
+        chunks: ["polyfill", "vendor", "index"], // Include necessary chunks
+        inject: true,
       }),
       new CopyWebpackPlugin({
         patterns: [
