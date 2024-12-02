@@ -4,7 +4,13 @@ const defineUser = require('./User');
 const defineLicense = require('./License');
 const defineSubscription = require('./Subscription');
 
+let modelsInitialized = false;
+
 async function initializeModels() {
+  if (modelsInitialized) {
+    return { User, License, Subscription };
+  }
+
   const sequelize = await initializeSequelize();
 
   // Define models
@@ -19,13 +25,14 @@ async function initializeModels() {
   License.hasOne(Subscription, { foreignKey: 'licenseId' });
   Subscription.belongsTo(License, { foreignKey: 'licenseId' });
 
-  // Synchronize Models with Database
+  // Synchronize models once
   try {
     await sequelize.sync();
     console.log('All models were synchronized successfully.');
+    modelsInitialized = true;
   } catch (error) {
     console.error('Unable to sync models:', error);
-    process.exit(1);
+    throw error;
   }
 
   return {

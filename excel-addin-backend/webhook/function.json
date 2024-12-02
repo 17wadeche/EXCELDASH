@@ -7,7 +7,7 @@
       "name": "req",
       "methods": ["post"],
       "route": "webhook",
-      "dataType": "binary",
+      "dataType": "binary"
     },
     {
       "type": "http",
