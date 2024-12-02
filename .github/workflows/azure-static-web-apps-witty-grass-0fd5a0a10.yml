@@ -35,9 +35,9 @@ jobs:
           npm install
       - name: Build And Deploy
         id: builddeploy
-        uses: Azure/static-web-apps-deploy@v1
+        uses: Azure/static-web-apps-deploy@v1.1.0
         with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_WITTY_GRASS_0FD5A0A10 }}
+          login_with_github: true
           action: "upload"                          
           app_location: "frontend"
           api_location: "excel-addin-backend"
@@ -49,7 +49,6 @@ jobs:
     steps:
       - name: Close Pull Request
         id: closepullrequest
-        uses: Azure/static-web-apps-deploy@v1
+        uses: Azure/static-web-apps-deploy@v1.1.0
         with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_WITTY_GRASS_0FD5A0A10 }}
           action: "close"
