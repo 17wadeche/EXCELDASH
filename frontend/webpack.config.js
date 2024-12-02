@@ -30,7 +30,7 @@ module.exports = async (env, options) => {
       commands: "./src/commands/commands.ts",
       screenshot: "./src/screenshot.tsx",
       fullScreenDashboard: "./src/fullScreenDashboard.tsx",
-      index: "./src/index.tsx",
+      index: "./src/taskpane/index.tsx",
     },
     output: {
       path: path.resolve(__dirname, "dist"),
@@ -105,8 +105,8 @@ module.exports = async (env, options) => {
       }),
       new HtmlWebpackPlugin({
         filename: "index.html",
-        template: "./src/index.html", // Create this template file
-        chunks: ["polyfill", "vendor", "index"], // Include necessary chunks
+        template: "./src/taskpane/index.html", // Create this template file
+        chunks: ["polyfill", "vendor", "taskpane"], // Include necessary chunks
         inject: true,
       }),
       new CopyWebpackPlugin({
