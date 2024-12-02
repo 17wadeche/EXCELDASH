@@ -92,7 +92,7 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
       try {
         const key = await getOrCreateLicenseKey();
         setLicenseKey(key);
-
+  
         const verifySubscription = async () => {
           try {
             const result = await checkSubscription(key);
@@ -103,21 +103,21 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
             message.error('Failed to verify subscription status.');
           }
         };
-
+  
         verifySubscription();
       } catch (error) {
         console.error('Error initializing license key:', error);
         message.error('Failed to initialize license key.');
       }
     };
-
+  
     initialize();
   }, []);
 
   const handleSubscribe = () => {
     setIsSubscriptionModalVisible(true);
   };
-
+  
   const initiateCheckout = async (plan: 'monthly' | 'yearly') => {
     setIsLoading(true);
     try {
