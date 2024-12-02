@@ -1,22 +1,27 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<OfficeApp xmlns="http://schemas.microsoft.com/office/appforoffice/1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0" xmlns:ov="http://schemas.microsoft.com/office/taskpaneappversionoverrides" xsi:type="TaskPaneApp">
+<OfficeApp xmlns="http://schemas.microsoft.com/office/appforoffice/1.1" 
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+           xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0" 
+           xmlns:ov="http://schemas.microsoft.com/office/taskpaneappversionoverrides" 
+           xsi:type="TaskPaneApp">
   <Id>95450596-f56d-4498-bb75-3b93306e32b3</Id>
-  <Version>1.0.0.0</Version>
+  <Version>1.0.0.1</Version> <!-- Incremented the version number -->
   <ProviderName>ChiTek</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
   <DisplayName DefaultValue="Dashboard"/>
   <Description DefaultValue="Create an Excel Dashboard."/>
-  <IconUrl DefaultValue="https://exceladdinstoragecw.z13.web.core.windows.net/assets/ea_32x32.png"/>
-  <HighResolutionIconUrl DefaultValue="https://exceladdinstoragecw.z13.web.core.windows.net/assets/ea_64x64.png"/>
-  <SupportUrl DefaultValue= "https://chitek.co.site"/>
+  <IconUrl DefaultValue="https://happy-forest-059a9d710.4.azurestaticapps.net/assets/ea_32x32.png"/>
+  <HighResolutionIconUrl DefaultValue="https://happy-forest-059a9d710.4.azurestaticapps.net/assets/ea_64x64.png"/>
+  <SupportUrl DefaultValue="https://chitek.co.site"/>
   <Hosts>
     <Host Name="Workbook"/>
   </Hosts>
   <DefaultSettings>
-    <SourceLocation DefaultValue="https://exceladdinstoragecw.z13.web.core.windows.net/taskpane.html"/>
+    <SourceLocation DefaultValue="https://happy-forest-059a9d710.4.azurestaticapps.net/taskpane.html"/>
   </DefaultSettings>
   <Permissions>ReadWriteDocument</Permissions>
-  <VersionOverrides xmlns="http://schemas.microsoft.com/office/taskpaneappversionoverrides" xsi:type="VersionOverridesV1_0">
+  <VersionOverrides xmlns="http://schemas.microsoft.com/office/taskpaneappversionoverrides" 
+                    xsi:type="VersionOverridesV1_0">
     <Hosts>
       <Host xsi:type="Workbook">
         <DesktopFormFactor>
@@ -59,14 +64,14 @@
     </Hosts>
     <Resources>
       <bt:Images>
-        <bt:Image id="Icon.16x16" DefaultValue="https://exceladdinstoragecw.z13.web.core.windows.net/assets/ea_16x16.png"/>
-        <bt:Image id="Icon.32x32" DefaultValue="https://exceladdinstoragecw.z13.web.core.windows.net/assets/ea_32x32.png"/>
-        <bt:Image id="Icon.80x80" DefaultValue="https://exceladdinstoragecw.z13.web.core.windows.net/assets/ea_80x80.png"/>
+        <bt:Image id="Icon.16x16" DefaultValue="https://happy-forest-059a9d710.4.azurestaticapps.net/assets/ea_16x16.png"/>
+        <bt:Image id="Icon.32x32" DefaultValue="https://happy-forest-059a9d710.4.azurestaticapps.net/assets/ea_32x32.png"/>
+        <bt:Image id="Icon.80x80" DefaultValue="https://happy-forest-059a9d710.4.azurestaticapps.net/assets/ea_80x80.png"/>
       </bt:Images>
       <bt:Urls>
         <bt:Url id="GetStarted.LearnMoreUrl" DefaultValue="https://go.microsoft.com/fwlink/?LinkId=276812"/>
-        <bt:Url id="Commands.Url" DefaultValue="https://exceladdinstoragecw.z13.web.core.windows.net/commands.html"/>
-        <bt:Url id="Taskpane.Url" DefaultValue="https://exceladdinstoragecw.z13.web.core.windows.net/taskpane.html"/>
+        <bt:Url id="Commands.Url" DefaultValue="https://happy-forest-059a9d710.4.azurestaticapps.net/commands.html"/>
+        <bt:Url id="Taskpane.Url" DefaultValue="https://happy-forest-059a9d710.4.azurestaticapps.net/taskpane.html"/>
       </bt:Urls>
       <bt:ShortStrings>
         <bt:String id="GetStarted.Title" DefaultValue="Build a custom Excel Dashboard!"/>
