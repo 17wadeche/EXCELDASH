@@ -5,6 +5,7 @@ const defineLicense = require('./License');
 const defineSubscription = require('./Subscription');
 
 let modelsInitialized = false;
+let sequelize; // Declare sequelize here
 let User, License, Subscription;
 
 async function initializeModels() {
@@ -12,7 +13,7 @@ async function initializeModels() {
     return { sequelize, User, License, Subscription };
   }
 
-  const sequelize = await initializeSequelize();
+  sequelize = await initializeSequelize();
 
   // Define models
   User = defineUser(sequelize);
