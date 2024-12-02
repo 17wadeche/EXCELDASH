@@ -6,7 +6,8 @@ const webpack = require("webpack");
 const path = require("path");
 
 const urlDev = "https://localhost:3000/";
-const urlProd = "https://witty-grass-0fd5a0a10.4.azurestaticapps.net"; //
+const urlProd = "https://happy-forest-059a9d710.4.azurestaticapps.net"; //
+
 async function getHttpsOptions() {
   const devCerts = require("office-addin-dev-certs");
   const httpsOptions = await devCerts.getHttpsServerOptions();
