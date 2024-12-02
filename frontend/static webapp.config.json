@@ -1,6 +1,18 @@
 {
   "routes": [
     {
+      "route": "/success",
+      "rewrite": "/success.html"
+    },
+    {
+      "route": "/cancel",
+      "rewrite": "/cancel.html"
+    },
+    {
+      "route": "/api/*",
+      "allowedRoles": ["anonymous"]
+    },
+    {
       "route": "/",
       "rewrite": "/taskpane.html"
     }
