@@ -41,7 +41,7 @@ jobs:
           action: "upload"                          
           app_location: "frontend"
           api_location: "excel-addin-backend"
-          output_location: "dist" 
+          output_location: "frontend/dist" 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
     runs-on: ubuntu-latest
