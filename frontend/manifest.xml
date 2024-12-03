@@ -5,7 +5,7 @@
            xmlns:ov="http://schemas.microsoft.com/office/taskpaneappversionoverrides" 
            xsi:type="TaskPaneApp">
   <Id>95450596-f56d-4498-bb75-3b93306e32b3</Id>
-  <Version>1.0.0.1</Version> <!-- Incremented the version number -->
+  <Version>1.0.0.1</Version>
   <ProviderName>ChiTek</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
   <DisplayName DefaultValue="Dashboard"/>
