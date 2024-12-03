@@ -1,11 +1,11 @@
 {
   "routes": [
     {
-      "route": "/success",
+      "route": "/success*",
       "rewrite": "/success.html"
     },
     {
-      "route": "/cancel",
+      "route": "/cancel*",
       "rewrite": "/cancel.html"
     },
     {

@@ -73,6 +73,9 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
   const [isSubscribed, setIsSubscribed] = useState<boolean>(false);
   const [subscriptionPlan, setSubscriptionPlan] = useState<'monthly' | 'yearly' | null>(null);
   const [isSubscriptionModalVisible, setIsSubscriptionModalVisible] = useState(false);
+  const [fullScreenDialog, setFullScreenDialog] = useState<
+    Office.Dialog | null
+  >(null);
   const [isLoading, setIsLoading] = useState(false);
   const isOfficeInitialized =
     typeof Office !== 'undefined' &&
@@ -155,7 +158,7 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
 
         <Modal
           title="Choose a Subscription Plan"
-          visible={isSubscriptionModalVisible}
+          open={isSubscriptionModalVisible}
           onCancel={() => setIsSubscriptionModalVisible(false)}
           footer={null}
         >
@@ -180,10 +183,6 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
       </div>
     );
   }
-
-  const [fullScreenDialog, setFullScreenDialog] = useState<
-    Office.Dialog | null
-  >(null);
 
   useEffect(() => {
     if (isPresenterMode) {
