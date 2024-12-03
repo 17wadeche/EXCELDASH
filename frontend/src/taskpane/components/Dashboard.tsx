@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useContext } from 'react';
 import { Responsive, WidthProvider } from 'react-grid-layout';
-import { Modal, Card, Button, Input, Tooltip, message } from 'antd';
+import { Modal, Card, Button, Input, Form, Tooltip, message } from 'antd';
 import EditWidgetForm from './EditWidgetForm';
 import MetricWidget from './widgets/MetricWidget';
 import { BREAKPOINTS, GRID_COLS, WIDGET_SIZES } from './layoutConstants';
@@ -72,6 +72,8 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
   const [licenseKey, setLicenseKey] = useState<string>('');
   const [isSubscribed, setIsSubscribed] = useState<boolean>(false);
   const [subscriptionPlan, setSubscriptionPlan] = useState<'monthly' | 'yearly' | null>(null);
+  const [email, setEmail] = useState('');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isSubscriptionModalVisible, setIsSubscriptionModalVisible] = useState(false);
   const [fullScreenDialog, setFullScreenDialog] = useState<
     Office.Dialog | null
@@ -116,6 +118,44 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
   
     initialize();
   }, []);
+  const handleLogin = async () => {
+    // Optionally, validate email format
+    if (!email) {
+      message.error('Please enter your email.');
+      return;
+    }
+  
+    try {
+      // Check subscription status
+      const result = await checkSubscription(email);
+      setIsSubscribed(result.subscribed);
+      setSubscriptionPlan(result.plan);
+      setIsLoggedIn(true);
+    } catch (error) {
+      console.error('Error checking subscription:', error);
+      message.error('Failed to verify subscription status.');
+    }
+  };
+  
+  // Render login form if not logged in
+  if (!isLoggedIn) {
+    return (
+      <div className="login-container">
+        <Form>
+          <Form.Item>
+            <Input
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </Form.Item>
+          <Button type="primary" onClick={handleLogin}>
+            Login
+          </Button>
+        </Form>
+      </div>
+    );
+  }
 
   const handleSubscribe = () => {
     setIsSubscriptionModalVisible(true);
@@ -124,7 +164,7 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
   const initiateCheckout = async (plan: 'monthly' | 'yearly') => {
     setIsLoading(true);
     try {
-      const checkoutUrl = await createCheckoutSession(licenseKey, plan);
+      const checkoutUrl = await createCheckoutSession(email, plan);
       window.open(checkoutUrl, '_blank');
     } catch (error: any) {
       console.error('Error initiating checkout:', error);
@@ -134,6 +174,19 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
       setIsSubscriptionModalVisible(false);
     }
   };
+  useEffect(() => {
+    if (isLoggedIn) {
+      localStorage.setItem('userEmail', email);
+    }
+  }, [isLoggedIn]);
+
+  useEffect(() => {
+    const savedEmail = localStorage.getItem('userEmail');
+    if (savedEmail) {
+      setEmail(savedEmail);
+      setIsLoggedIn(true);
+    }
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(async () => {

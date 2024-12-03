@@ -6,7 +6,11 @@ module.exports = async function (context, req) {
   let event;
 
   try {
-    event = stripe.webhooks.constructEvent(req.rawBody, sig, process.env.STRIPE_WEBHOOK_SECRET);
+    event = stripe.webhooks.constructEvent(
+      req.rawBody,
+      sig,
+      process.env.STRIPE_WEBHOOK_SECRET
+    );
   } catch (err) {
     context.log.error(`Webhook signature verification failed: ${err.message}`);
     context.res = {
@@ -16,36 +20,44 @@ module.exports = async function (context, req) {
     return;
   }
 
-  const { License } = await initializeModels();
+  const { User, Subscription } = await initializeModels();
 
   // Handle the event
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
 
-    // Extract license key and customer email
-    const licenseKey = session.metadata.licenseKey;
+    // Extract customer email
     const customerEmail = session.customer_details.email;
 
-    // Update or create the license in the database
     try {
-      await License.upsert({
-        licenseKey: licenseKey,
-        subscriptionId: session.subscription,
-        subscriptionStatus: 'active',
-        plan: session.display_items ? session.display_items[0].plan.nickname : 'unknown',
-        userId: null, // Update with actual user ID if available
+      // Find or create the user in the database
+      let user = await User.findOne({ where: { email: customerEmail } });
+      if (!user) {
+        user = await User.create({ email: customerEmail });
+      }
+
+      // Create or update the subscription in the database
+      const subscription = await stripe.subscriptions.retrieve(session.subscription);
+
+      await Subscription.upsert({
+        id: subscription.id,
+        userId: user.id,
+        status: subscription.status,
+        plan: subscription.items.data[0].plan.nickname,
+        currentPeriodEnd: new Date(subscription.current_period_end * 1000),
       });
 
-      context.log('License updated in database:', licenseKey);
+      context.log('Subscription updated in database for user:', customerEmail);
       context.res = {
         status: 200,
-        body: 'License updated successfully',
+        body: 'Subscription updated successfully',
       };
     } catch (error) {
-      context.log.error('Error updating license in database:', error);
+      context.log.error('Error updating subscription in database:', error);
+      // Respond with 200 to prevent Stripe from retrying the webhook
       context.res = {
-        status: 500,
-        body: 'Internal Server Error',
+        status: 200,
+        body: 'Webhook received but error occurred internally',
       };
     }
   } else {

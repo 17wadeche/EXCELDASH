@@ -11,6 +11,7 @@
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
     "strict": true,
+    "noImplicitAny": true,
     "module": "esnext",
     "resolveJsonModule": true,
     "noEmit": false,

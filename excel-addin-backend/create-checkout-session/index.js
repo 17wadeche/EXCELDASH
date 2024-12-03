@@ -1,11 +1,11 @@
 const Joi = require('joi');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-const initializeModels = require('../models'); // Adjust path as necessary
+const initializeModels = require('../models');
 
 module.exports = async function (context, req) {
   // Validate input
   const schema = Joi.object({
-    licenseKey: Joi.string().required(),
+    email: Joi.string().email().required(),
     plan: Joi.string().valid('monthly', 'yearly').required(),
   });
   const { error, value } = schema.validate(req.body);
@@ -18,7 +18,7 @@ module.exports = async function (context, req) {
     return;
   }
 
-  const { licenseKey, plan } = value;
+  const { email, plan } = value;
   let priceId;
 
   if (plan === 'monthly') {
@@ -28,17 +28,28 @@ module.exports = async function (context, req) {
   }
 
   try {
+    // Create or retrieve the customer in Stripe
+    let customer = await stripe.customers.list({ email });
+    if (customer.data.length > 0) {
+      customer = customer.data[0];
+    } else {
+      customer = await stripe.customers.create({ email });
+    }
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       mode: 'subscription',
-      line_items: [{
-        price: priceId,
-        quantity: 1,
-      }],
+      line_items: [
+        {
+          price: priceId,
+          quantity: 1,
+        },
+      ],
+      customer: customer.id,
       metadata: {
-        licenseKey,
+        email,
       },
-      success_url: process.env.SUCCESS_URL,
+      success_url: process.env.SUCCESS_URL + '?session_id={CHECKOUT_SESSION_ID}',
       cancel_url: process.env.CANCEL_URL,
     });
 

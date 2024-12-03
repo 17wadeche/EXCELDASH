@@ -3,22 +3,22 @@ const initializeModels = require('../models');
 module.exports = async function (context, req) {
   context.log('Processing check-subscription request.');
 
-  const licenseKey = req.query.licenseKey;
-  if (!licenseKey) {
-    context.log.warn('Missing licenseKey in check-subscription request.');
+  const email = req.query.email;
+  if (!email) {
+    context.log.warn('Missing email in check-subscription request.');
     context.res = {
       status: 400,
-      body: { error: 'licenseKey is required' },
+      body: { error: 'Email is required' },
     };
     return;
   }
 
   try {
-    const { License } = await initializeModels();
-    const license = await License.findOne({ where: { licenseKey } });
+    const { User, Subscription } = await initializeModels();
+    const user = await User.findOne({ where: { email }, include: Subscription });
 
-    if (!license) {
-      context.log.info(`License key ${licenseKey} not found.`);
+    if (!user || !user.Subscription) {
+      context.log.info(`User with email ${email} not found or has no subscription.`);
       context.res = {
         status: 200,
         body: { subscribed: false },
@@ -26,13 +26,13 @@ module.exports = async function (context, req) {
       return;
     }
 
-    const isActive = license.subscriptionStatus === 'active';
-    context.log.info(`License key ${licenseKey} is ${isActive ? 'active' : 'inactive'}.`);
+    const isActive = user.Subscription.status === 'active';
+    context.log.info(`User ${email} subscription is ${isActive ? 'active' : 'inactive'}.`);
     context.res = {
       status: 200,
       body: {
         subscribed: isActive,
-        plan: isActive ? license.plan : null,
+        plan: isActive ? user.Subscription.plan : null,
       },
     };
   } catch (error) {
@@ -43,4 +43,3 @@ module.exports = async function (context, req) {
     };
   }
 };
-
