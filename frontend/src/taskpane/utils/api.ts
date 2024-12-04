@@ -2,10 +2,6 @@ import { AxiosError } from "axios";
 import axios from 'axios';
 
 const API_BASE_URL = 'https://happy-forest-059a9d710.4.azurestaticapps.net/api';
-const getAuthHeaders = () => {
-  const token = localStorage.getItem('token');
-  return { Authorization: `Bearer ${token}` };
-};
 
 
 export const createCheckoutSession = async (plan: 'monthly' | 'yearly', email: string) => {
@@ -16,10 +12,10 @@ export const createCheckoutSession = async (plan: 'monthly' | 'yearly', email: s
   return response.data.url;
 };
 
-export const checkSubscription = async () => {
+export const checkSubscription = async (email: string) => {
   try {
     const response = await axios.get(`${API_BASE_URL}/check-subscription`, {
-      headers: getAuthHeaders(),
+      params: { email },
     });
     return response.data;
   } catch (error) {
@@ -51,6 +47,18 @@ export const verifySubscription = async (sessionId: string) => {
     return response.data;
   } catch (error) {
     console.error('Error in verifySubscription:', error);
+    throw error;
+  }
+};
+
+export const checkRegistration = async (email: string) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/check-registration`, {
+      params: { email },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error in checkRegistration:', error);
     throw error;
   }
 };

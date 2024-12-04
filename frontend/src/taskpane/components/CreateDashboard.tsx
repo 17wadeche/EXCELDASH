@@ -26,7 +26,7 @@ import { setWorkbookIdInProperties } from '../utils/excelUtils';
 import { DashboardItem } from './types';
 const { Content } = Layout;
 const { Search } = Input;
-import { createCheckoutSession, checkSubscription, loginUser, registerUser, verifySubscription } from './../utils/api';
+import { createCheckoutSession, checkSubscription, loginUser, registerUser, verifySubscription, checkRegistration } from './../utils/api';
 
 interface Widget {
   id: string;
@@ -48,6 +48,7 @@ const CreateDashboard: React.FC = () => {
   const [isRegistered, setIsRegistered] = useState<boolean>(false);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [email, setEmail] = useState('');
+  const [emailInput, setEmailInput] = useState('');
   const [password, setPassword] = useState('');
   const [isSubscriptionModalVisible, setIsSubscriptionModalVisible] = useState(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -68,6 +69,26 @@ const CreateDashboard: React.FC = () => {
     setLayouts,
   } = useContext(DashboardContext)!;
 
+  const handleEmailSubmit = async () => {
+    if (!emailInput) {
+      message.error('Please enter your email.');
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const subscriptionResult = await checkSubscription(emailInput);
+      setIsSubscribed(subscriptionResult.subscribed);
+      const registrationResult = await checkRegistration(emailInput);
+      setIsRegistered(registrationResult.registered);
+      setEmail(emailInput);
+    } catch (error) {
+      console.error('Error checking email:', error);
+      message.error('Failed to check email.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleSubscribe = () => {
     setIsSubscriptionModalVisible(true);
   };
@@ -87,6 +108,7 @@ const CreateDashboard: React.FC = () => {
   };
 
   useEffect(() => {
+    if (!email) return; // Only run if email is set
     const urlParams = new URLSearchParams(location.search);
     const sessionId = urlParams.get('session_id');
 
@@ -113,7 +135,7 @@ const CreateDashboard: React.FC = () => {
 
       verifySubscriptionStatus();
     }
-  }, [location.search]);
+  }, [location.search, email]);
 
   const handleRegister = async () => {
     if (!email || !password) {
@@ -238,6 +260,33 @@ const CreateDashboard: React.FC = () => {
   const filteredTemplates = templates.filter((template) =>
     template.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  if (!email) {
+    return (
+      <Layout style={{ padding: '24px', minHeight: '100vh' }}>
+        <Content>
+          <div style={{ maxWidth: '400px', margin: '0 auto' }}>
+            <h2>Enter your email</h2>
+            <Form onFinish={handleEmailSubmit}>
+              <Form.Item
+                rules={[{ required: true, message: 'Please enter your email' }]}
+              >
+                <Input
+                  placeholder="Enter your email"
+                  value={emailInput}
+                  onChange={(e) => setEmailInput(e.target.value)}
+                />
+              </Form.Item>
+              <Button type="primary" htmlType="submit">
+                Continue
+              </Button>
+            </Form>
+          </div>
+        </Content>
+      </Layout>
+    );
+  }
+  
   if (!isSubscribed) {
     return (
       <Layout style={{ padding: '24px', minHeight: '100vh' }}>
