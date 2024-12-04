@@ -73,14 +73,10 @@ const CreateDashboard: React.FC = () => {
   };
 
   const initiateCheckout = async (plan: 'monthly' | 'yearly') => {
-    if (!email) {
-      message.error('Please enter your email before subscribing.');
-      return;
-    }
     setIsLoading(true);
     try {
       const checkoutUrl = await createCheckoutSession(plan, email);
-      window.location.href = checkoutUrl; // Redirects the user to Stripe checkout
+      window.location.href = checkoutUrl;
     } catch (error: any) {
       console.error('Error initiating checkout:', error);
       message.error('Failed to initiate checkout.');
@@ -257,23 +253,35 @@ const CreateDashboard: React.FC = () => {
               onCancel={() => setIsSubscriptionModalVisible(false)}
               footer={null}
             >
-              <Button
-                type="primary"
-                block
-                style={{ marginBottom: '10px' }}
-                onClick={() => initiateCheckout('monthly')}
-                disabled={isLoading}
-              >
-                Monthly - $10
-              </Button>
-              <Button
-                type="primary"
-                block
-                onClick={() => initiateCheckout('yearly')}
-                disabled={isLoading}
-              >
-                Yearly - $110
-              </Button>
+              <Form layout="vertical">
+                <Form.Item
+                  label="Email"
+                  required
+                >
+                  <Input
+                    placeholder="Enter your email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </Form.Item>
+                <Button
+                  type="primary"
+                  block
+                  style={{ marginBottom: '10px' }}
+                  onClick={() => initiateCheckout('monthly')}
+                  disabled={isLoading || !email}
+                >
+                  Monthly - $10
+                </Button>
+                <Button
+                  type="primary"
+                  block
+                  onClick={() => initiateCheckout('yearly')}
+                  disabled={isLoading || !email}
+                >
+                  Yearly - $110
+                </Button>
+              </Form>
             </Modal>
           </div>
         </Content>
