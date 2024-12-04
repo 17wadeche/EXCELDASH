@@ -5,7 +5,7 @@ const tenantId = process.env.AZURE_TENANT_ID;
 const clientId = process.env.AZURE_CLIENT_ID;
 const clientSecret = process.env.AZURE_CLIENT_SECRET;
 const sqlServer = process.env.SQL_SERVER;
-const sqlDatabase = process.env.SQL_DATABASE; 
+const sqlDatabase = process.env.SQL_DATABASE;
 const credential = new ClientSecretCredential(tenantId, clientId, clientSecret);
 async function getAccessToken() {
   try {
@@ -13,7 +13,7 @@ async function getAccessToken() {
     return tokenResponse.token;
   } catch (error) {
     console.error('Error acquiring Azure AD token:', error);
-    throw error; 
+    throw error;
   }
 }
 async function initializeSequelize() {
@@ -35,14 +35,14 @@ async function initializeSequelize() {
           trustServerCertificate: false,
         },
       },
-      logging: console.log, 
+      logging: console.log,
     });
     await sequelize.authenticate();
     console.log('Azure AD Authentication: Connection has been established successfully.');
     return sequelize;
   } catch (error) {
     console.error('Unable to connect to the database:', error);
-    throw error; 
+    throw error;
   }
 }
 module.exports = initializeSequelize;
