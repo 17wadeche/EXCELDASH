@@ -9,7 +9,7 @@ const sqlDatabase = process.env.SQL_DATABASE;
 const credential = new ClientSecretCredential(tenantId, clientId, clientSecret);
 async function getAccessToken() {
   try {
-    const tokenResponse = await credential.getToken('https://database.windows.net//.default');
+    const tokenResponse = await credential.getToken('https://database.windows.net/.default');
     return tokenResponse.token;
   } catch (error) {
     console.error('Error acquiring Azure AD token:', error);
