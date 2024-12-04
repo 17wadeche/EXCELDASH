@@ -41,7 +41,7 @@ module.exports = async function (context, req) {
     context.log.error('Error checking subscription:', error);
     context.res = {
       status: 500,
-      body: { error: 'Internal Server Error' },
+      body: { error: error.message },
     };
   }
 };
