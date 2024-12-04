@@ -18,26 +18,20 @@ import {
   Divider,
   Empty,
 } from 'antd';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { DashboardContext } from '../context/DashboardContext';
-import {
-  DeleteOutlined,
-  EditOutlined,
-  EyeOutlined,
-  PlusOutlined,
-  FolderAddOutlined,
-} from '@ant-design/icons';
+import { DeleteOutlined, FolderAddOutlined, PlusOutlined } from '@ant-design/icons';
 import { v4 as uuidv4 } from 'uuid';
 import { setWorkbookIdInProperties } from '../utils/excelUtils';
 import { DashboardItem } from './types';
 const { Content } = Layout;
 const { Search } = Input;
+import { createCheckoutSession, checkSubscription, loginUser, registerUser, verifySubscription } from './../utils/api';
 
 interface Widget {
   id: string;
   title: string;
   content: string;
-  // other properties
 }
 
 interface Template {
@@ -50,11 +44,18 @@ interface Template {
 
 const CreateDashboard: React.FC = () => {
   const [dashboardTitle, setDashboardTitle] = useState('');
+  const [isSubscribed, setIsSubscribed] = useState<boolean>(false);
+  const [isRegistered, setIsRegistered] = useState<boolean>(false);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isSubscriptionModalVisible, setIsSubscriptionModalVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const location = useLocation();
   const [searchTerm, setSearchTerm] = useState('');
   const [templates, setTemplates] = useState<Template[]>([]);
   const [previewTemplate, setPreviewTemplate] = useState<Template | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-
   const navigate = useNavigate();
   const {
     setDashboardTitle: setContextTitle,
@@ -66,6 +67,91 @@ const CreateDashboard: React.FC = () => {
     currentWorkbookId,
     setLayouts,
   } = useContext(DashboardContext)!;
+
+  const handleSubscribe = () => {
+    setIsSubscriptionModalVisible(true);
+  };
+
+  const initiateCheckout = async (plan: 'monthly' | 'yearly') => {
+    if (!email) {
+      message.error('Please enter your email before subscribing.');
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const checkoutUrl = await createCheckoutSession(plan, email);
+      window.location.href = checkoutUrl; // Redirects the user to Stripe checkout
+    } catch (error: any) {
+      console.error('Error initiating checkout:', error);
+      message.error('Failed to initiate checkout.');
+    } finally {
+      setIsLoading(false);
+      setIsSubscriptionModalVisible(false);
+    }
+  };
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const sessionId = urlParams.get('session_id');
+
+    if (sessionId) {
+      window.history.replaceState({}, document.title, '/create-dashboard');
+
+      const verifySubscriptionStatus = async () => {
+        setIsLoading(true);
+        try {
+          const result = await verifySubscription(sessionId);
+          if (result.subscribed) {
+            setIsSubscribed(true);
+            message.success('Subscription successful!');
+          } else {
+            message.error('Subscription not completed.');
+          }
+        } catch (error) {
+          console.error('Error verifying subscription:', error);
+          message.error('Failed to verify subscription.');
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      verifySubscriptionStatus();
+    }
+  }, [location.search]);
+
+  const handleRegister = async () => {
+    if (!email || !password) {
+      message.error('Please enter your email and password.');
+      return;
+    }
+
+    try {
+      await registerUser(email, password);
+      message.success('Registration successful. Please log in.');
+      setIsRegistered(true);
+    } catch (error) {
+      console.error('Error during registration:', error);
+      message.error('Failed to register.');
+    }
+  };
+
+  const handleLogin = async () => {
+    if (!email || !password) {
+      message.error('Please enter your email and password.');
+      return;
+    }
+
+    try {
+      const token = await loginUser(email, password);
+      localStorage.setItem('token', token);
+      localStorage.setItem('userEmail', email);
+      setIsLoggedIn(true);
+      message.success('Login successful.');
+    } catch (error) {
+      console.error('Error during login:', error);
+      message.error('Failed to login.');
+    }
+  };
 
   useEffect(() => {
     setLoading(true);
@@ -156,6 +242,106 @@ const CreateDashboard: React.FC = () => {
   const filteredTemplates = templates.filter((template) =>
     template.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+  if (!isSubscribed) {
+    return (
+      <Layout style={{ padding: '24px', minHeight: '100vh' }}>
+        <Content>
+          <div style={{ textAlign: 'center', marginTop: '50px' }}>
+            <Button type="primary" onClick={handleSubscribe}>
+              Subscribe Now
+            </Button>
+
+            <Modal
+              title="Choose a Subscription Plan"
+              open={isSubscriptionModalVisible}
+              onCancel={() => setIsSubscriptionModalVisible(false)}
+              footer={null}
+            >
+              <Button
+                type="primary"
+                block
+                style={{ marginBottom: '10px' }}
+                onClick={() => initiateCheckout('monthly')}
+                disabled={isLoading}
+              >
+                Monthly - $10
+              </Button>
+              <Button
+                type="primary"
+                block
+                onClick={() => initiateCheckout('yearly')}
+                disabled={isLoading}
+              >
+                Yearly - $110
+              </Button>
+            </Modal>
+          </div>
+        </Content>
+      </Layout>
+    );
+  }
+
+  if (!isRegistered) {
+    return (
+      <Layout style={{ padding: '24px', minHeight: '100vh' }}>
+        <Content>
+          <div style={{ maxWidth: '400px', margin: '0 auto' }}>
+            <h2>Register</h2>
+            <Form>
+              <Form.Item>
+                <Input
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </Form.Item>
+              <Form.Item>
+                <Input.Password
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </Form.Item>
+              <Button type="primary" onClick={handleRegister}>
+                Register
+              </Button>
+            </Form>
+          </div>
+        </Content>
+      </Layout>
+    );
+  }
+
+  if (!isLoggedIn) {
+    return (
+      <Layout style={{ padding: '24px', minHeight: '100vh' }}>
+        <Content>
+          <div style={{ maxWidth: '400px', margin: '0 auto' }}>
+            <h2>Login</h2>
+            <Form>
+              <Form.Item>
+                <Input
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </Form.Item>
+              <Form.Item>
+                <Input.Password
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </Form.Item>
+              <Button type="primary" onClick={handleLogin}>
+                Login
+              </Button>
+            </Form>
+          </div>
+        </Content>
+      </Layout>
+    );
+  }
 
   return (
     <Layout style={{ padding: '24px', background: '#f0f2f5', minHeight: '100vh' }}>

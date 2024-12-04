@@ -1,4 +1,5 @@
-import React from 'react';
+// src/taskpane/components/LoginForm.tsx
+import React, { useState } from 'react';
 import { Form, Input, Button, message } from 'antd';
 import { loginUser } from '../utils/api';
 
@@ -6,18 +7,14 @@ interface LoginFormProps {
   onLoginSuccess: () => void;
 }
 
-interface AuthFormValues {
-  email: string;
-  password: string;
-}
-
 const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
   const [form] = Form.useForm();
 
-  const handleLogin = async (values: AuthFormValues) => {
+  const handleLogin = async (values: { email: string; password: string }) => {
     try {
       const token = await loginUser(values.email, values.password);
       localStorage.setItem('token', token);
+      localStorage.setItem('userEmail', values.email);
       message.success('Login successful.');
       onLoginSuccess();
     } catch (error) {
@@ -35,7 +32,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
       </Form.Item>
       <Form.Item
         name="password"
-        rules={[{ required: true, min: 8, message: 'Password must be at least 8 characters' }]}
+        rules={[{ required: true, message: 'Please input your password!' }]}
       >
         <Input.Password placeholder="Password" />
       </Form.Item>

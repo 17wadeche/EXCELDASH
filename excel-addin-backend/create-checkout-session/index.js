@@ -1,9 +1,7 @@
 const Joi = require('joi');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-const initializeModels = require('../models');
 
 module.exports = async function (context, req) {
-  // Validate input
   const schema = Joi.object({
     email: Joi.string().email().required(),
     plan: Joi.string().valid('monthly', 'yearly').required(),
@@ -28,10 +26,10 @@ module.exports = async function (context, req) {
   }
 
   try {
-    // Create or retrieve the customer in Stripe
-    let customer = await stripe.customers.list({ email });
-    if (customer.data.length > 0) {
-      customer = customer.data[0];
+    let customers = await stripe.customers.list({ email });
+    let customer;
+    if (customers.data.length > 0) {
+      customer = customers.data[0];
     } else {
       customer = await stripe.customers.create({ email });
     }
@@ -49,7 +47,7 @@ module.exports = async function (context, req) {
       metadata: {
         email,
       },
-      success_url: process.env.SUCCESS_URL + '?session_id={CHECKOUT_SESSION_ID}',
+      success_url: process.env.SUCCESS_URL,
       cancel_url: process.env.CANCEL_URL,
     });
 

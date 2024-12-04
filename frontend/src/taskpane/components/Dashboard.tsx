@@ -27,8 +27,6 @@ import { debounce } from 'lodash';
 import LineWidget from './widgets/LineWidget';
 import html2canvas from 'html2canvas';
 import PresentationDashboard from './PresentationDashboard';
-import { getOrCreateLicenseKey } from './../utils/licenseUtils';
-import { createCheckoutSession, checkSubscription } from './../utils/api';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 const defaultTitleWidget: Widget = {
@@ -69,12 +67,6 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
   const isUpdatingFromItem = useRef(false);
   const prevLayoutsRef = useRef<{ [key: string]: GridLayoutItem[] }>({});
   const [isPresentationMode, setIsPresentationMode] = useState(false);
-  const [licenseKey, setLicenseKey] = useState<string>('');
-  const [isSubscribed, setIsSubscribed] = useState<boolean>(false);
-  const [subscriptionPlan, setSubscriptionPlan] = useState<'monthly' | 'yearly' | null>(null);
-  const [email, setEmail] = useState('');
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isSubscriptionModalVisible, setIsSubscriptionModalVisible] = useState(false);
   const [fullScreenDialog, setFullScreenDialog] = useState<
     Office.Dialog | null
   >(null);
@@ -92,150 +84,6 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
     await refreshAllCharts();
     setIsRefreshing(false);
   };
-  useEffect(() => {
-    const initialize = async () => {
-      try {
-        const key = await getOrCreateLicenseKey();
-        setLicenseKey(key);
-  
-        const verifySubscription = async () => {
-          try {
-            const result = await checkSubscription(key);
-            setIsSubscribed(result.subscribed);
-            setSubscriptionPlan(result.plan);
-          } catch (error: any) { // Explicitly type error as 'any'
-            console.error('Error checking subscription:', error.message, error.response?.data);
-            message.error('Failed to verify subscription status.');
-          }
-        };
-  
-        verifySubscription();
-      } catch (error: any) { // Explicitly type error as 'any'
-        console.error('Error initializing license key:', error);
-        message.error('Failed to initialize license key.');
-      }
-    };
-  
-    initialize();
-  }, []);
-  const handleLogin = async () => {
-    // Optionally, validate email format
-    if (!email) {
-      message.error('Please enter your email.');
-      return;
-    }
-  
-    try {
-      // Check subscription status
-      const result = await checkSubscription(email);
-      setIsSubscribed(result.subscribed);
-      setSubscriptionPlan(result.plan);
-      setIsLoggedIn(true);
-    } catch (error) {
-      console.error('Error checking subscription:', error);
-      message.error('Failed to verify subscription status.');
-    }
-  };
-  
-  // Render login form if not logged in
-  if (!isLoggedIn) {
-    return (
-      <div className="login-container">
-        <Form>
-          <Form.Item>
-            <Input
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </Form.Item>
-          <Button type="primary" onClick={handleLogin}>
-            Login
-          </Button>
-        </Form>
-      </div>
-    );
-  }
-
-  const handleSubscribe = () => {
-    setIsSubscriptionModalVisible(true);
-  };
-  
-  const initiateCheckout = async (plan: 'monthly' | 'yearly') => {
-    setIsLoading(true);
-    try {
-      const checkoutUrl = await createCheckoutSession(email, plan);
-      window.open(checkoutUrl, '_blank');
-    } catch (error: any) {
-      console.error('Error initiating checkout:', error);
-      message.error('Failed to initiate checkout.');
-    } finally {
-      setIsLoading(false);
-      setIsSubscriptionModalVisible(false);
-    }
-  };
-  useEffect(() => {
-    if (isLoggedIn) {
-      localStorage.setItem('userEmail', email);
-    }
-  }, [isLoggedIn]);
-
-  useEffect(() => {
-    const savedEmail = localStorage.getItem('userEmail');
-    if (savedEmail) {
-      setEmail(savedEmail);
-      setIsLoggedIn(true);
-    }
-  }, []);
-
-  useEffect(() => {
-    const interval = setInterval(async () => {
-      try {
-        const result = await checkSubscription(licenseKey);
-        setIsSubscribed(result.subscribed);
-        setSubscriptionPlan(result.plan);
-      } catch (error) {
-        console.error('Error checking subscription:', error);
-      }
-    }, 60000); // Every 60 seconds
-
-    return () => clearInterval(interval);
-  }, [licenseKey]);
-
-  if (!isSubscribed) {
-    return (
-      <div className="dashboard-wrapper">
-        <Button type="primary" onClick={handleSubscribe}>
-          Subscribe Now
-        </Button>
-
-        <Modal
-          title="Choose a Subscription Plan"
-          open={isSubscriptionModalVisible}
-          onCancel={() => setIsSubscriptionModalVisible(false)}
-          footer={null}
-        >
-          <Button
-            type="primary"
-            block
-            style={{ marginBottom: '10px' }}
-            onClick={() => initiateCheckout('monthly')}
-            disabled={isLoading}
-          >
-            Monthly - $10
-          </Button>
-          <Button
-            type="primary"
-            block
-            onClick={() => initiateCheckout('yearly')}
-            disabled={isLoading}
-          >
-            Yearly - $110
-          </Button>
-        </Modal>
-      </div>
-    );
-  }
 
   useEffect(() => {
     if (isPresenterMode) {
@@ -276,25 +124,17 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
         boxSizing: dashboardRef.current.style.boxSizing,
         padding: dashboardRef.current.style.padding,
       };
-  
-      // Set new styles to ensure full content is visible
       dashboardRef.current.style.position = 'relative';
       dashboardRef.current.style.top = '0px';
       dashboardRef.current.style.left = '0px';
       dashboardRef.current.style.width = `${dashboardRef.current.scrollWidth}px`;
       dashboardRef.current.style.height = `${dashboardRef.current.scrollHeight}px`;
       dashboardRef.current.style.overflow = 'visible';
-      dashboardRef.current.style.transform = 'none'; // Remove any transforms
-      dashboardRef.current.style.boxSizing = 'border-box'; // Include borders in size calculations
-      dashboardRef.current.style.padding = '0'; // Remove padding
-  
-      // Ensure the dashboard is at full opacity
+      dashboardRef.current.style.transform = 'none';
+      dashboardRef.current.style.boxSizing = 'border-box';
+      dashboardRef.current.style.padding = '0';
       dashboardRef.current.style.opacity = '1';
-  
-      // Wait for styles to take effect
       await new Promise((resolve) => setTimeout(resolve, 100));
-  
-      // Recalculate dimensions after style change
       const rect = dashboardRef.current.getBoundingClientRect();
       const width = rect.width;
       const height = rect.height;

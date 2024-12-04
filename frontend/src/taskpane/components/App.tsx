@@ -1,6 +1,7 @@
 // src/taskpane/components/App.tsx
 
 import React from 'react';
+import { useEffect, useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import CustomLayout from './CustomLayout';
 import DashboardPage from './DashboardPage';
@@ -14,8 +15,15 @@ import ReportsList from './ReportsList';
 import ReportView from './ReportView';
 import EditTemplate from './EditTemplate';
 import EditDashboard from './EditDashboard';
+import ProtectedRoute from './ProtectedRoute';
 
 const App: React.FC = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    setIsLoggedIn(!!token);
+  }, []);
   return (
     <DashboardProvider>
       <Routes>
@@ -27,7 +35,14 @@ const App: React.FC = () => {
           <Route path="/reports-list" element={<ReportsList />} />
           <Route path="dashboard-list" element={<DashboardList />} />
           <Route path="create" element={<CreateDashboard />} />
-          <Route path="dashboard/:id" element={<DashboardPage />} />
+          <Route
+            path="dashboard/:id"
+            element={
+              <ProtectedRoute isAuthenticated={isLoggedIn}>
+                <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/full-screen" element={<Dashboard isFullScreen />} />
           <Route path="edit-dashboard/:id" element={<DashboardPage />} />
           <Route path="/reports-list" element={<ReportsList />} />

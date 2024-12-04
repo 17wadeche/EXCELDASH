@@ -1,3 +1,4 @@
+// check-subscription index
 const initializeModels = require('../models');
 
 module.exports = async function (context, req) {
