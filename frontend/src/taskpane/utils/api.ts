@@ -18,9 +18,14 @@ export const checkSubscription = async (email: string) => {
       params: { email },
     });
     return response.data;
-  } catch (error) {
-    console.error('Error in checkSubscription:', error);
-    throw error;
+  } catch (error: any) {
+    if (axios.isAxiosError(error) && error.response) {
+      console.error('Error in checkSubscription:', error.response.data);
+      throw new Error(error.response.data.error || 'An unknown error occurred.');
+    } else {
+      console.error('Error in checkSubscription:', error);
+      throw new Error('Network error. Please try again later.');
+    }
   }
 };
 

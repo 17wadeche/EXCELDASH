@@ -1,6 +1,6 @@
 // models/index.js
 
-const initializeSequelize = require('../db'); // Adjust the path as necessary
+const initializeSequelize = require('../db');
 
 const defineUser = require('./User');
 const defineSubscription = require('./Subscription');
@@ -19,7 +19,6 @@ async function initializeModels() {
   User = defineUser(sequelize);
   Subscription = defineSubscription(sequelize);
 
-  // Correct the associations
   User.hasOne(Subscription, { foreignKey: 'userId' });
   Subscription.belongsTo(User, { foreignKey: 'userId' });
 

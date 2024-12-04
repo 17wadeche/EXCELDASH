@@ -1,4 +1,5 @@
-// check-subscription index
+// check-subscription/index.js
+
 const initializeModels = require('../models');
 
 module.exports = async function (context, req) {
@@ -40,7 +41,7 @@ module.exports = async function (context, req) {
     context.log.error('Error checking subscription:', error);
     context.res = {
       status: 500,
-      body: { error: error.message },
+      body: { error: 'Internal Server Error' },
     };
   }
 };
