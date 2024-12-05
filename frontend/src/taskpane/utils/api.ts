@@ -3,7 +3,6 @@ import axios from 'axios';
 
 const API_BASE_URL = 'https://happy-forest-059a9d710.4.azurestaticapps.net/api';
 
-
 export const createCheckoutSession = async (plan: 'monthly' | 'yearly', email: string) => {
   const response = await axios.post(`${API_BASE_URL}/create-checkout-session`, {
     plan,
