@@ -268,9 +268,7 @@ const CreateDashboard: React.FC = () => {
           <div style={{ maxWidth: '400px', margin: '0 auto' }}>
             <h2>Enter your email</h2>
             <Form onFinish={handleEmailSubmit}>
-              <Form.Item
-                rules={[{ required: true, message: 'Please enter your email' }]}
-              >
+              <Form.Item rules={[{ required: true, message: 'Please enter your email' }]}>
                 <Input
                   placeholder="Enter your email"
                   value={emailInput}
@@ -286,58 +284,6 @@ const CreateDashboard: React.FC = () => {
       </Layout>
     );
   }
-  
-  if (!isSubscribed) {
-    return (
-      <Layout style={{ padding: '24px', minHeight: '100vh' }}>
-        <Content>
-          <div style={{ textAlign: 'center', marginTop: '50px' }}>
-            <Button type="primary" onClick={handleSubscribe}>
-              Subscribe Now
-            </Button>
-
-            <Modal
-              title="Choose a Subscription Plan"
-              open={isSubscriptionModalVisible}
-              onCancel={() => setIsSubscriptionModalVisible(false)}
-              footer={null}
-            >
-              <Form layout="vertical">
-                <Form.Item
-                  label="Email"
-                  required
-                >
-                  <Input
-                    placeholder="Enter your email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </Form.Item>
-                <Button
-                  type="primary"
-                  block
-                  style={{ marginBottom: '10px' }}
-                  onClick={() => initiateCheckout('monthly')}
-                  disabled={isLoading || !email}
-                >
-                  Monthly - $10
-                </Button>
-                <Button
-                  type="primary"
-                  block
-                  onClick={() => initiateCheckout('yearly')}
-                  disabled={isLoading || !email}
-                >
-                  Yearly - $110
-                </Button>
-              </Form>
-            </Modal>
-          </div>
-        </Content>
-      </Layout>
-    );
-  }
-
   if (!isRegistered) {
     return (
       <Layout style={{ padding: '24px', minHeight: '100vh' }}>
@@ -368,7 +314,56 @@ const CreateDashboard: React.FC = () => {
       </Layout>
     );
   }
-
+  
+  // If registered but not subscribed, show subscribe
+  if (!isSubscribed) {
+    return (
+      <Layout style={{ padding: '24px', minHeight: '100vh' }}>
+        <Content>
+          <div style={{ textAlign: 'center', marginTop: '50px' }}>
+            <Button type="primary" onClick={handleSubscribe}>
+              Subscribe Now
+            </Button>
+            <Modal
+              title="Choose a Subscription Plan"
+              open={isSubscriptionModalVisible}
+              onCancel={() => setIsSubscriptionModalVisible(false)}
+              footer={null}
+            >
+              <Form layout="vertical">
+                <Form.Item label="Email" required>
+                  <Input
+                    placeholder="Enter your email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </Form.Item>
+                <Button
+                  type="primary"
+                  block
+                  style={{ marginBottom: '10px' }}
+                  onClick={() => initiateCheckout('monthly')}
+                  disabled={isLoading || !email}
+                >
+                  Monthly - $10
+                </Button>
+                <Button
+                  type="primary"
+                  block
+                  onClick={() => initiateCheckout('yearly')}
+                  disabled={isLoading || !email}
+                >
+                  Yearly - $110
+                </Button>
+              </Form>
+            </Modal>
+          </div>
+        </Content>
+      </Layout>
+    );
+  }
+  
+  // If registered and subscribed but not logged in, show login
   if (!isLoggedIn) {
     return (
       <Layout style={{ padding: '24px', minHeight: '100vh' }}>
