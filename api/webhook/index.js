@@ -1,7 +1,6 @@
 //webhook index
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const initializeModels = require('../models');
-
 module.exports = async function (context, req) {
   const sig = req.headers['stripe-signature'];
   let event;
