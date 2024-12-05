@@ -1,6 +1,6 @@
 const initializeModels = require('../models');
 const Joi = require('joi');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 module.exports = async function (context, req) {
