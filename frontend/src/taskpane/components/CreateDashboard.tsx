@@ -1,23 +1,7 @@
 // src/taskpane/components/CreateDashboard.tsx
 
 import React, { useState, useEffect, useContext } from 'react';
-import {
-  Layout,
-  Form,
-  Input,
-  Button,
-  message,
-  Modal,
-  Tooltip,
-  Row,
-  Col,
-  Card,
-  List,
-  Avatar,
-  Spin,
-  Divider,
-  Empty,
-} from 'antd';
+import { Layout, Form, Input, Button, message, Modal, Tooltip, Row, Col, Card, List, Avatar, Spin, Divider, Empty} from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { DashboardContext } from '../context/DashboardContext';
 import { DeleteOutlined, FolderAddOutlined, PlusOutlined } from '@ant-design/icons';
@@ -76,11 +60,18 @@ const CreateDashboard: React.FC = () => {
     }
     setIsLoading(true);
     try {
+      console.log('Starting subscription check for:', emailInput);
       const subscriptionResult = await checkSubscription(emailInput);
+      console.log('Subscription result:', subscriptionResult);
       setIsSubscribed(subscriptionResult.subscribed);
+  
+      console.log('Starting registration check for:', emailInput);
       const registrationResult = await checkRegistration(emailInput);
+      console.log('Registration result:', registrationResult);
       setIsRegistered(registrationResult.registered);
+      
       setEmail(emailInput);
+      console.log('Email set to:', emailInput);
     } catch (error) {
       console.error('Error checking email:', error);
       message.error('Failed to check email.');
