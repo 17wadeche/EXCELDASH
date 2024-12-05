@@ -127,6 +127,10 @@ module.exports = async (env, options) => {
               }
             },
           },
+          {
+            from: "src/payment-success.html",
+            to: "payment-success.html",
+          },
         ],
       }),
       new webpack.ProvidePlugin({

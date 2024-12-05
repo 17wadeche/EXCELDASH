@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<head><title>Payment Success</title></head>
+<body>
+  <h1>Payment Successful</h1>
+  <script>
+    if (window.opener) {
+      window.opener.postMessage({ action: 'subscriptionSuccess' }, '*');
+    }
+    window.close();
+  </script>
+</body>
+</html>

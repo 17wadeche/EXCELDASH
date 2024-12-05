@@ -17,7 +17,6 @@ interface Widget {
   title: string;
   content: string;
 }
-
 interface Template {
   id: string;
   name: string;
@@ -88,7 +87,7 @@ const CreateDashboard: React.FC = () => {
     setIsLoading(true);
     try {
       const checkoutUrl = await createCheckoutSession(plan, email);
-      window.location.href = checkoutUrl;
+      window.open(checkoutUrl, 'stripeCheckout', 'width=600,height=800');
     } catch (error: any) {
       console.error('Error initiating checkout:', error);
       message.error('Failed to initiate checkout.');
@@ -99,34 +98,28 @@ const CreateDashboard: React.FC = () => {
   };
 
   useEffect(() => {
-    if (!email) return; // Only run if email is set
-    const urlParams = new URLSearchParams(location.search);
-    const sessionId = urlParams.get('session_id');
-
-    if (sessionId) {
-      window.history.replaceState({}, document.title, '/create-dashboard');
-
-      const verifySubscriptionStatus = async () => {
-        setIsLoading(true);
-        try {
-          const result = await verifySubscription(sessionId);
-          if (result.subscribed) {
-            setIsSubscribed(true);
-            message.success('Subscription successful!');
-          } else {
-            message.error('Subscription not completed.');
-          }
-        } catch (error) {
-          console.error('Error verifying subscription:', error);
-          message.error('Failed to verify subscription.');
-        } finally {
-          setIsLoading(false);
-        }
-      };
-
-      verifySubscriptionStatus();
+    function handleMessage(event: MessageEvent) {
+      if (event.data && event.data.action === 'subscriptionSuccess') {
+        checkSubscription(email)
+          .then(result => {
+            setIsSubscribed(result.subscribed);
+            if (result.subscribed) {
+              message.success('Subscription successful!');
+            } else {
+              message.error('Subscription not completed.');
+            }
+          })
+          .catch(error => {
+            console.error('Error re-checking subscription:', error);
+            message.error('Failed to update subscription status.');
+          });
+      }
     }
-  }, [location.search, email]);
+    window.addEventListener('message', handleMessage);
+    return () => {
+      window.removeEventListener('message', handleMessage);
+    };
+  }, [email]);
 
   const handleRegister = async () => {
     if (!email || !password) {
