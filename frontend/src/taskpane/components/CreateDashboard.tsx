@@ -92,6 +92,7 @@ const CreateDashboard: React.FC = () => {
   const initiateCheckout = async (plan: 'monthly' | 'yearly') => {
     setIsLoading(true);
     try {
+      const checkoutUrl = await createCheckoutSession(plan, email);
       Office.context.ui.displayDialogAsync(checkoutUrl, { height: 60, width: 40 }, (asyncResult) => {
         if (asyncResult.status === Office.AsyncResultStatus.Failed) {
           console.error('Failed to open dialog:', asyncResult.error);
