@@ -92,8 +92,33 @@ const CreateDashboard: React.FC = () => {
   const initiateCheckout = async (plan: 'monthly' | 'yearly') => {
     setIsLoading(true);
     try {
-      const checkoutUrl = await createCheckoutSession(plan, email);
-      window.open(checkoutUrl, 'stripeCheckout', 'width=600,height=800');
+      Office.context.ui.displayDialogAsync(checkoutUrl, { height: 60, width: 40 }, (asyncResult) => {
+        if (asyncResult.status === Office.AsyncResultStatus.Failed) {
+          console.error('Failed to open dialog:', asyncResult.error);
+          message.error('Failed to initiate checkout.');
+          return;
+        }
+        const dialog = asyncResult.value;
+        dialog.addEventHandler(Office.EventType.DialogMessageReceived, (arg) => {
+          const msg = arg.message;
+          if (msg === 'subscriptionSuccess') {
+            checkSubscription(email)
+              .then((result) => {
+                setIsSubscribed(result.subscribed);
+                if (result.subscribed) {
+                  message.success('Subscription successful!');
+                } else {
+                  message.error('Subscription not completed.');
+                }
+              })
+              .catch((error) => {
+                console.error('Error re-checking subscription:', error);
+                message.error('Failed to update subscription status.');
+              });
+            dialog.close();
+          }
+        });
+      });
     } catch (error: any) {
       console.error('Error initiating checkout:', error);
       message.error('Failed to initiate checkout.');

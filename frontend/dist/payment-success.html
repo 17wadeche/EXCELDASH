@@ -3,11 +3,12 @@
 <head><title>Payment Success</title></head>
 <body>
   <h1>Payment Successful</h1>
+  <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
   <script>
-    if (window.opener) {
-      window.opener.postMessage({ action: 'subscriptionSuccess' }, '*');
+    // Send a message back to the parent (the task pane) indicating success
+    if (Office && Office.context && Office.context.ui) {
+      Office.context.ui.messageParent("subscriptionSuccess");
     }
-    window.close();
   </script>
 </body>
 </html>
