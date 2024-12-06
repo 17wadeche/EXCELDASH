@@ -7,8 +7,7 @@ module.exports = (sequelize) => {
     'User',
     {
       id: {
-        type: DataTypes.UUID,
-        defaultValue: DataTypes.UUIDV4,
+        type: DataTypes.CHAR(36),
         primaryKey: true,
         allowNull: false,
       },
