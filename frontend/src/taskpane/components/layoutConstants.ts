@@ -13,12 +13,12 @@ export const GRID_COLS: { [key in Breakpoint]: number } = {
 export const BREAKPOINTS: Breakpoint[] = ['xxl', 'xl', 'lg', 'md', 'sm'];
 
 export const WIDGET_SIZES: { [key: string]: { w: number; h: number } } = {
-  text: { w: 6, h: 8 },
-  chart: { w: 7, h: 20 },
-  gantt: { w: 17, h: 35 },
-  image: { w: 7, h: 20 },
-  metric: { w: 3, h: 5 },
-  report: { w: 12, h: 10 },
-  line: { w: 12, h: 1 },
-  title: { w: 12, h: 6 },
+  text: { w: 6, h: 24 },
+  chart: { w: 3, h: 60 },
+  gantt: { w: 9, h: 100 },
+  image: { w: 4, h: 60 },
+  metric: { w: 2, h: 15 },
+  report: { w: 6, h: 30 },
+  line: { w: 6, h: 3 },
+  title: { w: 8, h: 24 },
 };
