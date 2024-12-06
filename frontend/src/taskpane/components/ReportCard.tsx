@@ -12,7 +12,7 @@ interface ReportCardProps {
   onDelete: (id: string) => void;
 }
 
-const ReportCard: React.FC<ReportCardProps> = React.memo(({ report, onView, onEdit, onDelete }) => {
+const ReportCard: React.FC<ReportCardProps> = React.memo(({ report, onView, onDelete }) => {
   return (
     <Card
       hoverable
