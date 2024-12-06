@@ -13,6 +13,7 @@ import {
   Checkbox,
   Button,
   message,
+  Typography,
 } from 'antd';
 import Draggable from 'react-draggable';
 import { v4 as uuidv4 } from 'uuid';
@@ -21,7 +22,7 @@ import './GanttChart.css';
 import AddTaskForm from './AddTaskFrom';
 
 const { Option } = Select;
-
+const { Title } = Typography;
 const FrappeGanttAny = FrappeGantt as any;
 
 interface GanttChartComponentProps {
@@ -166,7 +167,21 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
        <Draggable handle=".drag-handle">
       <div className="gantt-chart-container">
         {/* Header Section */}
-        <div className="gantt-header drag-handle">
+        <div
+          className="gantt-header drag-handle"
+          style={{
+            display: 'flex',
+            justifyContent:
+              titleAlignment === 'center'
+                ? 'center'
+                : titleAlignment === 'right'
+                ? 'flex-end'
+                : 'flex-start',
+            alignItems: 'center',
+            cursor: 'move',
+            marginBottom: '16px',
+          }}
+        >
           <Title level={4} className="gantt-title">
             {title}
           </Title>
@@ -215,14 +230,6 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
             onClick={handleClick}
             onDateChange={handleDateChange}
             onProgressChange={handleProgressChange}
-            customPopupHtml={(task: Task) => (
-              `<div class="custom-popup">
-                <h4>${task.name}</h4>
-                <p>Start: ${new Date(task.start).toLocaleDateString()}</p>
-                <p>End: ${new Date(task.end).toLocaleDateString()}</p>
-                <p>Progress: ${task.progress}%</p>
-              </div>`
-            )}
           />
         </div>
 
