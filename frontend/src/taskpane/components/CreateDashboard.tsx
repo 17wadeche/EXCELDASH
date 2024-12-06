@@ -108,9 +108,15 @@ const CreateDashboard: React.FC = () => {
       const checkoutUrl = await createCheckoutSession(plan, email);
       console.log('Checkout URL:', checkoutUrl);
       Office.context.ui.displayDialogAsync(checkoutUrl, { height: 60, width: 40 }, (asyncResult) => {
+        if (asyncResult.status === Office.AsyncResultStatus.Failed) {
+          console.error('Failed to open dialog:', asyncResult.error);
+          message.error('Failed to initiate checkout.');
+          return;
+        }
+  
         const dialog = asyncResult.value;
         dialog.addEventHandler(Office.EventType.DialogEventReceived, () => {
-
+          console.log('Dialog closed, re-checking subscription...');
           checkSubscription(email).then(result => {
             setIsSubscribed(result.subscribed);
             if (result.subscribed) {
@@ -118,6 +124,9 @@ const CreateDashboard: React.FC = () => {
             } else {
               message.error('Subscription not completed.');
             }
+          }).catch(error => {
+            console.error('Error re-checking subscription after dialog closed:', error);
+            message.error('Failed to update subscription status.');
           });
         });
       });

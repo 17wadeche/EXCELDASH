@@ -3,11 +3,11 @@
 <head><title>Payment Success</title></head>
 <body>
   <h1>Payment Successful</h1>
-  <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+  <p>Your payment has been completed. The window will now close.</p>
   <script>
-    if (Office && Office.context && Office.context.ui) {
-      Office.context.ui.messageParent("subscriptionSuccess");
-    }
+    setTimeout(() => {
+      window.close();
+    }, 20);
   </script>
 </body>
 </html>
