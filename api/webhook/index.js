@@ -1,6 +1,7 @@
-// webhook index.js
+// webhook/index.js
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-const initializeModels = require('../models');
+const initializeModels = require('../models'); // Assumes Sequelize or similar ORM
+
 module.exports = async function (context, req) {
   const sig = req.headers['stripe-signature'];
   let event;
@@ -15,7 +16,7 @@ module.exports = async function (context, req) {
     return;
   }
   context.log('Stripe event data:', event.data.object);
-  const { User, Subscription } = await initializeModels();
+  const { User, Subscription } = await initializeModels(); // Initialize ORM models
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
     context.log('Session subscription:', session.subscription);
@@ -33,11 +34,16 @@ module.exports = async function (context, req) {
       }
       const subscription = await stripe.subscriptions.retrieve(session.subscription);
       await Subscription.upsert({
-        id: subscription.id,
-        userId: user.id,
+        subscription_id: subscription.id, // Unique identifier from Stripe
+        userId: user.id,                   // Foreign key to Users table
         status: subscription.status,
-        plan: subscription.items.data[0].price.nickname,
+        subscription_plan: subscription.items.data[0].price.nickname, // Updated attribute
         currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+        email: customerEmail,              // Ensure this matches the 'email' column
+        paid_amount: subscription.plan.amount, // Adjust based on actual Stripe response
+        currency: subscription.plan.currency,  // Adjust based on actual Stripe response
+        createdAt: new Date(subscription.created * 1000),
+        updatedAt: new Date(subscription.updated * 1000),
       });
       context.log('Subscription updated in database for user:', customerEmail);
       context.res = {
@@ -47,7 +53,7 @@ module.exports = async function (context, req) {
     } catch (error) {
       context.log.error('Error updating subscription in database:', error);
       context.res = {
-        status: 200,
+        status: 500,
         body: 'Webhook received but error occurred internally',
       };
     }
@@ -64,11 +70,14 @@ module.exports = async function (context, req) {
         return;
       }
       await Subscription.upsert({
-        id: subscription.id,
+        subscription_id: subscription.id,
         userId: user.id,
         status: subscription.status,
-        plan: subscription.items.data[0].price.nickname,
+        subscription_plan: subscription.items.data[0].price.nickname, // Updated attribute
         currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+        paid_amount: invoice.amount_paid,   
+        currency: invoice.currency,          
+        updatedAt: new Date(), // Update the 'updatedAt' field
       });
       context.log('Subscription updated on invoice payment succeeded for user:', user.email);
       context.res = {
@@ -78,11 +87,12 @@ module.exports = async function (context, req) {
     } catch (error) {
       context.log.error('Error updating subscription on invoice.payment_succeeded:', error);
       context.res = {
-        status: 200,
+        status: 500,
         body: 'Webhook received but error occurred internally',
       };
     }
   } else {
+    context.log(`Unhandled event type ${event.type}`);
     context.res = {
       status: 200,
       body: `Unhandled event type ${event.type}`,

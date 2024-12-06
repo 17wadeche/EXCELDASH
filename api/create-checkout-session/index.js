@@ -7,7 +7,6 @@ module.exports = async function (context, req) {
     plan: Joi.string().valid('monthly', 'yearly').required(),
   });
   const { error, value } = schema.validate(req.body);
-
   if (error) {
     context.res = {
       status: 400,
@@ -15,16 +14,13 @@ module.exports = async function (context, req) {
     };
     return;
   }
-
   const { email, plan } = value;
   let priceId;
-
   if (plan === 'monthly') {
     priceId = process.env.PRICE_ID_MONTHLY;
   } else if (plan === 'yearly') {
     priceId = process.env.PRICE_ID_YEARLY;
   }
-
   try {
     let customers = await stripe.customers.list({ email });
     let customer;
@@ -33,7 +29,6 @@ module.exports = async function (context, req) {
     } else {
       customer = await stripe.customers.create({ email });
     }
-
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       mode: 'subscription',
@@ -48,9 +43,8 @@ module.exports = async function (context, req) {
         email,
       },
       success_url: process.env.SUCCESS_URL,
-      cancel_url: process.env.CANCEL_URL,
+      cancel_url: process.env.CANCEL_URL, 
     });
-
     context.res = {
       status: 200,
       body: { url: session.url },
