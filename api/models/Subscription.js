@@ -2,12 +2,6 @@
 
 module.exports = (sequelize, DataTypes) => {
   const Subscription = sequelize.define('Subscription', {
-    id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      autoIncrement: true, // If 'id' is meant to auto-increment
-      allowNull: false,
-    },
     email: {
       type: DataTypes.STRING(255),
       allowNull: false,
