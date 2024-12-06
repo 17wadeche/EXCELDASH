@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<OfficeApp xmlns="http://schemas.microsoft.com/office/appforoffice/1.1" 
+<OfficeApp xmlns="http://schemas.microsoft.com/office/appforoffice/1.3" 
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
            xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0" 
            xmlns:ov="http://schemas.microsoft.com/office/taskpaneappversionoverrides" 
@@ -13,6 +13,9 @@
   <IconUrl DefaultValue="https://happy-forest-059a9d710.4.azurestaticapps.net/assets/ea_32x32.png"/>
   <HighResolutionIconUrl DefaultValue="https://happy-forest-059a9d710.4.azurestaticapps.net/assets/ea_64x64.png"/>
   <SupportUrl DefaultValue="https://chitek.co.site"/>
+  <AppDomains>
+    <AppDomain>https://checkout.stripe.com</AppDomain>
+  </AppDomains>
   <Hosts>
     <Host Name="Workbook"/>
   </Hosts>
@@ -20,11 +23,8 @@
     <SourceLocation DefaultValue="https://happy-forest-059a9d710.4.azurestaticapps.net/taskpane.html"/>
   </DefaultSettings>
   <Permissions>ReadWriteDocument</Permissions>
-  <AppDomains>
-  <AppDomain>https://checkout.stripe.com</AppDomain>
-  </AppDomains>
-  <VersionOverrides xmlns="http://schemas.microsoft.com/office/taskpaneappversionoverrides" 
-                    xsi:type="VersionOverridesV1_0">
+  <VersionOverrides xmlns="http://schemas.microsoft.com/office/taskpaneappversionoverrides/1.3" 
+                    xsi:type="VersionOverridesV1_3">
     <Hosts>
       <Host xsi:type="Workbook">
         <DesktopFormFactor>
