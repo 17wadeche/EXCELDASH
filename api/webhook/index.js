@@ -45,7 +45,7 @@ module.exports = async function (context, req) {
       const paidAmount = subscription.items.data[0]?.price?.unit_amount || 0; // in cents
       const currency = subscription.items.data[0]?.price?.currency || 'usd';
       const subscriptionData = {
-        subscription_id: subscription.subscription_id,
+        subscription_id: subscription.id,
         userId: user.id,
         status: subscription.status,
         subscription_plan: subscriptionPlan,
@@ -91,7 +91,7 @@ module.exports = async function (context, req) {
       const paidAmount = invoice.amount_paid || 0; // in cents
       const currency = invoice.currency || 'usd';
       const subscriptionData = {
-        subscription_id: subscription_id,
+        subscription_id: subscription.id,
         userId: user.id,
         status: subscription.status,
         subscription_plan: subscriptionPlan,

@@ -83,6 +83,12 @@ const CreateDashboard: React.FC = () => {
     setIsSubscriptionModalVisible(true);
   };
 
+  useEffect(() => {
+    if (isSubscribed) {
+      message.success('Subscription active!');
+    }
+  }, [isSubscribed]);
+
   const initiateCheckout = async (plan: 'monthly' | 'yearly') => {
     setIsLoading(true);
     try {
