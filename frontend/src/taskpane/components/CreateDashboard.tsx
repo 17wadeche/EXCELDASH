@@ -410,6 +410,9 @@ const CreateDashboard: React.FC = () => {
       </Layout>
     );
   }
+  localStorage.setItem('isLoggedIn', 'true');
+  localStorage.setItem('isSubscribed', 'true');
+  localStorage.setItem('isRegistered', 'true');
 
   return (
     <Layout style={{ padding: '24px', background: '#f0f2f5', minHeight: '100vh' }}>

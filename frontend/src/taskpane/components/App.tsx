@@ -15,19 +15,26 @@ import ReportsList from './ReportsList';
 import ReportView from './ReportView';
 import EditTemplate from './EditTemplate';
 import EditDashboard from './EditDashboard';
-import ProtectedRoute from './ProtectedRoute';
 
 const App: React.FC = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem('isLoggedIn') === 'true');
+  const [isRegistered, setIsRegistered] = useState(localStorage.getItem('isRegistered') === 'true');
+  const [isSubscribed, setIsSubscribed] = useState(localStorage.getItem('isSubscribed') === 'true');
 
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    setIsLoggedIn(!!token);
-  }, []);
   return (
     <DashboardProvider>
       <Routes>
         <Route path="/" element={<CustomLayout />}>
+          <Route 
+            index 
+            element={
+              <CreateDashboard
+                isLoggedIn={isLoggedIn}
+                isRegistered={isRegistered}
+                isSubscribed={isSubscribed}
+              />
+            } 
+          />
           <Route index element={<CreateDashboard />} />
           <Route path="dashboard-editor" element={<DashboardPage />} />
           <Route path="custom-report" element={<CustomReport />} />
@@ -35,14 +42,7 @@ const App: React.FC = () => {
           <Route path="/reports-list" element={<ReportsList />} />
           <Route path="dashboard-list" element={<DashboardList />} />
           <Route path="create" element={<CreateDashboard />} />
-          <Route
-            path="dashboard/:id"
-            element={
-              <ProtectedRoute isAuthenticated={isLoggedIn}>
-                <DashboardPage />
-              </ProtectedRoute>
-            } 
-            />
+          <Route path="dashboard/:id" element={<DashboardPage /> }/>
           <Route path="/full-screen" element={<Dashboard isFullScreen />} />
           <Route path="edit-dashboard/:id" element={<DashboardPage />} />
           <Route path="/reports-list" element={<ReportsList />} />
