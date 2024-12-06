@@ -185,6 +185,8 @@
   margin: 0;
   background-color: var(--background-color);
   box-shadow: none;
+  transform: scale(0.8); /* Adjust 0.8 to the desired zoom level */
+  transform-origin: top left;
 }
 
 .scaled-container {

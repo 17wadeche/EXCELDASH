@@ -618,7 +618,7 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
           layouts={layouts}
           breakpoints={{ xxl: 1920, xl: 1600, lg: 1200, md: 996, sm: 768 }}
           cols={GRID_COLS}
-          rowHeight={5}
+          rowHeight={2}
           onLayoutChange={handleLayoutChange}
           draggableHandle=".drag-handle"
           isResizable={isEditingEnabled}
