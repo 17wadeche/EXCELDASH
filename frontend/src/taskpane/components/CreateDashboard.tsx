@@ -52,6 +52,18 @@ const CreateDashboard: React.FC = () => {
     setLayouts,
   } = useContext(DashboardContext)!;
 
+  useEffect(() => {
+    const savedEmail = localStorage.getItem('userEmail');
+    if (savedEmail) {
+      setEmail(savedEmail);
+      checkSubscription(savedEmail)
+        .then((result) => {
+          setIsSubscribed(result.subscribed);
+        })
+        .catch((error) => console.error('Error checking subscription on mount:', error));
+    }
+  }, []);
+
   const handleEmailSubmit = async () => {
     if (!emailInput) {
       message.error('Please enter your email.');
@@ -70,6 +82,7 @@ const CreateDashboard: React.FC = () => {
       setIsRegistered(registrationResult.registered);
       
       setEmail(emailInput);
+      localStorage.setItem('userEmail', emailInput);
       console.log('Email set to:', emailInput);
     } catch (error) {
       console.error('Error checking email:', error);
@@ -104,19 +117,8 @@ const CreateDashboard: React.FC = () => {
         dialog.addEventHandler(Office.EventType.DialogMessageReceived, (arg: any) => {
           const msg = (arg as { message: string }).message;
           if (msg === 'subscriptionSuccess') {
-            checkSubscription(email)
-              .then((result) => {
-                setIsSubscribed(result.subscribed);
-                if (result.subscribed) {
-                  message.success('Subscription successful!');
-                } else {
-                  message.error('Subscription not completed.');
-                }
-              })
-              .catch((error) => {
-                console.error('Error re-checking subscription:', error);
-                message.error('Failed to update subscription status.');
-              });
+            setIsSubscribed(true);
+            message.success('Subscription successful!');
             dialog.close();
           }
         });
