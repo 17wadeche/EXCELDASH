@@ -1,5 +1,6 @@
 const initializeModels = require('../models');
 const Joi = require('joi');
+const bcrypt = require('bcryptjs');
 
 module.exports = async function (context, req) {
   const schema = Joi.object({
@@ -25,7 +26,8 @@ module.exports = async function (context, req) {
       };
       return;
     }
-    await User.create({ email, password });
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await User.create({ email, password: hashedPassword });
     context.res = {
       status: 201,
       body: { message: 'User registered successfully.' },
