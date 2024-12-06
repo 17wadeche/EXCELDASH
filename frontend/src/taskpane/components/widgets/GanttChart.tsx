@@ -164,7 +164,6 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
 
   return (
     <Draggable handle=".drag-handle">
-       <Draggable handle=".drag-handle">
       <div className="gantt-chart-container">
         {/* Header Section */}
         <div
