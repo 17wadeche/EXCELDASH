@@ -25,14 +25,6 @@ const ReportCard: React.FC<ReportCardProps> = React.memo(({ report, onView, onEd
             aria-label={`View Report: ${report.name}`}
           />
         </Tooltip>,
-        <Tooltip title="Edit Report" key="edit">
-          <Button
-            type="text"
-            icon={<EditOutlined />}
-            onClick={() => onEdit(report.id)}
-            aria-label={`Edit Report: ${report.name}`}
-          />
-        </Tooltip>,
         <Tooltip title="Delete Report" key="delete">
           <Button
             type="text"
