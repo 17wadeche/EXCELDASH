@@ -1,6 +1,7 @@
 /* src/taskpane/components/Dashboard.css */
 
 .grid-item {
+  position: relative;
   margin: 0;
   box-shadow: none;
   padding: 0;
