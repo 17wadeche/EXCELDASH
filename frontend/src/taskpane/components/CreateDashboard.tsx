@@ -10,7 +10,7 @@ import { setWorkbookIdInProperties } from '../utils/excelUtils';
 import { DashboardItem } from './types';
 const { Content } = Layout;
 const { Search } = Input;
-import { createCheckoutSession, checkSubscription, loginUser, registerUser, verifySubscription, checkRegistration } from './../utils/api';
+import { createCheckoutSession, checkSubscription, loginUser, registerUser, verifySubscription, checkRegistration, unsubscribeUser  } from './../utils/api';
 
 interface Widget {
   id: string;
