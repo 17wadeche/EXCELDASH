@@ -287,6 +287,40 @@ const CreateDashboard: React.FC = () => {
     template.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('userEmail');
+    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('isSubscribed');
+    localStorage.removeItem('isRegistered');
+    setIsLoggedIn(false);
+    setIsSubscribed(false);
+    setIsRegistered(false);
+    setEmail('');
+    message.success('Logged out successfully!');
+    navigate('/'); // Redirect to the initial screen or another route
+  };
+
+  const handleUnsubscribe = async () => {
+    try {
+      const response = await fetch('/api/unsubscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      const result = await response.json();
+      if (response.ok) {
+        setIsSubscribed(false);
+        message.success('Subscription canceled.');
+      } else {
+        message.error(`Failed to unsubscribe: ${result.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error unsubscribing:', error);
+      message.error('Failed to unsubscribe.');
+    }
+  };
+
   if (!email) {
     return (
       <Layout style={{ padding: '24px', minHeight: '100vh' }}>
@@ -341,7 +375,6 @@ const CreateDashboard: React.FC = () => {
     );
   }
   
-  // If registered but not subscribed, show subscribe
   if (!isSubscribed) {
     return (
       <Layout style={{ padding: '24px', minHeight: '100vh' }}>
@@ -428,6 +461,15 @@ const CreateDashboard: React.FC = () => {
     <Layout style={{ padding: '24px', background: '#f0f2f5', minHeight: '100vh' }}>
       <Content>
         {/* Create Dashboard Form */}
+        {isLoggedIn && isSubscribed && (
+          <Row justify="end" style={{ marginBottom: '20px' }}>
+            <Button style={{ marginRight: '10px' }} onClick={handleUnsubscribe} danger>
+              Unsubscribe
+            </Button>
+            <Button onClick={handleLogout}>Logout</Button>
+          </Row>
+        )}
+        
         <Row justify="center" gutter={[100, 24]}>
           <Col xs={24} sm={20} md={16} lg={12}>
             <Card

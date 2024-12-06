@@ -66,3 +66,8 @@ export const checkRegistration = async (email: string) => {
     throw error;
   }
 };
+
+export const unsubscribeUser = async (email: string) => {
+  const response = await axios.post(`${API_BASE_URL}/unsubscribe`, { email });
+  return response.data;
+};
