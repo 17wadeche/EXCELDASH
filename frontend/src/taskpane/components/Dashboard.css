@@ -8,7 +8,7 @@
   --toolbar-icon-hover-color: #1890ff;
   --toolbar-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   --widget-bg: #ffffff;
-  --widget-border: #ffffff;
+  --widget-border: none;
   --widget-shadow: none;
   --action-icon-color: #595959;
   --action-icon-hover-color: #40a9ff;
@@ -34,7 +34,6 @@
   --toolbar-icon-hover-color: #40a9ff;
   --toolbar-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
   --widget-bg: #1f1f1f;
-  --widget-border: #434343;
   --text-color: #ffffff;
   --secondary-text-color: #bfbfbf;
 }
@@ -292,10 +291,7 @@
   flex-direction: column;
   height: 100%;
   background-color: var(--widget-bg);
-  border: 1px solid var(--widget-border);
-  border-radius: 8px;
-  padding: 16px;
-  box-shadow: var(--widget-shadow);
+  padding: 0px;
 }
 
 .gantt-chart-container.drag-handle {
@@ -325,7 +321,6 @@
 .widget-card canvas {
   max-width: 100%;
   height: auto;
-  border-radius: 4px;
 }
 
 /* Smooth Transitions for Interactive Elements */
