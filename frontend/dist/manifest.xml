@@ -2,7 +2,7 @@
 <OfficeApp xmlns="http://schemas.microsoft.com/office/appforoffice/1.3" 
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
            xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0" 
-           xmlns:ov="http://schemas.microsoft.com/office/taskpaneappversionoverrides" 
+           xmlns:ov="http://schemas.microsoft.com/office/taskpaneappversionoverrides/1.0" 
            xsi:type="TaskPaneApp">
   <Id>95450596-f56d-4498-bb75-3b93306e32b3</Id>
   <Version>1.0.0.1</Version>
@@ -23,8 +23,8 @@
     <SourceLocation DefaultValue="https://happy-forest-059a9d710.4.azurestaticapps.net/taskpane.html"/>
   </DefaultSettings>
   <Permissions>ReadWriteDocument</Permissions>
-  <VersionOverrides xmlns="http://schemas.microsoft.com/office/taskpaneappversionoverrides/1.3" 
-                    xsi:type="VersionOverridesV1_3">
+  <VersionOverrides xmlns="http://schemas.microsoft.com/office/taskpaneappversionoverrides/1.0" 
+                    xsi:type="VersionOverridesV1_0">
     <Hosts>
       <Host xsi:type="Workbook">
         <DesktopFormFactor>
