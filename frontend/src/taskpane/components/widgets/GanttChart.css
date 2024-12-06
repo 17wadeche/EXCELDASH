@@ -1,11 +1,11 @@
 /* GanttChartComponent.css */
 .gantt-chart-container {
-  width: 100%;
-  max-width: 1000px; /* Adjust as needed */
-  margin: 10px auto;
-  padding: 10px;
-  background-color: #ffffff;
-  position: relative;
+  position: relative; /* Ensure relative positioning for child elements */
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: var(--widget-bg);
+  padding: 0px;
 }
 
 .gantt-header {
@@ -32,18 +32,6 @@
   margin-bottom: 16px;
   display: flex;
   justify-content: flex-end;
-}
-
-.task-selection {
-  margin-bottom: 16px;
-}
-
-.task-checkboxes {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  max-height: 150px;
-  overflow-y: auto;
 }
 
 .gantt-chart-wrapper {
