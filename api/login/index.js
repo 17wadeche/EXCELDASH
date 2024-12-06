@@ -8,9 +8,7 @@ module.exports = async function (context, req) {
     email: Joi.string().email().required(),
     password: Joi.string().required(),
   });
-
   const { error, value } = schema.validate(req.body);
-
   if (error) {
     context.res = {
       status: 400,
@@ -18,12 +16,9 @@ module.exports = async function (context, req) {
     };
     return;
   }
-
   const { email, password } = value;
-
   try {
     const { User } = await initializeModels();
-
     const user = await User.findOne({ where: { email } });
     if (!user) {
       context.res = {
@@ -32,7 +27,6 @@ module.exports = async function (context, req) {
       };
       return;
     }
-
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) {
       context.res = {
@@ -41,11 +35,9 @@ module.exports = async function (context, req) {
       };
       return;
     }
-
-    const token = jwt.sign({ userId: user.subscription_id }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
       expiresIn: '7d',
     });
-
     context.res = {
       status: 200,
       body: { token },

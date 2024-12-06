@@ -6,9 +6,7 @@ module.exports = async function (context, req) {
     email: Joi.string().email().required(),
     password: Joi.string().min(8).required(),
   });
-
   const { error, value } = schema.validate(req.body);
-
   if (error) {
     context.res = {
       status: 400,
@@ -16,12 +14,9 @@ module.exports = async function (context, req) {
     };
     return;
   }
-
   const { email, password } = value;
-
   try {
     const { User } = await initializeModels();
-
     const existingUser = await User.findOne({ where: { email } });
     if (existingUser) {
       context.res = {
@@ -30,9 +25,7 @@ module.exports = async function (context, req) {
       };
       return;
     }
-
     await User.create({ email, password });
-
     context.res = {
       status: 201,
       body: { message: 'User registered successfully.' },

@@ -21,7 +21,7 @@ module.exports = async function (context, req) {
   const { User, Subscription, sequelize } = await initializeModels();
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
-    context.log('Processing checkout.session.completed for session:', session.subscription_id);
+    context.log('Processing checkout.session.completed for session:', session.id);
     const customerEmail = session.customer_details.email;
     const stripeCustomerId = session.customer;
     const transaction = await sequelize.transaction();
@@ -30,23 +30,23 @@ module.exports = async function (context, req) {
       if (!user) {
         context.log(`User with email ${customerEmail} not found. Creating new user.`);
         user = await User.create({ email: customerEmail, stripeCustomerId }, { transaction });
-        context.log(`Created new user with ID: ${user.subscription_id}`);
+        context.log(`Created new user with ID: ${user.id}`);
       } else {
-        context.log(`Found existing user with ID: ${user.subscription_id}`);
+        context.log(`Found existing user with ID: ${user.id}`);
         if (!user.stripeCustomerId) {
-          context.log(`Updating user ${user.subscription_id} with Stripe Customer ID.`);
+          context.log(`Updating user ${user.id} with Stripe Customer ID.`);
           user.stripeCustomerId = stripeCustomerId;
           await user.save({ transaction });
         }
       }
       const subscription = await stripe.subscriptions.retrieve(session.subscription);
-      context.log(`Retrieved subscription from Stripe: ${subscription.subscription_id}`);
+      context.log(`Retrieved subscription from Stripe: ${subscription.id}`);
       const subscriptionPlan = subscription.items.data[0]?.price?.nickname || 'Unknown Plan';
       const paidAmount = subscription.items.data[0]?.price?.unit_amount || 0; // in cents
       const currency = subscription.items.data[0]?.price?.currency || 'usd';
       const subscriptionData = {
         subscription_id: subscription.subscription_id,
-        userId: user.subscription_id,
+        userId: user.id,
         status: subscription.status,
         subscription_plan: subscriptionPlan,
         currentPeriodEnd: new Date(subscription.current_period_end * 1000),
@@ -86,13 +86,13 @@ module.exports = async function (context, req) {
         await transaction.commit(); // Commit to acknowledge event
         return;
       }
-      context.log(`Found user with ID: ${user.subscription_id} for Stripe Customer ID: ${stripeCustomerId}`);
+      context.log(`Found user with ID: ${user.id} for Stripe Customer ID: ${stripeCustomerId}`);
       const subscriptionPlan = subscription.items.data[0]?.price?.nickname || 'Unknown Plan';
       const paidAmount = invoice.amount_paid || 0; // in cents
       const currency = invoice.currency || 'usd';
       const subscriptionData = {
-        subscription_id: subscription.subscription_id,
-        userId: user.subscription_id,
+        subscription_id: subscription_id,
+        userId: user.id,
         status: subscription.status,
         subscription_plan: subscriptionPlan,
         currentPeriodEnd: new Date(subscription.current_period_end * 1000),
@@ -103,7 +103,6 @@ module.exports = async function (context, req) {
       await Subscription.upsert(subscriptionData, { transaction });
       await transaction.commit();
       context.log(`Subscription ${subscription.subscription_id} updated on invoice payment succeeded for user ${user.email}.`);
-
       context.res = {
         status: 200,
         body: 'Subscription updated on invoice payment succeeded',

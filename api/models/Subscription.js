@@ -2,14 +2,14 @@
 
 module.exports = (sequelize, DataTypes) => {
   const Subscription = sequelize.define('Subscription', {
+    subscription_id: {
+      type: DataTypes.STRING(255),
+      primaryKey: true,
+      allowNull: false,
+    },
     email: {
       type: DataTypes.STRING(255),
       allowNull: false,
-    },
-    subscription_id: {
-      type: DataTypes.STRING(255),
-      allowNull: false,
-      unique: true,
     },
     status: {
       type: DataTypes.STRING(50),
@@ -22,16 +22,6 @@ module.exports = (sequelize, DataTypes) => {
     currentPeriodEnd: {
       type: DataTypes.DATE,
       allowNull: false,
-    },
-    createdAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: sequelize.literal('GETDATE()'),
-    },
-    updatedAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: sequelize.literal('GETDATE()'),
     },
     userId: {
       type: DataTypes.CHAR(36),
