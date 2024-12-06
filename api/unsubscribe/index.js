@@ -1,7 +1,33 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-const initializeModels = require('../models'); // Sequelize models initialization
-
+const initializeModels = require('../models');
+const jwt = require('jsonwebtoken'); 
 module.exports = async function (context, req) {
+  const authHeader = req.headers['authorization'];
+  if (!authHeader) {
+    context.res = {
+      status: 401,
+      body: { error: 'Authorization header missing.' }
+    };
+    return;
+  }
+  const token = authHeader.split(' ')[1];
+  if (!token) {
+    context.res = {
+      status: 401,
+      body: { error: 'Token missing.' }
+    };
+    return;
+  }
+  let decoded;
+  try {
+    decoded = jwt.verify(token, process.env.JWT_SECRET);
+  } catch (err) {
+    context.res = {
+      status: 403,
+      body: { error: 'Invalid token.' }
+    };
+    return;
+  }
   const { email } = req.body;
   if (!email) {
     context.res = {
@@ -22,6 +48,14 @@ module.exports = async function (context, req) {
       };
       return;
     }
+    if (decoded.email !== email) {
+      await transaction.rollback();
+      context.res = {
+        status: 403,
+        body: { error: 'Cannot unsubscribe another user.' }
+      };
+      return;
+    }
     const subscription = await Subscription.findOne({
       where: { userId: user.id, status: 'active' },
       transaction
@@ -35,8 +69,6 @@ module.exports = async function (context, req) {
       return;
     }
     await stripe.subscriptions.update(subscription.subscription_id, {
-      cancel_at_period_end: false,
-      proration_behavior: 'create_prorations',
       cancel_at_period_end: false
     });
     subscription.status = 'canceled';
