@@ -173,6 +173,7 @@ const CreateDashboard: React.FC = () => {
       await registerUser(email, password);
       message.success('Registration successful. Please log in.');
       setIsRegistered(true);
+      localStorage.setItem('isRegistered', 'true');
     } catch (error) {
       console.error('Error during registration:', error);
       message.error('Failed to register.');
@@ -190,6 +191,7 @@ const CreateDashboard: React.FC = () => {
       localStorage.setItem('token', token);
       localStorage.setItem('userEmail', email);
       setIsLoggedIn(true);
+      localStorage.setItem('isLoggedIn', 'true');
       message.success('Login successful.');
     } catch (error) {
       console.error('Error during login:', error);
@@ -324,6 +326,13 @@ const CreateDashboard: React.FC = () => {
   const isSubscribedFromStorage = localStorage.getItem('isSubscribed') === 'true';
   const isRegisteredFromStorage = localStorage.getItem('isRegistered') === 'true';
   const savedEmail = localStorage.getItem('userEmail');
+
+  console.log('LocalStorage states:', {
+    isLoggedInFromStorage,
+    isSubscribedFromStorage,
+    isRegisteredFromStorage,
+    savedEmail,
+  });
 
   // If all conditions are already met, skip all steps and go straight to dashboard creation UI
   if (isLoggedInFromStorage && isRegisteredFromStorage && isSubscribedFromStorage && savedEmail) {
@@ -642,9 +651,6 @@ const CreateDashboard: React.FC = () => {
       </Layout>
     );
   }
-  localStorage.setItem('isLoggedIn', 'true');
-  localStorage.setItem('isSubscribed', 'true');
-  localStorage.setItem('isRegistered', 'true');
 
   return (
     <Layout style={{ padding: '24px', background: '#f0f2f5', minHeight: '100vh' }}>

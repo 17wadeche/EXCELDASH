@@ -1,7 +1,6 @@
 /* src/taskpane/components/Dashboard.css */
 
 .grid-item {
-  overflow: visible;
   margin: 0;
   box-shadow: none;
   padding: 0;
@@ -9,6 +8,7 @@
 }
 
 .widget-card {
+  position: relative;
   margin: 0;
   padding: 0;
   height: 100%;
