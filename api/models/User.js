@@ -29,20 +29,10 @@ module.exports = (sequelize) => {
         type: DataTypes.STRING,
         allowNull: true,
       },
-      createdAt: { // Explicitly define createdAt
-        type: DataTypes.DATE,
-        allowNull: false,
-        defaultValue: DataTypes.NOW,
-      },
-      updatedAt: { // Explicitly define updatedAt
-        type: DataTypes.DATE,
-        allowNull: false,
-        defaultValue: DataTypes.NOW,
-      },
     },
     {
       tableName: 'Users',
-      timestamps: false,
+      timestamps: true,
     }
   );
   User.beforeCreate(async (user) => {

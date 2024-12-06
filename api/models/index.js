@@ -15,7 +15,7 @@ async function initializeModels() {
   User.hasOne(Subscription, { foreignKey: 'userId' });
   Subscription.belongsTo(User, { foreignKey: 'userId' });
   try {
-    await sequelize.sync();
+    await sequelize.sync({alter: true});
     console.log('All models were synchronized successfully.');
     modelsInitialized = true;
   } catch (error) {
