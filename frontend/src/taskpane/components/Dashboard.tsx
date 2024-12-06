@@ -18,7 +18,6 @@ import SalesChart from './widgets/SalesChart';
 import GanttChartComponent from './widgets/GanttChart';
 import ImageWidget from './widgets/ImageWidget';
 import ReportWidget from './widgets/ReportWidget';
-import './themes.css';
 import { v4 as uuidv4 } from 'uuid';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
