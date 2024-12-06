@@ -41,8 +41,8 @@ const App: React.FC = () => {
               <ProtectedRoute isAuthenticated={isLoggedIn}>
                 <DashboardPage />
               </ProtectedRoute>
-            }
-          />
+            } 
+            />
           <Route path="/full-screen" element={<Dashboard isFullScreen />} />
           <Route path="edit-dashboard/:id" element={<DashboardPage />} />
           <Route path="/reports-list" element={<ReportsList />} />

@@ -111,8 +111,6 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
       if (toolbar) {
         toolbar.style.display = 'none';
       }
-  
-      // Save the original styles
       const originalStyle = {
         position: dashboardRef.current.style.position,
         top: dashboardRef.current.style.top,
