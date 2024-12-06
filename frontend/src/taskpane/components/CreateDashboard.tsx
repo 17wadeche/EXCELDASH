@@ -100,8 +100,8 @@ const CreateDashboard: React.FC = () => {
           return;
         }
         const dialog = asyncResult.value;
-        dialog.addEventHandler(Office.EventType.DialogMessageReceived, (arg) => {
-          const msg = arg.message;
+        dialog.addEventHandler(Office.EventType.DialogMessageReceived, (arg: any) => {
+          const msg = (arg as { message: string }).message;
           if (msg === 'subscriptionSuccess') {
             checkSubscription(email)
               .then((result) => {
