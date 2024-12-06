@@ -64,7 +64,7 @@ const CustomLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) =>
   } = dashboardContext;
 
   const isInDashboard = location.pathname.startsWith('/dashboard');
-
+  const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
   const showImportChartModal = () => {
     setIsImportChartModalVisible(true);
   };
@@ -112,22 +112,27 @@ const CustomLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) =>
       >
         <div className="logo">Dashboard</div>
         <Menu mode="inline" selectedKeys={[location.pathname]}>
-          {/* Create Dashboard */}
           <Menu.Item key="/create" icon={<PlusOutlined />}>
             <Link to="/create">Create Dashboard</Link>
           </Menu.Item>
-
-          {/* Dashboard List */}
-          <Menu.Item key="/dashboard-list" icon={<UnorderedListOutlined />}>
-            <Link to="/dashboard-list">Dashboard List</Link>
-          </Menu.Item>
-
-          {/* Reports List */}
-          <Menu.Item key="/reports-list" icon={<FileOutlined />}>
-            <Link to="/reports-list">Reports List</Link>
-          </Menu.Item>
-
-          {/* Conditionally Render Add Visuals */}
+          {isLoggedIn ? (
+            <Menu.Item key="/dashboard-list" icon={<UnorderedListOutlined />}>
+              <Link to="/dashboard-list">Dashboard List</Link>
+            </Menu.Item>
+          ) : (
+            <Menu.Item key="dashboard-list-disabled" icon={<UnorderedListOutlined />} disabled>
+              Dashboard List (Login required)
+            </Menu.Item>
+          )}
+          {isLoggedIn ? (
+            <Menu.Item key="/reports-list" icon={<FileOutlined />}>
+              <Link to="/reports-list">Reports List</Link>
+            </Menu.Item>
+          ) : (
+            <Menu.Item key="reports-list-disabled" icon={<FileOutlined />} disabled>
+              Reports List (Login required)
+            </Menu.Item>
+          )}
           {isInDashboard && (
             <SubMenu key="add-visuals" icon={<PictureOutlined />} title="Add Visuals">
               <Menu.Item key="dashboard-settings" icon={<BorderOutlined />} onClick={() => setIsSettingsModalVisible(true)}>
@@ -164,7 +169,6 @@ const CustomLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) =>
               </Menu.Item>
             </SubMenu>
           )}
-          {/* Conditionally Render Other Functions */}
           {isInDashboard && (
             <SubMenu key="other-functions" icon={<AppstoreOutlined />} title="Other Functions">
               <Menu.Item key="export-pdf" icon={<DownloadOutlined />} onClick={exportDashboardAsPDF}>
