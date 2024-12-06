@@ -42,7 +42,7 @@ module.exports = async function (context, req) {
       return;
     }
 
-    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ userId: user.subscription_id }, process.env.JWT_SECRET, {
       expiresIn: '7d',
     });
 

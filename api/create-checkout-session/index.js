@@ -38,7 +38,7 @@ module.exports = async function (context, req) {
           quantity: 1,
         },
       ],
-      customer: customer.id,
+      customer: customer.subscription_id,
       metadata: {
         email,
       },
