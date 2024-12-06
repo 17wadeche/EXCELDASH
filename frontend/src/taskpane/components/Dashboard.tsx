@@ -60,6 +60,7 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
       }
     : {};
   const isUpdatingLayout = useRef(false);
+  const [rowHeight, setRowHeight] = useState<number>(5);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isLineSettingsModalVisible, setIsLineSettingsModalVisible] = useState(false);
@@ -150,8 +151,6 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
       });
   
       const imgData = canvas.toDataURL('image/png');
-  
-      // Restore the original styles
       Object.assign(dashboardRef.current.style, originalStyle);
   
       if (toolbar) {
@@ -277,9 +276,6 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
   }, [currentDashboard]);
 
   const [theme, setTheme] = useState('light-theme');
-  const [zoomLevel, setZoomLevel] = useState(1);
-  const [isScreenshotModalVisible, setIsScreenshotModalVisible] = useState(false);
-  const [screenshotImage, setScreenshotImage] = useState<string | null>(null);
   const dashboardRef = useRef<HTMLDivElement>(null);
   const handleSave = () => {
     if (currentDashboardId) {
@@ -419,9 +415,6 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
     setCurrentWidget(null);
   };
 
-  const zoomIn = () => setZoomLevel((prev) => Math.min(prev + 0.1, 2));
-  const zoomOut = () => setZoomLevel((prev) => Math.max(prev - 0.1, 0.5));
-  const resetZoom = () => setZoomLevel(1);
   const openPresenterMode = () => {
     if (isOfficeInitialized) {
       const url = window.location.origin + '/fullScreenDashboard.html';
@@ -518,7 +511,6 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
       message.error('Presenter mode is not available outside of Office.');
     }
   };
-
   return (
     <div className="dashboard-wrapper">
       <Draggable handle=".drag-handle">
@@ -557,33 +549,6 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
                   onClick={handleSave}
                   className="toolbar-button"
                   aria-label="Save"
-                />
-              </Tooltip>
-              <Tooltip title="Zoom In" placement="left">
-                <Button
-                  type="text"
-                  icon={<ZoomInOutlined />}
-                  onClick={zoomIn}
-                  className="toolbar-button"
-                  aria-label="Zoom In"
-                />
-              </Tooltip>
-              <Tooltip title="Zoom Out" placement="left">
-                <Button
-                  type="text"
-                  icon={<ZoomOutOutlined />}
-                  onClick={zoomOut}
-                  className="toolbar-button"
-                  aria-label="Zoom Out"
-                />
-              </Tooltip>
-              <Tooltip title="Reset Zoom" placement="left">
-                <Button
-                  type="text"
-                  icon={<ZoomInOutlined rotate={90} />}
-                  onClick={resetZoom}
-                  className="toolbar-button"
-                  aria-label="Reset Zoom"
                 />
               </Tooltip>
               <Tooltip title="Refresh All Charts" placement="left">
@@ -644,9 +609,7 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
           ...borderStyle,
           width: '100%',
           height: 'auto',
-          overflow: 'hidden',
-          transform: isPresenterMode ? 'none' : `scale(${zoomLevel})`,
-          transformOrigin: '0 0',
+          overflow: 'auto',
           paddingBottom: '3px',
         }}
       >
@@ -655,7 +618,7 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
           layouts={layouts}
           breakpoints={{ xxl: 1920, xl: 1600, lg: 1200, md: 996, sm: 768 }}
           cols={GRID_COLS}
-          rowHeight={10}
+          rowHeight={5}
           onLayoutChange={handleLayoutChange}
           draggableHandle=".drag-handle"
           isResizable={isEditingEnabled}
