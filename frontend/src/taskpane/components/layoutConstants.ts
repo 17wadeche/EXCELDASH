@@ -15,10 +15,10 @@ export const BREAKPOINTS: Breakpoint[] = ['xxl', 'xl', 'lg', 'md', 'sm'];
 export const WIDGET_SIZES: { [key: string]: { w: number; h: number } } = {
   text: { w: 6, h: 24 },
   chart: { w: 6, h: 80 },
-  gantt: { w: 9, h: 100 },
+  gantt: { w: 20, h: 300 },
   image: { w: 6, h: 80 },
-  metric: { w: 2, h: 30 },
-  report: { w: 6, h: 30 },
+  metric: { w: 4, h: 60 },
+  report: { w: 20, h: 300 },
   line: { w: 6, h: 3 },
   title: { w: 8, h: 24 },
 };
