@@ -8,8 +8,8 @@
   --toolbar-icon-hover-color: #1890ff;
   --toolbar-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   --widget-bg: #ffffff;
-  --widget-border: #f0f0f0;
-  --widget-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --widget-border: #ffffff;
+  --widget-shadow: none;
   --action-icon-color: #595959;
   --action-icon-hover-color: #40a9ff;
   --background-color: #f5f5f5;
@@ -63,9 +63,8 @@
 /* Grid Item Styling */
 .grid-item {
   position: relative;
-  margin: 8px;
-  box-shadow: var(--widget-shadow);
-  padding: 16px;
+  margin: 0px;
+  padding: 0px;
   background-color: var(--widget-bg);
   transition: transform 0.3s;
 }
