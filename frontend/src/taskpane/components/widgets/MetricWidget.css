@@ -3,27 +3,24 @@
   position: relative;
   width: 250px; /* Adjust as needed */
   margin: 16px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
   background-color: #ffffff;
   transition: transform 0.2s;
 }
 
-.metric-widget-container:hover {
-  transform: translateY(-5px);
-}
-
 .metric-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-between; /* Adjust based on titleAlignment */
   align-items: center;
   cursor: move;
-  margin-bottom: 16px;
+  padding: 8px 12px;
+  background-color: var(--card-background); /* Use theme variable */
 }
 
 .metric-title {
   margin: 0;
   font-weight: 600;
+  font-size: 18px;
+  color: var(--text-color);
 }
 
 .drag-icon {
@@ -54,6 +51,17 @@
 .metric-target-value {
   text-align: center;
   margin-bottom: 16px;
+  font-size: 14px;
+  color: var(--secondary-text-color);
+}
+
+.metric-target-value .metric-target-label {
+  margin-right: 4px;
+}
+
+.metric-target-value .metric-target-number {
+  font-weight: bold;
+  color: var(--text-color);
 }
 
 .edit-controls {
@@ -63,10 +71,11 @@
 }
 
 .metric-edit-button {
+  display: none;
   position: absolute;
   top: 8px;
   right: 8px;
-  display: none;
+  z-index: 1;
 }
 
 .metric-widget-container:hover .metric-edit-button {
