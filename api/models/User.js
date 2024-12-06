@@ -1,6 +1,5 @@
 // User.js
 const { DataTypes } = require('sequelize');
-const bcrypt = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid'); 
 
 module.exports = (sequelize) => {
@@ -16,7 +15,10 @@ module.exports = (sequelize) => {
       email: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true,
+        unique: {
+          name: 'UQ_Users_email',
+          msg: 'Email must be unique',
+        },
         validate: {
           isEmail: true,
         },

@@ -4,7 +4,6 @@ const initializeModels = require('../models');
 
 module.exports = async function (context, req) {
   context.log('Processing check-subscription request.');
-
   const email = req.query.email;
   if (!email) {
     context.log.warn('Missing email in check-subscription request.');
@@ -16,7 +15,15 @@ module.exports = async function (context, req) {
   }
   try {
     const { User, Subscription } = await initializeModels();
-    const user = await User.findOne({ where: { email }, include: Subscription });
+    const user = await User.findOne({
+      where: { email },
+      include: [
+        {
+          model: Subscription,
+          required: false,
+        },
+      ],
+    });
 
     if (!user || !user.Subscription) {
       context.log.info(`User with email ${email} not found or has no subscription.`);
@@ -26,7 +33,6 @@ module.exports = async function (context, req) {
       };
       return;
     }
-
     const isActive = user.Subscription.status === 'active';
     context.log.info(`User ${email} subscription is ${isActive ? 'active' : 'inactive'}.`);
     context.res = {
