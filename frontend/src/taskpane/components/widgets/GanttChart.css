@@ -1,57 +1,126 @@
-/* src/taskpane/components/widgets/GanttChart.css */
+/* GanttChartComponent.css */
+.gantt-chart-container {
+  width: 100%;
+  max-width: 1000px; /* Adjust as needed */
+  margin: 16px auto;
+  padding: 16px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
 
-.gantt-chart-container,
-.gantt-chart-wrapper,
-.frappe-gantt,
-.frappe-gantt svg {
-  padding: 0;
+.gantt-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: move;
+  margin-bottom: 16px;
+}
+
+.gantt-title {
   margin: 0;
-  box-sizing: border-box;
+  font-weight: 600;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.view-mode-buttons {
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.task-selection {
+  margin-bottom: 16px;
+}
+
+.task-checkboxes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-height: 150px;
+  overflow-y: auto;
 }
 
 .gantt-chart-wrapper {
   width: 100%;
-  height: 100%;
-}
-
-.frappe-gantt {
-  width: 100%;
-  height: 100%;
-}
-
-.frappe-gantt svg {
-    overflow: hidden;
-  }
-
-.frappe-gantt .bar {
-  height: 20px !important; 
-}
-
-.frappe-gantt .grid-row,
-.frappe-gantt .bar-wrapper {
-  height: 30px !important; 
-}
-
-.frappe-gantt .grid-background {
-  height: auto !important; 
-}
-
-.frappe-gantt .bar-group {
-  margin-bottom: 0 !important;
+  height: 500px; /* Adjust height as needed */
+  overflow-x: auto;
 }
 
 .custom-tooltip {
+  position: absolute;
   background-color: #fff;
-  border: 1px solid #ccc;
-  padding: 8px;
+  border: 1px solid #d9d9d9;
+  padding: 12px;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.custom-tooltip h5 {
+  margin-bottom: 8px;
+  font-size: 16px;
+}
+
+.custom-tooltip p {
+  margin: 4px 0;
+  font-size: 14px;
+}
+
+.frappe-gantt svg {
+  overflow: visible;
+}
+
+.frappe-gantt .bar {
+  fill: #1890ff; /* Ant Design primary color */
+  stroke: #096dd9;
+  stroke-width: 1;
+  transition: fill 0.3s, stroke 0.3s;
+}
+
+.frappe-gantt .bar-progress {
+  fill: #73d13d; /* Ant Design success color */
+}
+
+.frappe-gantt .bar:hover {
+  fill: #40a9ff;
+  cursor: pointer;
+}
+
+.frappe-gantt .grid-row {
+  stroke: #f0f0f0;
+}
+
+.frappe-gantt .grid-header {
+  stroke: #f0f0f0;
+}
+
+.gantt-container {
+  position: relative;
+  overflow: auto;
 }
 
 .drag-handle {
   cursor: move;
-  padding: 8px;
-  background-color: #f0f0f0;
-  border-bottom: 1px solid #ddd;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+}
+
+@media (max-width: 768px) {
+  .gantt-chart-container {
+    padding: 8px;
+  }
+
+  .gantt-header, .header-actions, .view-mode-buttons, .task-selection {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .view-mode-buttons {
+    justify-content: center;
+  }
 }

@@ -46,7 +46,7 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
   const [selectedTaskIds, setSelectedTaskIds] = useState<string[]>([]);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
-  const rowHeight = 20; // Adjust this value as needed
+  const rowHeight = 30; // Adjust this value as needed
 
   useEffect(() => {
     setTasks(initialTasks);
@@ -83,7 +83,6 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
   };
 
   const handleClick = (task: Task) => {
-    // Use the stored mouse position or other means to get `clientX` and `clientY`
     const { x: clientX, y: clientY } = mousePosition;
   
     setTooltipContent(
@@ -164,86 +163,66 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
 
   return (
     <Draggable handle=".drag-handle">
-      <div
-        className="gantt-chart-container"
-        style={{
-          width: '100%',
-          height: `${tasks.length * (rowHeight + 10) + 200}px`,
-          position: 'relative',
-          overflow: 'hidden',
-        }}
-      >
-        {/* Title Section with Drag Handle and Alignment Option */}
-        <div
-          className="gantt-header drag-handle"
-          style={{
-            width: '100%',
-            textAlign: titleAlignment,
-            cursor: 'move',
-            padding: '0px',
-            backgroundColor: '#ffffff',
-            borderBottom: '1px solid #ddd',
-            marginBottom: '0px',
-          }}
-        >
-          <strong>{title}</strong>
+       <Draggable handle=".drag-handle">
+      <div className="gantt-chart-container">
+        {/* Header Section */}
+        <div className="gantt-header drag-handle">
+          <Title level={4} className="gantt-title">
+            {title}
+          </Title>
+          <div className="header-actions">
+            <Button type="primary" onClick={() => setAddTaskModalVisible(true)}>
+              Add Task
+            </Button>
+          </div>
         </div>
 
         {/* View Mode Buttons */}
-        <div
-          style={{
-            marginBottom: '0px',
-            display: 'flex',
-            gap: '0px',
-            alignSelf:
-              titleAlignment === 'center' ? 'center' : 'flex-start',
-          }}
-        >
-          <Button onClick={() => setViewMode('Day')}>Day</Button>
-          <Button onClick={() => setViewMode('Week')}>Week</Button>
-          <Button onClick={() => setViewMode('Month')}>Month</Button>
-        </div>
-
-        {/* Add and Delete Task Buttons */}
-        <div
-          style={{
-            marginBottom: '0px',
-            display: 'flex',
-            gap: '0px',
-            alignSelf:
-              titleAlignment === 'center' ? 'center' : 'flex-start',
-          }}
-        >
+        <div className="view-mode-buttons">
+          <Select
+            value={viewMode}
+            onChange={(value) => setViewMode(value)}
+            style={{ width: 120 }}
+            aria-label="Select View Mode"
+          >
+            <Option value="Day">Day</Option>
+            <Option value="Week">Week</Option>
+            <Option value="Month">Month</Option>
+          </Select>
         </div>
 
         {/* Task Selection for Deletion */}
-        <div
-          style={{
-            marginBottom: '0px',
-            maxHeight: '150px',
-            overflowY: 'auto',
-          }}
-        >
-          {tasks.map((task) => (
-            <div key={task.id}>
+        <div className="task-selection">
+          <Title level={5}>Select Tasks to Delete:</Title>
+          <div className="task-checkboxes">
+            {tasks.map((task) => (
               <Checkbox
+                key={task.id}
                 checked={selectedTaskIds.includes(task.id)}
                 onChange={() => handleTaskSelection(task.id)}
               >
                 {task.name}
               </Checkbox>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
         {/* Gantt Chart */}
-        <div className="gantt-chart-wrapper" style={{ width: '100%', height: '100%' }}>
+        <div className="gantt-chart-wrapper">
           <FrappeGantt
             tasks={tasks}
             viewMode={viewMode}
             onClick={handleClick}
             onDateChange={handleDateChange}
             onProgressChange={handleProgressChange}
+            customPopupHtml={(task: Task) => (
+              `<div class="custom-popup">
+                <h4>${task.name}</h4>
+                <p>Start: ${new Date(task.start).toLocaleDateString()}</p>
+                <p>End: ${new Date(task.end).toLocaleDateString()}</p>
+                <p>Progress: ${task.progress}%</p>
+              </div>`
+            )}
           />
         </div>
 
@@ -252,13 +231,8 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
           <div
             className="custom-tooltip"
             style={{
-              position: 'absolute',
-              top: tooltipPosition.y - 100,
-              left: tooltipPosition.x - 100,
-              backgroundColor: '#fff',
-              border: '1px solid #ccc',
-              padding: '8px',
-              zIndex: 1000,
+              top: tooltipPosition.y + 10,
+              left: tooltipPosition.x + 10,
             }}
           >
             {tooltipContent}
