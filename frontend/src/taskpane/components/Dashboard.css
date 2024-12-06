@@ -69,8 +69,9 @@
   transition: transform 0.3s;
 }
 
-.grid-item:hover {
-  background-color: #f5f5f5;
+
+.grid-item:hover .widget-actions {
+  opacity: 1; /* Fully visible on hover */
 }
 
 /* Widget Card Styling */
