@@ -81,7 +81,7 @@
   box-shadow: var(--toolbar-shadow);
   z-index: 800;
   backdrop-filter: blur(5px);
-  width: 60px; /* Expanded width */
+  width: 40px; /* Expanded width */
   transition: width 0.3s ease, padding 0.3s ease;
 }
 
@@ -107,7 +107,7 @@
 
 .toolbar-button {
   margin: 6px 0;
-  width: 40px;
+  width: 30px;
   height: 40px;
   color: var(--toolbar-icon-color);
   display: flex;
@@ -180,7 +180,7 @@
   flex: 1;
   overflow: auto;
   padding: 0;
-  width: 600px;
+  width: 400px;
   margin: 0 auto;
   background-color: var(--background-color);
   box-shadow: none;
