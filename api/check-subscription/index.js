@@ -34,7 +34,7 @@ module.exports = async function (context, req) {
       status: 200,
       body: {
         subscribed: isActive,
-        plan: isActive ? user.Subscription.plan : null,
+        plan: isActive ? user.Subscription.subscription_plan : null,
       },
     };
   } catch (error) {

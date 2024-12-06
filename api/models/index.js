@@ -1,5 +1,4 @@
 // models/index.js
-
 const initializeSequelize = require('../db'); // Sequelize initialization
 const defineUser = require('./User'); // Define User model
 const defineSubscription = require('./Subscription'); // Define Subscription model
@@ -16,17 +15,13 @@ async function initializeModels() {
   User.hasOne(Subscription, { foreignKey: 'userId' });
   Subscription.belongsTo(User, { foreignKey: 'userId' });
   try {
-    await sequelize.sync(); // Consider using migrations instead in production
+    await sequelize.sync();
     console.log('All models were synchronized successfully.');
     modelsInitialized = true;
   } catch (error) {
     console.error('Unable to sync models:', error);
     throw error;
   }
-  return {
-    sequelize,
-    User,
-    Subscription,
-  };
+  return { sequelize, User, Subscription };
 }
 module.exports = initializeModels;

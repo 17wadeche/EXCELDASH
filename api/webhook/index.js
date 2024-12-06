@@ -1,4 +1,5 @@
 // webhook/index.js
+
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const initializeModels = require('../models'); // Assumes Sequelize or similar ORM
 
@@ -15,42 +16,54 @@ module.exports = async function (context, req) {
     };
     return;
   }
-  context.log('Stripe event data:', event.data.object);
-  const { User, Subscription } = await initializeModels(); // Initialize ORM models
+  context.log('Stripe event type:', event.type);
+  context.log('Stripe event data:', JSON.stringify(event.data.object));
+  const { User, Subscription, sequelize } = await initializeModels();
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
-    context.log('Session subscription:', session.subscription);
+    context.log('Processing checkout.session.completed for session:', session.id);
     const customerEmail = session.customer_details.email;
     const stripeCustomerId = session.customer;
+    const transaction = await sequelize.transaction();
     try {
-      let user = await User.findOne({ where: { email: customerEmail } });
+      let user = await User.findOne({ where: { email: customerEmail }, transaction });
       if (!user) {
-        user = await User.create({ email: customerEmail, stripeCustomerId });
+        context.log(`User with email ${customerEmail} not found. Creating new user.`);
+        user = await User.create({ email: customerEmail, stripeCustomerId }, { transaction });
+        context.log(`Created new user with ID: ${user.id}`);
       } else {
+        context.log(`Found existing user with ID: ${user.id}`);
         if (!user.stripeCustomerId) {
+          context.log(`Updating user ${user.id} with Stripe Customer ID.`);
           user.stripeCustomerId = stripeCustomerId;
-          await user.save();
+          await user.save({ transaction });
         }
       }
       const subscription = await stripe.subscriptions.retrieve(session.subscription);
-      await Subscription.upsert({
-        subscription_id: subscription.id, // Unique identifier from Stripe
-        userId: user.id,                   // Foreign key to Users table
+      context.log(`Retrieved subscription from Stripe: ${subscription.id}`);
+      const subscriptionPlan = subscription.items.data[0]?.price?.nickname || 'Unknown Plan';
+      const paidAmount = subscription.items.data[0]?.price?.unit_amount || 0; // in cents
+      const currency = subscription.items.data[0]?.price?.currency || 'usd';
+      const subscriptionData = {
+        subscription_id: subscription.id,
+        userId: user.id,
         status: subscription.status,
-        subscription_plan: subscription.items.data[0].price.nickname, // Updated attribute
+        subscription_plan: subscriptionPlan,
         currentPeriodEnd: new Date(subscription.current_period_end * 1000),
-        email: customerEmail,              // Ensure this matches the 'email' column
-        paid_amount: subscription.plan.amount, // Adjust based on actual Stripe response
-        currency: subscription.plan.currency,  // Adjust based on actual Stripe response
-        createdAt: new Date(subscription.created * 1000),
-        updatedAt: new Date(subscription.updated * 1000),
-      });
-      context.log('Subscription updated in database for user:', customerEmail);
+        email: customerEmail,
+        paid_amount: paidAmount,
+        currency: currency,
+      };
+      context.log(`Upserting subscription data: ${JSON.stringify(subscriptionData)}`);
+      await Subscription.upsert(subscriptionData, { transaction });
+      await transaction.commit();
+      context.log(`Subscription ${subscription.id} upserted for user ${customerEmail}.`);
       context.res = {
         status: 200,
         body: 'Subscription updated successfully',
       };
     } catch (error) {
+      await transaction.rollback();
       context.log.error('Error updating subscription in database:', error);
       context.res = {
         status: 500,
@@ -61,30 +74,42 @@ module.exports = async function (context, req) {
     const invoice = event.data.object;
     const subscriptionId = invoice.subscription;
     const stripeCustomerId = invoice.customer;
+    context.log('Processing invoice.payment_succeeded for subscription:', subscriptionId);
+    const transaction = await sequelize.transaction();
     try {
       const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-      const user = await User.findOne({ where: { stripeCustomerId } });
+      context.log(`Retrieved subscription from Stripe: ${subscription.id}`);
+      const user = await User.findOne({ where: { stripeCustomerId }, transaction });
       if (!user) {
-        context.log.error('No user found for this Stripe customer ID:', stripeCustomerId);
+        context.log.error(`No user found for Stripe Customer ID: ${stripeCustomerId}`);
         context.res = { status: 200, body: 'User not found, but event handled' };
+        await transaction.commit(); // Commit to acknowledge event
         return;
       }
-      await Subscription.upsert({
+      context.log(`Found user with ID: ${user.id} for Stripe Customer ID: ${stripeCustomerId}`);
+      const subscriptionPlan = subscription.items.data[0]?.price?.nickname || 'Unknown Plan';
+      const paidAmount = invoice.amount_paid || 0; // in cents
+      const currency = invoice.currency || 'usd';
+      const subscriptionData = {
         subscription_id: subscription.id,
         userId: user.id,
         status: subscription.status,
-        subscription_plan: subscription.items.data[0].price.nickname, // Updated attribute
+        subscription_plan: subscriptionPlan,
         currentPeriodEnd: new Date(subscription.current_period_end * 1000),
-        paid_amount: invoice.amount_paid,   
-        currency: invoice.currency,          
-        updatedAt: new Date(), // Update the 'updatedAt' field
-      });
-      context.log('Subscription updated on invoice payment succeeded for user:', user.email);
+        paid_amount: paidAmount,
+        currency: currency,
+      };
+      context.log(`Upserting subscription data: ${JSON.stringify(subscriptionData)}`);
+      await Subscription.upsert(subscriptionData, { transaction });
+      await transaction.commit();
+      context.log(`Subscription ${subscription.id} updated on invoice payment succeeded for user ${user.email}.`);
+
       context.res = {
         status: 200,
         body: 'Subscription updated on invoice payment succeeded',
       };
     } catch (error) {
+      await transaction.rollback();
       context.log.error('Error updating subscription on invoice.payment_succeeded:', error);
       context.res = {
         status: 500,
