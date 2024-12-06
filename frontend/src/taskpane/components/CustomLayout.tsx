@@ -121,7 +121,7 @@ const CustomLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) =>
             </Menu.Item>
           ) : (
             <Menu.Item key="dashboard-list-disabled" icon={<UnorderedListOutlined />} disabled>
-              Dashboard List (Login required)
+              <span>Dashboard List (Login required)</span>
             </Menu.Item>
           )}
           {isLoggedIn ? (
@@ -130,7 +130,7 @@ const CustomLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) =>
             </Menu.Item>
           ) : (
             <Menu.Item key="reports-list-disabled" icon={<FileOutlined />} disabled>
-              Reports List (Login required)
+              <span>Reports List (Login required)</span>
             </Menu.Item>
           )}
           {isInDashboard && (

@@ -1,7 +1,6 @@
 /* src/taskpane/components/Dashboard.css */
 
 .grid-item {
-  position: relative; /* Add this */
   overflow: visible;
   margin: 0;
   box-shadow: none;
@@ -10,7 +9,6 @@
 }
 
 .widget-card {
-  position: relative; /* Add this */
   margin: 0;
   padding: 0;
   height: 100%;
@@ -215,10 +213,6 @@
 
 .gantt-chart-container .frappe-gantt {
   flex: 1;
-}
-
-.metric-widget-container {
-  position: relative;
 }
 
 .metric-edit-button {

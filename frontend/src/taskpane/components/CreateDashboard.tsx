@@ -320,7 +320,196 @@ const CreateDashboard: React.FC = () => {
       message.error('Failed to unsubscribe.');
     }
   };
+  const isLoggedInFromStorage = localStorage.getItem('isLoggedIn') === 'true';
+  const isSubscribedFromStorage = localStorage.getItem('isSubscribed') === 'true';
+  const isRegisteredFromStorage = localStorage.getItem('isRegistered') === 'true';
+  const savedEmail = localStorage.getItem('userEmail');
 
+  // If all conditions are already met, skip all steps and go straight to dashboard creation UI
+  if (isLoggedInFromStorage && isRegisteredFromStorage && isSubscribedFromStorage && savedEmail) {
+    return (
+      <Layout style={{ padding: '24px', background: '#f0f2f5', minHeight: '100vh' }}>
+        <Content>
+          {/* Create Dashboard Form */}
+          {isLoggedInFromStorage && isSubscribedFromStorage && (
+            <Row justify="end" style={{ marginBottom: '20px' }}>
+              <Button style={{ marginRight: '10px' }} onClick={handleUnsubscribe} danger>
+                Unsubscribe
+              </Button>
+              <Button onClick={handleLogout}>Logout</Button>
+            </Row>
+          )}
+
+          <Row justify="center" gutter={[100, 24]}>
+            <Col xs={24} sm={20} md={16} lg={12}>
+              <Card
+                bordered={false}
+                style={{
+                  borderRadius: '12px',
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                  background: '#fff',
+                }}
+              >
+                <Form layout="vertical" onFinish={handleCreate}>
+                  <Form.Item
+                    label="Dashboard Title"
+                    name="dashboardTitle"
+                    rules={[
+                      {
+                        required: true,
+                        message: 'Please input the dashboard title!',
+                      },
+                    ]}
+                  >
+                    <Input
+                      placeholder="Enter dashboard title"
+                      value={dashboardTitle}
+                      onChange={(e) => setDashboardTitle(e.target.value)}
+                      prefix={<PlusOutlined />}
+                      allowClear
+                      size="large"
+                    />
+                  </Form.Item>
+                  <Form.Item>
+                    <Button
+                      type="primary"
+                      htmlType="submit"
+                      block
+                      disabled={!dashboardTitle.trim()}
+                      loading={loading}
+                      size="large"
+                      icon={<FolderAddOutlined />}
+                      style={{
+                        borderRadius: '8px',
+                        height: '50px',
+                        fontSize: '16px',
+                        backgroundColor: '#1890ff',
+                        borderColor: '#1890ff',
+                        transition: 'background-color 0.3s ease',
+                      }}
+                      onMouseEnter={(e) => {
+                        (e.target as HTMLButtonElement).style.backgroundColor = '#40a9ff';
+                      }}
+                      onMouseLeave={(e) => {
+                        (e.target as HTMLButtonElement).style.backgroundColor = '#1890ff';
+                      }}
+                    >
+                      Create Dashboard
+                    </Button>
+                  </Form.Item>
+                </Form>
+              </Card>
+            </Col>
+          </Row>
+
+          <Divider />
+
+          {/* Template Section */}
+          <Row justify="center" gutter={[16, 24]}>
+            <Col xs={24} sm={20} md={16} lg={12}>
+              <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+                <h2 style={{ fontWeight: '600', color: '#001529' }}>Choose a Template</h2>
+                <p style={{ color: '#595959' }}>Select a template to quickly create a new dashboard.</p>
+              </div>
+              <Search
+                placeholder="Search Templates"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                enterButton
+                allowClear
+                size="large"
+                style={{ marginBottom: '20px' }}
+              />
+              {loading ? (
+                <div style={{ textAlign: 'center', padding: '50px 0' }}>
+                  <Spin tip="Loading templates..." size="large" />
+                </div>
+              ) : filteredTemplates.length > 0 ? (
+                <List
+                  grid={{
+                    gutter: 16,
+                    xs: 1,
+                    sm: 2,
+                    md: 3,
+                    lg: 4,
+                    xl: 4,
+                    xxl: 6,
+                  }}
+                  dataSource={filteredTemplates}
+                  locale={{
+                    emptyText: <Empty description="No Templates Found" />,
+                  }}
+                  renderItem={(template) => (
+                    <List.Item>
+                      <Card
+                        hoverable
+                        actions={[
+                          <Tooltip title="Create Dashboard from Template" key="create">
+                            <Button
+                              type="primary"
+                              shape="circle"
+                              icon={<FolderAddOutlined />}
+                              onClick={() => createDashboardFromTemplate(template)}
+                            />
+                          </Tooltip>,
+                          <Tooltip title="Delete Template" key="delete">
+                            <Button
+                              type="default"
+                              danger
+                              shape="circle"
+                              icon={<DeleteOutlined />}
+                              onClick={() => confirmDeleteTemplate(template.id)}
+                            />
+                          </Tooltip>,
+                        ]}
+                        style={{
+                          borderRadius: '12px',
+                          overflow: 'hidden',
+                          transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                        }}
+                        onMouseEnter={(e) => {
+                          (e.currentTarget as HTMLElement).style.transform = 'scale(1.03)';
+                          (e.currentTarget as HTMLElement).style.boxShadow =
+                            '0 8px 16px rgba(0, 0, 0, 0.2)';
+                        }}
+                        onMouseLeave={(e) => {
+                          (e.currentTarget as HTMLElement).style.transform = 'scale(1)';
+                          (e.currentTarget as HTMLElement).style.boxShadow =
+                            '0 4px 12px rgba(0, 0, 0, 0.1)';
+                        }}
+                      >
+                        <Card.Meta
+                          title={<span style={{ fontSize: '18px', fontWeight: '500' }}>{template.name}</span>}
+                        />
+                      </Card>
+                    </List.Item>
+                  )}
+                />
+              ) : (
+                <Empty description="No Templates Available" />
+              )}
+            </Col>
+          </Row>
+
+          {/* Preview Modal */}
+          {previewTemplate && (
+            <Modal
+              open={!!previewTemplate}
+              title={`Preview: ${previewTemplate.name}`}
+              footer={null}
+              onCancel={() => setPreviewTemplate(null)}
+              width={800}
+              centered
+              bodyStyle={{ maxHeight: '70vh', overflowY: 'auto' }}
+              destroyOnClose
+            >
+              <p>Preview functionality has been removed.</p>
+            </Modal>
+          )}
+        </Content>
+      </Layout>
+    );
+  }
   if (!email) {
     return (
       <Layout style={{ padding: '24px', minHeight: '100vh' }}>
