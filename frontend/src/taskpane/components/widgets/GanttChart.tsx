@@ -28,7 +28,7 @@ const FrappeGanttAny = FrappeGantt as any;
 interface GanttChartComponentProps {
   tasks: Task[];
   onTasksChange?: (updatedTasks: Task[]) => void;
-  titleAlignment?: 'left' | 'center';
+  titleAlignment?: 'left' | 'center' | 'right';
   title?: string;
 }
 
