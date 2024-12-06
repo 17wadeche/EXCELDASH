@@ -17,25 +17,11 @@ import EditTemplate from './EditTemplate';
 import EditDashboard from './EditDashboard';
 
 const App: React.FC = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem('isLoggedIn') === 'true');
-  const [isRegistered, setIsRegistered] = useState(localStorage.getItem('isRegistered') === 'true');
-  const [isSubscribed, setIsSubscribed] = useState(localStorage.getItem('isSubscribed') === 'true');
-
   return (
     <DashboardProvider>
       <Routes>
         <Route path="/" element={<CustomLayout />}>
-          <Route 
-            index 
-            element={
-              <CreateDashboard
-                isLoggedIn={isLoggedIn}
-                isRegistered={isRegistered}
-                isSubscribed={isSubscribed}
-              />
-            } 
-          />
-          <Route index element={<CreateDashboard />} />
+          <Route index element={ <CreateDashboard />} />
           <Route path="dashboard-editor" element={<DashboardPage />} />
           <Route path="custom-report" element={<CustomReport />} />
           <Route path="template/:id/edit" element={<EditTemplate />} />
