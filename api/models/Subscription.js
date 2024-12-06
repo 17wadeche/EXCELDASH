@@ -39,6 +39,16 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING(10),
       allowNull: true,
     },
+    createdAt: { // Explicitly define createdAt
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
+    updatedAt: { // Explicitly define updatedAt
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
   }, {
     tableName: 'Subscriptions',
     schema: 'dbo', // Specify the correct schema

@@ -1,6 +1,7 @@
 // User.js
 const { DataTypes } = require('sequelize');
 const bcrypt = require('bcryptjs');
+const { v4: uuidv4 } = require('uuid'); 
 
 module.exports = (sequelize) => {
   const User = sequelize.define(
@@ -10,6 +11,7 @@ module.exports = (sequelize) => {
         type: DataTypes.CHAR(36),
         primaryKey: true,
         allowNull: false,
+        defaultValue: () => uuidv4(),
       },
       email: {
         type: DataTypes.STRING,
@@ -21,16 +23,26 @@ module.exports = (sequelize) => {
       },
       password: {
         type: DataTypes.STRING,
-        allowNull: true,
+        allowNull: false,
       },
       stripeCustomerId: {
         type: DataTypes.STRING,
         allowNull: true,
       },
+      createdAt: { // Explicitly define createdAt
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW,
+      },
+      updatedAt: { // Explicitly define updatedAt
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW,
+      },
     },
     {
       tableName: 'Users',
-      timestamps: true,
+      timestamps: false,
     }
   );
   User.beforeCreate(async (user) => {
