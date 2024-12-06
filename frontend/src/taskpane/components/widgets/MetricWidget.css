@@ -2,40 +2,52 @@
 .metric-widget-container {
   position: relative;
   width: 250px; /* Adjust as needed */
-  margin: 16px;
+  margin: 0px;
   background-color: #ffffff;
   transition: transform 0.2s;
+  cursor: grab;
+}
+
+.metric-widget-container:active {
+  cursor: grabbing; /* Show grabbing cursor when dragged */
 }
 
 .metric-header {
   display: flex;
-  justify-content: space-between; /* Adjust based on titleAlignment */
+  justify-content: center; /* Center the title */
   align-items: center;
-  cursor: move;
-  padding: 8px 12px;
-  background-color: var(--card-background); /* Use theme variable */
+  padding: 0px 0px;
+  font-size: 14x; /* Font size for title */
+  font-weight: 600;
+  color: var(--text-color);
+  text-align: center; /* Center align the text */
 }
 
 .metric-title {
   margin: 0;
   font-weight: 600;
-  font-size: 18px;
+  font-size: 14px;
   color: var(--text-color);
 }
 
 .drag-icon {
+  position: absolute;
+  top: 8px;
+  right: 8px;
   width: 16px;
   height: 16px;
-  background-image: url('data:image/svg+xml;base64,...'); /* Add a drag icon SVG */
   background-size: cover;
+  cursor: grab;
 }
 
 .metric-value {
   display: flex;
+  flex-direction: column;
   align-items: center;
+  font-size: 14px;
   justify-content: center;
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: 0px;
+  margin-bottom: 0px;
 }
 
 .metric-arrow.up {
@@ -50,13 +62,13 @@
 
 .metric-target-value {
   text-align: center;
-  margin-bottom: 16px;
+  margin-bottom: 0px;
   font-size: 14px;
   color: var(--secondary-text-color);
 }
 
 .metric-target-value .metric-target-label {
-  margin-right: 4px;
+  margin-right: 2px;
 }
 
 .metric-target-value .metric-target-number {

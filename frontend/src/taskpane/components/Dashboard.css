@@ -64,7 +64,7 @@
   position: relative;
   margin: 0px;
   padding: 0px;
-  background-color: var(--widget-bg);
+  background-color: #ffffff;;
   transition: transform 0.3s;
 }
 
