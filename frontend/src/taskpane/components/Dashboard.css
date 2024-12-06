@@ -177,10 +177,9 @@
 }
 
 .dashboard-container {
-  flex: 1;
   overflow: auto;
   padding: 0;
-  width: 400px;
+  width: 550px;
   margin: 0 auto;
   background-color: var(--background-color);
   box-shadow: none;

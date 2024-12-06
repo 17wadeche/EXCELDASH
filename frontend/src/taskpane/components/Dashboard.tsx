@@ -607,6 +607,7 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
         className={`dashboard-container ${theme}`}
         style={{
           ...borderStyle,
+          width:'550px',
           height: 'auto',
           overflow: 'auto',
           paddingBottom: '3px',
