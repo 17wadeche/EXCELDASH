@@ -179,7 +179,7 @@
 .dashboard-container {
   overflow: auto;
   padding: 0;
-  width: 550px;
+  width: 625px;
   margin: 0 auto;
   background-color: var(--background-color);
   box-shadow: none;
