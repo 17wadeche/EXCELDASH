@@ -89,8 +89,8 @@ const MetricWidget: React.FC<MetricWidgetProps> = ({ id, data }) => {
   };
 
   return (
-    <div className="metric-widget-container">
-      <Draggable handle=".metric-header">
+    <Draggable handle=".metric-header">
+      <div className="metric-widget-container">
         <Card
           className="metric-widget-card"
           style={{
@@ -101,7 +101,7 @@ const MetricWidget: React.FC<MetricWidgetProps> = ({ id, data }) => {
           bordered={false}
         >
           {/* Title */}
-          <div className="metric-header" style={{ cursor: 'move' }}>
+          <div className="metric-header">
             <Title level={4} style={{ margin: 0 }}>
               {data.displayName?.trim() || 'Metric'}
             </Title>
@@ -129,49 +129,49 @@ const MetricWidget: React.FC<MetricWidgetProps> = ({ id, data }) => {
             <span className="metric-target-number">{formatTargetValue(data.targetValue)}</span>
           </div>
         </Card>
-      </Draggable>
 
-      {/* Edit Button */}
-      {!isEditing && (
-        <div className="metric-edit-button">
-          <Tooltip title="Edit Value">
-            <Button
-              type="text"
-              icon={<EditOutlined />}
-              onClick={() => setIsEditing(true)}
-              style={{ fontSize: '16px' }}
-              aria-label="Edit Value"
-            />
-          </Tooltip>
-        </div>
-      )}
+        {/* Edit Button */}
+        {!isEditing && (
+          <div className="metric-edit-button">
+            <Tooltip title="Edit Value">
+              <Button
+                type="text"
+                icon={<EditOutlined />}
+                onClick={() => setIsEditing(true)}
+                style={{ fontSize: '16px' }}
+                aria-label="Edit Value"
+              />
+            </Tooltip>
+          </div>
+        )}
 
-      {/* Save and Cancel Controls */}
-      {isEditing && (
-        <div style={{ marginTop: '8px', textAlign: 'center' }}>
-          <Tooltip title="Save">
-            <Button
-              type="primary"
-              shape="circle"
-              icon={<CheckOutlined />}
-              onClick={handleSave}
-              loading={isLoading}
-              style={{ marginRight: '8px' }}
-              aria-label="Save Value"
-            />
-          </Tooltip>
-          <Tooltip title="Cancel">
-            <Button
-              type="default"
-              shape="circle"
-              icon={<CloseOutlined />}
-              onClick={handleCancel}
-              aria-label="Cancel Edit"
-            />
-          </Tooltip>
-        </div>
-      )}
-    </div>
+        {/* Save and Cancel Controls */}
+        {isEditing && (
+          <div style={{ marginTop: '8px', textAlign: 'center' }}>
+            <Tooltip title="Save">
+              <Button
+                type="primary"
+                shape="circle"
+                icon={<CheckOutlined />}
+                onClick={handleSave}
+                loading={isLoading}
+                style={{ marginRight: '8px' }}
+                aria-label="Save Value"
+              />
+            </Tooltip>
+            <Tooltip title="Cancel">
+              <Button
+                type="default"
+                shape="circle"
+                icon={<CloseOutlined />}
+                onClick={handleCancel}
+                aria-label="Cancel Edit"
+              />
+            </Tooltip>
+          </div>
+        )}
+      </div>
+    </Draggable>
   );
 };
 
