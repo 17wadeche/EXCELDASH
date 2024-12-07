@@ -5,7 +5,7 @@
   height: 100%;
   background-color: var(--widget-bg);
   padding: 0;
-  overflow: hidden; /* Ensures the container doesn't break */
+  overflow: hidden; /* Prevents breaking out of the container */
 }
 
 .gantt-header {
@@ -28,8 +28,7 @@
 }
 
 .gantt-chart-wrapper {
-  width: 100%;
-  height: calc(100% - 80px); /* Adjust height dynamically */
+  flex: 1; /* Allow the wrapper to take all remaining space */
   overflow-x: auto; /* Enable horizontal scrolling */
   overflow-y: auto; /* Enable vertical scrolling */
   background-color: #fafafa; /* Light background for better contrast */
@@ -37,6 +36,8 @@
 
 .frappe-gantt svg {
   overflow: visible;
+  width: auto; /* Ensure the chart's width is dynamically calculated */
+  height: auto; /* Ensure the chart's height is dynamically calculated */
 }
 
 .frappe-gantt .bar {
@@ -81,7 +82,7 @@
 
 @media (max-width: 768px) {
   .gantt-chart-container {
-    padding: 0px;
+    padding: 0%;
   }
 
   .gantt-header {
