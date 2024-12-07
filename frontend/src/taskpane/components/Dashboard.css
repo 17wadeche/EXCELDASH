@@ -55,7 +55,7 @@
 .dashboard-container {
   width: 700px; /* Fixed width */
   max-width: 100%; /* Prevent overflow on smaller screens */
-  height: 1400; /* Adjust based on content */
+  height: 100%; /* Adjust based on content */
   margin: 0 auto; /* Center the dashboard */
   background-color: var(--widget-bg);
   padding: 0px; /* Add padding inside */
@@ -394,11 +394,15 @@
 .gantt-chart-wrapper {
   padding: 0;
   margin: 0;
+  flex: 1;
+  min-width: 100%; /
 }
 
 .frappe-gantt svg {
   padding: 0;
   margin: 0;
+  width: 100% !important; /* Makes sure the SVG scales with the container */
+  height: auto !important;
   display: block; /* Ensures no extra space below the SVG */
 }
 
