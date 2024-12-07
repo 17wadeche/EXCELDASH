@@ -122,12 +122,12 @@ const MetricWidget: React.FC<MetricWidgetProps> = ({ id, data }) => {
             className="metric-value"
             style={{
               color,
-              fontSize: data.fontSize || 36,
+              fontSize: data.fontSize || 12,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               gap: '8px',
-              marginBottom: '8px',
+              marginBottom: '0px',
             }}
           >
             {arrowIcon}
@@ -136,7 +136,7 @@ const MetricWidget: React.FC<MetricWidgetProps> = ({ id, data }) => {
                 min={0}
                 value={inputValue}
                 onChange={(value) => setInputValue(value || 0)}
-                style={{ fontSize: data.fontSize || 36 }}
+                style={{ fontSize: data.fontSize || 12 }}
                 aria-label="Metric Input"
               />
             ) : (

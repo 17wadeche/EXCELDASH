@@ -3,8 +3,7 @@
   position: relative;
   width: 250px; /* Adjust as needed */
   margin: 0px;
-  background-color: #ffffff;
-  transition: transform 0.2s;
+  transition: transform 0.2s ease;
   cursor: grab;
 }
 
@@ -14,13 +13,13 @@
 
 .metric-header {
   display: flex;
-  justify-content: center; /* Center the title */
+  justify-content: center; /* Align title in the center */
   align-items: center;
-  padding: 0px 0px;
-  font-size: 14x; /* Font size for title */
+  font-size: 12px; /* Adjust font size */
   font-weight: 600;
   color: var(--text-color);
-  text-align: center; /* Center align the text */
+  text-align: center;
+  margin-bottom: 0px; /* Add spacing below the title */
 }
 
 .metric-title {
@@ -42,33 +41,27 @@
 
 .metric-value {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  font-size: 14px;
+  flex-direction: column; /* Stack elements vertically */
+  align-items: center; /* Center align content */
   justify-content: center;
-  gap: 0px;
-  margin-bottom: 0px;
+  font-size: 12px; /* Adjust font size for value */
+  color: #3f8600; /* Success color for value */
+  margin-bottom: 0px; /* Add spacing below value */
 }
 
-.metric-arrow.up {
-  color: #52c41a;
-  animation: bounce 1s infinite;
-}
-
-.metric-arrow.down {
-  color: #f5222d;
-  animation: shake 1s infinite;
+.metric-arrow {
+  font-size: 12px; 
 }
 
 .metric-target-value {
   text-align: center;
-  margin-bottom: 0px;
-  font-size: 14px;
+  font-size: 12px;
   color: var(--secondary-text-color);
+  margin-top: 0px;
 }
 
 .metric-target-value .metric-target-label {
-  margin-right: 2px;
+  font-weight: normal; /* Lighter font for label */
 }
 
 .metric-target-value .metric-target-number {
@@ -92,18 +85,4 @@
 
 .metric-widget-container:hover .metric-edit-button {
   display: block;
-}
-
-/* Animations */
-@keyframes bounce {
-  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-  40% { transform: translateY(-5px); }
-  60% { transform: translateY(-3px); }
-}
-
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-3px); }
-  50% { transform: translateX(3px); }
-  75% { transform: translateX(-3px); }
 }
