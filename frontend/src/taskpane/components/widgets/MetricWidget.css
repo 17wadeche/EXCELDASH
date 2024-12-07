@@ -13,31 +13,32 @@
 
 .metric-header {
   text-align: center; /* Center the title */
-  font-size: 16px; /* Adjust font size for the title */
+  font-size: 16px;
   font-weight: 600;
   color: var(--text-color);
-  margin-bottom: 8px; /* Add spacing below the title */
+  margin-bottom: 12px; /* Space below the title */
 }
 
 .metric-value {
   display: flex;
   flex-direction: column; /* Stack arrow and value vertically */
-  align-items: center;
+  align-items: center; /* Center align content */
   justify-content: center;
-  color: #3f8600; /* Success color */
-  font-size: 24px; /* Adjust font size for metric value */
-  margin-bottom: 8px; /* Add spacing below the value */
+  font-size: 24px; /* Adjust font size for value */
+  margin-bottom: 12px; /* Space below the value */
+  color: inherit; /* Use dynamic color based on success/failure */
 }
 
 .metric-arrow {
-  font-size: 20px; /* Adjust arrow size */
+  font-size: 20px;
   margin-bottom: 4px; /* Space between arrow and value */
 }
 
 .metric-target-value {
-  text-align: center;
+  text-align: center; /* Align the target value to the center */
   font-size: 14px;
   color: var(--secondary-text-color);
+  margin-top: 8px; /* Space above the target value */
 }
 
 .metric-target-value .metric-target-label {

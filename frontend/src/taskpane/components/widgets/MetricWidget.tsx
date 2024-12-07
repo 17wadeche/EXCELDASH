@@ -1,6 +1,12 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { Card, Typography, Button, InputNumber, Tooltip } from 'antd';
-import { ArrowUpOutlined, ArrowDownOutlined, EditOutlined, CheckOutlined, CloseOutlined } from '@ant-design/icons';
+import {
+  ArrowUpOutlined,
+  ArrowDownOutlined,
+  EditOutlined,
+  CheckOutlined,
+  CloseOutlined,
+} from '@ant-design/icons';
 import { DashboardContext } from '../../context/DashboardContext'; 
 import { MetricData } from '../types';
 import Draggable from 'react-draggable';
@@ -20,7 +26,6 @@ const MetricWidget: React.FC<MetricWidgetProps> = ({ id, data }) => {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    console.log('MetricWidget data:', data);
     setInputValue(data.currentValue || 0);
   }, [data]);
 
@@ -70,7 +75,6 @@ const MetricWidget: React.FC<MetricWidgetProps> = ({ id, data }) => {
     setIsLoading(true);
     try {
       await writeMetricValue(id, inputValue, data.worksheetName, data.cellAddress);
-      console.log('Metric updated successfully.');
     } catch (error) {
       console.error('Error updating metric:', error);
     } finally {
@@ -85,19 +89,19 @@ const MetricWidget: React.FC<MetricWidgetProps> = ({ id, data }) => {
   };
 
   return (
-    <div className="metric-widget-container" style={{ position: 'relative' }}>
-      <Draggable handle=".drag-handle">
+    <div className="metric-widget-container">
+      <Draggable handle=".metric-header">
         <Card
           className="metric-widget-card"
           style={{
             textAlign: 'center',
-            padding: '12px',
+            padding: '16px',
             backgroundColor: data.backgroundColor || '#ffffff',
           }}
           bordered={false}
         >
           {/* Title */}
-          <div className="metric-header drag-handle" style={{ cursor: 'move' }}>
+          <div className="metric-header" style={{ cursor: 'move' }}>
             <Title level={4} style={{ margin: 0 }}>
               {data.displayName?.trim() || 'Metric'}
             </Title>
@@ -105,7 +109,7 @@ const MetricWidget: React.FC<MetricWidgetProps> = ({ id, data }) => {
 
           {/* Metric Value Section */}
           <div className="metric-value" style={{ color }}>
-            <span className="metric-arrow">{arrowIcon}</span>
+            {arrowIcon}
             {isEditing ? (
               <InputNumber
                 min={0}
@@ -126,7 +130,8 @@ const MetricWidget: React.FC<MetricWidgetProps> = ({ id, data }) => {
           </div>
         </Card>
       </Draggable>
-      {/* Edit Value Button */}
+
+      {/* Edit Button */}
       {!isEditing && (
         <div className="metric-edit-button">
           <Tooltip title="Edit Value">
@@ -136,6 +141,32 @@ const MetricWidget: React.FC<MetricWidgetProps> = ({ id, data }) => {
               onClick={() => setIsEditing(true)}
               style={{ fontSize: '16px' }}
               aria-label="Edit Value"
+            />
+          </Tooltip>
+        </div>
+      )}
+
+      {/* Save and Cancel Controls */}
+      {isEditing && (
+        <div style={{ marginTop: '8px', textAlign: 'center' }}>
+          <Tooltip title="Save">
+            <Button
+              type="primary"
+              shape="circle"
+              icon={<CheckOutlined />}
+              onClick={handleSave}
+              loading={isLoading}
+              style={{ marginRight: '8px' }}
+              aria-label="Save Value"
+            />
+          </Tooltip>
+          <Tooltip title="Cancel">
+            <Button
+              type="default"
+              shape="circle"
+              icon={<CloseOutlined />}
+              onClick={handleCancel}
+              aria-label="Cancel Edit"
             />
           </Tooltip>
         </div>
