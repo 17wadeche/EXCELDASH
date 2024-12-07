@@ -1,0 +1,17 @@
+/* src/styles/gantt.css */
+
+.gantt-label {
+    cursor: pointer;
+  }
+  
+  .gantt-bar:hover {
+    opacity: 0.8;
+  }
+  
+  .gantt-ctrl-start,
+  .gantt-ctrl-finish {
+    cursor: pointer;
+  }
+  
+  /* Add additional styles as needed based on your Gantt chart's requirements */
+  

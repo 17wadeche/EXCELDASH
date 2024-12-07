@@ -26,6 +26,7 @@ import { debounce } from 'lodash';
 import LineWidget from './widgets/LineWidget';
 import html2canvas from 'html2canvas';
 import PresentationDashboard from './PresentationDashboard';
+import ChartWidget from './ChartWidget';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 const defaultTitleWidget: Widget = {

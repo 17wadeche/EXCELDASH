@@ -15,6 +15,7 @@ import ReportsList from './ReportsList';
 import ReportView from './ReportView';
 import EditTemplate from './EditTemplate';
 import EditDashboard from './EditDashboard';
+import GanttChart from './GanttChart';
 
 const App: React.FC = () => {
   return (
@@ -34,6 +35,7 @@ const App: React.FC = () => {
           <Route path="/reports-list" element={<ReportsList />} />
           <Route path="/report/:id" element={<ReportView />} />
           <Route path="/template/:id/edit" element={<EditTemplate />} />
+          <Route path="/dashboard/gantt" element={<DashboardPage />} />
           <Route path="*" element={<Navigate to="/dashboard-list" replace />} />
         </Route>
       </Routes>

@@ -152,6 +152,8 @@ export interface GanttWidgetData {
   tasks: Task[];
   ganttTitle?: string;
   titleAlignment?: 'left' | 'center' | 'right';
+  options?: any; // Define based on your Gantt chart's options
+  type?: 'canvas' | 'svg' | 'string';
 }
 
 // Chart Data Interface

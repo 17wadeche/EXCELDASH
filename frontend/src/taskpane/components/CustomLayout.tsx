@@ -30,6 +30,7 @@ import VersionHistoryModal from './VersionHistoryModal';
 import DashboardSettingsModal from './DashboardSettingsModal';
 import './CustomLayout.css';
 import LineSettingsModal from './LineSettingsModal';
+import GanttChart from './GanttChart'; 
 
 const { Content, Sider } = Layout;
 const { SubMenu } = Menu;
@@ -45,6 +46,9 @@ const CustomLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) =>
   const [isLineSettingsModalVisible, setIsLineSettingsModalVisible] = useState(false);
   const [editingWidget, setEditingWidget] = useState<Widget | null>(null);
   const location = useLocation();
+  const isGanttRoute = location.pathname === '/dashboard/gantt';
+  const { widgets, ganttData, ganttOptions } = useContext(DashboardContext);
+  const ganttWidget = widgets.find(widget => widget.type === 'gantt');
   const isFullScreen = location.pathname === '/full-screen';
   const dashboardContext = useContext(DashboardContext);
   if (!dashboardContext) {
@@ -61,6 +65,8 @@ const CustomLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) =>
     setDashboardBorderSettings,
     saveAsTemplate,
     saveDashboardVersion,
+    ganttData, // Access Gantt data from context
+    ganttOptions,
   } = dashboardContext;
 
   const isInDashboard = location.pathname.startsWith('/dashboard');
@@ -98,7 +104,10 @@ const CustomLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) =>
   const onCollapse = (collapsed: boolean) => {
     setCollapsed(collapsed);
   };
-
+  const handleAddGanttTemplate = () => {
+    generateProjectManagementTemplateAndGanttChart();
+    navigate('/dashboard/gantt');
+  };
   return (
     <Layout className="custom-layout light-theme" style={{ minHeight: '100vh', width: '100%', height: '100%' }}>
       {/* Sidebar */}
@@ -157,7 +166,7 @@ const CustomLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) =>
               <Menu.Item
                 key="test"
                 icon={<ScheduleOutlined />}
-                onClick={generateProjectManagementTemplateAndGanttChart}
+                onClick={handleAddGanttTemplate}
               >
                 Add Gantt Template
               </Menu.Item>
