@@ -1,78 +1,52 @@
-/* MetricWidget.css */
 .metric-widget-container {
   position: relative;
-  width: 250px; /* Adjust as needed */
+  width: 250px;
   margin: 0px;
+  background-color: #ffffff;
   transition: transform 0.2s ease;
   cursor: grab;
 }
 
 .metric-widget-container:active {
-  cursor: grabbing; /* Show grabbing cursor when dragged */
+  cursor: grabbing;
 }
 
 .metric-header {
-  display: flex;
-  justify-content: center; /* Align title in the center */
-  align-items: center;
-  font-size: 12px; /* Adjust font size */
+  text-align: center; /* Center the title */
+  font-size: 16px; /* Adjust font size for the title */
   font-weight: 600;
   color: var(--text-color);
-  text-align: center;
-  margin-bottom: 0px; /* Add spacing below the title */
-}
-
-.metric-title {
-  margin: 0;
-  font-weight: 600;
-  font-size: 14px;
-  color: var(--text-color);
-}
-
-.drag-icon {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 16px;
-  height: 16px;
-  background-size: cover;
-  cursor: grab;
+  margin-bottom: 8px; /* Add spacing below the title */
 }
 
 .metric-value {
   display: flex;
-  flex-direction: column; /* Stack elements vertically */
-  align-items: center; /* Center align content */
+  flex-direction: column; /* Stack arrow and value vertically */
+  align-items: center;
   justify-content: center;
-  font-size: 12px; /* Adjust font size for value */
-  color: #3f8600; /* Success color for value */
-  margin-bottom: 0px; /* Add spacing below value */
+  color: #3f8600; /* Success color */
+  font-size: 24px; /* Adjust font size for metric value */
+  margin-bottom: 8px; /* Add spacing below the value */
 }
 
 .metric-arrow {
-  font-size: 12px; 
+  font-size: 20px; /* Adjust arrow size */
+  margin-bottom: 4px; /* Space between arrow and value */
 }
 
 .metric-target-value {
   text-align: center;
-  font-size: 12px;
+  font-size: 14px;
   color: var(--secondary-text-color);
-  margin-top: 0px;
 }
 
 .metric-target-value .metric-target-label {
-  font-weight: normal; /* Lighter font for label */
+  font-weight: normal;
 }
 
 .metric-target-value .metric-target-number {
   font-weight: bold;
   color: var(--text-color);
-}
-
-.edit-controls {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
 }
 
 .metric-edit-button {
