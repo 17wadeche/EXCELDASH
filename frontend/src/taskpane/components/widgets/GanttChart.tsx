@@ -165,8 +165,23 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
   return (
     <Draggable handle=".drag-handle">
       <div className="gantt-chart-container">
-        <div className="gantt-header drag-handle">
-          <Title level={4} className="gantt-title">
+        <div
+          className="gantt-header drag-handle"
+          style={{
+            display: 'flex',
+            justifyContent:
+              titleAlignment === 'center'
+                ? 'center'
+                : titleAlignment === 'right'
+                ? 'flex-end'
+                : 'flex-start',
+            alignItems: 'center',
+            cursor: 'move',
+            gap: '16px', // Add spacing between title and view mode selector
+            marginBottom: '0px',
+          }}
+        >
+          <Title level={4} className="gantt-title" style={{ margin: 0 }}>
             {title}
           </Title>
           <div className="view-mode-buttons">
