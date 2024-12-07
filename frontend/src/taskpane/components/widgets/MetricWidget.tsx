@@ -10,7 +10,7 @@ import {
 import { DashboardContext } from '../../context/DashboardContext'; 
 import { MetricData } from '../types';
 import Draggable from 'react-draggable';
-import './MetricWidget.css';
+import '../Dashboard.css';
 
 const { Title } = Typography;
 

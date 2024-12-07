@@ -277,19 +277,6 @@
   }
 }
 
-/* Metric Edit Button */
-.metric-edit-button {
-  display: none;
-  position: absolute;
-  bottom: 8px;
-  left: 8px;
-  z-index: 1;
-}
-
-.metric-widget-container:hover .metric-edit-button {
-  display: block;
-}
-
 /* Widget Media Handling */
 .widget-card img, 
 .widget-card svg, 

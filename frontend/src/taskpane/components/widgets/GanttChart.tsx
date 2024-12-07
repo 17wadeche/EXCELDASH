@@ -18,7 +18,7 @@ import {
 import Draggable from 'react-draggable';
 import { v4 as uuidv4 } from 'uuid';
 import '../../../frappe-gantt.css';
-import './GanttChart.css';
+import '../Dashboard.css';
 import AddTaskForm from './AddTaskFrom';
 
 const { Option } = Select;
