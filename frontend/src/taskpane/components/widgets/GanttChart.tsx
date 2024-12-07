@@ -165,39 +165,23 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
   return (
     <Draggable handle=".drag-handle">
       <div className="gantt-chart-container">
-        <div
-          className="gantt-header drag-handle"
-          style={{
-            display: 'flex',
-            justifyContent: titleAlignment === 'center' ? 'center'
-                : titleAlignment === 'right'
-                ? 'flex-end'
-                : 'flex-start',
-            alignItems: 'center',
-            cursor: 'move',
-            marginBottom: '0px',
-          }}
-        >
+        <div className="gantt-header drag-handle">
           <Title level={4} className="gantt-title">
             {title}
           </Title>
+          <div className="view-mode-buttons">
+            <Select
+              value={viewMode}
+              onChange={(value) => setViewMode(value)}
+              style={{ width: 120 }}
+              aria-label="Select View Mode"
+            >
+              <Option value="Day">Day</Option>
+              <Option value="Week">Week</Option>
+              <Option value="Month">Month</Option>
+            </Select>
+          </div>
         </div>
-
-        {/* View Mode Buttons */}
-        <div className="view-mode-buttons">
-          <Select
-            value={viewMode}
-            onChange={(value) => setViewMode(value)}
-            style={{ width: 120 }}
-            aria-label="Select View Mode"
-          >
-            <Option value="Day">Day</Option>
-            <Option value="Week">Week</Option>
-            <Option value="Month">Month</Option>
-          </Select>
-        </div>
-
-        {/* Gantt Chart */}
         <div className="gantt-chart-wrapper">
           <FrappeGantt
             tasks={tasks}
@@ -207,7 +191,24 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
             onProgressChange={handleProgressChange}
           />
         </div>
-        {/* Add Task Button */}
+        {tooltipVisible && (
+          <div
+            className="custom-tooltip"
+            style={{
+              position: 'absolute',
+              top: tooltipPosition.y + 10,
+              left: tooltipPosition.x + 10,
+              background: '#fff',
+              border: '1px solid #ccc',
+              padding: '8px',
+              borderRadius: '4px',
+              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+              zIndex: 1000,
+            }}
+          >
+            {tooltipContent}
+          </div>
+        )}
         <Button
           type="primary"
           style={{
