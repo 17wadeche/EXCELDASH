@@ -277,31 +277,6 @@
   }
 }
 
-/* Gantt Header Styling */
-.gantt-header {
-  font-weight: bold;
-  font-size: 18px;
-  color: var(--text-color);
-  margin-bottom: 16px;
-}
-
-/* Gantt Chart Container */
-.gantt-chart-container {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  background-color: var(--widget-bg);
-  padding: 0px;
-}
-
-.gantt-chart-container.drag-handle {
-  cursor: move; 
-}
-
-.gantt-chart-container .frappe-gantt {
-  flex: 1;
-}
-
 /* Metric Edit Button */
 .metric-edit-button {
   display: none;
