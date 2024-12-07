@@ -214,10 +214,7 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
               top: tooltipPosition.y + 10,
               left: tooltipPosition.x + 10,
               background: '#fff',
-              border: '1px solid #ccc',
               padding: '8px',
-              borderRadius: '4px',
-              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
               zIndex: 1000,
             }}
           >
