@@ -13,7 +13,7 @@
   justify-content: space-between;
   align-items: center;
   cursor: move;
-  margin-bottom: 16px;
+  margin-bottom: 0px;
 }
 
 .gantt-title {
@@ -33,6 +33,12 @@
   display: flex;
   justify-content: flex-end;
 }
+button[type='primary'] {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  z-index: 10;
+}
 
 .gantt-chart-wrapper {
   width: 100%;
@@ -41,35 +47,6 @@
   overflow-y: hidden; /* Hide vertical scrollbar if not needed */
   border-radius: 4px;
   background-color: #fafafa; /* Light background for better contrast */
-}
-
-.custom-tooltip {
-  position: absolute;
-  background-color: var(--card-background); /* Use theme variable */
-  border: 1px solid var(--border-color);
-  padding: 12px;
-  border-radius: 4px;
-  box-shadow: var(--box-shadow);
-  z-index: 1000;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.custom-tooltip.visible {
-  opacity: 1;
-}
-
-.custom-tooltip h5 {
-  margin-bottom: 8px;
-  font-size: 16px;
-  color: var(--text-color);
-}
-
-.custom-tooltip p {
-  margin: 4px 0;
-  font-size: 14px;
-  color: var(--secondary-text-color);
 }
 
 .frappe-gantt svg {

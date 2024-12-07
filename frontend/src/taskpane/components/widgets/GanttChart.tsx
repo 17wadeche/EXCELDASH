@@ -165,30 +165,22 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
   return (
     <Draggable handle=".drag-handle">
       <div className="gantt-chart-container">
-        {/* Header Section */}
         <div
           className="gantt-header drag-handle"
           style={{
             display: 'flex',
-            justifyContent:
-              titleAlignment === 'center'
-                ? 'center'
+            justifyContent: titleAlignment === 'center' ? 'center'
                 : titleAlignment === 'right'
                 ? 'flex-end'
                 : 'flex-start',
             alignItems: 'center',
             cursor: 'move',
-            marginBottom: '16px',
+            marginBottom: '0px',
           }}
         >
           <Title level={4} className="gantt-title">
             {title}
           </Title>
-          <div className="header-actions">
-            <Button type="primary" onClick={() => setAddTaskModalVisible(true)}>
-              Add Task
-            </Button>
-          </div>
         </div>
 
         {/* View Mode Buttons */}
@@ -205,22 +197,6 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
           </Select>
         </div>
 
-        {/* Task Selection for Deletion */}
-        <div className="task-selection">
-          <Title level={5}>Select Tasks to Delete:</Title>
-          <div className="task-checkboxes">
-            {tasks.map((task) => (
-              <Checkbox
-                key={task.id}
-                checked={selectedTaskIds.includes(task.id)}
-                onChange={() => handleTaskSelection(task.id)}
-              >
-                {task.name}
-              </Checkbox>
-            ))}
-          </div>
-        </div>
-
         {/* Gantt Chart */}
         <div className="gantt-chart-wrapper">
           <FrappeGantt
@@ -231,21 +207,18 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
             onProgressChange={handleProgressChange}
           />
         </div>
-
-        {/* Tooltip */}
-        {tooltipVisible && (
-          <div
-            className="custom-tooltip"
-            style={{
-              top: tooltipPosition.y + 10,
-              left: tooltipPosition.x + 10,
-            }}
-          >
-            {tooltipContent}
-          </div>
-        )}
-
-        {/* Add Task Modal */}
+        {/* Add Task Button */}
+        <Button
+          type="primary"
+          style={{
+            position: 'absolute',
+            bottom: '16px',
+            right: '16px',
+          }}
+          onClick={() => setAddTaskModalVisible(true)}
+        >
+          Add Task
+        </Button>
         <AddTaskForm
           visible={addTaskModalVisible}
           onCreate={handleAddTask}
