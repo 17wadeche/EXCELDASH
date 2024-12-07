@@ -4,7 +4,7 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const webpack = require("webpack");
 const path = require("path");
-
+const TerserPlugin = require('terser-webpack-plugin');
 const urlDev = "https://localhost:3000/";
 const urlProd = "https://happy-forest-059a9d710.4.azurestaticapps.net";
 
@@ -37,6 +37,12 @@ module.exports = async (env, options) => {
       path: path.resolve(__dirname, "dist"),
       filename: "[name].bundle.js",
       clean: true,
+      library: {
+        name: 'Gantt',
+        type: 'umd',
+        export: 'named',
+      },
+      globalObject: 'this',
     },
     resolve: {
       extensions: [".ts", ".tsx", ".js", ".jsx", ".html"],
@@ -44,6 +50,27 @@ module.exports = async (env, options) => {
     },
     module: {
       rules: [
+        {
+          test: /\.(js|jsx)$/,
+          exclude: /node_modules/,
+          use: {
+            loader: 'babel-loader',
+            options: {
+              babelrc: false,
+              presets: [
+                ['@babel/preset-env', {
+                  modules: false,
+                  targets: '> 0.25%, not dead',
+                }],
+                '@babel/preset-react',
+              ],
+              plugins: [
+                '@babel/plugin-transform-runtime',
+              ],
+              babelHelpers: 'runtime',
+            },
+          },
+        },
         {
           test: /\.tsx?$/,
           exclude: /node_modules/,
