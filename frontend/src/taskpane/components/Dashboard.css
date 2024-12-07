@@ -53,9 +53,9 @@
 
 /* Dashboard Container */
 .dashboard-container {
-  width: 680px; /* Fixed width */
+  width: 700px; /* Fixed width */
   max-width: 100%; /* Prevent overflow on smaller screens */
-  height: auto; /* Adjust based on content */
+  height: 1400; /* Adjust based on content */
   margin: 0 auto; /* Center the dashboard */
   background-color: var(--widget-bg);
   padding: 0px; /* Add padding inside */
@@ -373,7 +373,7 @@
   height: 100%;
   background-color: var(--widget-bg);
   padding: 0;
-  overflow: hidden;
+  overflow: auto;
 }
 .gantt-header {
   display: flex;
@@ -390,17 +390,18 @@
 .view-mode-buttons {
   margin: 0 auto;
 }
+
 .gantt-chart-wrapper {
-  flex: 1;
-  overflow-x: auto;
-  overflow-y: auto;
-  background-color: #fafafa;
+  padding: 0;
+  margin: 0;
 }
+
 .frappe-gantt svg {
-  overflow: visible;
-  width: auto;
-  height: auto;
+  padding: 0;
+  margin: 0;
+  display: block; /* Ensures no extra space below the SVG */
 }
+
 .frappe-gantt .bar {
   fill: #1890ff;
   stroke: #096dd9;
@@ -409,6 +410,15 @@
 }
 .frappe-gantt .bar-progress {
   fill: #73d13d;
+}
+
+.gantt-chart-container, 
+.gantt-container, 
+.gantt, 
+.gantt .grid-background, 
+.frappe-gantt {
+  padding-bottom: 0 !important;
+  margin-bottom: 0 !important;
 }
 
 /* Responsive Adjustments */
