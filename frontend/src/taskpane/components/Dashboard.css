@@ -180,6 +180,7 @@
 }
 .metric-widget-container {
   position: relative;
+  box-shadow: none;
 }
 .metric-widget-container:hover .metric-edit-button {
   display: block;

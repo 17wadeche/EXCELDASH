@@ -99,13 +99,12 @@ const MetricWidget: React.FC<MetricWidgetProps> = ({ id, data }) => {
       style={{
         width: '100%',
         height: '100%',
-        padding: '8px',
+        padding: '4px',
         overflow: 'hidden',
         border: '1px solid #ddd',
         backgroundColor: data.backgroundColor || '#fff',
-        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
         borderRadius: '8px',
-        position: 'relative', // Ensure relative positioning for internal elements
+        position: 'relative',
       }}
     >
       {/* Drag Handle */}
@@ -118,16 +117,16 @@ const MetricWidget: React.FC<MetricWidgetProps> = ({ id, data }) => {
             : data.titleAlignment === 'right' 
               ? 'flex-end' 
               : 'flex-start',
-          padding: '8px',
+          padding: '4px',
           backgroundColor: '#f0f0f0',
           borderBottom: '1px solid #ddd',
-          cursor: 'move', // Indicate draggable area
-          userSelect: 'none', // Prevent text selection during drag
+          cursor: 'move',
+          userSelect: 'none',
           borderRadius: '8px 8px 0 0',
         }}
       >
         <Tooltip title="Drag Metric Widget" placement="top">
-          <Title level={4} style={{ margin: 0 }}>
+          <Title level={4} style={{ margin: 0, fontSize: '12px'  }}>
             {data.displayName && data.displayName.trim() !== '' ? data.displayName : 'Metric'}
           </Title>
         </Tooltip>
@@ -138,12 +137,12 @@ const MetricWidget: React.FC<MetricWidgetProps> = ({ id, data }) => {
         className="metric-value"
         style={{
           color,
-          fontSize: data.fontSize || 36,
+          fontSize: data.fontSize || 24,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: '8px',
-          margin: '16px 0',
+          gap: '4px',
+          margin: '8px 0',
         }}
       >
         {arrowIcon}
@@ -152,7 +151,7 @@ const MetricWidget: React.FC<MetricWidgetProps> = ({ id, data }) => {
             min={0}
             value={inputValue}
             onChange={(value) => setInputValue(value || 0)}
-            style={{ fontSize: data.fontSize || 36, width: '100px' }}
+            style={{ fontSize: data.fontSize || 24, width: '80px' }}
             aria-label="Metric Input"
           />
         ) : (
@@ -164,7 +163,7 @@ const MetricWidget: React.FC<MetricWidgetProps> = ({ id, data }) => {
       <div
         className="metric-target-value"
         style={{
-          fontSize: data.fontSize ? data.fontSize * 0.5 : 18,
+          fontSize: data.fontSize ? data.fontSize * 0.4 : 14,
           color: '#555',
           textAlign: 'center',
         }}
@@ -177,7 +176,7 @@ const MetricWidget: React.FC<MetricWidgetProps> = ({ id, data }) => {
       
       {/* Edit Controls */}
       {isEditing && (
-        <div style={{ marginTop: '16px', textAlign: 'center' }}>
+        <div style={{ marginTop: '8px', textAlign: 'center' }}>
           <Tooltip title="Save">
             <Button
               type="primary"
@@ -185,7 +184,7 @@ const MetricWidget: React.FC<MetricWidgetProps> = ({ id, data }) => {
               icon={<CheckOutlined />}
               onClick={handleSave}
               loading={isLoading}
-              style={{ marginRight: '8px' }}
+              style={{ marginRight: '4px' }}
               aria-label="Save Value"
             />
           </Tooltip>
@@ -195,22 +194,20 @@ const MetricWidget: React.FC<MetricWidgetProps> = ({ id, data }) => {
               shape="circle"
               icon={<CloseOutlined />}
               onClick={handleCancel}
-              style={{ marginLeft: '8px' }}
+              style={{ marginLeft: '4px' }}
               aria-label="Cancel Edit"
             />
           </Tooltip>
         </div>
       )}
-      
-      {/* Edit Value Button */}
       {!isEditing && (
-        <div className="metric-edit-button" style={{ position: 'absolute', bottom: '16px', right: '16px' }}>
+        <div className="metric-edit-button" style={{ position: 'absolute', bottom: '8px', right: '8px' }}>
           <Tooltip title="Edit Value">
             <Button
               type="text"
               icon={<EditOutlined />}
               onClick={() => setIsEditing(true)}
-              style={{ fontSize: '16px' }}
+              style={{ fontSize: '12px' }}
               aria-label="Edit Value"
             />
           </Tooltip>
