@@ -200,25 +200,6 @@
   }
 }
 
-.gantt-header {
-  font-weight: bold;
-  font-size: 16px;
-}
-
-.gantt-chart-container.drag-handle {
-  cursor: move; 
-}
-
-.gantt-chart-container {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
-.gantt-chart-container .frappe-gantt {
-  flex: 1;
-}
-
 .metric-edit-button {
   display: none;
   position: absolute;
