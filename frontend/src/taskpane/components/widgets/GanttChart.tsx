@@ -159,16 +159,14 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
           </Button>
         </Col>
       </Row>
-      <div className="gantt-chart-wrapper">
-        <div className="gantt-inner-wrapper">
+      <div className="gantt-chart-wrapper" style={{ overflowX: 'auto', overflowY: 'auto' }}>
+        <div style={{ minWidth: '2000px', height: '600px' }}>
           <FrappeGantt
             tasks={tasks}
             viewMode={viewMode}
             onClick={handleClick}
             onDateChange={handleDateChange}
             onProgressChange={handleProgressChange}
-            custom_width="2000px"   // Key addition
-            custom_height="600px"   // Optional for consistent sizing
           />
         </div>
       </div>
