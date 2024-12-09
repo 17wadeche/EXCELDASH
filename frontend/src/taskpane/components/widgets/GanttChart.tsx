@@ -5,7 +5,7 @@ import { FrappeGantt } from 'react-frappe-gantt';
 import { Task } from '../types';
 import { Select, Button, message } from 'antd';
 import { v4 as uuidv4 } from 'uuid';
-import './GanttChart.css';
+import '../Dashboard.css'
 import AddTaskForm from './AddTaskForm';
 import Draggable from 'react-draggable';
 
