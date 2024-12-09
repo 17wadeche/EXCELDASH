@@ -1,14 +1,22 @@
-
 .gantt-chart-container {
   width: 100%;
   height: 600px;
-  overflow: auto;
+  overflow: hidden; /* Or overflow: hidden on the container and handle scroll separately */
   position: relative;
   box-sizing: border-box;
   padding: 0;
   margin: 0;
 }
 
-.gantt-container {
-  position: static !important;
+.gantt-chart-wrapper {
+  width: 100%;
+  height: 100%;
+  overflow-x: auto; /* Enable horizontal scroll */
+  overflow-y: auto; /* Enable vertical scroll as needed */
+  position: relative;
+}
+
+.gantt-inner-wrapper {
+  width: 2000px; /* Force a wider area to ensure scrolling */
+  height: 100%;
 }

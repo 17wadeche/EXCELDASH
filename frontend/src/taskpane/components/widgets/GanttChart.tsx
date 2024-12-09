@@ -137,11 +137,8 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
     message.success('Task added successfully!');
   };
   return (
-    <div
-      className="gantt-chart-container">
-      <div
-        className="gantt-header drag-handle"
-        style={{textAlign: titleAlignment}}>
+    <div className="gantt-chart-container">
+      <div className="gantt-header" style={{ textAlign: titleAlignment }}>
         <strong>{title}</strong>
       </div>
       <Row justify="space-between" align="middle" style={{ marginBottom: '20px' }}>
@@ -161,16 +158,19 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
             Add Task
           </Button>
         </Col>
-        <Col></Col>
       </Row>
       <div className="gantt-chart-wrapper">
-        <FrappeGantt
-          tasks={tasks}
-          viewMode={viewMode}
-          onClick={handleClick}
-          onDateChange={handleDateChange}
-          onProgressChange={handleProgressChange}
-        />
+        <div className="gantt-inner-wrapper">
+          <FrappeGantt
+            tasks={tasks}
+            viewMode={viewMode}
+            onClick={handleClick}
+            onDateChange={handleDateChange}
+            onProgressChange={handleProgressChange}
+            custom_width="2000px"   // Key addition
+            custom_height="600px"   // Optional for consistent sizing
+          />
+        </div>
       </div>
       <AddTaskForm
         visible={addTaskModalVisible}
