@@ -20,5 +20,5 @@ export const WIDGET_SIZES: { [key: string]: { w: number; h: number } } = {
   metric: { w: 4, h: 80 },
   report: { w: 20, h: 160 },
   line: { w: 6, h: 3 },
-  title: { w: 8, h: 24 },
+  title: { w: 12, h: 24 },
 };

@@ -170,7 +170,7 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
             padding: '0px',
             backgroundColor: '#ffffff',
             borderBottom: '1px solid #ddd',
-            marginBottom: '0px',
+            marginBottom: '10px',
           }}
         >
           <strong>{title}</strong>
