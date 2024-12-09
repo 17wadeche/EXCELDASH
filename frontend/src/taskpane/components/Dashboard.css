@@ -208,6 +208,10 @@
   z-index: 1;
 }
 
+.metric-widget-container {
+  position: relative;
+}
+
 .metric-widget-container:hover .metric-edit-button {
   display: block;
 }

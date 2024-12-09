@@ -4,6 +4,7 @@ import { ArrowUpOutlined, ArrowDownOutlined, EditOutlined, CheckOutlined, CloseO
 import { DashboardContext } from '../../context/DashboardContext'; 
 import { MetricData } from '../types';
 import Draggable from 'react-draggable';
+import '../Dashboard.css'
 
 const { Title } = Typography;
 
