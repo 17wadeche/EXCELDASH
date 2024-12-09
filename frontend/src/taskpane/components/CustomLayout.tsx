@@ -110,7 +110,7 @@ const CustomLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) =>
         collapsed={collapsed}
         onCollapse={onCollapse}
       >
-        <div className="logo">Dashboard</div>
+        {!collapsed && <div className="logo">Dashboard</div>}
         <Menu mode="inline" selectedKeys={[location.pathname]}>
           <Menu.Item key="/create" icon={<PlusOutlined />}>
             <Link to="/create">Create Dashboard</Link>
