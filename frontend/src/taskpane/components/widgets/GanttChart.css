@@ -1,3 +1,7 @@
+.gantt-chart-container {
+  overflow: auto;
+}
+
 .gantt-container {
   position: static !important;
   overflow: visible !important;
