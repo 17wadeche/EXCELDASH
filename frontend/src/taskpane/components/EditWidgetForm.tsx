@@ -294,6 +294,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
               : '',
             color: task.color,
           })),
+          title: cleanedValues.title,
           titleAlignment: cleanedValues.titleAlignment || 'left',
         } as GanttWidgetData;
         break;
@@ -869,7 +870,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
       {widget.type === 'gantt' && (
         <>
           <Form.Item
-            name="ganttTitle"
+            name="title"
             label="Gantt Chart Title"
             rules={[
               { required: true, message: 'Please enter Gantt chart title' },

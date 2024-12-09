@@ -150,7 +150,7 @@ export interface Task {
 // Gantt Widget Data Interface
 export interface GanttWidgetData {
   tasks: Task[];
-  ganttTitle?: string;
+  title: string;
   titleAlignment?: 'left' | 'center' | 'right';
 }
 

@@ -651,7 +651,7 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
               content = (
                 <GanttChartComponent
                   tasks={(widget.data as GanttWidgetData).tasks}
-                  title={(widget.data as GanttWidgetData).ganttTitle}
+                  title={(widget.data as GanttWidgetData).title}
                 />
               );
             } else if (widget.type === 'metric') {
