@@ -156,7 +156,7 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
         className="gantt-chart-container"
         style={{
           width: '100%',
-          height: `${tasks.length * (rowHeight + 10) + 200}px`,
+          height: `${tasks.length * (rowHeight + 10) + 300}px`,
           position: 'relative',
           overflow: 'hidden',
         }}
