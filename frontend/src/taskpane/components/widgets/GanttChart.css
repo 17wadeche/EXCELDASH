@@ -1,55 +1,14 @@
+
 .gantt-chart-container {
+  width: 100%;
+  height: 600px;
   overflow: auto;
+  position: relative;
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
 }
 
 .gantt-container {
   position: static !important;
-  overflow: visible !important;
-}
-.frappe-gantt, 
-.frappe-gantt svg, 
-.gantt-chart-wrapper {
-  width: 100%;
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-.frappe-gantt {
-  width: 100%;
-  padding: 0;
-  margin: 0;
-  box-sizing: border-box;
-}
-.frappe-gantt svg {
-  overflow: visible;
-  padding: 0;
-  margin: 0;
-  box-sizing: border-box;
-}
-.frappe-gantt .bar {
-  height: 20px !important; 
-}
-.frappe-gantt .grid-row,
-.frappe-gantt .bar-wrapper {
-  height: 30px !important; 
-}
-.frappe-gantt .grid-background {
-  height: auto !important; 
-}
-.frappe-gantt .bar-group {
-  margin-bottom: 0 !important;
-}
-.custom-tooltip {
-  background-color: #fff;
-  border: 1px solid #ccc;
-  padding: 8px;
-}
-.drag-handle {
-  cursor: move;
-  padding: 8px;
-  background-color: #f0f0f0;
-  border-bottom: 1px solid #ddd;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
 }

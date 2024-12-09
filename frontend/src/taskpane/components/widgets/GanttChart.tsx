@@ -15,7 +15,6 @@ import {
 } from 'antd';
 import Draggable from 'react-draggable';
 import { v4 as uuidv4 } from 'uuid';
-import '../../../frappe-gantt.css';
 import './GanttChart.css';
 import AddTaskForm from './AddTaskForm';
 
@@ -139,25 +138,10 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
   };
   return (
     <div
-      className="gantt-chart-container"
-      style={{
-        width: '100%',
-        height: `600px`,
-        position: 'relative',
-      }}
-    >
+      className="gantt-chart-container">
       <div
         className="gantt-header drag-handle"
-        style={{
-          width: '100%',
-          textAlign: titleAlignment,
-          cursor: 'move',
-          padding: '10px 0',
-          backgroundColor: '#ffffff',
-          borderBottom: '1px solid #ddd',
-          marginBottom: '10px',
-        }}
-      >
+        style={{textAlign: titleAlignment}}>
         <strong>{title}</strong>
       </div>
       <Row justify="space-between" align="middle" style={{ marginBottom: '20px' }}>
@@ -188,22 +172,6 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
           onProgressChange={handleProgressChange}
         />
       </div>
-      {tooltipVisible && (
-        <div
-          className="custom-tooltip"
-          style={{
-            position: 'absolute',
-            top: tooltipPosition.y - 100,
-            left: tooltipPosition.x - 100,
-            backgroundColor: '#fff',
-            border: '1px solid #ccc',
-            padding: '8px',
-            zIndex: 1000,
-          }}
-        >
-          {tooltipContent}
-        </div>
-      )}
       <AddTaskForm
         visible={addTaskModalVisible}
         onCreate={handleAddTask}
