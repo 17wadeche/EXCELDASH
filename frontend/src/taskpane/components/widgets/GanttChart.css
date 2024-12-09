@@ -2,7 +2,7 @@
   width: 600px;      /* Make the container smaller than the viewport */
   height: 400px;
   border: 1px solid red; /* Visible border to see movement */
-  position: relative;
+  position: relative !important;
   box-sizing: border-box;
 }
   
@@ -16,4 +16,11 @@
 .gantt-inner-wrapper {
   width: 2000px;
   height: 100%;
+}
+
+.gantt-chart-container .ant-card-body {
+  position: relative !important;
+  background-color: transparent !important;
+  top: 0 !important;
+  left: 0 !important;
 }
