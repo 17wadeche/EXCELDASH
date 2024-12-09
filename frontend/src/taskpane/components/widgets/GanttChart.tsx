@@ -1,19 +1,14 @@
 // src/taskpane/components/widgets/GanttChartComponent.tsx
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Row, Col } from 'antd';
 import { FrappeGantt } from 'react-frappe-gantt';
 import { Task } from '../types';
 import {
   Select,
-  Modal,
-  Form,
-  Input,
-  DatePicker,
   Button,
-  message,
+  message
 } from 'antd';
-import Draggable from 'react-draggable';
 import { v4 as uuidv4 } from 'uuid';
 import './GanttChart.css';
 import AddTaskForm from './AddTaskForm';
@@ -35,13 +30,20 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
 }) => {
   const [viewMode, setViewMode] = useState<'Day' | 'Week' | 'Month'>('Week');
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
+  
+  // For tooltip logic
   const [tooltipContent, setTooltipContent] = useState<React.ReactNode>(null);
   const [tooltipVisible, setTooltipVisible] = useState(false);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
-  const [addTaskModalVisible, setAddTaskModalVisible] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-
-  const rowHeight = 20;
+  
+  // For drag-to-scroll logic
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const isDraggingRef = useRef<boolean>(false);
+  const startXRef = useRef<number>(0);
+  const startYRef = useRef<number>(0);
+  const scrollLeftRef = useRef<number>(0);
+  const scrollTopRef = useRef<number>(0);
 
   useEffect(() => {
     setTasks(initialTasks);
@@ -79,7 +81,6 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
 
   const handleClick = (task: Task) => {
     const { x: clientX, y: clientY } = mousePosition;
-  
     setTooltipContent(
       <div className="tooltip-content">
         <h5>{task.name}</h5>
@@ -99,11 +100,24 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
   useEffect(() => {
     const handleMouseMove = (event: MouseEvent) => {
       setMousePosition({ x: event.clientX, y: event.clientY });
+      if (isDraggingRef.current && wrapperRef.current) {
+        const dx = event.clientX - startXRef.current;
+        const dy = event.clientY - startYRef.current;
+        wrapperRef.current.scrollLeft = scrollLeftRef.current - dx;
+        wrapperRef.current.scrollTop = scrollTopRef.current - dy;
+      }
     };
-  
+
+    const handleMouseUp = () => {
+      isDraggingRef.current = false;
+    };
+
     document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+    
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
     };
   }, []);
 
@@ -136,6 +150,19 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
     }
     message.success('Task added successfully!');
   };
+
+  const [addTaskModalVisible, setAddTaskModalVisible] = useState(false);
+
+  const onMouseDown = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (wrapperRef.current) {
+      isDraggingRef.current = true;
+      startXRef.current = event.clientX;
+      startYRef.current = event.clientY;
+      scrollLeftRef.current = wrapperRef.current.scrollLeft;
+      scrollTopRef.current = wrapperRef.current.scrollTop;
+    }
+  };
+
   return (
     <div className="gantt-chart-container">
       <div className="gantt-header" style={{ textAlign: titleAlignment }}>
@@ -159,8 +186,12 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
           </Button>
         </Col>
       </Row>
-      <div className="gantt-chart-wrapper" style={{ overflowX: 'auto', overflowY: 'auto' }}>
-        <div style={{ minWidth: '2000px', height: '600px' }}>
+      <div 
+        className="gantt-chart-wrapper" 
+        ref={wrapperRef} 
+        onMouseDown={onMouseDown}
+      >
+        <div className="gantt-inner-wrapper">
           <FrappeGantt
             tasks={tasks}
             viewMode={viewMode}
@@ -179,4 +210,5 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
     </div>
   );
 };
+
 export default GanttChartComponent;
