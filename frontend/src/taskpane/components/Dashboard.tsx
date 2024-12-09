@@ -28,6 +28,7 @@ import LineWidget from './widgets/LineWidget';
 import html2canvas from 'html2canvas';
 import PresentationDashboard from './PresentationDashboard';
 
+
 const ResponsiveGridLayout = WidthProvider(Responsive);
 const defaultTitleWidget: Widget = {
   id: 'dashboard-title',
@@ -512,7 +513,7 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
     }
   };
   return (
-    <div className="dashboard-wrapper">
+    <div className="dashboard-wrapper" style={{ position: 'relative', width: '100%', height: '100vh' }}>
       <Draggable handle=".drag-handle">
         <div className={`fixed-vertical-toolbar ${isCollapsed ? 'collapsed' : ''}`}>
           <div className="drag-handle">

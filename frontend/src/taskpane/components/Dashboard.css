@@ -213,3 +213,15 @@
   top: 0 !important;
   left: 0 !important;
 }
+
+.drag-handle {
+  cursor: move;
+  user-select: none;
+}
+
+/* Optional: Additional styling for the drag handle */
+.drag-handle {
+  background-color: #f0f0f0;
+  padding: 8px;
+  border-bottom: 1px solid #ddd;
+}

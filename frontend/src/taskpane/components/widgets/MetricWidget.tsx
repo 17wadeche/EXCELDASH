@@ -1,9 +1,11 @@
+// src/taskpane/components/widgets/MetricWidget.tsx
 import React, { useEffect, useState, useContext } from 'react';
 import { Card, Typography, Button, InputNumber, Tooltip } from 'antd';
 import { ArrowUpOutlined, ArrowDownOutlined, EditOutlined, CheckOutlined, CloseOutlined } from '@ant-design/icons';
 import { DashboardContext } from '../../context/DashboardContext'; 
 import { MetricData } from '../types';
-import '../Dashboard.css'
+import '../Dashboard.css';
+import Draggable from 'react-draggable';
 
 const { Title } = Typography;
 
@@ -85,122 +87,142 @@ const MetricWidget: React.FC<MetricWidgetProps> = ({ id, data }) => {
   };
 
   return (
-    <div className="metric-widget-container" style={{ position: 'relative' }}>
-      <Card
-        className="metric-widget-card"
-        style={{ 
-          textAlign: 'center', 
-          padding: '12px', 
-          backgroundColor: data.backgroundColor || '#ffffff' 
+    <Draggable handle=".metric-header">
+      <div
+        style={{
+          width: '300px',
+          height: '200px',
+          position: 'absolute', // Allow free movement
+          margin: 0,
+          padding: 0,
+          overflow: 'hidden',
+          cursor: 'move',
+          border: '1px solid #ddd',
+          backgroundColor: data.backgroundColor || '#fff',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+          borderRadius: '8px',
         }}
-        bordered={false}
       >
-        {/* Title Section */}
-        <div
-          className="metric-header"
-          style={{
-            display: 'flex',
-            justifyContent: data.titleAlignment === 'center' 
-              ? 'center' 
-              : data.titleAlignment === 'right' 
-                ? 'flex-end' 
-                : 'flex-start',
-            padding: '0px',
-            backgroundColor: '#ffffff',
-            borderBottom: '1px solid #ddd',
-            marginBottom: '8px',
+        <Card
+          className="metric-widget-card"
+          style={{ 
+            textAlign: 'center', 
+            padding: '12px', 
+            backgroundColor: 'transparent',
+            border: 'none',
+            boxShadow: 'none',
+            height: '100%',
           }}
+          bordered={false}
         >
-          <Title level={4} style={{ margin: 0 }}>
-            {data.displayName && data.displayName.trim() !== '' ? data.displayName : 'Metric'}
-          </Title>
-        </div>
-        
-        {/* Metric Value Section */}
-        <div
-          className="metric-value"
-          style={{
-            color,
-            fontSize: data.fontSize || 36,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-            marginBottom: '8px',
-          }}
-        >
-          {arrowIcon}
-          {isEditing ? (
-            <InputNumber
-              min={0}
-              value={inputValue}
-              onChange={(value) => setInputValue(value || 0)}
-              style={{ fontSize: data.fontSize || 36 }}
-              aria-label="Metric Input"
-            />
-          ) : (
-            <span className="metric-number">{formatValue(currentValue)}</span>
-          )}
-        </div>
-        
-        {/* Target Value Section */}
-        <div
-          className="metric-target-value"
-          style={{
-            fontSize: data.fontSize ? data.fontSize * 0.5 : 18,
-            color: '#555',
-            textAlign: 'center',
-          }}
-        >
-          <span className="metric-target-label">Target: </span>
-          <span className="metric-target-number" style={{ fontWeight: 'bold' }}>
-            {formatTargetValue(data.targetValue)}
-          </span>
-        </div>
-        
-        {/* Edit Controls */}
-        {isEditing && (
-          <div style={{ marginTop: '8px' }}>
-            <Tooltip title="Save">
-              <Button
-                type="primary"
-                shape="circle"
-                icon={<CheckOutlined />}
-                onClick={handleSave}
-                loading={isLoading}
-                style={{ marginRight: '8px' }}
-                aria-label="Save Value"
+          {/* Title Section */}
+          <div
+            className="metric-header"
+            style={{
+              display: 'flex',
+              justifyContent: data.titleAlignment === 'center' 
+                ? 'center' 
+                : data.titleAlignment === 'right' 
+                  ? 'flex-end' 
+                  : 'flex-start',
+              padding: '0px',
+              backgroundColor: '#f0f0f0',
+              borderBottom: '1px solid #ddd',
+              marginBottom: '8px',
+              cursor: 'move', // Indicate draggable area
+            }}
+          >
+            <Title level={4} style={{ margin: 0 }}>
+              {data.displayName && data.displayName.trim() !== '' ? data.displayName : 'Metric'}
+            </Title>
+          </div>
+          
+          {/* Metric Value Section */}
+          <div
+            className="metric-value"
+            style={{
+              color,
+              fontSize: data.fontSize || 36,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              marginBottom: '8px',
+            }}
+          >
+            {arrowIcon}
+            {isEditing ? (
+              <InputNumber
+                min={0}
+                value={inputValue}
+                onChange={(value) => setInputValue(value || 0)}
+                style={{ fontSize: data.fontSize || 36 }}
+                aria-label="Metric Input"
               />
-            </Tooltip>
-            <Tooltip title="Cancel">
+            ) : (
+              <span className="metric-number">{formatValue(currentValue)}</span>
+            )}
+          </div>
+          
+          {/* Target Value Section */}
+          <div
+            className="metric-target-value"
+            style={{
+              fontSize: data.fontSize ? data.fontSize * 0.5 : 18,
+              color: '#555',
+              textAlign: 'center',
+            }}
+          >
+            <span className="metric-target-label">Target: </span>
+            <span className="metric-target-number" style={{ fontWeight: 'bold' }}>
+              {formatTargetValue(data.targetValue)}
+            </span>
+          </div>
+          
+          {/* Edit Controls */}
+          {isEditing && (
+            <div style={{ marginTop: '8px' }}>
+              <Tooltip title="Save">
+                <Button
+                  type="primary"
+                  shape="circle"
+                  icon={<CheckOutlined />}
+                  onClick={handleSave}
+                  loading={isLoading}
+                  style={{ marginRight: '8px' }}
+                  aria-label="Save Value"
+                />
+              </Tooltip>
+              <Tooltip title="Cancel">
+                <Button
+                  type="default"
+                  shape="circle"
+                  icon={<CloseOutlined />}
+                  onClick={handleCancel}
+                  style={{ marginLeft: '8px' }}
+                  aria-label="Cancel Edit"
+                />
+              </Tooltip>
+            </div>
+          )}
+        </Card>
+        
+        {/* Edit Value Button */}
+        {!isEditing && (
+          <div className="metric-edit-button" style={{ position: 'absolute', bottom: '10px', right: '10px' }}>
+            <Tooltip title="Edit Value">
               <Button
-                type="default"
-                shape="circle"
-                icon={<CloseOutlined />}
-                onClick={handleCancel}
-                style={{ marginLeft: '8px' }}
-                aria-label="Cancel Edit"
+                type="text"
+                icon={<EditOutlined />}
+                onClick={() => setIsEditing(true)}
+                style={{ fontSize: '16px' }}
+                aria-label="Edit Value"
               />
             </Tooltip>
           </div>
         )}
-      </Card>
-      
-      {/* Edit Value Button */}
-      {!isEditing && (
-        <div className="metric-edit-button">
-          <Tooltip title="Edit Value">
-            <Button
-              type="text"
-              icon={<EditOutlined />}
-              onClick={() => setIsEditing(true)}
-              style={{ fontSize: '16px' }}
-              aria-label="Edit Value"
-            />
-          </Tooltip>
-        </div>
-      )}
-    </div>
+      </div>
+    </Draggable>
   );
 };
 

@@ -5,7 +5,7 @@ import { FrappeGantt } from 'react-frappe-gantt';
 import { Task } from '../types';
 import { Select, Button, message } from 'antd';
 import { v4 as uuidv4 } from 'uuid';
-import '../Dashboard.css';
+import '../Dashboard.css'; // Ensure no react-grid-layout classes affect this component
 import AddTaskForm from './AddTaskForm';
 import Draggable from 'react-draggable';
 
@@ -68,59 +68,84 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
   };
 
   return (
-    <Draggable handle=".gantt-header">
+    <div
+      className="gantt-chart-container"
+      style={{
+        width: '100%',
+        height: '100%',
+        padding: '8px',
+        overflow: 'hidden',
+        border: '1px solid #ddd',
+        backgroundColor: '#fff',
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+        borderRadius: '8px',
+        position: 'relative', // Ensure relative positioning for internal elements
+      }}
+    >
+      {/* Drag Handle */}
       <div
+        className="drag-handle"
         style={{
-          width: '600px',
-          height: '600px',
-          position: 'relative',
-          margin: 0,
-          padding: 0,
-          overflow: 'hidden',
-          cursor: 'move',
-          border: '1px solid #ddd',
-          backgroundColor: '#fff',
+          textAlign: titleAlignment,
+          background: '#f0f0f0',
+          padding: '8px',
+          cursor: 'move', // Indicate draggable area
+          borderBottom: '1px solid #ddd',
+          borderRadius: '8px 8px 0 0',
+          userSelect: 'none', // Prevent text selection during drag
         }}
       >
-        <div className="gantt-header" style={{ textAlign: titleAlignment, background: '#f0f0f0', padding: '8px' }}>
-          <strong>{title}</strong>
-        </div>
-        <Row justify="space-between" align="middle" style={{ marginBottom: '20px', padding: '8px' }}>
-          <Col>
-            <Select
-              value={viewMode}
-              onChange={(value: 'Day' | 'Week' | 'Month') => setViewMode(value)}
-              style={{ width: 120 }}
-            >
-              <Option value="Day">Day</Option>
-              <Option value="Week">Week</Option>
-              <Option value="Month">Month</Option>
-            </Select>
-          </Col>
-          <Col>
-            <Button type="primary" onClick={() => setAddTaskModalVisible(true)}>
-              Add Task
-            </Button>
-          </Col>
-        </Row>
-        <div className="gantt-chart-wrapper" style={{ overflowX: 'auto', overflowY: 'auto', padding: '8px' }}>
-          <div style={{ minWidth: '2000px', height: '600px' }}>
-            <FrappeGantt
-              tasks={tasks}
-              viewMode={viewMode}
-              onDateChange={handleDateChange}
-              onProgressChange={handleProgressChange}
-            />
-          </div>
-        </div>
-        <AddTaskForm
-          visible={addTaskModalVisible}
-          onCreate={handleAddTask}
-          onCancel={() => setAddTaskModalVisible(false)}
-          existingTasks={tasks}
-        />
+        <strong>{title}</strong>
       </div>
-    </Draggable>
+
+      {/* Control Panel */}
+      <Row justify="space-between" align="middle" style={{ margin: '16px 0', padding: '0 8px' }}>
+        <Col>
+          <Select
+            value={viewMode}
+            onChange={(value: 'Day' | 'Week' | 'Month') => setViewMode(value)}
+            style={{ width: 120 }}
+          >
+            <Option value="Day">Day</Option>
+            <Option value="Week">Week</Option>
+            <Option value="Month">Month</Option>
+          </Select>
+        </Col>
+        <Col>
+          <Button type="primary" onClick={() => setAddTaskModalVisible(true)}>
+            Add Task
+          </Button>
+        </Col>
+      </Row>
+
+      {/* Gantt Chart */}
+      <div
+        className="gantt-chart-wrapper"
+        style={{
+          overflowX: 'auto',
+          overflowY: 'auto',
+          padding: '0 8px',
+          height: 'calc(100% - 100px)', // Adjust based on header and control panel height
+        }}
+      >
+        <div style={{ minWidth: '2000px', height: '600px' }}>
+          <FrappeGantt
+            tasks={tasks}
+            viewMode={viewMode}
+            onDateChange={handleDateChange}
+            onProgressChange={handleProgressChange}
+          />
+        </div>
+      </div>
+
+      {/* Add Task Modal */}
+      <AddTaskForm
+        visible={addTaskModalVisible}
+        onCreate={handleAddTask}
+        onCancel={() => setAddTaskModalVisible(false)}
+        existingTasks={tasks}
+      />
+    </div>
   );
 };
 

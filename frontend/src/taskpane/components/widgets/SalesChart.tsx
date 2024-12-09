@@ -25,7 +25,7 @@ import {
   PolarArea,
   // Add other chart types as needed
 } from 'react-chartjs-2';
-import 'chartjs-adapter-moment'; // Ensure the adapter is imported
+import 'chartjs-adapter-moment';
 import zoomPlugin from 'chartjs-plugin-zoom';
 import isEqual from 'lodash/isEqual';
 import type {
