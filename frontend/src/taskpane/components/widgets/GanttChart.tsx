@@ -143,7 +143,7 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
         className="gantt-chart-container"
         style={{
           width: '100%',
-          height: `${tasks.length * (rowHeight + 10) + 300}px`,
+          height: `600px`,
           position: 'relative',
           overflow: 'scroll',
         }}
@@ -181,7 +181,7 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
           </Col>
           <Col></Col>
         </Row>
-        <div className="gantt-chart-wrapper" style={{ width: '100%', height: '100%' }}>
+        <div className="gantt-chart-wrapper">
           <FrappeGantt
             tasks={tasks}
             viewMode={viewMode}
