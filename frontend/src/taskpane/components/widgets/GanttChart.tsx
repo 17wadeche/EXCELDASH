@@ -33,15 +33,19 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
   }, [initialTasks]);
 
   const handleDateChange = (task: Task, start: Date, end: Date) => {
-    const updatedTasks = tasks.map((t) => (t.id === task.id ? { ...t, start: start.toISOString().split('T')[0], end: end.toISOString().split('T')[0] } : t));
+    const updatedTasks = tasks.map((t) =>
+      t.id === task.id
+        ? { ...t, start: start.toISOString().split('T')[0], end: end.toISOString().split('T')[0] }
+        : t
+    );
     setTasks(updatedTasks);
-    onTasksChange?.(updatedTasks);
+    if (onTasksChange) onTasksChange(updatedTasks);
   };
 
   const handleProgressChange = (task: Task, progress: number) => {
     const updatedTasks = tasks.map((t) => (t.id === task.id ? { ...t, progress } : t));
     setTasks(updatedTasks);
-    onTasksChange?.(updatedTasks);
+    if (onTasksChange) onTasksChange(updatedTasks);
   };
 
   const handleAddTask = (values: any) => {
@@ -57,12 +61,12 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
     const updatedTasks = [...tasks, newTask];
     setTasks(updatedTasks);
     setAddTaskModalVisible(false);
-    onTasksChange?.(updatedTasks);
+    if (onTasksChange) onTasksChange(updatedTasks);
     message.success('Task added successfully!');
   };
 
   return (
-    <Draggable handle=".gantt-header">
+    <Draggable>
       <div className="gantt-chart-container">
         <div className="gantt-header" style={{ textAlign: titleAlignment }}>
           <strong>{title}</strong>
