@@ -1,10 +1,12 @@
 // src/taskpane/components/widgets/GanttChartComponent.tsx
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Row, Col } from 'antd';
 import { FrappeGantt } from 'react-frappe-gantt';
 import { Task } from '../types';
 import { Select, Button, message } from 'antd';
 import { v4 as uuidv4 } from 'uuid';
+import Draggable, { DraggableData } from 'react-draggable'; // Import Draggable
 import './GanttChart.css';
 import AddTaskForm from './AddTaskForm';
 
@@ -26,13 +28,19 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
   const [viewMode, setViewMode] = useState<'Day' | 'Week' | 'Month'>('Week');
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
   const [addTaskModalVisible, setAddTaskModalVisible] = useState(false);
+
+  const [tooltipContent, setTooltipContent] = useState<React.ReactNode>(null);
+  const [tooltipVisible, setTooltipVisible] = useState(false);
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const overlayRef = useRef<HTMLDivElement>(null);
-  const isDraggingRef = useRef(false);
-  const startXRef = useRef(0);
-  const startYRef = useRef(0);
-  const scrollLeftRef = useRef(0);
-  const scrollTopRef = useRef(0);
+  
+  // For tracking initial drag state
+  const startXRef = useRef<number>(0);
+  const startYRef = useRef<number>(0);
+  const scrollLeftRef = useRef<number>(0);
+  const scrollTopRef = useRef<number>(0);
 
   useEffect(() => {
     setTasks(initialTasks);
@@ -64,6 +72,43 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
     onTasksChange?.(updatedTasks);
   };
 
+  const handleClick = (task: Task) => {
+    const { x: clientX, y: clientY } = mousePosition;
+    setTooltipContent(
+      <div className="tooltip-content">
+        <h5>{task.name}</h5>
+        <p>Task started on: {new Date(task.start).toLocaleDateString()}</p>
+        <p>Expected to finish by: {new Date(task.end).toLocaleDateString()}</p>
+        <p>{task.progress}% completed!</p>
+      </div>
+    );
+    setTooltipPosition({ x: clientX, y: clientY });
+    setTooltipVisible(true);
+  };
+
+  useEffect(() => {
+    const handleOutsideClick = () => {
+      setTooltipVisible(false);
+    };
+    if (tooltipVisible) {
+      document.addEventListener('click', handleOutsideClick);
+    } else {
+      document.removeEventListener('click', handleOutsideClick);
+    }
+    return () => {
+      document.removeEventListener('click', handleOutsideClick);
+    };
+  }, [tooltipVisible]);
+
+  // Track mouse position for tooltip
+  useEffect(() => {
+    const handleMouseMove = (event: MouseEvent) => {
+      setMousePosition({ x: event.clientX, y: event.clientY });
+    };
+    document.addEventListener('mousemove', handleMouseMove);
+    return () => document.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
   const handleAddTask = (values: any) => {
     const newTask: Task = {
       id: uuidv4(),
@@ -81,41 +126,24 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
     message.success('Task added successfully!');
   };
 
-  const onMouseDown = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (overlayRef.current && wrapperRef.current) {
-      overlayRef.current.style.pointerEvents = 'all';
-      isDraggingRef.current = true;
-      startXRef.current = event.clientX;
-      startYRef.current = event.clientY;
+  const onDragStart = (_: MouseEvent, data: DraggableData) => {
+    if (wrapperRef.current) {
+      // Record initial scroll and mouse positions
       scrollLeftRef.current = wrapperRef.current.scrollLeft;
       scrollTopRef.current = wrapperRef.current.scrollTop;
+      startXRef.current = data.x;
+      startYRef.current = data.y;
     }
   };
 
-  useEffect(() => {
-    const handleMouseMove = (event: MouseEvent) => {
-      if (isDraggingRef.current && wrapperRef.current) {
-        const dx = event.clientX - startXRef.current;
-        const dy = event.clientY - startYRef.current;
-        wrapperRef.current.scrollLeft = scrollLeftRef.current - dx;
-        wrapperRef.current.scrollTop = scrollTopRef.current - dy;
-      }
-    };
-
-    const handleMouseUp = () => {
-      isDraggingRef.current = false;
-      if (overlayRef.current) {
-        overlayRef.current.style.pointerEvents = 'none';
-      }
-    };
-
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, []);
+  const onDrag = (_: MouseEvent, data: DraggableData) => {
+    if (wrapperRef.current) {
+      const dx = data.x - startXRef.current;
+      const dy = data.y - startYRef.current;
+      wrapperRef.current.scrollLeft = scrollLeftRef.current - dx;
+      wrapperRef.current.scrollTop = scrollTopRef.current - dy;
+    }
+  };
 
   return (
     <div className="gantt-chart-container">
@@ -140,21 +168,26 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
           </Button>
         </Col>
       </Row>
-      <div
-        className="gantt-chart-wrapper"
-        ref={wrapperRef}
-        onMouseDown={onMouseDown}
-      >
-        <div className="gantt-chart-content">
-          <FrappeGantt
-            tasks={tasks}
-            viewMode={viewMode}
-            onDateChange={handleDateChange}
-            onProgressChange={handleProgressChange}
-          />
-          <div className="drag-overlay" ref={overlayRef}></div>
-        </div>
+      
+      <div className="gantt-chart-wrapper" ref={wrapperRef}>
+        {/* Use Draggable to intercept drag events and control scroll */}
+        <Draggable
+          position={{ x: 0, y: 0 }}
+          onStart={onDragStart}
+          onDrag={onDrag}
+        >
+          <div className="gantt-inner-wrapper">
+            <FrappeGantt
+              tasks={tasks}
+              viewMode={viewMode}
+              onClick={handleClick}
+              onDateChange={handleDateChange}
+              onProgressChange={handleProgressChange}
+            />
+          </div>
+        </Draggable>
       </div>
+
       <AddTaskForm
         visible={addTaskModalVisible}
         onCreate={handleAddTask}
