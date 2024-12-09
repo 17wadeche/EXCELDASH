@@ -158,7 +158,7 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
           width: '100%',
           height: `${tasks.length * (rowHeight + 10) + 300}px`,
           position: 'relative',
-          overflow: 'visible',
+          overflow: scroll,
         }}
       >
         <div
@@ -167,7 +167,7 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
             width: '100%',
             textAlign: titleAlignment,
             cursor: 'move',
-            padding: '0px',
+            padding: '10px 0',
             backgroundColor: '#ffffff',
             borderBottom: '1px solid #ddd',
             marginBottom: '10px',
