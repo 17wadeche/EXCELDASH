@@ -138,81 +138,79 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
     message.success('Task added successfully!');
   };
   return (
-    <Draggable handle=".drag-handle">
+    <div
+      className="gantt-chart-container"
+      style={{
+        width: '100%',
+        height: `600px`,
+        position: 'relative',
+      }}
+    >
       <div
-        className="gantt-chart-container"
+        className="gantt-header drag-handle"
         style={{
           width: '100%',
-          height: `600px`,
-          position: 'relative',
+          textAlign: titleAlignment,
+          cursor: 'move',
+          padding: '10px 0',
+          backgroundColor: '#ffffff',
+          borderBottom: '1px solid #ddd',
+          marginBottom: '10px',
         }}
       >
-        <div
-          className="gantt-header drag-handle"
-          style={{
-            width: '100%',
-            textAlign: titleAlignment,
-            cursor: 'move',
-            padding: '10px 0',
-            backgroundColor: '#ffffff',
-            borderBottom: '1px solid #ddd',
-            marginBottom: '10px',
-          }}
-        >
-          <strong>{title}</strong>
-        </div>
-        <Row justify="space-between" align="middle" style={{ marginBottom: '20px' }}>
-          <Col>
-            <Select
-              value={viewMode}
-              onChange={(value: 'Day' | 'Week' | 'Month') => setViewMode(value)}
-              style={{ width: 120 }}
-            >
-              <Option value="Day">Day</Option>
-              <Option value="Week">Week</Option>
-              <Option value="Month">Month</Option>
-            </Select>
-          </Col>
-          <Col>
-            <Button type="primary" onClick={() => setAddTaskModalVisible(true)}>
-              Add Task
-            </Button>
-          </Col>
-          <Col></Col>
-        </Row>
-        <div className="gantt-chart-wrapper">
-          <FrappeGantt
-            tasks={tasks}
-            viewMode={viewMode}
-            onClick={handleClick}
-            onDateChange={handleDateChange}
-            onProgressChange={handleProgressChange}
-          />
-        </div>
-        {tooltipVisible && (
-          <div
-            className="custom-tooltip"
-            style={{
-              position: 'absolute',
-              top: tooltipPosition.y - 100,
-              left: tooltipPosition.x - 100,
-              backgroundColor: '#fff',
-              border: '1px solid #ccc',
-              padding: '8px',
-              zIndex: 1000,
-            }}
+        <strong>{title}</strong>
+      </div>
+      <Row justify="space-between" align="middle" style={{ marginBottom: '20px' }}>
+        <Col>
+          <Select
+            value={viewMode}
+            onChange={(value: 'Day' | 'Week' | 'Month') => setViewMode(value)}
+            style={{ width: 120 }}
           >
-            {tooltipContent}
-          </div>
-        )}
-        <AddTaskForm
-          visible={addTaskModalVisible}
-          onCreate={handleAddTask}
-          onCancel={() => setAddTaskModalVisible(false)}
-          existingTasks={tasks}
+            <Option value="Day">Day</Option>
+            <Option value="Week">Week</Option>
+            <Option value="Month">Month</Option>
+          </Select>
+        </Col>
+        <Col>
+          <Button type="primary" onClick={() => setAddTaskModalVisible(true)}>
+            Add Task
+          </Button>
+        </Col>
+        <Col></Col>
+      </Row>
+      <div className="gantt-chart-wrapper">
+        <FrappeGantt
+          tasks={tasks}
+          viewMode={viewMode}
+          onClick={handleClick}
+          onDateChange={handleDateChange}
+          onProgressChange={handleProgressChange}
         />
       </div>
-    </Draggable>
+      {tooltipVisible && (
+        <div
+          className="custom-tooltip"
+          style={{
+            position: 'absolute',
+            top: tooltipPosition.y - 100,
+            left: tooltipPosition.x - 100,
+            backgroundColor: '#fff',
+            border: '1px solid #ccc',
+            padding: '8px',
+            zIndex: 1000,
+          }}
+        >
+          {tooltipContent}
+        </div>
+      )}
+      <AddTaskForm
+        visible={addTaskModalVisible}
+        onCreate={handleAddTask}
+        onCancel={() => setAddTaskModalVisible(false)}
+        existingTasks={tasks}
+      />
+    </div>
   );
 };
 export default GanttChartComponent;
