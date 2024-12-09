@@ -30,14 +30,10 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
 }) => {
   const [viewMode, setViewMode] = useState<'Day' | 'Week' | 'Month'>('Week');
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
-  
-  // For tooltip logic
   const [tooltipContent, setTooltipContent] = useState<React.ReactNode>(null);
   const [tooltipVisible, setTooltipVisible] = useState(false);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  
-  // For drag-to-scroll logic
   const wrapperRef = useRef<HTMLDivElement>(null);
   const isDraggingRef = useRef<boolean>(false);
   const startXRef = useRef<number>(0);
@@ -155,6 +151,7 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
 
   const onMouseDown = (event: React.MouseEvent<HTMLDivElement>) => {
     if (wrapperRef.current) {
+      event.preventDefault();
       isDraggingRef.current = true;
       startXRef.current = event.clientX;
       startYRef.current = event.clientY;
