@@ -503,7 +503,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           case 'gantt': {
             const ganttData: GanttWidgetData = {
               tasks: widget.data.tasks || [],
-              ganttTitle: widget.data.ganttTitle || 'Gantt Chart',
+              title: widget.data.title || 'Gantt Chart',
               titleAlignment: widget.data.titleAlignment || 'left',
             };
             return { ...widget, data: ganttData };
@@ -1558,7 +1558,7 @@ const redo = () => {
             case 'gantt': {
               const ganttData: GanttWidgetData = {
                 tasks: widget.data.tasks || [],
-                ganttTitle: widget.data.ganttTitle || 'Gantt Chart',
+                title: widget.data.title || 'Gantt Chart',
                 titleAlignment: widget.data.titleAlignment || 'left',
               };
               return { ...widget, data: ganttData };
@@ -2151,7 +2151,7 @@ const redo = () => {
               type: 'gantt',
               data: {
                 tasks,
-                ganttTitle: 'Gantt Chart',
+                title: 'Gantt Chart',
                 titleAlignment: 'left',
               } as GanttWidgetData,
             };

@@ -115,7 +115,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
       case 'gantt':
         const ganttData = widget.data as GanttWidgetData;
         return {
-          ganttTitle: ganttData.ganttTitle || 'Gantt Chart',
+          title: ganttData.title || 'Gantt Chart',
           tasks: ganttData.tasks.map((task) => ({
             ...task,
             start: moment(task.start),
