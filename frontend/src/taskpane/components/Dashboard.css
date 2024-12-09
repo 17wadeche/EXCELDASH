@@ -7,7 +7,6 @@
   padding: 0;
   background-color: transparent;
 }
-
 .widget-card {
   position: relative;
   margin: 0;
@@ -17,7 +16,6 @@
   flex-direction: column;
   background-color: transparent;
 }
-
 .widget-actions {
   position: absolute;
   top: 5px;
@@ -25,18 +23,15 @@
   display: none;
   z-index: 1;
 }
-
 .grid-item:hover .widget-actions {
   display: flex;
 }
-
 .action-icon {
   margin-left: 8px;
   cursor: pointer;
   color: #000;
   font-size: 16px;
 }
-
 .widget-card .ant-card-body {
   display: flex;
   justify-content: center;
@@ -46,11 +41,9 @@
   background-color: transparent;
   height: 100%;
 }
-
 .react-grid-item {
   transition: none;
 }
-
 .react-grid-item .react-resizable-handle {
   z-index: 10;
   position: absolute;
@@ -61,11 +54,9 @@
   cursor: se-resize;
   background-color: rgba(0, 0, 0, 0);
 }
-
 .react-grid-item:hover .react-resizable-handle {
   background-color: rgba(0, 0, 0, 0.2);
 }
-
 .fixed-vertical-toolbar {
   position: fixed;
   top: 8%;
@@ -84,27 +75,22 @@
   width: 40px; /* Expanded width */
   transition: width 0.3s ease, padding 0.3s ease;
 }
-
 .fixed-vertical-toolbar.collapsed {
   width: 50px; 
   padding: 8px 4px;
 }
-
 .fixed-vertical-toolbar.collapsed .toolbar-button:not(.toggle-button) {
   display: none;
 }
-
 .fixed-vertical-toolbar.collapsed .toggle-button {
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s ease;
 }
-
 .fixed-vertical-toolbar.collapsed:hover .toggle-button {
   opacity: 1;
   pointer-events: auto;
 }
-
 .toolbar-button {
   margin: 6px 0;
   width: 30px;
@@ -116,26 +102,21 @@
   font-size: 20px;
   transition: color 0.3s, background-color 0.3s, opacity 0.3s;
 }
-
 .toolbar-button:hover {
   color: var(--toolbar-icon-hover-color);
   background-color: transparent;
 }
-
 .fixed-vertical-toolbar .toggle-button {
   display: block;
   transition: transform 0.3s ease, opacity 0.3s ease;
   cursor: pointer;
 }
-
 .fixed-vertical-toolbar.collapsed .toggle-button .anticon {
   transform: rotate(180deg);
 }
-
 .fixed-vertical-toolbar:not(.collapsed) .toggle-button .anticon {
   transform: rotate(0deg);
 }
-
 .dashboard-wrapper.light-theme {
   --toolbar-bg: rgba(255, 255, 255, 0.9);
   --toolbar-border: #d9d9d9;
@@ -143,15 +124,12 @@
   --toolbar-icon-hover-color: #1890ff;
   --toolbar-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
-
 .fixed-vertical-toolbar .toggle-button {
   z-index: 1000;
 }
-
 .fixed-vertical-toolbar.collapsed:hover .toggle-button .anticon {
   color: var(--toolbar-icon-hover-color);
 }
-
 .dashboard.full-screen {
   position: fixed;
   top: 0;
@@ -162,20 +140,17 @@
   z-index: 9999;
   overflow: auto;
 }
-
 .dashboard.full-screen .ant-btn {
   position: absolute;
   top: 10px;
   right: 10px;
 }
-
 .dashboard-wrapper {
   display: flex;
   height: 100vh; 
   width: 100vw; 
   position: relative;
 }
-
 .dashboard-container {
   overflow: auto;
   padding: 0;
@@ -184,22 +159,18 @@
   background-color: var(--background-color);
   box-shadow: none;
 }
-
 .scaled-container {
   transform-origin: top left;
-  overflow: hidden; /* Ensure any overflow is clipped */
+  overflow: hidden;
 }
-
 .fixed-toolbar .ant-btn {
   margin-right: 8px;
 }
-
 @media (max-width: 768px) {
   .fixed-vertical-toolbar {
     flex-wrap: wrap;
   }
 }
-
 .metric-edit-button {
   display: none;
   position: absolute;
@@ -207,22 +178,18 @@
   left: 5px;
   z-index: 1;
 }
-
 .metric-widget-container {
   position: relative;
 }
-
 .metric-widget-container:hover .metric-edit-button {
   display: block;
 }
-
 .widget-card img, 
 .widget-card svg, 
 .widget-card canvas {
   max-width: 100%;
   height: auto;
 }
-
 .gantt-chart-container {
   width: 600px;
   height: 400px;
@@ -230,19 +197,16 @@
   position: relative !important;
   box-sizing: border-box;
 }
-  
 .gantt-chart-wrapper {
   width: 100%;
   height: 100%;
   overflow: auto;
   position: relative;
 }
-
 .gantt-inner-wrapper {
   width: 2000px;
   height: 100%;
 }
-
 .gantt-chart-container .ant-card-body {
   position: relative !important;
   background-color: transparent !important;
