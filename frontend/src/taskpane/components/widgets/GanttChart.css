@@ -10,7 +10,6 @@
   overflow: auto;
   position: relative;
   cursor: grab;
-  user-select: none;
 }
 .gantt-chart-wrapper:active {
   cursor: grabbing; /* Show "grabbing" cursor when dragging */
@@ -18,4 +17,13 @@
 .gantt-inner-wrapper {
   width: 2000px;
   height: 100%;
+}
+.drag-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none; 
+  cursor: inherit;
 }

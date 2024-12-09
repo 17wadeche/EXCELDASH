@@ -1,14 +1,9 @@
 // src/taskpane/components/widgets/GanttChartComponent.tsx
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Row, Col } from 'antd';
 import { FrappeGantt } from 'react-frappe-gantt';
 import { Task } from '../types';
-import {
-  Select,
-  Button,
-  message
-} from 'antd';
+import { Select, Button, message } from 'antd';
 import { v4 as uuidv4 } from 'uuid';
 import './GanttChart.css';
 import AddTaskForm from './AddTaskForm';
@@ -30,16 +25,14 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
 }) => {
   const [viewMode, setViewMode] = useState<'Day' | 'Week' | 'Month'>('Week');
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
-  const [tooltipContent, setTooltipContent] = useState<React.ReactNode>(null);
-  const [tooltipVisible, setTooltipVisible] = useState(false);
-  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [addTaskModalVisible, setAddTaskModalVisible] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const isDraggingRef = useRef<boolean>(false);
-  const startXRef = useRef<number>(0);
-  const startYRef = useRef<number>(0);
-  const scrollLeftRef = useRef<number>(0);
-  const scrollTopRef = useRef<number>(0);
+  const overlayRef = useRef<HTMLDivElement>(null);
+  const isDraggingRef = useRef(false);
+  const startXRef = useRef(0);
+  const startYRef = useRef(0);
+  const scrollLeftRef = useRef(0);
+  const scrollTopRef = useRef(0);
 
   useEffect(() => {
     setTasks(initialTasks);
@@ -57,9 +50,7 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
       return t;
     });
     setTasks(updatedTasks);
-    if (onTasksChange) {
-      onTasksChange(updatedTasks);
-    }
+    onTasksChange?.(updatedTasks);
   };
 
   const handleProgressChange = (task: Task, progress: number) => {
@@ -70,63 +61,8 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
       return t;
     });
     setTasks(updatedTasks);
-    if (onTasksChange) {
-      onTasksChange(updatedTasks);
-    }
+    onTasksChange?.(updatedTasks);
   };
-
-  const handleClick = (task: Task) => {
-    const { x: clientX, y: clientY } = mousePosition;
-    setTooltipContent(
-      <div className="tooltip-content">
-        <h5>{task.name}</h5>
-        <p>Task started on: {new Date(task.start).toLocaleDateString()}</p>
-        <p>Expected to finish by: {new Date(task.end).toLocaleDateString()}</p>
-        <p>{task.progress}% completed!</p>
-      </div>
-    );
-    setTooltipPosition({ x: clientX, y: clientY });
-    setTooltipVisible(true);
-  };
-
-  const handleOutsideClick = () => {
-    setTooltipVisible(false);
-  };
-
-  useEffect(() => {
-    const handleMouseMove = (event: MouseEvent) => {
-      setMousePosition({ x: event.clientX, y: event.clientY });
-      if (isDraggingRef.current && wrapperRef.current) {
-        const dx = event.clientX - startXRef.current;
-        const dy = event.clientY - startYRef.current;
-        wrapperRef.current.scrollLeft = scrollLeftRef.current - dx;
-        wrapperRef.current.scrollTop = scrollTopRef.current - dy;
-      }
-    };
-
-    const handleMouseUp = () => {
-      isDraggingRef.current = false;
-    };
-
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-    
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (tooltipVisible) {
-      document.addEventListener('click', handleOutsideClick);
-    } else {
-      document.removeEventListener('click', handleOutsideClick);
-    }
-    return () => {
-      document.removeEventListener('click', handleOutsideClick);
-    };
-  }, [tooltipVisible]);
 
   const handleAddTask = (values: any) => {
     const newTask: Task = {
@@ -141,17 +77,13 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
     const updatedTasks = [...tasks, newTask];
     setTasks(updatedTasks);
     setAddTaskModalVisible(false);
-    if (onTasksChange) {
-      onTasksChange(updatedTasks);
-    }
+    onTasksChange?.(updatedTasks);
     message.success('Task added successfully!');
   };
 
-  const [addTaskModalVisible, setAddTaskModalVisible] = useState(false);
-
   const onMouseDown = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (wrapperRef.current) {
-      event.preventDefault();
+    if (overlayRef.current && wrapperRef.current) {
+      overlayRef.current.style.pointerEvents = 'all';
       isDraggingRef.current = true;
       startXRef.current = event.clientX;
       startYRef.current = event.clientY;
@@ -159,6 +91,31 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
       scrollTopRef.current = wrapperRef.current.scrollTop;
     }
   };
+
+  useEffect(() => {
+    const handleMouseMove = (event: MouseEvent) => {
+      if (isDraggingRef.current && wrapperRef.current) {
+        const dx = event.clientX - startXRef.current;
+        const dy = event.clientY - startYRef.current;
+        wrapperRef.current.scrollLeft = scrollLeftRef.current - dx;
+        wrapperRef.current.scrollTop = scrollTopRef.current - dy;
+      }
+    };
+
+    const handleMouseUp = () => {
+      isDraggingRef.current = false;
+      if (overlayRef.current) {
+        overlayRef.current.style.pointerEvents = 'none';
+      }
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, []);
 
   return (
     <div className="gantt-chart-container">
@@ -183,19 +140,19 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
           </Button>
         </Col>
       </Row>
-      <div 
-        className="gantt-chart-wrapper" 
-        ref={wrapperRef} 
+      <div
+        className="gantt-chart-wrapper"
+        ref={wrapperRef}
         onMouseDown={onMouseDown}
       >
-        <div className="gantt-inner-wrapper">
+        <div className="gantt-chart-content">
           <FrappeGantt
             tasks={tasks}
             viewMode={viewMode}
-            onClick={handleClick}
             onDateChange={handleDateChange}
             onProgressChange={handleProgressChange}
           />
+          <div className="drag-overlay" ref={overlayRef}></div>
         </div>
       </div>
       <AddTaskForm
