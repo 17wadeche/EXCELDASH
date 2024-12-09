@@ -67,44 +67,50 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
 
   return (
     <Draggable>
-      <div className="gantt-chart-container">
-        <div className="gantt-header" style={{ textAlign: titleAlignment }}>
-          <strong>{title}</strong>
-        </div>
-        <Row justify="space-between" align="middle" style={{ marginBottom: '20px' }}>
-          <Col>
-            <Select
-              value={viewMode}
-              onChange={(value: 'Day' | 'Week' | 'Month') => setViewMode(value)}
-              style={{ width: 120 }}
-            >
-              <Option value="Day">Day</Option>
-              <Option value="Week">Week</Option>
-              <Option value="Month">Month</Option>
-            </Select>
-          </Col>
-          <Col>
-            <Button type="primary" onClick={() => setAddTaskModalVisible(true)}>
-              Add Task
-            </Button>
-          </Col>
-        </Row>
-        <div className="gantt-chart-wrapper" style={{ overflowX: 'auto', overflowY: 'auto' }}>
-          <div style={{ minWidth: '2000px', height: '600px' }}>
-            <FrappeGantt
-              tasks={tasks}
-              viewMode={viewMode}
-              onDateChange={handleDateChange}
-              onProgressChange={handleProgressChange}
-            />
+      <div className="react-grid-item grid-item react-draggable cssTransforms react-resizable">
+        <div className="widget-card">
+          <div className="ant-card-body">
+            <div className="gantt-chart-container">
+              <div className="gantt-header" style={{ textAlign: titleAlignment }}>
+                <strong>{title}</strong>
+              </div>
+              <Row justify="space-between" align="middle" style={{ marginBottom: '20px' }}>
+                <Col>
+                  <Select
+                    value={viewMode}
+                    onChange={(value: 'Day' | 'Week' | 'Month') => setViewMode(value)}
+                    style={{ width: 120 }}
+                  >
+                    <Option value="Day">Day</Option>
+                    <Option value="Week">Week</Option>
+                    <Option value="Month">Month</Option>
+                  </Select>
+                </Col>
+                <Col>
+                  <Button type="primary" onClick={() => setAddTaskModalVisible(true)}>
+                    Add Task
+                  </Button>
+                </Col>
+              </Row>
+              <div className="gantt-chart-wrapper" style={{ overflowX: 'auto', overflowY: 'auto' }}>
+                <div style={{ minWidth: '2000px', height: '600px' }}>
+                  <FrappeGantt
+                    tasks={tasks}
+                    viewMode={viewMode}
+                    onDateChange={handleDateChange}
+                    onProgressChange={handleProgressChange}
+                  />
+                </div>
+              </div>
+              <AddTaskForm
+                visible={addTaskModalVisible}
+                onCreate={handleAddTask}
+                onCancel={() => setAddTaskModalVisible(false)}
+                existingTasks={tasks}
+              />
+            </div>
           </div>
         </div>
-        <AddTaskForm
-          visible={addTaskModalVisible}
-          onCreate={handleAddTask}
-          onCancel={() => setAddTaskModalVisible(false)}
-          existingTasks={tasks}
-        />
       </div>
     </Draggable>
   );
