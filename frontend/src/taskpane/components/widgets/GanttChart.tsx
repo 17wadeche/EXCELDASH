@@ -137,19 +137,6 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
     }
     message.success('Task added successfully!');
   };
-
-  useEffect(() => {
-    const svgElement = document.querySelector('.frappe-gantt svg');
-    if (svgElement) {
-      const gridBackground = svgElement.querySelector('.grid-background');
-      if (gridBackground) {
-        const gridHeight = parseFloat(gridBackground.getAttribute('height') || '0');
-        svgElement.setAttribute('height', `${gridHeight}`);
-        svgElement.setAttribute('viewBox', `0 0 ${svgElement.getAttribute('width')} ${gridHeight}`);
-      }
-    }
-  }, [tasks]);
-
   return (
     <Draggable handle=".drag-handle">
       <div
