@@ -47,12 +47,12 @@
 .react-grid-item .react-resizable-handle {
   z-index: 10;
   position: absolute;
-  width: 20px;
-  height: 20px;
+  width: 10px;
+  height: 10px;
   bottom: 0;
   right: 0;
   cursor: se-resize;
-  background-color: rgba(0, 0, 0, 0);
+  background-color: rgba(110, 110, 110, 0);
 }
 .react-grid-item:hover .react-resizable-handle {
   background-color: rgba(0, 0, 0, 0.2);
