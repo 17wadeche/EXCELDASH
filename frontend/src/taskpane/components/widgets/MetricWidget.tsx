@@ -1,7 +1,7 @@
 // src/taskpane/components/widgets/MetricWidget.tsx
 
 import React, { useEffect, useState, useContext } from 'react';
-import { Card, Typography, Button, InputNumber, Tooltip } from 'antd';
+import { Card, Typography, Button, InputNumber, Tooltip, message } from 'antd';
 import { 
   ArrowUpOutlined, 
   ArrowDownOutlined, 
