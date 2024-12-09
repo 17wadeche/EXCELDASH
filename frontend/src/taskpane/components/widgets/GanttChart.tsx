@@ -145,7 +145,6 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
           width: '100%',
           height: `600px`,
           position: 'relative',
-          overflow: 'scroll',
         }}
       >
         <div
