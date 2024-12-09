@@ -924,7 +924,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
               type: 'gantt',
               data: {
                 tasks,
-                ganttTitle: 'Gantt Chart',
+                title: 'Gantt Chart',
                 titleAlignment: 'left',
               } as GanttWidgetData,
             };
@@ -1308,7 +1308,7 @@ const redo = () => {
               type: 'gantt',
               data: {
                 tasks: [],
-                ganttTitle: 'Gantt Chart',
+                title: 'Gantt Chart',
                 titleAlignment: 'left',
               } as GanttWidgetData,
             };
