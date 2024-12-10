@@ -2595,7 +2595,7 @@ const redo = () => {
         addReport,
         setReports,
         editReport,
-        addTasktoGantt,
+        addTaskToGantt,
         currentWorkbookId,
         deleteReport,
         setCurrentWorkbookId,
