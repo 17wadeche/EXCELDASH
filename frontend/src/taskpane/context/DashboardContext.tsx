@@ -2338,6 +2338,9 @@ const redo = () => {
           message.error('GanttTable not found in the Gantt worksheet.');
           return;
         }
+        const dependenciesValue = Array.isArray(newTask.dependencies)
+          ? newTask.dependencies.join(', ')
+          : (newTask.dependencies ?? '');
         const rowData: (string | number | boolean)[] = [
           newTask.name,
           capitalizeFirstLetter(newTask.type ?? ''),
@@ -2347,7 +2350,7 @@ const redo = () => {
           '',
           '',
           newTask.progress,
-          newTask.dependencies ?? '',
+          dependenciesValue
         ];
         console.log('Row data to add:', rowData);
         table.rows.add(undefined, [rowData]);
