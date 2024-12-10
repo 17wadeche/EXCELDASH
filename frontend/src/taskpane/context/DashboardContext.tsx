@@ -2323,7 +2323,7 @@ const redo = () => {
         updateLayoutsForNewWidgets(updatedWidgets);
         localStorage.setItem('widgets', JSON.stringify(updatedWidgets));
         return updatedWidgets;
-      });
+      })
       await Excel.run(async (context) => {
         const sheet = context.workbook.worksheets.getItem('Gantt');
         const table = sheet.tables.getItemOrNullObject('GanttTable');
@@ -2333,20 +2333,19 @@ const redo = () => {
           message.error('GanttTable not found in the Gantt worksheet.');
           return;
         }
-        table.rows.add(undefined, [ // Changed from null to undefined
-          [
-            newTask.id,
-            newTask.name,
-            newTask.start,
-            newTask.end,
-            '',
-            '',
-            '',
-            newTask.progress,
-            newTask.dependencies ?? '',
-            newTask.color ?? '',
-          ],
-        ]);
+        const rowData = [
+          newTask.name,            // Task Name
+          newTask.type,            // Task Type
+          newTask.start,           // Start Date
+          newTask.end,             // End Date
+          '',                      // Completed Date (handled via Excel formulas)
+          '',                      // Duration (Days) (handled via Excel formulas)
+          '',                      // Actual Duration (Days) (handled via Excel formulas)
+          newTask.progress ?? 0,   // Progress %
+          newTask.dependencies ?? '', // Dependencies
+        ];
+        console.log('Row data to add:', rowData);
+        table.rows.add(undefined, [rowData]);
         await context.sync();
       });
       message.success('Task added successfully and synced to Excel!');
