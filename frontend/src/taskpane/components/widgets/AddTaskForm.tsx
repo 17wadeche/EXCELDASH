@@ -23,7 +23,7 @@ const AddTaskForm: React.FC<AddTaskFormProps> = ({ visible, onCancel }) => {
     return null;
   }
 
-  const { addTaskToGantt } = dashboardContext as DashboardContextProps & { addTaskToGantt: Function };
+  const { addTaskToGantt } = dashboardContext;
 
   const handleOk = async () => {
     try {

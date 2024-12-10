@@ -2330,17 +2330,17 @@ const redo = () => {
         table.load(['name']);
         await context.sync();
         if (table.isNullObject) {
-          message.error('TasksTable not found in the Tasks worksheet.');
+          message.error('GanttTable not found in the Gantt worksheet.');
           return;
         }
-        table.rows.add(null, [
+        table.rows.add(undefined, [ // Changed from null to undefined
           [
             newTask.id,
             newTask.name,
             newTask.start,
             newTask.end,
             newTask.progress,
-            newTask.dependencies.join(', '),
+            newTask.dependencies ? newTask.dependencies.join(', ') : '',
             newTask.color,
           ],
         ]);
@@ -2349,7 +2349,11 @@ const redo = () => {
       message.success('Task added successfully and synced to Excel!');
     } catch (error) {
       console.error('Error adding task to Gantt widget and Excel:', error);
-      message.error('Failed to add task to Gantt widget and Excel.');
+      if (error instanceof OfficeExtension.Error) {
+        message.error(`Office.js Error: ${error.code} - ${error.message}`);
+      } else {
+        message.error('Failed to add task to Gantt widget and Excel.');
+      }
     }
   };
 

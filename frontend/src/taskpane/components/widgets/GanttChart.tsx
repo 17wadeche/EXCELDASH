@@ -83,23 +83,6 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
     if (onTasksChange) onTasksChange(updatedTasks);
   };
 
-  const handleAddTask = (values: any) => {
-    const newTask: Task = {
-      id: uuidv4(),
-      name: values.name,
-      start: values.start.format('YYYY-MM-DD'),
-      end: values.end.format('YYYY-MM-DD'),
-      progress: values.progress,
-      dependencies: values.dependencies ? values.dependencies.split(',') : [],
-      color: values.color,
-    };
-    const updatedTasks = [...tasks, newTask];
-    setTasks(updatedTasks);
-    setAddTaskModalVisible(false);
-    if (onTasksChange) onTasksChange(updatedTasks);
-    message.success('Task added successfully!');
-  };
-
   return (
     <div
       className="gantt-chart-container"
@@ -174,7 +157,6 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
       {/* Add Task Modal */}
       <AddTaskForm
         visible={addTaskModalVisible}
-        onCreate={handleAddTask}
         onCancel={() => setAddTaskModalVisible(false)}
       />
     </div>
