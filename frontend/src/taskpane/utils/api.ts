@@ -2,10 +2,12 @@ import { AxiosError } from "axios";
 import axios from 'axios';
 
 const API_BASE_URL = 'https://happy-forest-059a9d710.4.azurestaticapps.net/api';
+
 const storedToken = localStorage.getItem('token');
 if (storedToken) {
   axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
 }
+
 export const createCheckoutSession = async (plan: 'monthly' | 'yearly', email: string) => {
   const response = await axios.post(`${API_BASE_URL}/create-checkout-session`, {
     plan,
@@ -21,7 +23,8 @@ export const checkSubscription = async (email: string) => {
     });
     return response.data;
   } catch (error: any) {
-    ...
+    console.error('Error in checkSubscription:', error);
+    throw new Error(error.response?.data?.error || 'An unknown error occurred.');
   }
 };
 
@@ -50,8 +53,9 @@ export const verifySubscription = async (sessionId: string) => {
       params: { session_id: sessionId },
     });
     return response.data;
-  } catch (error) {
-    ...
+  } catch (error: any) {
+    console.error('Error in verifySubscription:', error);
+    throw new Error(error.response?.data?.error || 'An unknown error occurred.');
   }
 };
 
@@ -61,17 +65,23 @@ export const checkRegistration = async (email: string) => {
       params: { email },
     });
     return response.data;
-  } catch (error) {
-    ...
+  } catch (error: any) {
+    console.error('Error in checkRegistration:', error);
+    throw new Error(error.response?.data?.error || 'An unknown error occurred.');
   }
 };
 
 export const unsubscribeUser = async (email: string) => {
   const token = localStorage.getItem('token');
-  const response = await axios.post(`${API_BASE_URL}/unsubscribe`, { email }, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  return response.data;
+  try {
+    const response = await axios.post(`${API_BASE_URL}/unsubscribe`, { email }, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error('Error in unsubscribeUser:', error);
+    throw new Error(error.response?.data?.error || 'An unknown error occurred.');
+  }
 };
