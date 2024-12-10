@@ -227,3 +227,27 @@
   border-bottom: 1px solid #ddd;
 }
 
+.gantt-chart-container .bar {
+  transition: fill 0.3s ease;
+}
+
+/* Specific Task Color Classes (These are now dynamically generated, but keeping for any predefined colors) */
+.color-red .bar {
+  fill: #FF4D4F; /* Ant Design red-6 */
+}
+
+.color-green .bar {
+  fill: #52C41A; /* Ant Design green-6 */
+}
+
+.color-blue .bar {
+  fill: #1890FF; /* Ant Design blue-6 */
+}
+
+.color-orange .bar {
+  fill: #FA8C16; /* Ant Design orange-6 */
+}
+
+.color-purple .bar {
+  fill: #722ED1; /* Ant Design purple-6 */
+}

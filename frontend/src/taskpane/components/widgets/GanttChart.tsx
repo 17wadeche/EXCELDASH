@@ -32,6 +32,37 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
     setTasks(initialTasks);
   }, [initialTasks]);
 
+  const injectTaskColors = (tasks: Task[]) => {
+    const styleElementId = 'gantt-task-colors';
+    let styleElement = document.getElementById(styleElementId);
+    if (!styleElement) {
+      styleElement = document.createElement('style');
+      styleElement.id = styleElementId;
+      document.head.appendChild(styleElement);
+    }
+    if (styleElement.sheet) {
+      while (styleElement.sheet.cssRules.length > 0) {
+        styleElement.sheet.deleteRule(0);
+      }
+    }
+    tasks.forEach(task => {
+      if (task.color) {
+        const className = `task-${task.id}`;
+        task.custom_class = className;
+        const rule = `
+          .${className} .bar {
+            fill: ${task.color} !important;
+          }
+        `;
+        styleElement.sheet?.insertRule(rule, styleElement.sheet.cssRules.length);
+      }
+    });
+  };
+
+  useEffect(() => {
+    injectTaskColors(tasks);
+  }, [tasks]);
+
   const handleDateChange = (task: Task, start: Date, end: Date) => {
     const updatedTasks = tasks.map((t) =>
       t.id === task.id
@@ -58,7 +89,7 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
       end: values.end.format('YYYY-MM-DD'),
       progress: values.progress,
       dependencies: values.dependencies ? values.dependencies.split(',') : [],
-      custom_class: values.custom_class ? 'is-important' : '',
+      color: values.color,
     };
     const updatedTasks = [...tasks, newTask];
     setTasks(updatedTasks);
