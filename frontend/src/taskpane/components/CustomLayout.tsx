@@ -136,7 +136,7 @@ const CustomLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) =>
           {isInDashboard && (
             <SubMenu key="add-visuals" icon={<PictureOutlined />} title="Add Visuals">
               <Menu.Item key="dashboard-settings" icon={<BorderOutlined />} onClick={() => setIsSettingsModalVisible(true)}>
-                Dashboard Settings
+                Boarder Settings
               </Menu.Item>
               <Menu.Item key="add-line" icon={<LineOutlined />} onClick={() => addWidget('line')}>
                 Line
