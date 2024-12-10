@@ -40,6 +40,7 @@ interface DashboardContextProps {
   saveTemplate: () => void;
   setCurrentWorkbookId: (id: string | undefined) => void;
   currentDashboard: DashboardItem | null;
+  addTaskToGantt: (task: Task) => Promise<void>;
   setCurrentDashboard: (dashboard: DashboardItem | null) => void;
   updateLayoutsForNewWidgets: (widgets: Widget[]) => void;
   currentWorkbookId: string | undefined;
@@ -2290,6 +2291,68 @@ const redo = () => {
     return cellAddressRegex.test(address);
   };
 
+  const addTaskToGantt = async (newTask: Task) => {
+    try {
+      setWidgets((prevWidgets) => {
+        const updatedWidgets = prevWidgets.map((widget) => {
+          if (widget.type === 'gantt') {
+            const ganttData = widget.data as GanttWidgetData;
+            return {
+              ...widget,
+              data: {
+                ...ganttData,
+                tasks: [...ganttData.tasks, newTask],
+              },
+            };
+          }
+          return widget;
+        });
+        const ganttExists = updatedWidgets.some((w) => w.type === 'gantt');
+        if (!ganttExists) {
+          const newGanttWidget: Widget = {
+            id: `gantt-${uuidv4()}`,
+            type: 'gantt',
+            data: {
+              tasks: [newTask],
+              title: 'Gantt Chart',
+              titleAlignment: 'left',
+            },
+          };
+          updatedWidgets.push(newGanttWidget);
+        }
+        updateLayoutsForNewWidgets(updatedWidgets);
+        localStorage.setItem('widgets', JSON.stringify(updatedWidgets));
+        return updatedWidgets;
+      });
+      await Excel.run(async (context) => {
+        const sheet = context.workbook.worksheets.getItem('Gantt');
+        const table = sheet.tables.getItemOrNullObject('GanttTable');
+        table.load(['name']);
+        await context.sync();
+        if (table.isNullObject) {
+          message.error('TasksTable not found in the Tasks worksheet.');
+          return;
+        }
+        table.rows.add(null, [
+          [
+            newTask.id,
+            newTask.name,
+            newTask.start,
+            newTask.end,
+            newTask.progress,
+            newTask.dependencies.join(', '),
+            newTask.color,
+          ],
+        ]);
+        await context.sync();
+      });
+      message.success('Task added successfully and synced to Excel!');
+    } catch (error) {
+      console.error('Error adding task to Gantt widget and Excel:', error);
+      message.error('Failed to add task to Gantt widget and Excel.');
+    }
+  };
+
   const updateMetricValue = async (widgetId: string) => {
     try {
       console.log(`Updating metric value for widget ID: ${widgetId}`);
@@ -2532,6 +2595,7 @@ const redo = () => {
         addReport,
         setReports,
         editReport,
+        addTasktoGantt,
         currentWorkbookId,
         deleteReport,
         setCurrentWorkbookId,
