@@ -45,13 +45,7 @@
   transition: none;
 }
 .react-grid-item:hover .react-resizable-handle {
-  background: repeating-linear-gradient(
-    135deg,
-    #000,
-    #000 1px,
-    transparent 1px,
-    transparent 4px
-  ) !important;
+  background: none;
   opacity: 1;
 }
 .react-grid-item .react-resizable-handle {
