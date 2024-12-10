@@ -2340,7 +2340,7 @@ const redo = () => {
         }
         const rowData: (string | number | boolean)[] = [
           newTask.name,
-          capitalizeFirstLetter(newTask.type),
+          capitalizeFirstLetter(newTask.type ?? ''),
           newTask.start,
           newTask.end,
           '',
