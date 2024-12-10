@@ -143,7 +143,7 @@ export interface Task {
   progress: number;
   dependencies?: string;
   custom_class?: string;
-  type?: string;
+  type: string;
   color?: string;
 }
 
