@@ -24,7 +24,6 @@ module.exports = async function (context, req) {
         },
       ],
     });
-
     if (!user || !user.Subscription) {
       context.log.info(`User with email ${email} not found or has no subscription.`);
       context.res = {

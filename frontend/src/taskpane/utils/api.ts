@@ -2,7 +2,10 @@ import { AxiosError } from "axios";
 import axios from 'axios';
 
 const API_BASE_URL = 'https://happy-forest-059a9d710.4.azurestaticapps.net/api';
-
+const storedToken = localStorage.getItem('token');
+if (storedToken) {
+  axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
+}
 export const createCheckoutSession = async (plan: 'monthly' | 'yearly', email: string) => {
   const response = await axios.post(`${API_BASE_URL}/create-checkout-session`, {
     plan,
@@ -18,13 +21,7 @@ export const checkSubscription = async (email: string) => {
     });
     return response.data;
   } catch (error: any) {
-    if (axios.isAxiosError(error) && error.response) {
-      console.error('Error in checkSubscription:', error.response.data);
-      throw new Error(error.response.data.error || 'An unknown error occurred.');
-    } else {
-      console.error('Error in checkSubscription:', error);
-      throw new Error('Network error. Please try again later.');
-    }
+    ...
   }
 };
 
@@ -33,7 +30,11 @@ export const loginUser = async (email: string, password: string): Promise<string
     email,
     password,
   });
-  return response.data.token;
+  const token = response.data.token;
+  localStorage.setItem('token', token);
+  axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
+  return token;
 };
 
 export const registerUser = async (email: string, password: string): Promise<void> => {
@@ -50,8 +51,7 @@ export const verifySubscription = async (sessionId: string) => {
     });
     return response.data;
   } catch (error) {
-    console.error('Error in verifySubscription:', error);
-    throw error;
+    ...
   }
 };
 
@@ -62,12 +62,16 @@ export const checkRegistration = async (email: string) => {
     });
     return response.data;
   } catch (error) {
-    console.error('Error in checkRegistration:', error);
-    throw error;
+    ...
   }
 };
 
 export const unsubscribeUser = async (email: string) => {
-  const response = await axios.post(`${API_BASE_URL}/unsubscribe`, { email });
+  const token = localStorage.getItem('token');
+  const response = await axios.post(`${API_BASE_URL}/unsubscribe`, { email }, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
   return response.data;
 };
