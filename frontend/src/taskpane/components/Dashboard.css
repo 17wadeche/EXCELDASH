@@ -44,6 +44,16 @@
 .react-grid-item {
   transition: none;
 }
+.react-grid-item:hover .react-resizable-handle {
+  background: repeating-linear-gradient(
+    135deg,
+    #000,
+    #000 1px,
+    transparent 1px,
+    transparent 4px
+  ) !important;
+  opacity: 1;
+}
 .react-grid-item .react-resizable-handle {
   z-index: 10;
   position: absolute;
@@ -52,10 +62,9 @@
   bottom: 0;
   right: 0;
   cursor: se-resize;
-  background-color: rgba(110, 110, 110, 0);
-}
-.react-grid-item:hover .react-resizable-handle {
-  background-color: rgba(0, 0, 0, 0.2);
+  background: none !important;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
 }
 .fixed-vertical-toolbar {
   position: fixed;
