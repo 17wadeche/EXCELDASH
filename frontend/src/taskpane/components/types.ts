@@ -138,12 +138,12 @@ export interface TextData {
 export interface Task {
   id: string;
   name: string;
-  start: string; // 'YYYY-MM-DD' format
-  end: string;   // 'YYYY-MM-DD' format
-  progress: number; // Between 0 and 100
-  dependencies?: string; // Comma-separated IDs of dependencies
-  custom_class?: string; // Optional CSS class
-  type?: string; // Add this if you are using it
+  start: string;
+  end: string;
+  progress: number;
+  dependencies?: string;
+  custom_class?: string;
+  type?: string;
   color?: string;
 }
 

@@ -2340,7 +2340,7 @@ const redo = () => {
             newTask.start,
             newTask.end,
             newTask.progress,
-            newTask.dependencies ? newTask.dependencies.join(', ') : '',
+            newTask.dependencies ? newTask.dependencies : '',
             newTask.color,
           ],
         ]);
