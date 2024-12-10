@@ -303,8 +303,8 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           ...cleanedValues,
           displayName: cleanedValues.displayName || 'Metric',
           titleAlignment: cleanedValues.titleAlignment || 'left',
-          worksheetName: cleanedValues.worksheetName, // Correct source
-          cellAddress: cleanedValues.cellAddress, // Correct source
+          worksheetName: cleanedValues.worksheetName,
+          cellAddress: cleanedValues.cellAddress,
         };
         break;
       default:
