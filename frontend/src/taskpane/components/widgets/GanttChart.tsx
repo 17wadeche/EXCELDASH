@@ -34,9 +34,9 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
 
   const injectTaskColors = (tasks: Task[]) => {
     const styleElementId = 'gantt-task-colors';
-    let styleElement = document.getElementById(styleElementId);
+    let styleElement = document.getElementById(styleElementId) as HTMLStyleElement | null;
     if (!styleElement) {
-      styleElement = document.createElement('style');
+      styleElement = document.createElement('style') as HTMLStyleElement;
       styleElement.id = styleElementId;
       document.head.appendChild(styleElement);
     }
@@ -45,18 +45,20 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
         styleElement.sheet.deleteRule(0);
       }
     }
-    tasks.forEach(task => {
+    const updatedTasks = tasks.map(task => {
       if (task.color) {
         const className = `task-${task.id}`;
-        task.custom_class = className;
         const rule = `
           .${className} .bar {
             fill: ${task.color} !important;
           }
         `;
         styleElement.sheet?.insertRule(rule, styleElement.sheet.cssRules.length);
+        return { ...task, custom_class: className };
       }
+      return task;
     });
+    setTasks(updatedTasks);
   };
 
   useEffect(() => {
@@ -174,7 +176,6 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
         visible={addTaskModalVisible}
         onCreate={handleAddTask}
         onCancel={() => setAddTaskModalVisible(false)}
-        existingTasks={tasks}
       />
     </div>
   );
