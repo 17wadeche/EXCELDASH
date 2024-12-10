@@ -2340,8 +2340,8 @@ const redo = () => {
             newTask.start,
             newTask.end,
             newTask.progress,
-            newTask.dependencies ? newTask.dependencies : '',
-            newTask.color,
+            newTask.dependencies ?? '',
+            newTask.color ?? '',
           ],
         ]);
         await context.sync();
