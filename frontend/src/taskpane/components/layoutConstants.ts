@@ -18,7 +18,7 @@ export const WIDGET_SIZES: { [key: string]: { w: number; h: number } } = {
   gantt: { w: 20, h: 160 },
   image: { w: 8, h: 100 },
   metric: { w: 4, h: 60 },
-  report: { w: 200 h: 160 },
+  report: { w: 200, h: 160 },
   line: { w: 6, h: 3 },
   title: { w: 12, h: 24 },
 };
