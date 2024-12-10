@@ -12,7 +12,7 @@ import jsPDF from 'jspdf';
 import PromptWidgetDetailsModal from '../components/PromptWidgetDetailsModal';
 import { DashboardBorderSettings } from '../components/types';
 import TitleWidgetComponent from '../components/TitleWidget';
-import { capitalizeFirstLetter } from '../../utils/stringUtils'; 
+import { capitalizeFirstLetter } from '../utils/stringUtils'; 
 
 const { Option } = Select;
 interface DashboardContextProps {
