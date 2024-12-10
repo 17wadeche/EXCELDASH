@@ -2339,7 +2339,7 @@ const redo = () => {
         }
         const rowData: (string | number | boolean)[] = [
           newTask.name,
-          newTask.type,
+          newTask.type ?? '',
           newTask.start,
           newTask.end,
           '',
