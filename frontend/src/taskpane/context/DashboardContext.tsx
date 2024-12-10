@@ -12,6 +12,7 @@ import jsPDF from 'jspdf';
 import PromptWidgetDetailsModal from '../components/PromptWidgetDetailsModal';
 import { DashboardBorderSettings } from '../components/types';
 import TitleWidgetComponent from '../components/TitleWidget';
+import { capitalizeFirstLetter } from '../../utils/stringUtils'; 
 
 const { Option } = Select;
 interface DashboardContextProps {
@@ -2339,7 +2340,7 @@ const redo = () => {
         }
         const rowData: (string | number | boolean)[] = [
           newTask.name,
-          newTask.type ?? '',
+          capitalizeFirstLetter(newTask.type),
           newTask.start,
           newTask.end,
           '',
