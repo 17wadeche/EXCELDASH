@@ -1462,6 +1462,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     [currentDashboard, dashboards, editDashboard, setDashboards, setCurrentDashboard, dashboardTitle, layouts, currentDashboardId]
   );
   useEffect(() => {
+    if (!currentDashboardId) return;
     const migrateWidgets = async () => {
       try {
         const response = await axios.get(`/api/dashboards/${currentDashboardId}/widgets`);
