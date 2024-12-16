@@ -1,4 +1,3 @@
-const Joi = require('joi');
 const axios = require('axios');
 
 module.exports = async function (context, req) {
@@ -6,18 +5,8 @@ module.exports = async function (context, req) {
   const id = req.params.id;
 
   if (method === 'post') {
-    const schema = Joi.object({
-      content: Joi.string().required(),
-    });
-
-    const { error, value } = schema.validate(req.body);
-    if (error) {
-      context.res = { status: 400, body: { error: error.details[0].message } };
-      return;
-    }
-
     try {
-      const response = await axios.post('https://happy-forest-059a9d710.4.azurestaticapps.net/api/templates', value);
+      const response = await axios.post('https://happy-forest-059a9d710.4.azurestaticapps.net/api/template', req.body);
       context.res = { status: 200, body: response.data };
     } catch (error) {
       context.log.error('Error creating template:', error);
@@ -25,7 +14,7 @@ module.exports = async function (context, req) {
     }
   } else if (method === 'get') {
     try {
-      let url = 'https://happy-forest-059a9d710.4.azurestaticapps.net/api/templates';
+      let url = 'https://happy-forest-059a9d710.4.azurestaticapps.net/api/template';
       if (id) url += `/${id}`;
 
       const response = await axios.get(url);
@@ -39,19 +28,8 @@ module.exports = async function (context, req) {
       context.res = { status: 400, body: { error: 'Template ID is required for updating.' } };
       return;
     }
-
-    const schema = Joi.object({
-      content: Joi.string().required(),
-    });
-
-    const { error, value } = schema.validate(req.body);
-    if (error) {
-      context.res = { status: 400, body: { error: error.details[0].message } };
-      return;
-    }
-
     try {
-      const response = await axios.put(`https://happy-forest-059a9d710.4.azurestaticapps.net/api/template/${id}`, value);
+      const response = await axios.put(`https://happy-forest-059a9d710.4.azurestaticapps.net/api/template/${id}`, req.body);
       context.res = { status: 200, body: response.data };
     } catch (error) {
       context.log.error('Error updating template:', error);
