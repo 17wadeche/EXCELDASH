@@ -8,7 +8,6 @@ const storedToken = localStorage.getItem('token');
 if (storedToken) {
   axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
 }
-
 export const createCheckoutSession = async (plan: 'monthly' | 'yearly', email: string) => {
   const response = await axios.post(`${API_BASE_URL}/create-checkout-session`, {
     plan,
@@ -16,7 +15,6 @@ export const createCheckoutSession = async (plan: 'monthly' | 'yearly', email: s
   });
   return response.data.url;
 };
-
 export const checkSubscription = async (email: string) => {
   try {
     const response = await axios.get(`${API_BASE_URL}/check-subscription`, {
@@ -28,7 +26,6 @@ export const checkSubscription = async (email: string) => {
     throw new Error(error.response?.data?.error || 'An unknown error occurred.');
   }
 };
-
 export const loginUser = async (email: string, password: string): Promise<string> => {
   const response = await axios.post(`${API_BASE_URL}/login`, {
     email,
@@ -37,17 +34,14 @@ export const loginUser = async (email: string, password: string): Promise<string
   const token = response.data.token;
   localStorage.setItem('token', token);
   axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-
   return token;
 };
-
 export const registerUser = async (email: string, password: string): Promise<void> => {
   await axios.post(`${API_BASE_URL}/register`, {
     email,
     password,
   });
 };
-
 export const verifySubscription = async (sessionId: string) => {
   try {
     const response = await axios.get(`${API_BASE_URL}/verify-subscription`, {
@@ -59,7 +53,6 @@ export const verifySubscription = async (sessionId: string) => {
     throw new Error(error.response?.data?.error || 'An unknown error occurred.');
   }
 };
-
 export const checkRegistration = async (email: string) => {
   try {
     const response = await axios.get(`${API_BASE_URL}/check-registration`, {
@@ -71,7 +64,6 @@ export const checkRegistration = async (email: string) => {
     throw new Error(error.response?.data?.error || 'An unknown error occurred.');
   }
 };
-
 export const unsubscribeUser = async (email: string) => {
   const token = localStorage.getItem('token');
   try {
@@ -86,42 +78,34 @@ export const unsubscribeUser = async (email: string) => {
     throw new Error(error.response?.data?.error || 'An unknown error occurred.');
   }
 };
-
 export const getDashboards = async (): Promise<DashboardItem[]> => {
   const response = await axios.get(`${API_BASE_URL}/dashboards`);
   return response.data;
 };
-
 export const getDashboardById = async (id: string): Promise<DashboardItem> => {
   const response = await axios.get(`${API_BASE_URL}/dashboards/${id}`);
   return response.data;
 };
-
 export const createDashboard = async (dashboard: DashboardItem): Promise<DashboardItem> => {
   const response = await axios.post(`${API_BASE_URL}/dashboards`, dashboard);
   return response.data;
 };
-
 export const updateDashboard = async (id: string, dashboard: DashboardItem): Promise<DashboardItem> => {
   const response = await axios.put(`${API_BASE_URL}/dashboards/${id}`, dashboard);
   return response.data;
 };
-
 export const getTemplates = async (): Promise<TemplateItem[]> => {
   const response = await axios.get(`${API_BASE_URL}/templates`);
   return response.data;
 };
-
 export const getTemplateById = async (id: string): Promise<TemplateItem> => {
   const response = await axios.get(`${API_BASE_URL}/templates/${id}`);
   return response.data;
 };
-
 export const createTemplate = async (template: TemplateItem): Promise<TemplateItem> => {
   const response = await axios.post(`${API_BASE_URL}/templates`, template);
   return response.data;
 };
-
 export const updateTemplate = async (id: string, template: TemplateItem): Promise<TemplateItem> => {
   const response = await axios.put(`${API_BASE_URL}/templates/${id}`, template);
   return response.data;

@@ -175,6 +175,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     };
     loadCurrentDashboard();
   }, [currentDashboardId]);
+
   const syncCurrentDashboardToServer = async (
     updatedWidgets: Widget[],
     updatedLayouts: { [key: string]: GridLayoutItem[] },
@@ -369,8 +370,8 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     setReports(updatedReports);
   };
   useEffect(() => {
-    if (!currentDashboardId) return;
     const fetchWidgetsFromServer = async () => {
+      if (!currentDashboardId) return;
       try {
         const response = await axios.get(`/api/dashboards/${currentDashboardId}/widgets`);
         const fetchedWidgets = response.data;
