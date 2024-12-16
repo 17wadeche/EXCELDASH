@@ -3,7 +3,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import Dashboard from './Dashboard';
 import { DashboardContext } from '../context/DashboardContext';
 import { useParams } from 'react-router-dom';
-import { DashboardItem } from './types'; // Ensure this import exists
+import { DashboardItem } from './types';
 
 const DashboardPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();

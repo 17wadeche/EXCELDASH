@@ -125,7 +125,8 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
   useEffect(() => {
     const fetchDashboards = async () => {
       try {
-        const response = await axios.get('/api/dashboards'); 
+        const response = await axios.get('/api/dashboards');
+        console.log('Fetched dashboards:', response.data);
         const fetchedDashboards: DashboardItem[] = response.data;
         setDashboards(fetchedDashboards);
         if (fetchedDashboards.length > 0) {
