@@ -9,6 +9,7 @@ import html2canvas from 'html2canvas';
 import SalesChart from '../components/widgets/SalesChart';
 import isEqual from 'lodash.isequal'
 import jsPDF from 'jspdf';
+import axios from 'axios';
 import PromptWidgetDetailsModal from '../components/PromptWidgetDetailsModal';
 import { DashboardBorderSettings } from '../components/types';
 import TitleWidgetComponent from '../components/TitleWidget';
@@ -96,82 +97,118 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       titleAlignment: 'center',
     } as TitleWidgetData,
   };
-  const [widgets, setWidgets] = useState<Widget[]>(
-    initialWidgets && initialWidgets.length > 0 ? initialWidgets : [defaultTitleWidget]
-  );
+  const [widgets, setWidgetsState] = useState<Widget[]>(initialWidgets && initialWidgets.length > 0 ? initialWidgets : [defaultTitleWidget]);
   const [dashboards, setDashboards] = useState<DashboardItem[]>([]);
   const [dashboardTitle, setDashboardTitle] = useState<string>('My Dashboard');
   const [isFullscreenActive, setIsFullscreenActive] = useState(false);
   const [currentDashboard, setCurrentDashboard] = useState<DashboardItem | null>(null);
   const [currentTemplateId, setCurrentTemplateId] = useState<string | null>(null);
-  const [widgetToPrompt, setWidgetToPrompt] = useState<{
-    widget: Widget;
-    onComplete: (updatedWidget: Widget) => void;
-  } | null>(null);
-  const [isChartSelectionModalVisible, setIsChartSelectionModalVisible] = useState(false);
-  const [availableCharts, setAvailableCharts] = useState<{ key: number; name: string }[]>([]);
+  const [widgetToPrompt, setWidgetToPrompt] = useState<{widget: Widget; onComplete: (updatedWidget: Widget) => void;} | null>(null);
   const [layouts, setLayouts] = useState<{ [key: string]: GridLayoutItem[] }>(initialLayouts);
-  const [currentWorkbookId, setCurrentWorkbookId] = useState<string | undefined>(
-    initialWorkbookId ?? undefined
-  );
+  const [currentWorkbookId, setCurrentWorkbookId] = useState<string | undefined>(initialWorkbookId ?? undefined);
   const [reports, setReports] = useState<ReportItem[]>([]);
-  const [pastStates, setPastStates] = useState<
-  { widgets: Widget[]; layouts: { [key: string]: GridLayoutItem[] } }[]
-  >([]);
-  const [futureStates, setFutureStates] = useState<
-    { widgets: Widget[]; layouts: { [key: string]: GridLayoutItem[] } }[]
-  >([]);
+  const [pastStates, setPastStates] = useState<{ widgets: Widget[]; layouts: { [key: string]: GridLayoutItem[] } }[] >([]);
+  const [futureStates, setFutureStates] = useState<{ widgets: Widget[]; layouts: { [key: string]: GridLayoutItem[] } }[]>([]);
   const [availableWorksheets, setAvailableWorksheets] = useState<string[]>([]);
-  const [isNameModalVisible, setIsNameModalVisible] = useState(false);
-  const [newDashboardName, setNewDashboardName] = useState('');
-  const [ganttEventHandlers, setGanttEventHandlers] = useState<((event: Excel.WorksheetChangedEventArgs) => Promise<void>)[]>([]);
   const ganttEventHandlersRef = useRef<((event: Excel.WorksheetChangedEventArgs) => Promise<void>)[]>([]);
   const [currentDashboardId, setCurrentDashboardId] = useState<string | null>(null);
   const [selectedRangeAddress, setSelectedRangeAddress] = useState<string | null>(null);
   const canUndo = pastStates.length > 0;
   const canRedo = futureStates.length > 0;
-
+  const isUndoRedoRef = useRef(false);
+  const [dashboardBorderSettings, setDashboardBorderSettings] = useState<DashboardBorderSettings>({
+    showBorder: false,
+    color: '#000000',
+    thickness: 1,
+    style: 'solid',
+  });
   useEffect(() => {
-    const updateCurrentDashboard = () => {
-      const dashboard = dashboards.find((d) => d.id === currentDashboardId);
-      if (dashboard) {
-        if (dashboard.workbookId === currentWorkbookId) {
-          if (!isEqual(dashboard, currentDashboard)) {
-            setCurrentDashboard(dashboard);
-            if (!isEqual(dashboard.components, widgets)) {
-              setWidgets(dashboard.components);
-            }
-            if (!isEqual(dashboard.layouts || {}, layouts)) {
-              setLayouts(dashboard.layouts || {});
-            }
-            if (dashboard.title !== dashboardTitle) {
-              setDashboardTitle(dashboard.title || 'My Dashboard');
-            }
-            if (dashboard.layouts && Object.keys(dashboard.layouts).length > 0 && !isEqual(dashboard.layouts, layouts)) {
-              setLayouts(dashboard.layouts);
-            } else {
-              updateLayoutsForNewWidgets(dashboard.components);
-            }
-          }
-        } else {
-          message.warning('The selected dashboard is not associated with the currently open workbook.');
-          resetDashboard();
+    const fetchDashboards = async () => {
+      try {
+        const response = await axios.get('/api/dashboards'); 
+        const fetchedDashboards: DashboardItem[] = response.data;
+        setDashboards(fetchedDashboards);
+        if (fetchedDashboards.length > 0) {
+          const firstDashboard = fetchedDashboards[0];
+          setCurrentDashboardId(firstDashboard.id);
         }
-      } else {
-        resetDashboard();
+      } catch (error) {
+        console.error('Error fetching dashboards:', error);
+        message.error('Failed to load dashboards from server.');
       }
     };
-    updateCurrentDashboard();
-  }, [currentDashboardId, dashboards, currentWorkbookId]);
-  const isUndoRedoRef = useRef(false);
-  const isInitialRender = useRef(true);
-  
+    fetchDashboards();
+  }, []);
+  const setWidgets = (newWidgets: Widget[]) => {
+    setWidgetsState(newWidgets);
+  };
+  useEffect(() => {
+    const loadCurrentDashboard = async () => {
+      if (!currentDashboardId) return;
+      try {
+        const response = await axios.get(`/api/dashboards/${currentDashboardId}`);
+        const db: DashboardItem = response.data;
+        setCurrentDashboard(db);
+        let updatedWidgets = db.components;
+        if (!updatedWidgets.some(w => w.type === 'title')) {
+          updatedWidgets = [defaultTitleWidget, ...updatedWidgets];
+        }
+        setWidgetsState(updatedWidgets);
+        setDashboardTitle(db.title || 'My Dashboard');
+        if (db.layouts && Object.keys(db.layouts).length > 0) {
+          setLayouts(db.layouts);
+        } else {
+          updateLayoutsForNewWidgets(updatedWidgets);
+        }
+      } catch (error) {
+        console.error(`Error loading dashboard ${currentDashboardId}:`, error);
+        message.error('Failed to load the selected dashboard.');
+      }
+    };
+    loadCurrentDashboard();
+  }, [currentDashboardId]);
+  const syncCurrentDashboardToServer = async (updatedWidgets: Widget[], updatedLayouts: { [key: string]: GridLayoutItem[] }, updatedTitle: string) => {
+    if (!currentDashboardId || !currentDashboard) return;
+    try {
+      const updatedDashboard: DashboardItem = {
+        ...currentDashboard,
+        components: updatedWidgets,
+        layouts: updatedLayouts,
+        title: updatedTitle
+      };
+      await axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard);
+      setCurrentDashboard(updatedDashboard);
+    } catch (error) {
+      console.error('Error syncing dashboard to server:', error);
+      message.error('Failed to save changes to server.');
+    }
+  };
+  const updateWidgetsWithHistory = (updateFn: (prevWidgets: Widget[]) => Widget[]) => {
+    setWidgetsState((prevWidgets) => {
+      const newWidgets = updateFn(prevWidgets);
+      setPastStates((prev) => [...prev, { widgets: prevWidgets, layouts }]);
+      setFutureStates([]);
+      if (currentDashboardId && currentDashboard) {
+        const updatedDashboard: DashboardItem = {
+          ...currentDashboard,
+          components: newWidgets,
+          layouts,
+          title: dashboardTitle,
+        };
+        axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard)
+          .catch(err => {
+            console.error('Error syncing updates to server:', err);
+            message.error('Failed to save changes to server.');
+          });
+      }
+      return newWidgets;
+    });
+  };
   useEffect(() => {
     if (isUndoRedoRef.current) {
       isUndoRedoRef.current = false;
     }
   }, [widgets, layouts]);
-
   const resetDashboard = () => {
     setCurrentDashboard(null);
     setWidgets([defaultTitleWidget]);
@@ -179,43 +216,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     setDashboardTitle('My Dashboard');
     console.log('Dashboard reset to default.');
   };
-
-  useEffect(() => {
-    if (
-      currentDashboard &&
-      currentDashboard.layouts &&
-      Object.keys(currentDashboard.layouts).length > 0 &&
-      !isEqual(layouts, currentDashboard.layouts)
-    ) {
-      setLayouts(currentDashboard.layouts);
-    }
-  }, [currentDashboard]);
-  
-  const setDefaultLayouts = () => {
-    const newLayouts = { ...initialLayouts };
-    ['lg', 'md', 'sm'].forEach((breakpoint) => {
-      const breakpointCols = GRID_COLS[breakpoint as Breakpoint];
-      let y = 0;
-      newLayouts[breakpoint] = widgets.map((widget) => {
-        const size = WIDGET_SIZES[widget.type] || { w: 8, h: 4 };
-        let x = widget.type === 'title' ? Math.floor((breakpointCols - size.w) / 2) : 0;
-        const layoutItem: GridLayoutItem = {
-          i: widget.id,
-          x,
-          y,
-          w: size.w,
-          h: size.h,
-          minW: 1,
-          minH: 1,
-        };
-        y += size.h;
-        return layoutItem;
-      });
-    });
-    setLayouts(newLayouts);
-    console.log('Default layouts set.');
-  };
-
   const writeMetricValue = async (
     widgetId: string,
     newValue: number,
@@ -267,25 +267,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     },
     []
   );
-
-  const [dashboardBorderSettings, setDashboardBorderSettings] = useState<DashboardBorderSettings>(
-    () => {
-      const storedSettings = localStorage.getItem('dashboardBorderSettings');
-      return storedSettings
-        ? JSON.parse(storedSettings)
-        : {
-            showBorder: false,
-            color: '#000000',
-            thickness: 1,
-            style: 'solid',
-          };
-    }
-  );
-
-  useEffect(() => {
-    localStorage.setItem('dashboardBorderSettings', JSON.stringify(dashboardBorderSettings));
-  }, [dashboardBorderSettings]);
-
   const handleWidgetDetailsComplete = (updatedWidget: Widget) => {
     if (!widgetToPrompt) {
       console.warn('widgetToPrompt is null.');
@@ -294,13 +275,11 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     const { widget, onComplete } = widgetToPrompt;
     updateWidgetsWithHistory((prevWidgets) => {
       const newWidgets = prevWidgets.map((w) => (w.id === widget.id ? updatedWidget : w));
-      localStorage.setItem('widgets', JSON.stringify(newWidgets));
       return newWidgets;
     });
     onComplete(updatedWidget);
     setWidgetToPrompt(null);
   };
-
   useEffect(() => {
     if (!initialAvailableWorksheets.length) {
       const fetchSheets = async () => {
@@ -312,91 +291,29 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       setAvailableWorksheets(initialAvailableWorksheets);
     }
   }, []);
-
   useEffect(() => {
-    const initializeDashboards = async () => {
-      const storedDashboards: DashboardItem[] = JSON.parse(localStorage.getItem('dashboards') || '[]');
-      const migratedDashboards = [...storedDashboards];
-      let workbookId = await getWorkbookIdFromProperties();
-      if (!workbookId) {
-        workbookId = uuidv4();
-        await setWorkbookIdInProperties(workbookId);
+    const autosaveInterval = setInterval(async () => {
+      if (!currentDashboardId || !currentDashboard) {
+        return;
       }
-      setCurrentWorkbookId(workbookId);
-      migratedDashboards.forEach((dashboard) => {
-        if (!dashboard.workbookId) {
-          dashboard.workbookId = workbookId;
-        }
-      });
-      setDashboards(migratedDashboards);
-      const storedCurrentDashboardId = localStorage.getItem('currentDashboardId') || null;
-      if (storedCurrentDashboardId) {
-        const dashboard = migratedDashboards.find((d) => d.id === storedCurrentDashboardId);
-        if (dashboard) {
-          setCurrentDashboardId(dashboard.id);
-          setCurrentDashboard(dashboard);
-          setWidgets(dashboard.components);
-          const validLayouts = fixInvalidLayouts(dashboard.layouts || {}, dashboard.components);
-          setLayouts(validLayouts);
-          setDashboardTitle(dashboard.title || 'My Dashboard');
-          return;
-        }
-      }
-      const matchingDashboard = migratedDashboards.find(
-        (dashboard) => dashboard.workbookId === workbookId
-      );
-      if (matchingDashboard) {
-        setCurrentDashboardId(matchingDashboard.id);
-        setCurrentDashboard(matchingDashboard);
-        setWidgets(matchingDashboard.components);
-        const validLayouts = fixInvalidLayouts(matchingDashboard.layouts || {}, matchingDashboard.components);
-        if (Object.keys(validLayouts).length === 0) {
-          updateLayoutsForNewWidgets(matchingDashboard.components);
-        } else {
-          setLayouts(validLayouts);
-        }
-        setDashboardTitle(matchingDashboard.title || 'My Dashboard');
-      } else {
-        setCurrentDashboard(null);
-        setWidgets([defaultTitleWidget]);
-        setLayouts({});
-        setDashboardTitle('My Dashboard');
-        console.log('Dashboard reset to default.');
-      }
-    };
-    initializeDashboards();
-  }, []);
-
-  useEffect(() => {
-    const autosaveInterval = setInterval(() => {
-      if (currentDashboard) {
-        const updatedDashboards = dashboards.map((dashboard) =>
-          dashboard.id === currentDashboard.id
-            ? { ...currentDashboard, components: widgets, layouts, title: dashboardTitle }
-            : dashboard
-        );
-        setDashboards(updatedDashboards);
-        localStorage.setItem('dashboards', JSON.stringify(updatedDashboards));
-        console.log('Autosaved at', new Date().toLocaleTimeString());
+      try {
+        const updatedDashboard: DashboardItem = {
+          ...currentDashboard,
+          components: widgets,
+          layouts: layouts,
+          title: dashboardTitle,
+        };
+        await axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard);
+        console.log('Server-based autosave completed at', new Date().toLocaleTimeString());
+      } catch (error) {
+        console.error('Error during server-based autosave:', error);
+        message.error('Failed to autosave dashboard to the server.');
       }
     }, 2 * 60 * 1000);
     return () => {
       clearInterval(autosaveInterval);
     };
-  }, [widgets, layouts, dashboardTitle, currentDashboard, dashboards]);
-
-  useEffect(() => {
-    const initializeReports = async () => {
-      const storedReports = JSON.parse(localStorage.getItem('reports') || '[]');
-      const currentWorkbookId = await getWorkbookIdFromProperties();
-      const workbookReports = storedReports.filter(
-        (report: ReportItem) => report.workbookId === currentWorkbookId
-      );
-      setReports(workbookReports || []);
-    };
-    initializeReports();
-  }, []);
-
+  }, [widgets, layouts, dashboardTitle, currentDashboard, currentDashboardId]);
   useEffect(() => {
     if (!initialWorkbookId) {
       const initializeWorkbookId = async () => {
@@ -408,17 +325,14 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       setCurrentWorkbookId(initialWorkbookId);
     }
   }, []);
-
   const isInDialog = (): boolean => {
     return !!Office?.context?.ui?.messageParent;
   };
-
   const getAvailableWorksheets = async (): Promise<string[]> => {
     if (isInDialog()) {
       console.log('Running in dialog; skipping getAvailableWorksheets.');
       return [];
     }
-  
     try {
       return await Excel.run(async (context: Excel.RequestContext) => {
         const sheets = context.workbook.worksheets;
@@ -432,151 +346,161 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       return [];
     }
   };
-
   const addReport = (report: ReportItem) => {
     const updatedReports = [...reports, report];
     setReports(updatedReports);
-    localStorage.setItem('reports', JSON.stringify(updatedReports));
   };
   const editReport = (report: ReportItem) => {
     const updatedReports = reports.map((r) => (r.id === report.id ? report : r));
     setReports(updatedReports);
-    localStorage.setItem('reports', JSON.stringify(updatedReports));
   };
   const deleteReport = (id: string) => {
     const updatedReports = reports.filter((r) => r.id !== id);
     setReports(updatedReports);
-    localStorage.setItem('reports', JSON.stringify(updatedReports));
   };
   useEffect(() => {
-    const storedWidgets = JSON.parse(localStorage.getItem('widgets') || '[]');
-    const needsMigration = storedWidgets.some(
-      (widget: Widget) => (widget.type === 'chart' || widget.type === 'image') && 'chartIndex' in widget.data
-    );
-    if (needsMigration) {
-      migrateChartIndexToAssociatedRange();
-    } else {
-      const updatedWidgets = storedWidgets.map((widget: any) => {
-        switch (widget.type) {
-          case 'image': {
-            const imageData: ImageWidgetData = {
-              src: widget.data.src || '',
-            };
-            return { ...widget, data: imageData };
+    if (!currentDashboardId) return;
+    const fetchWidgetsFromServer = async () => {
+      try {
+        const response = await axios.get(`/api/dashboards/${currentDashboardId}/widgets`);
+        const fetchedWidgets = response.data;
+        const needsMigration = fetchedWidgets.some(
+          (widget: Widget) => (widget.type === 'chart' || widget.type === 'image') && 'chartIndex' in widget.data
+        );
+        if (needsMigration) {
+          migrateChartIndexToAssociatedRange();
+        } else {
+          const updatedWidgets = fetchedWidgets.map((widget: any) => {
+            switch (widget.type) {
+              case 'image': {
+                const imageData: ImageWidgetData = {
+                  src: widget.data.src || '',
+                };
+                return { ...widget, data: imageData };
+              }
+              case 'chart': {
+                const chartData: ChartData = {
+                  type: widget.data.type || 'bar',
+                  title: widget.data.title || 'Sample Chart',
+                  labels: widget.data.labels || [],
+                  datasets: widget.data.datasets || [],
+                  titleAlignment: widget.data.titleAlignment || 'left',
+                  associatedRange: widget.data.associatedRange || '',
+                  worksheetName: widget.data.worksheetName || '',
+                };
+                return { ...widget, data: chartData };
+              }
+              case 'metric': {
+                const metricData: MetricData = {
+                  cellAddress: widget.data.cellAddress || '',
+                  worksheetName: widget.data.worksheetName || '',
+                  targetValue: widget.data.targetValue ?? 0,
+                  comparison: widget.data.comparison || 'greater',
+                  fontSize: widget.data.fontSize ?? 28,
+                  displayName: widget.data.displayName || 'KPI',
+                  format: widget.data.format || 'number',
+                  currentValue: widget.data.currentValue ?? 0,
+                  titleAlignment: widget.data.titleAlignment || 'left',
+                  backgroundColor: '#ffffff',
+                  textColor: '#000000',
+                };
+                return { ...widget, data: metricData };
+              }
+              case 'text': {
+                const textData: TextData = {
+                  content: widget.data.content || 'Your Dashboard Title',
+                  fontSize: widget.data.fontSize ?? 24,
+                  textColor: widget.data.textColor || '#000000',
+                  backgroundColor: widget.data.backgroundColor || '#ffffff',
+                  titleAlignment: widget.data.titleAlignment || 'left',
+                };
+                return { ...widget, data: textData };
+              }
+              case 'gantt': {
+                const ganttData: GanttWidgetData = {
+                  tasks: widget.data.tasks || [],
+                  title: widget.data.title || 'Gantt Chart',
+                  titleAlignment: widget.data.titleAlignment || 'left',
+                };
+                return { ...widget, data: ganttData };
+              }
+              case 'report': {
+                const reportData: ReportData = {
+                  columns: widget.data.columns || [],
+                  data: widget.data.data || [],
+                };
+                return { ...widget, data: reportData };
+              }
+              default:
+                console.warn(`Unknown widget type: ${widget.type}. Widget will be skipped.`);
+                return null;
+            }
+          }).filter((widget: Widget | null) => widget !== null);
+          if (!updatedWidgets.some((w: Widget) => w.type === 'title')) {
+            updatedWidgets.unshift(defaultTitleWidget);
           }
-          case 'chart': {
-            const chartData: ChartData = {
-              type: widget.data.type || 'bar',
-              title: widget.data.title || 'Sample Chart',
-              labels: widget.data.labels || [],
-              datasets: widget.data.datasets || [],
-              titleAlignment: widget.data.titleAlignment || 'left',
-              associatedRange: widget.data.associatedRange || '',
-              worksheetName: widget.data.worksheetName || '',
-            };
-            return { ...widget, data: chartData };
-          }
-          case 'metric': {
-            const metricData: MetricData = {
-              cellAddress: widget.data.cellAddress || '',
-              worksheetName: widget.data.worksheetName || '',
-              targetValue: widget.data.targetValue ?? 0,
-              comparison: widget.data.comparison || 'greater',
-              fontSize: widget.data.fontSize ?? 28,
-              displayName: widget.data.displayName || 'KPI',
-              format: widget.data.format || 'number',
-              currentValue: widget.data.currentValue ?? 0,
-              titleAlignment: widget.data.titleAlignment || 'left',
-              backgroundColor: '#ffffff',
-              textColor: '#000000',
-            };
-            return { ...widget, data: metricData };
-          }
-          case 'text': {
-            const textData: TextData = {
-              content: widget.data.content || 'Your Dashboard Title',
-              fontSize: widget.data.fontSize ?? 24,
-              textColor: widget.data.textColor || '#000000',
-              backgroundColor: widget.data.backgroundColor || '#ffffff',
-              titleAlignment: widget.data.titleAlignment || 'left',
-            };
-            return { ...widget, data: textData };
-          }
-          case 'gantt': {
-            const ganttData: GanttWidgetData = {
-              tasks: widget.data.tasks || [],
-              title: widget.data.title || 'Gantt Chart',
-              titleAlignment: widget.data.titleAlignment || 'left',
-            };
-            return { ...widget, data: ganttData };
-          }
-          case 'report': {
-            const reportData: ReportData = {
-              columns: widget.data.columns || [],
-              data: widget.data.data || [],
-            };
-            return { ...widget, data: reportData };
-          }
-          default:
-            console.warn(`Unknown widget type: ${widget.type}. Widget will be skipped.`);
-            return null;
+          setWidgets(updatedWidgets);
         }
-      }).filter((widget: Widget | null) => widget !== null);
-      if (!updatedWidgets.some((w: Widget) => w.type === 'title')) {
-        updatedWidgets.unshift(defaultTitleWidget);
+      } catch (error) {
+        console.error('Failed to fetch widgets:', error);
+        message.error('Failed to load widgets from server.');
       }
-      setWidgets(updatedWidgets);
-    }
-  }, []);
-
-  const saveAsTemplate = () => {
-    const template = {
-      id: uuidv4(),
-      name: dashboardTitle || 'Untitled Template',
-      widgets: widgets,
-      layouts: layouts,
     };
-    const storedTemplates = JSON.parse(localStorage.getItem('dashboardTemplates') || '[]');
-    storedTemplates.push(template);
-    localStorage.setItem('dashboardTemplates', JSON.stringify(storedTemplates));
-    message.success('Dashboard saved as template!');
+    fetchWidgetsFromServer();
+  }, [currentDashboardId]); 
+  const saveAsTemplate = async () => {
+    try {
+      const template = {
+        id: uuidv4(),
+        name: dashboardTitle || 'Untitled Template',
+        widgets: widgets,
+        layouts: layouts,
+      };
+      const response = await axios.post('/api/templates', template);
+      message.success('Dashboard saved as template!');
+    } catch (error) {
+      console.error('Error saving template:', error);
+      message.error('Failed to save template to the server.');
+    }
   };
-  
-  const saveTemplate = () => {
+  const saveTemplate = async () => {
     if (!currentDashboardId) {
       message.warning('No dashboard is currently active.');
       return;
     }
-    const storedDashboards = JSON.parse(localStorage.getItem('dashboards') || '[]');
-    const updatedDashboards = storedDashboards.map((dashboard: DashboardItem) => {
-      if (dashboard.id === currentDashboardId) {
-        return {
-          ...dashboard,
-          title: dashboardTitle,
-          components: widgets,
-          layouts: layouts,
-        };
+    try {
+      const dashboardToSave = {
+        title: dashboardTitle,
+        components: widgets,
+        layouts: layouts,
       }
-      return dashboard;
-    });
-    localStorage.setItem('dashboards', JSON.stringify(updatedDashboards));
-    setDashboards(updatedDashboards);
-    message.success('Dashboard saved successfully!');
+      const response = await axios.put(`/api/dashboards/${currentDashboardId}`, dashboardToSave);
+      const updatedDashboard = response.data;
+      setDashboards((prevDashboards) => {
+        const index = prevDashboards.findIndex(d => d.id === currentDashboardId);
+        if (index === -1) return prevDashboards;
+        const newDashboards = [...prevDashboards];
+        newDashboards[index] = updatedDashboard;
+        return newDashboards;
+      });
+      message.success('Dashboard saved successfully!');
+    } catch (error) {
+      console.error('Error saving dashboard:', error);
+      message.error('Failed to save dashboard to the server.');
+    }
   };
   enum ReferenceStyle {
     a1 = 0,
     r1c1 = 1,
   }
-
   const excelSerialToDateString = (serial: number): string => {
     if (typeof serial !== 'number' || isNaN(serial)) {
       console.warn('Invalid serial number:', serial);
       return '';
     }
     const date = new Date((serial - 25569) * 86400000);
-    return date.toISOString().split('T')[0]; // 'YYYY-MM-DD'
+    return date.toISOString().split('T')[0];
   };
-  
   const applyListDataValidation = (
     range: Excel.Range,
     source: string,
@@ -604,7 +528,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       title: promptTitle,
     };
   };
-
   const insertProjectManagementTemplate = async () => {
     try {
       await Excel.run(async (context: Excel.RequestContext) => {
@@ -826,7 +749,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       message.error('Failed to insert template into Excel.');
     }
   };
-
   const createGanttChart = async () => {
     try {
       await Excel.run(async (context: Excel.RequestContext) => {
@@ -864,22 +786,22 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
               (completedSerial !== '' && typeof completedSerial !== 'number')
             ) {
               console.warn(`Invalid serial numbers for task: ${taskName}, row`);
-              return null; // Skip invalid rows
+              return null;
             }
             const startDate: Date = excelSerialToDate(startSerial);
             const endDate: Date = excelSerialToDate(endSerial);
             const completedDate: Date | undefined =
               completedSerial !== '' ? excelSerialToDate(completedSerial) : undefined;
             if (!(startDate instanceof Date) || isNaN(startDate.getTime())) {
-              console.warn(`Invalid start date for task: ${taskName}, startDate`);
+              console.warn(`Invalid start date for task: ${taskName}`);
               return null;
             }
             if (!(endDate instanceof Date) || isNaN(endDate.getTime())) {
-              console.warn(`Invalid end date for task: ${taskName}, endDate`);
+              console.warn(`Invalid end date for task: ${taskName}`);
               return null;
             }
             if (completedSerial !== '' && (!completedDate || isNaN(completedDate.getTime()))) {
-              console.warn(`Invalid completed date for task: ${taskName}, completedDate`);
+              console.warn(`Invalid completed date for task: ${taskName}`);
               return null;
             }
             const dependencies: string = dependenciesRaw
@@ -898,7 +820,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
               color = '#FF0000';
             }
             return {
-              id: `task-${taskName.replace(/\s+/g, '-')}`, 
+              id: `task-${taskName.replace(/\s+/g, '-')}`,
               name: taskName,
               type: taskType.toLowerCase(),
               start: startDate.toISOString(),
@@ -910,8 +832,8 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           })
           .filter((task) => task !== null) as Task[];
         setWidgets((prevWidgets) => {
-          const ganttWidgetExists = prevWidgets.some((widget) => widget.type === 'gantt');
           let updatedWidgets: Widget[];
+          const ganttWidgetExists = prevWidgets.some((widget) => widget.type === 'gantt');
           if (ganttWidgetExists) {
             updatedWidgets = prevWidgets.map((widget) => {
               if (widget.type === 'gantt') {
@@ -938,105 +860,123 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
               ...currentDashboard,
               components: updatedWidgets,
             };
-            setCurrentDashboard(updatedDashboard);
-            editDashboard(updatedDashboard);
-            const updatedDashboards = dashboards.map((d) =>
-              d.id === currentDashboard.id ? updatedDashboard : d
-            );
-            setDashboards(updatedDashboards);
-            localStorage.setItem('dashboards', JSON.stringify(updatedDashboards));
+            editDashboard(updatedDashboard)
+              .then(() => {
+                setCurrentDashboard(updatedDashboard);
+                message.success('Gantt chart data prepared and saved successfully!');
+              })
+              .catch((err) => {
+                console.error('Error saving updated dashboard:', err);
+                message.error('Failed to save updated Gantt chart to the server.');
+              });
           }
   
-          localStorage.setItem('widgets', JSON.stringify(updatedWidgets));
           return updatedWidgets;
         });
-  
-        message.success('Gantt chart data prepared successfully.');
       });
     } catch (error) {
       console.error('Error creating Gantt chart:', error);
       message.error('Failed to create Gantt chart.');
     }
   };
-
   const generateProjectManagementTemplateAndGanttChart = async () => {
     await insertProjectManagementTemplate();
     await createGanttChart();
   };
-
   const undo = () => {
-  if (pastStates.length > 0) {
-    isUndoRedoRef.current = true;
-    const previousState = pastStates[pastStates.length - 1];
-    setPastStates(pastStates.slice(0, pastStates.length - 1));
-    setFutureStates([{ widgets, layouts }, ...futureStates]);
-    setWidgets(previousState.widgets);
-    setLayouts(previousState.layouts);
-  }
-};
-
-const redo = () => {
-  if (futureStates.length > 0) {
-    isUndoRedoRef.current = true;
-    const nextState = futureStates[0];
-    setFutureStates(futureStates.slice(1));
-    setPastStates([...pastStates, { widgets, layouts }]);
-    setWidgets(nextState.widgets);
-    setLayouts(nextState.layouts);
-  }
-};
-  
-
-  const MAX_VERSIONS = 5;
-  
-  const saveDashboardVersion = () => {
-    if (!currentDashboardId) {
-      message.error('No dashboard is currently active.');
-      return;
+    if (pastStates.length > 0) {
+      isUndoRedoRef.current = true;
+      const previousState = pastStates[pastStates.length - 1];
+      setPastStates(pastStates.slice(0, pastStates.length - 1));
+      setFutureStates([{ widgets, layouts }, ...futureStates]);
+      setWidgets(previousState.widgets);
+      setLayouts(previousState.layouts);
+      if (currentDashboardId && currentDashboard) {
+        const updatedDashboard: DashboardItem = {
+          ...currentDashboard,
+          components: previousState.widgets,
+          layouts: previousState.layouts,
+          title: dashboardTitle,
+        };
+        axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard)
+          .catch(err => {
+            console.error('Error syncing undo to server:', err);
+          });
+      }
     }
-  
-    setDashboards((prevDashboards) => {
-      const dashboardIndex = prevDashboards.findIndex((d) => d.id === currentDashboardId);
-      if (dashboardIndex === -1) {
-        message.error('Dashboard not found.');
-        return prevDashboards;
-      }
-      const currentDashboard = prevDashboards[dashboardIndex];
-      const newVersion: DashboardVersion = {
-        id: uuidv4(),
-        timestamp: new Date().toISOString(),
-        title: dashboardTitle,
-        components: widgets,
-        layouts,
-      };
-      const updatedVersions = [newVersion];
-      if (currentDashboard.versions && currentDashboard.versions.length > 0) {
-        updatedVersions.push(...currentDashboard.versions);
-      }
-      const limitedVersions = updatedVersions.slice(0, MAX_VERSIONS);
-      const updatedDashboard: DashboardItem = {
-        ...currentDashboard,
-        versions: limitedVersions,
-      };
-      const updatedDashboards = [...prevDashboards];
-      updatedDashboards[dashboardIndex] = updatedDashboard;
-      localStorage.setItem('dashboards', JSON.stringify(updatedDashboards));
-      message.success('Dashboard version saved.');
-      return updatedDashboards;
-    });
   };
-
-  const restoreDashboardVersion = (versionId: string) => {
-    if (!currentDashboardId) {
+  const redo = () => {
+    if (futureStates.length > 0) {
+      isUndoRedoRef.current = true;
+      const nextState = futureStates[0];
+      setFutureStates(futureStates.slice(1));
+      setPastStates([...pastStates, { widgets, layouts }]);
+      setWidgets(nextState.widgets);
+      setLayouts(nextState.layouts);
+      if (currentDashboardId && currentDashboard) {
+        const updatedDashboard: DashboardItem = {
+          ...currentDashboard,
+          components: nextState.widgets,
+          layouts: nextState.layouts,
+          title: dashboardTitle,
+        };
+        axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard)
+          .catch(err => {
+            console.error('Error syncing redo to server:', err);
+          });
+      }
+    }
+  };
+  const MAX_VERSIONS = 5;
+  const saveDashboardVersion = () => {
+    if (!currentDashboardId || !currentDashboard) {
       message.error('No dashboard is currently active.');
       return;
     }
-    const dashboard = dashboards.find((d) => d.id === currentDashboardId);
-    if (!dashboard || !dashboard.versions) {
+    const newVersion: DashboardVersion = {
+      id: uuidv4(),
+      timestamp: new Date().toISOString(),
+      title: dashboardTitle,
+      components: widgets,
+      layouts,
+    };
+    const updatedVersions = [newVersion];
+    if (currentDashboard.versions && currentDashboard.versions.length > 0) {
+      updatedVersions.push(...currentDashboard.versions);
+    }
+    const limitedVersions = updatedVersions.slice(0, 5);
+    const updatedDashboard: DashboardItem = {
+      ...currentDashboard,
+      versions: limitedVersions,
+      components: widgets,
+      layouts,
+      title: dashboardTitle
+    };
+    axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard)
+      .then(() => {
+        message.success('Dashboard version saved.');
+        setCurrentDashboard(updatedDashboard);
+        setDashboards(prev => {
+          const idx = prev.findIndex(d => d.id === currentDashboardId);
+          if (idx !== -1) {
+            const newDashboards = [...prev];
+            newDashboards[idx] = updatedDashboard;
+            return newDashboards;
+          }
+          return prev;
+        });
+      })
+      .catch(err => {
+        console.error('Error saving version to server:', err);
+        message.error('Failed to save dashboard version.');
+      });
+  };
+  const restoreDashboardVersion = (versionId: string) => {
+    if (!currentDashboardId || !currentDashboard || !currentDashboard.versions) {
       message.error('No versions available for this dashboard.');
       return;
     }
-    const version = dashboard.versions.find((v) => v.id === versionId);
+    const version = currentDashboard.versions.find((v) => v.id === versionId);
     if (!version) {
       message.error('Version not found.');
       return;
@@ -1044,9 +984,31 @@ const redo = () => {
     setWidgets(version.components);
     setLayouts(version.layouts);
     setDashboardTitle(version.title);
-    message.success('Dashboard restored to selected version.');
+    const updatedDashboard: DashboardItem = {
+      ...currentDashboard,
+      components: version.components,
+      layouts: version.layouts,
+      title: version.title
+    };
+    axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard)
+      .then(() => {
+        message.success('Dashboard restored to selected version.');
+        setCurrentDashboard(updatedDashboard);
+        setDashboards(prev => {
+          const idx = prev.findIndex(d => d.id === currentDashboardId);
+          if (idx !== -1) {
+            const newDashboards = [...prev];
+            newDashboards[idx] = updatedDashboard;
+            return newDashboards;
+          }
+          return prev;
+        });
+      })
+      .catch(err => {
+        console.error('Error restoring version to server:', err);
+        message.error('Failed to restore version.');
+      });
   };
-
   const fixInvalidLayouts = (
     layouts: { [key: string]: GridLayoutItem[] },
     widgets: Widget[]
@@ -1065,7 +1027,6 @@ const redo = () => {
     }
     return updatedLayouts;
   };
-
   const updateLayoutsForNewWidgets = (newWidgets: Widget[]) => {
     setLayouts((prevLayouts) => {
       const updatedLayouts: { [key: string]: GridLayoutItem[] } = {...prevLayouts};
@@ -1102,24 +1063,23 @@ const redo = () => {
       return updatedLayouts;
     });
   };
-
   const addDashboard = async (dashboard: DashboardItem) => {
     let components = dashboard.components;
     if (!components.some((w) => w.type === 'title')) {
-      components = [defaultTitleWidget, ...components];
+      components = [{ ...defaultTitleWidget }, ...components];
     }
     const updatedDashboard = { ...dashboard, components };
-    const updatedDashboards = [...dashboards, updatedDashboard];
-    setDashboards(updatedDashboards);
-    localStorage.setItem('dashboards', JSON.stringify(updatedDashboards));
-    if (!currentWorkbookId) {
-      const workbookId = await getWorkbookIdFromProperties();
-      setCurrentWorkbookId(workbookId);
+    try {
+      const response = await axios.post('/api/dashboards', updatedDashboard);
+      const savedDashboard: DashboardItem = response.data;
+      setDashboards((prev) => [...prev, savedDashboard]);
+      setCurrentDashboardId(savedDashboard.id);
+      message.success('Dashboard saved successfully!');
+    } catch (err) {
+      console.error('Error saving new dashboard to server:', err);
+      message.error('Failed to save dashboard to server.');
     }
-    setCurrentDashboardId(updatedDashboard.id);
-    message.success('Dashboard saved successfully!');
   };
-
   const generateLayoutsForWidgets = (widgets: Widget[]): { [key: string]: GridLayoutItem[] } => {
     const updatedLayouts: { [key: string]: GridLayoutItem[] } = {};
     const breakpointList: Breakpoint[] = ['lg', 'md', 'sm'];
@@ -1150,46 +1110,47 @@ const redo = () => {
     });
     return updatedLayouts;
   };
-
   const editDashboard = (dashboard: DashboardItem) => {
-    if (!dashboard.layouts || Object.keys(dashboard.layouts).length === 0) {
-      dashboard.layouts = generateLayoutsForWidgets(dashboard.components);
-    }
-    setDashboards((prevDashboards) => {
-      const dashboardIndex = prevDashboards.findIndex((d) => d.id === dashboard.id);
-      if (dashboardIndex === -1) {
-        return prevDashboards;
-      }
-      const updatedDashboards = [...prevDashboards];
-      updatedDashboards[dashboardIndex] = dashboard;
-      localStorage.setItem('dashboards', JSON.stringify(updatedDashboards));
-      return updatedDashboards;
-    });
+    axios.put(`/api/dashboards/${dashboard.id}`, dashboard)
+      .then(response => {
+        const updated = response.data as DashboardItem;
+        setDashboards((prevDashboards) => {
+          const idx = prevDashboards.findIndex(d => d.id === updated.id);
+          if (idx !== -1) {
+            const newDashboards = [...prevDashboards];
+            newDashboards[idx] = updated;
+            return newDashboards;
+          }
+          return prevDashboards;
+        });
+      })
+      .catch(err => {
+        console.error('Error updating dashboard on server:', err);
+        message.error('Failed to update dashboard on server.');
+      });
   };
-
   const deleteDashboard = (id: string) => {
-    const updatedDashboards = dashboards.filter((d) => d.id !== id);
-    setDashboards(updatedDashboards);
-    localStorage.setItem('dashboards', JSON.stringify(updatedDashboards));
+    axios.delete(`/api/dashboards/${id}`)
+      .then(() => {
+        setDashboards((prev) => prev.filter(d => d.id !== id));
+        if (currentDashboardId === id) {
+          setCurrentDashboard(null);
+          setCurrentDashboardId(null);
+          setWidgets([defaultTitleWidget]);
+          setLayouts({});
+          setDashboardTitle('My Dashboard');
+        }
+        message.success('Dashboard deleted successfully!');
+      })
+      .catch(err => {
+        console.error('Error deleting dashboard on server:', err);
+        message.error('Failed to delete dashboard.');
+      });
   };
-
   const setWidgetsAndLayouts = (newWidgets: Widget[]) => {
     setWidgets(newWidgets);
     updateLayoutsForNewWidgets(newWidgets);
   };
-  
-  const updateWidgetsWithHistory = (updateFn: (prevWidgets: Widget[]) => Widget[]) => {
-    setWidgets((prevWidgets) => {
-      const newWidgets = updateFn(prevWidgets);
-      setPastStates((prevPastStates) => [
-        ...prevPastStates,
-        { widgets: prevWidgets, layouts },
-      ]);
-      setFutureStates([]);
-      return newWidgets;
-    });
-  };
-
   const setLayoutsWithHistory: React.Dispatch<
     React.SetStateAction<{ [key: string]: GridLayoutItem[] }>
   > = (update) => {
@@ -1208,7 +1169,6 @@ const redo = () => {
       return newLayouts;
     });
   };
-
   const addWidgetFunc = useCallback(
     (
       type: 'text' | 'chart' | 'gantt' | 'image' | 'metric' | 'report' | 'line' | 'title' ,
@@ -1341,8 +1301,7 @@ const redo = () => {
         promptForWidgetDetails(newWidget, (updatedWidget: Widget) => {
           setWidgets((prevWidgets) => {
             const newWidgets = [...prevWidgets, updatedWidget];
-            updateLayoutsForNewWidgets(newWidgets); 
-            localStorage.setItem('widgets', JSON.stringify(newWidgets));
+            updateLayoutsForNewWidgets(newWidgets);
             return newWidgets;
           });
           message.success(`${type.charAt(0).toUpperCase() + type.slice(1)} widget added successfully!`);
@@ -1352,58 +1311,52 @@ const redo = () => {
       updateWidgetsWithHistory((prevWidgets) => {
         const newWidgets = [...prevWidgets, newWidget];
         updateLayoutsForNewWidgets([newWidget]);
-        if (currentDashboard) {
+        if (currentDashboardId && currentDashboard) {
           const updatedDashboard = {
             ...currentDashboard,
             components: newWidgets,
+            layouts,
+            title: dashboardTitle,
           };
-          setCurrentDashboard(updatedDashboard);
-          editDashboard(updatedDashboard);
-          const updatedDashboards = dashboards.map((d) =>
-            d.id === currentDashboard.id ? updatedDashboard : d
-          );
-          setDashboards(updatedDashboards);
-          localStorage.setItem('dashboards', JSON.stringify(updatedDashboards));
+          axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard)
+            .catch(err => {
+              console.error('Error syncing updates to server:', err);
+              message.error('Failed to save changes to server.');
+            });
         }
         return newWidgets;
       });
     },
-    [currentDashboard, dashboards, editDashboard, setDashboards, setCurrentDashboard, widgets, promptForWidgetDetails]
+    [currentDashboard, dashboards, editDashboard, setDashboards, setCurrentDashboard, widgets, promptForWidgetDetails, dashboardTitle, layouts, currentDashboardId]
   );
-
-  const removeWidgetFunc = useCallback(
-    (id: string) => {
-      updateWidgetsWithHistory((prevWidgets) => {
-        const newWidgets = prevWidgets.filter((widget) => widget.id !== id);
-        setLayouts((prevLayouts) => {
-          const updatedLayouts = Object.fromEntries(
-            Object.entries(prevLayouts).map(([breakpoint, layoutItems]) => [
-              breakpoint,
-              layoutItems.filter((item) => item.i !== id),
-            ])
-          );
-          return updatedLayouts;
-        });
-        if (currentDashboard) {
-          const updatedDashboard = {
-            ...currentDashboard,
-            components: newWidgets,
-          };
-          setCurrentDashboard(updatedDashboard);
-          editDashboard(updatedDashboard);
-          const updatedDashboards = dashboards.map((d) =>
-            d.id === currentDashboard.id ? updatedDashboard : d
-          );
-          setDashboards(updatedDashboards);
-          localStorage.setItem('dashboards', JSON.stringify(updatedDashboards));
-        }
-        return newWidgets;
+  const removeWidgetFunc = useCallback((id: string) => {
+    updateWidgetsWithHistory((prevWidgets) => {
+      const newWidgets = prevWidgets.filter((widget) => widget.id !== id);
+      setLayouts((prevLayouts) => {
+        const updatedLayouts = Object.fromEntries(
+          Object.entries(prevLayouts).map(([breakpoint, layoutItems]) => [
+            breakpoint,
+            layoutItems.filter((item) => item.i !== id),
+          ])
+        );
+        return updatedLayouts;
       });
-    },
-    [currentDashboard, dashboards, editDashboard, setDashboards, setCurrentDashboard]
-  );
-  
-
+      if (currentDashboardId && currentDashboard) {
+        const updatedDashboard = {
+          ...currentDashboard,
+          components: newWidgets,
+          layouts,
+          title: dashboardTitle,
+        };
+        axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard)
+          .catch(err => {
+            console.error('Error syncing updates to server:', err);
+            message.error('Failed to save changes to server.');
+          });
+      }
+      return newWidgets;
+    });
+  }, [currentDashboard, dashboards, editDashboard, setDashboards, setCurrentDashboard, dashboardTitle, layouts, currentDashboardId]);
   const updateWidgetFunc = useCallback(
     (
       id: string,
@@ -1486,108 +1439,115 @@ const redo = () => {
             return widget;
           }
         });
-        if (currentDashboard) {
+        if (currentDashboardId && currentDashboard) {
           const updatedDashboard = {
             ...currentDashboard,
             components: newWidgets,
+            layouts,
+            title: dashboardTitle,
           };
-          setCurrentDashboard(updatedDashboard);
-          editDashboard(updatedDashboard);
-          const updatedDashboards = dashboards.map((d) =>
-            d.id === currentDashboard.id ? updatedDashboard : d
-          );
-          setDashboards(updatedDashboards);
-          localStorage.setItem('dashboards', JSON.stringify(updatedDashboards));
+          axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard)
+            .catch(err => {
+              console.error('Error syncing updates to server:', err);
+              message.error('Failed to save changes to server.');
+            });
         }
-        localStorage.setItem('widgets', JSON.stringify(newWidgets));
         return newWidgets;
       });
       message.success('Widget updated successfully!');
     },
-    [currentDashboard, dashboards, editDashboard, setDashboards, setCurrentDashboard]
+    [currentDashboard, dashboards, editDashboard, setDashboards, setCurrentDashboard, dashboardTitle, layouts, currentDashboardId]
   );
-
   useEffect(() => {
-    const migrateWidgets = () => {
-      const storedWidgets: Widget[] = JSON.parse(localStorage.getItem('widgets') || '[]');
-      const migratedWidgets = storedWidgets
-        .map((widget) => {
-          switch (widget.type) {
-            case 'image': {
-              const imageData: ImageWidgetData = {
-                src: widget.data.src || '',
-              };
-              return { ...widget, data: imageData };
+    const migrateWidgets = async () => {
+      try {
+        const response = await axios.get(`/api/dashboards/${currentDashboardId}/widgets`);
+        const serverWidgets: Widget[] = response.data;
+        const migratedWidgets = serverWidgets
+          .map((widget) => {
+            switch (widget.type) {
+              case 'image': {
+                const imageData: ImageWidgetData = {
+                  src: widget.data.src || '',
+                };
+                return { ...widget, data: imageData };
+              }
+              case 'chart': {
+                const chartData: ChartData = {
+                  type: widget.data.type || 'bar',
+                  title: widget.data.title || 'Sample Chart',
+                  labels: widget.data.labels || [],
+                  datasets: widget.data.datasets || [],
+                  titleAlignment: widget.data.titleAlignment || 'left',
+                  associatedRange: widget.data.associatedRange || '',
+                  worksheetName: widget.data.worksheetName || '',
+                };
+                return { ...widget, data: chartData };
+              }
+              case 'metric': {
+                const metricData: MetricData = {
+                  cellAddress: widget.data.cellAddress || '',
+                  worksheetName: widget.data.worksheetName || '',
+                  targetValue: widget.data.targetValue ?? 0,
+                  comparison: widget.data.comparison || 'greater',
+                  fontSize: widget.data.fontSize ?? 28,
+                  displayName: widget.data.displayName || 'KPI',
+                  format: widget.data.format || 'number',
+                  currentValue: widget.data.currentValue ?? 0,
+                  titleAlignment: widget.data.titleAlignment || 'left',
+                  backgroundColor: widget.data.backgroundColor || '#ffffff',
+                  textColor: widget.data.textColor || '#000000',
+                };
+                return { ...widget, data: metricData };
+              }
+              case 'text': {
+                const textData: TextData = {
+                  content: widget.data.content || 'Your Dashboard Title',
+                  fontSize: widget.data.fontSize ?? 24,
+                  textColor: widget.data.textColor || '#000000',
+                  backgroundColor: widget.data.backgroundColor || '#ffffff',
+                  titleAlignment: widget.data.titleAlignment || 'left',
+                };
+                return { ...widget, data: textData };
+              }
+              case 'gantt': {
+                const ganttData: GanttWidgetData = {
+                  tasks: widget.data.tasks || [],
+                  title: widget.data.title || 'Gantt Chart',
+                  titleAlignment: widget.data.titleAlignment || 'left',
+                };
+                return { ...widget, data: ganttData };
+              }
+              case 'report': {
+                const reportData: ReportData = {
+                  columns: widget.data.columns || [],
+                  data: widget.data.data || [],
+                };
+                return { ...widget, data: reportData };
+              }
+              default:
+                return null;
             }
-            case 'chart': {
-              const chartData: ChartData = {
-                type: widget.data.type || 'bar',
-                title: widget.data.title || 'Sample Chart',
-                labels: widget.data.labels || [],
-                datasets: widget.data.datasets || [],
-                titleAlignment: widget.data.titleAlignment || 'left',
-                associatedRange: widget.data.associatedRange || '',
-                worksheetName: widget.data.worksheetName || '',
-              };
-              return { ...widget, data: chartData };
-            }
-            case 'metric': {
-              const metricData: MetricData = {
-                cellAddress: widget.data.cellAddress || '',
-                worksheetName: widget.data.worksheetName || '',
-                targetValue: widget.data.targetValue ?? 0,
-                comparison: widget.data.comparison || 'greater',
-                fontSize: widget.data.fontSize ?? 28,
-                displayName: widget.data.displayName || 'KPI',
-                format: widget.data.format || 'number',
-                currentValue: widget.data.currentValue ?? 0,
-                titleAlignment: widget.data.titleAlignment || 'left',
-                backgroundColor: widget.data.backgroundColor || '#ffffff',
-                textColor: widget.data.textColor || '#000000',
-              };
-              return { ...widget, data: metricData };
-            }
-            case 'text': {
-              const textData: TextData = {
-                content: widget.data.content || 'Your Dashboard Title',
-                fontSize: widget.data.fontSize ?? 24,
-                textColor: widget.data.textColor || '#000000',
-                backgroundColor: widget.data.backgroundColor || '#ffffff',
-                titleAlignment: widget.data.titleAlignment || 'left',
-              };
-              return { ...widget, data: textData };
-            }
-            case 'gantt': {
-              const ganttData: GanttWidgetData = {
-                tasks: widget.data.tasks || [],
-                title: widget.data.title || 'Gantt Chart',
-                titleAlignment: widget.data.titleAlignment || 'left',
-              };
-              return { ...widget, data: ganttData };
-            }
-            case 'report': {
-              const reportData: ReportData = {
-                columns: widget.data.columns || [],
-                data: widget.data.data || [],
-              };
-              return { ...widget, data: reportData };
-            }
-            default:
-              return null;
-          }
-        })
-        .filter((widget: Widget | null) => widget !== null) as Widget[];
-      if (!migratedWidgets.some((w: Widget) => w.type === 'title')) {
-        migratedWidgets.unshift(defaultTitleWidget);
-        updateLayoutsForNewWidgets([defaultTitleWidget]);
+          })
+          .filter((widget: Widget | null) => widget !== null) as Widget[];
+        if (!migratedWidgets.some((w: Widget) => w.type === 'title')) {
+          migratedWidgets.unshift(defaultTitleWidget);
+          updateLayoutsForNewWidgets([defaultTitleWidget]);
+        }
+        setWidgets(migratedWidgets);
+        updateLayoutsForNewWidgets(migratedWidgets);
+      } catch (error) {
+        console.error('Error fetching and migrating widgets:', error);
+        message.error('Failed to load widgets from server.');
       }
-      setWidgets(migratedWidgets);
-      updateLayoutsForNewWidgets(migratedWidgets);
     };
     migrateWidgets();
-  }, []);
-
+  }, [currentDashboardId]);
   const migrateChartIndexToAssociatedRange = async () => {
+    if (!currentDashboardId || !currentDashboard) {
+      console.warn('No current dashboard available for migration.');
+      return;
+    }
     try {
       await Excel.run(async (context) => {
         const worksheets = context.workbook.worksheets;
@@ -1595,10 +1555,13 @@ const redo = () => {
         await context.sync();
         let globalChartIndex = 0;
         const chartMap: { [key: number]: { worksheetName: string; associatedRange: string } } = {};
-        worksheets.items.forEach((sheet) => {
+        for (const sheet of worksheets.items) {
           const charts = sheet.charts;
           charts.load('items');
-          charts.items.forEach((chart) => {
+        }
+        await context.sync();
+        for (const sheet of worksheets.items) {
+          for (const chart of sheet.charts.items) {
             const dataRange = chart.getDataBodyRange();
             dataRange.load('address');
             chartMap[globalChartIndex] = {
@@ -1606,13 +1569,12 @@ const redo = () => {
               associatedRange: '', 
             };
             globalChartIndex++;
-          });
-        });
+          }
+        }
         await context.sync();
         globalChartIndex = 0;
-        worksheets.items.forEach((sheet) => {
-          const charts = sheet.charts;
-          charts.items.forEach((chart) => {
+        for (const sheet of worksheets.items) {
+          for (const chart of sheet.charts.items) {
             const key = globalChartIndex;
             const dataRange = chart.getDataBodyRange();
             if (dataRange.address) {
@@ -1622,8 +1584,8 @@ const redo = () => {
               console.warn(`Chart "${chart.name}" on worksheet "${sheet.name}" has no associated data range.`);
             }
             globalChartIndex++;
-          });
-        });
+          }
+        }
         setWidgets((prevWidgets) => {
           const newWidgets = prevWidgets.map((widget) => {
             if (widget.type === 'image') {
@@ -1670,39 +1632,42 @@ const redo = () => {
           const cleanedWidgets = newWidgets.map((widget) => {
             if (widget.type === 'image') {
               const { chartIndex, ...rest } = widget.data as ImageWidgetData & { chartIndex?: number };
-              return {
-                ...widget,
-                data: rest,
-              };
+              return { ...widget, data: rest };
             } else if (widget.type === 'chart') {
               const { chartIndex, ...rest } = widget.data as ChartData & { chartIndex?: number };
-              return {
-                ...widget,
-                data: rest,
-              };
+              return { ...widget, data: rest };
             }
             return widget;
           });
-          localStorage.setItem('widgets', JSON.stringify(cleanedWidgets));
+          axios.put(`/api/dashboards/${currentDashboardId}/widgets`, cleanedWidgets)
+            .then(() => {
+              message.success('Widgets migrated to use associatedRange successfully.');
+            })
+            .catch((err) => {
+              console.error('Error updating widgets on server:', err);
+              message.error('Failed to update migrated widgets on server.');
+            });
+  
           return cleanedWidgets;
         });
         console.log('Migration from chartIndex to associatedRange completed.');
-        message.success('Widgets migrated to use associatedRange successfully.');
       });
     } catch (error) {
       console.error('Error migrating widgets:', error);
       message.error('Failed to migrate widgets to use associatedRange.');
     }
   };
-
   const promptUserToSelectWorksheetAndRange = async (): Promise<{ worksheetName: string; associatedRange: string }> => {
     return {
       worksheetName: 'Sheet1',
       associatedRange: 'A1:B4',
     };
   };
-
   const importChartImageFromExcel = async () => {
+    if (!currentDashboardId) {
+      console.warn('No current dashboard ID available for importing chart images.');
+      return;
+    }
     try {
       await Excel.run(async (context: Excel.RequestContext) => {
         const sheet = context.workbook.worksheets.getActiveWorksheet();
@@ -1733,18 +1698,18 @@ const redo = () => {
               }
             });
             imageWidgets = imageWidgets.slice(0, imageResults.length);
-            return [...nonImageWidgets, ...imageWidgets];
+            const updatedWidgets = [...nonImageWidgets, ...imageWidgets];
+            axios.put(`/api/dashboards/${currentDashboardId}/widgets`, updatedWidgets)
+              .then(() => {
+                message.success('All chart images imported and updated successfully.');
+              })
+              .catch((err) => {
+                console.error('Error updating widgets on server:', err);
+                message.error('Failed to update widgets with imported images on server.');
+              });
+  
+            return updatedWidgets;
           });
-          const updatedWidgets = [
-            ...widgets.filter(w => w.type !== 'image'),
-            ...imageResults.map(img => ({
-              id: `image-${uuidv4()}`,
-              type: 'image',
-              data: { src: `data:image/png;base64,${img}` },
-            })),
-          ];
-          localStorage.setItem('widgets', JSON.stringify(updatedWidgets));
-          message.success('All chart images imported and updated successfully.');
         } else {
           message.warning('No charts found on the active worksheet.');
         }
@@ -1754,7 +1719,6 @@ const redo = () => {
       message.error('Failed to import chart image from Excel.');
     }
   };
-
   const copyWidget = useCallback(
     (widget: Widget) => {
       const newWidget: Widget = {
@@ -1766,7 +1730,6 @@ const redo = () => {
     },
     [addWidgetFunc]
   );
-
   const isCellAddressInRange = async (
     context: Excel.RequestContext,
     sheet: Excel.Worksheet,
@@ -1796,7 +1759,6 @@ const redo = () => {
       return false;
     }
   };
-
   const refreshAllCharts = useCallback(async () => {
     if (!currentDashboard || !currentDashboard.workbookId) {
       message.error('No dashboard or workbook ID found.');
@@ -1844,12 +1806,10 @@ const redo = () => {
             }
             case "metric": {
               const metricData = widget.data as MetricData;
-  
               if (metricData.worksheetName && metricData.cellAddress) {
                 const sheet = worksheets.getItemOrNullObject(metricData.worksheetName);
                 sheet.load("isNullObject");
                 await context.sync();
-  
                 if (sheet.isNullObject) {
                   hasError = true;
                   errorMessages.push(
@@ -1905,8 +1865,8 @@ const redo = () => {
                 );
                 const updatedChartData = {
                   ...chartData,
-                  labels: [...labels], // New labels array
-                  datasets: updatedDatasets.map((dataset) => ({ ...dataset })), // New datasets array
+                  labels: [...labels],
+                  datasets: updatedDatasets.map((dataset) => ({ ...dataset })),
                 };
                 return {
                   ...widget,
@@ -1942,7 +1902,6 @@ const redo = () => {
               }
               return widget;
             }
-  
             default:
               return widget;
           }
@@ -1953,16 +1912,19 @@ const redo = () => {
             ...currentDashboard,
             components: updatedWidgets,
           };
+          try {
+            await axios.put(`/api/dashboards/${currentDashboard.id}`, updatedDashboard);
+            message.success("Charts and metrics have been refreshed and saved successfully.");
+          } catch (err) {
+            console.error('Error updating dashboard on server:', err);
+            message.error('Failed to update dashboard on server.');
+          }
           setCurrentDashboard(updatedDashboard);
-          editDashboard(updatedDashboard);
           const updatedDashboards = dashboards.map((d) =>
             d.id === currentDashboard.id ? updatedDashboard : d
           );
           setDashboards(updatedDashboards);
-          localStorage.setItem('dashboards', JSON.stringify(updatedDashboards));
         }
-        localStorage.setItem("widgets", JSON.stringify(updatedWidgets));
-        message.success("Charts and metrics have been refreshed successfully.");
       });
       await importChartImageFromExcel();
     } catch (error) {
@@ -1971,13 +1933,10 @@ const redo = () => {
         message.error(`Office.js Error: ${error.code} - ${error.message}`);
       } else {
         console.error("Unexpected Error:", error);
-        message.error(
-          "An unexpected error occurred while refreshing charts."
-        );
+        message.error("An unexpected error occurred while refreshing charts.");
       }
     }
   }, [widgets, setWidgets, importChartImageFromExcel, updateWidgetFunc, addWidgetFunc, currentDashboard]);
-
   const getRandomColor = () => {
     const letters = '0123456789ABCDEF';
     let color = '#';
@@ -1986,7 +1945,6 @@ const redo = () => {
     }
     return color;
   };
-
   const readDataFromExcel = async () => {
     if (!currentDashboard || !currentDashboard.workbookId) {
       message.error('No dashboard or workbook ID found.');
@@ -2045,7 +2003,6 @@ const redo = () => {
       message.error('Failed to read data from Excel.');
     }
   };
-
   const readGanttDataFromExcel = async () => {
     if (!currentDashboard || !currentDashboard.workbookId) {
       message.error('No dashboard or workbook ID found.');
@@ -2160,17 +2117,28 @@ const redo = () => {
             updatedWidgets = [...prevWidgets, newGanttWidget];
             updateLayoutsForNewWidgets([newGanttWidget])
           }
-          localStorage.setItem('widgets', JSON.stringify(updatedWidgets));
           return updatedWidgets;
         });
-        message.success('Gantt chart data loaded from Excel.');
+        if (currentDashboard) {
+          const updatedDashboard = {
+            ...currentDashboard,
+            components: updatedWidgets,
+          };
+          try {
+            await axios.put(`/api/dashboards/${currentDashboard.id}`, updatedDashboard);
+            message.success('Gantt chart data loaded from Excel and saved successfully.');
+          } catch (err) {
+            console.error('Error updating dashboard on server:', err);
+            message.error('Failed to update dashboard on server.');
+          }
+          setCurrentDashboard(updatedDashboard);
+        }
       });
     } catch (error) {
       console.error('Error reading Gantt data from Excel:', error);
       message.error('Failed to read Gantt data from Excel.');
     }
   };
-
   useEffect(() => {
     const registeredWidgets = new Set<string>();
     let eventResults: OfficeExtension.EventHandlerResult<Excel.WorksheetChangedEventArgs>[] = [];
@@ -2227,7 +2195,6 @@ const redo = () => {
       });
     };
   }, [widgets, currentDashboard?.id, currentDashboard?.workbookId]);
-  
   useEffect(() => {
     const setupGanttEventHandlers = async () => {
       if (!currentDashboard || !currentDashboard.workbookId) {
@@ -2259,7 +2226,6 @@ const redo = () => {
         console.error('Error setting up Gantt event handlers:', error);
       }
     };
-  
     setupGanttEventHandlers();
     return () => {
       const removeGanttEventHandlers = async () => {
@@ -2286,20 +2252,19 @@ const redo = () => {
       removeGanttEventHandlers();
     };
   }, [currentDashboard?.id, currentDashboard?.workbookId]);
-
   const isValidCellAddress = (address: string) => {
     const cellAddressRegex = /^[A-Za-z]{1,3}[1-9][0-9]{0,6}$/;
     return cellAddressRegex.test(address);
   };
-
   const addTaskToGantt = async (newTask: Task) => {
     if (!newTask.name || !newTask.type || newTask.start === undefined || newTask.end === undefined) {
       message.error('Task is missing required fields.');
       return;
     }
     try {
+      let updatedWidgets: Widget[] = [];
       setWidgets((prevWidgets) => {
-        const updatedWidgets = prevWidgets.map((widget) => {
+        updatedWidgets = prevWidgets.map((widget) => {
           if (widget.type === 'gantt') {
             const ganttData = widget.data as GanttWidgetData;
             return {
@@ -2324,9 +2289,8 @@ const redo = () => {
             },
           };
           updatedWidgets.push(newGanttWidget);
+          updateLayoutsForNewWidgets([newGanttWidget]);
         }
-        updateLayoutsForNewWidgets(updatedWidgets);
-        localStorage.setItem('widgets', JSON.stringify(updatedWidgets));
         return updatedWidgets;
       });
       await Excel.run(async (context) => {
@@ -2350,13 +2314,26 @@ const redo = () => {
           '',
           '',
           newTask.progress,
-          dependenciesValue
+          dependenciesValue,
         ];
         console.log('Row data to add:', rowData);
         table.rows.add(undefined, [rowData]);
         await context.sync();
-      })
-      message.success('Task added successfully and synced to Excel!');
+      });
+      if (currentDashboard) {
+        const updatedDashboard = {
+          ...currentDashboard,
+          components: updatedWidgets,
+        };
+        try {
+          await axios.put(`/api/dashboards/${currentDashboard.id}`, updatedDashboard);
+          message.success('Task added successfully and synced to Excel and server!');
+        } catch (err) {
+          console.error('Error updating dashboard on server:', err);
+          message.error('Failed to update dashboard on server.');
+        }
+        setCurrentDashboard(updatedDashboard);
+      }
     } catch (error) {
       console.error('Error adding task to Gantt widget and Excel:', error);
       if (error instanceof OfficeExtension.Error) {
@@ -2366,7 +2343,6 @@ const redo = () => {
       }
     }
   };
-
   const updateMetricValue = async (widgetId: string) => {
     try {
       console.log(`Updating metric value for widget ID: ${widgetId}`);
@@ -2420,7 +2396,6 @@ const redo = () => {
       message.error('Failed to update metric value. Please ensure the cell address is valid.');
     }
   };
-
   const setWorkbookIdInProperties = async (workbookId: string) => {
     if (isInDialog()) {
       console.log('Running in dialog; skipping setWorkbookIdInProperties.');
@@ -2442,7 +2417,6 @@ const redo = () => {
       console.error('Error setting workbook ID in custom properties:', error);
     }
   };
-
   const getWorkbookIdFromProperties = async (): Promise<string> => {
     if (isInDialog()) {
       console.log('Running in dialog; skipping getWorkbookIdFromProperties.');
@@ -2475,7 +2449,6 @@ const redo = () => {
       return workbookId;
     }
   };
-  
   const exportDashboardAsPDF = async (): Promise<void> => {
     const input = document.getElementById('dashboard-container');
     if (!input) {
@@ -2628,3 +2601,4 @@ const redo = () => {
     </DashboardContext.Provider>
   );
 };
+

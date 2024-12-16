@@ -81,7 +81,6 @@ export type Widget =
   | LineWidget;
 
 
-// Widget Data Types
 export type WidgetData<T extends WidgetType> =
   T extends 'title' ? TitleWidgetData :
   T extends 'text' ? TextData :
@@ -90,7 +89,7 @@ export type WidgetData<T extends WidgetType> =
   T extends 'image' ? ImageWidgetData :
   T extends 'metric' ? MetricData :
   T extends 'report' ? ReportData :
-  T extends 'line' ? ReportData :
+  T extends 'line' ? LineWidgetData :
   never;
 
 // Metric Widget Data
@@ -147,14 +146,12 @@ export interface Task {
   color?: string;
 }
 
-// Gantt Widget Data Interface
 export interface GanttWidgetData {
   tasks: Task[];
   title: string;
   titleAlignment?: 'left' | 'center' | 'right';
 }
 
-// Chart Data Interface
 export interface ChartData {
   title?: string;
   titleAlignment?: 'left' | 'center' | 'right';
@@ -216,42 +213,25 @@ export interface ChartData {
   };
 }
 
-// Chart Widget Interface
-export interface ChartWidget {
-  id: string;
-  type: 'chart';
-  data: ChartData;
-}
-
 export interface DashboardBorderSettings {
   showBorder: boolean;
   color: string;
-  thickness: number; // in pixels
+  thickness: number;
   style: 'solid' | 'dashed' | 'dotted';
 }
-
-// Image Widget Data Interface
 export interface ImageWidgetData {
   src: string;
 }
 
-// Export Chart Types
 export { ChartType, ChartDataset };
 
-// Component Data Type
 export type ComponentData = TextData | ChartData | GanttWidgetData;
-
-// Dashboard Component Interface
 export interface DashboardComponent {
   id: string;
   type: 'gantt' | 'chart' | 'text' | 'image'| 'metric' | 'report' | 'line';
   data: WidgetData<WidgetType>;
 }
-
-// Grid Layout Item Type
 export type GridLayoutItem = Layout;
-
-// Dashboard Item Interface
 export interface DashboardItem {
   id: string;
   title: string;
@@ -260,8 +240,6 @@ export interface DashboardItem {
   versions?: DashboardVersion[];
   workbookId?: string;
 }
-
-// Dashboard Version Interface
 export interface DashboardVersion {
   id: string;
   timestamp: string;
@@ -270,11 +248,16 @@ export interface DashboardVersion {
   layouts: { [key: string]: GridLayoutItem[] };
 }
 
-// Dataset Interface
 export interface Dataset {
   label: string;
   data: number[];
   backgroundColor: string;
   borderColor?: string;
   borderWidth?: number;
+}
+
+export interface TemplateItem {
+  id?: string;
+  name: string;
+  content: string;
 }
