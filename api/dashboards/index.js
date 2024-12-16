@@ -6,7 +6,6 @@ module.exports = async function (context, req) {
   const id = req.params.id;
 
   if (method === 'post') {
-    // Create a new dashboard
     const schema = Joi.object({
       name: Joi.string().required(),
       components: Joi.array().items(Joi.object()).required(),
@@ -24,7 +23,7 @@ module.exports = async function (context, req) {
     }
 
     try {
-      const response = await axios.post('https://your-api-endpoint.com/dashboards', value);
+      const response = await axios.post('https://happy-forest-059a9d710.4.azurestaticapps.net/api/dashboards', value);
       context.res = {
         status: 200,
         body: response.data,
@@ -37,9 +36,8 @@ module.exports = async function (context, req) {
       };
     }
   } else if (method === 'get') {
-    // Retrieve dashboards
     try {
-      let url = 'https://your-api-endpoint.com/dashboards';
+      let url = 'https://happy-forest-059a9d710.4.azurestaticapps.net/api/dashboards';
       if (id) {
         url += `/${id}`;
       }
@@ -57,7 +55,6 @@ module.exports = async function (context, req) {
       };
     }
   } else if (method === 'put') {
-    // Update an existing dashboard
     if (!id) {
       context.res = {
         status: 400,
@@ -83,7 +80,7 @@ module.exports = async function (context, req) {
     }
 
     try {
-      const response = await axios.put(`https://your-api-endpoint.com/dashboards/${id}`, value);
+      const response = await axios.put(`https://happy-forest-059a9d710.4.azurestaticapps.net/api/dashboards/${id}`, value);
       context.res = {
         status: 200,
         body: response.data,
