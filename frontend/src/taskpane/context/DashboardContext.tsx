@@ -52,12 +52,12 @@ interface DashboardContextProps {
   setDashboardTitle: (title: string) => void;
   availableWorksheets: string[];
   setAvailableWorksheets: React.Dispatch<React.SetStateAction<string[]>>;
-  setWidgets: (widgets: Widget[]) => void;
+  setWidgets: React.Dispatch<React.SetStateAction<Widget[]>>;
   addDashboard: (dashboard: DashboardItem) => void;
   saveDashboardVersion: () => void;
   restoreDashboardVersion: (versionId: string) => void;
-  promptForWidgetDetails: ( widget: Widget, onComplete: (updatedWidget: Widget) => void) => void;
-  editDashboard: (dashboard: DashboardItem) => void;
+  promptForWidgetDetails: (widget: Widget, onComplete: (updatedWidget: Widget) => void) => void;
+  editDashboard: (dashboard: DashboardItem) => Promise<void>;
   deleteDashboard: (id: string) => void;
   undo: () => void;
   redo: () => void;
@@ -139,9 +139,17 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     };
     fetchDashboards();
   }, []);
-  const setWidgets = (newWidgets: Widget[]) => {
-    setWidgetsState(newWidgets);
+  const setWidgets: React.Dispatch<React.SetStateAction<Widget[]>> = (update) => {
+    if (typeof update === 'function') {
+      setWidgetsState((prevWidgets) => {
+        const newWidgets = (update as (prev: Widget[]) => Widget[])(prevWidgets);
+        return newWidgets;
+      });
+    } else {
+      setWidgetsState(update);
+    }
   };
+
   useEffect(() => {
     const loadCurrentDashboard = async () => {
       if (!currentDashboardId) return;
@@ -167,14 +175,18 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     };
     loadCurrentDashboard();
   }, [currentDashboardId]);
-  const syncCurrentDashboardToServer = async (updatedWidgets: Widget[], updatedLayouts: { [key: string]: GridLayoutItem[] }, updatedTitle: string) => {
+  const syncCurrentDashboardToServer = async (
+    updatedWidgets: Widget[],
+    updatedLayouts: { [key: string]: GridLayoutItem[] },
+    updatedTitle: string
+  ) => {
     if (!currentDashboardId || !currentDashboard) return;
     try {
       const updatedDashboard: DashboardItem = {
         ...currentDashboard,
         components: updatedWidgets,
         layouts: updatedLayouts,
-        title: updatedTitle
+        title: updatedTitle,
       };
       await axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard);
       setCurrentDashboard(updatedDashboard);
@@ -184,10 +196,11 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     }
   };
   const updateWidgetsWithHistory = (updateFn: (prevWidgets: Widget[]) => Widget[]) => {
-    setWidgetsState((prevWidgets) => {
+    setWidgetsState((prevWidgets: Widget[]) => {
       const newWidgets = updateFn(prevWidgets);
       setPastStates((prev) => [...prev, { widgets: prevWidgets, layouts }]);
       setFutureStates([]);
+
       if (currentDashboardId && currentDashboard) {
         const updatedDashboard: DashboardItem = {
           ...currentDashboard,
@@ -195,15 +208,15 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           layouts,
           title: dashboardTitle,
         };
-        axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard)
-          .catch(err => {
-            console.error('Error syncing updates to server:', err);
-            message.error('Failed to save changes to server.');
-          });
+        axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard).catch((err: unknown) => {
+          console.error('Error syncing updates to server:', err);
+          message.error('Failed to save changes to server.');
+        });
       }
       return newWidgets;
     });
   };
+
   useEffect(() => {
     if (isUndoRedoRef.current) {
       isUndoRedoRef.current = false;
@@ -236,8 +249,8 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         range.values = [[newValue]];
         await context.sync();
         console.log(`Setting widget ${widgetId} currentValue to ${newValue}`);
-        setWidgets((prevWidgets) =>
-          prevWidgets.map((widget) =>
+        setWidgets((prevWidgets: Widget[]) =>
+          prevWidgets.map((widget: Widget) =>
             widget.id === widgetId && widget.type === 'metric'
               ? {
                   ...widget,
@@ -261,12 +274,9 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       }
     }
   };
-  const promptForWidgetDetails = useCallback(
-    (widget: Widget, onComplete: (updatedWidget: Widget) => void) => {
-      setWidgetToPrompt({ widget, onComplete });
-    },
-    []
-  );
+  const promptForWidgetDetails = useCallback((widget: Widget, onComplete: (updatedWidget: Widget) => void) => {
+    setWidgetToPrompt({ widget, onComplete });
+  }, []);
   const handleWidgetDetailsComplete = (updatedWidget: Widget) => {
     if (!widgetToPrompt) {
       console.warn('widgetToPrompt is null.');
@@ -831,16 +841,15 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
             } as Task;
           })
           .filter((task) => task !== null) as Task[];
-        setWidgets((prevWidgets) => {
+        setWidgets((prevWidgets: Widget[]) => {
           let updatedWidgets: Widget[];
-          const ganttWidgetExists = prevWidgets.some((widget) => widget.type === 'gantt');
+          const ganttWidgetExists = prevWidgets.some((widget: Widget) => widget.type === 'gantt');
           if (ganttWidgetExists) {
-            updatedWidgets = prevWidgets.map((widget) => {
+            updatedWidgets = prevWidgets.map((widget: Widget) => {
               if (widget.type === 'gantt') {
                 return { ...widget, data: { ...widget.data, tasks } };
-              } else {
-                return widget;
               }
+              return widget;
             });
           } else {
             const newGanttWidget: Widget = {
@@ -856,21 +865,11 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
             updateLayoutsForNewWidgets(updatedWidgets);
           }
           if (currentDashboard) {
-            const updatedDashboard = {
-              ...currentDashboard,
-              components: updatedWidgets,
-            };
-            editDashboard(updatedDashboard)
-              .then(() => {
-                setCurrentDashboard(updatedDashboard);
-                message.success('Gantt chart data prepared and saved successfully!');
-              })
-              .catch((err) => {
-                console.error('Error saving updated dashboard:', err);
-                message.error('Failed to save updated Gantt chart to the server.');
-              });
+            editDashboard(currentDashboard).then(() => {
+              setCurrentDashboard(currentDashboard);
+              message.success('Gantt chart data prepared and saved successfully!');
+            });
           }
-  
           return updatedWidgets;
         });
       });
@@ -1110,24 +1109,24 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     });
     return updatedLayouts;
   };
-  const editDashboard = (dashboard: DashboardItem) => {
-    axios.put(`/api/dashboards/${dashboard.id}`, dashboard)
-      .then(response => {
-        const updated = response.data as DashboardItem;
-        setDashboards((prevDashboards) => {
-          const idx = prevDashboards.findIndex(d => d.id === updated.id);
-          if (idx !== -1) {
-            const newDashboards = [...prevDashboards];
-            newDashboards[idx] = updated;
-            return newDashboards;
-          }
-          return prevDashboards;
-        });
-      })
-      .catch(err => {
-        console.error('Error updating dashboard on server:', err);
-        message.error('Failed to update dashboard on server.');
+  const editDashboard = async (dashboard: DashboardItem): Promise<void> => {
+    try {
+      const response = await axios.put(`/api/dashboards/${dashboard.id}`, dashboard);
+      const updated = response.data as DashboardItem;
+      setDashboards((prevDashboards) => {
+        const idx = prevDashboards.findIndex(d => d.id === updated.id);
+        if (idx !== -1) {
+          const newDashboards = [...prevDashboards];
+          newDashboards[idx] = updated;
+          return newDashboards;
+        }
+        return prevDashboards;
       });
+    } catch (err) {
+      console.error('Error updating dashboard on server:', err);
+      message.error('Failed to update dashboard on server.');
+      throw err;
+    }
   };
   const deleteDashboard = (id: string) => {
     axios.delete(`/api/dashboards/${id}`)
@@ -1299,7 +1298,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       if (missingFields.length > 0) {
         message.warning(`Please provide the following fields: ${missingFields.join(', ')}`);
         promptForWidgetDetails(newWidget, (updatedWidget: Widget) => {
-          setWidgets((prevWidgets) => {
+          setWidgets((prevWidgets: Widget[]) => {
             const newWidgets = [...prevWidgets, updatedWidget];
             updateLayoutsForNewWidgets(newWidgets);
             return newWidgets;
@@ -1308,7 +1307,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         });
         return;
       }
-      updateWidgetsWithHistory((prevWidgets) => {
+      updateWidgetsWithHistory((prevWidgets: Widget[]) => {
         const newWidgets = [...prevWidgets, newWidget];
         updateLayoutsForNewWidgets([newWidget]);
         if (currentDashboardId && currentDashboard) {
@@ -1586,8 +1585,8 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
             globalChartIndex++;
           }
         }
-        setWidgets((prevWidgets) => {
-          const newWidgets = prevWidgets.map((widget) => {
+        setWidgets((prevWidgets: Widget[]) => {
+          const newWidgets = prevWidgets.map((widget: Widget) => {
             if (widget.type === 'image') {
               const imageData = widget.data as ImageWidgetData & { chartIndex?: number };
               if ('chartIndex' in imageData && imageData.chartIndex !== undefined) {
@@ -1603,7 +1602,9 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
                     },
                   };
                 } else {
-                  console.warn(`No associatedRange found for chartIndex ${chartIndex} in ImageWidget ${widget.id}.`);
+                  console.warn(
+                    `No associatedRange found for chartIndex ${chartIndex} in ImageWidget ${widget.id}.`
+                  );
                   return widget;
                 }
               }
@@ -1681,9 +1682,9 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
             return imageResult.value;
           });
           const imageResults = await Promise.all(imagePromises);
-          setWidgets((prevWidgets) => {
-            const nonImageWidgets = prevWidgets.filter(widget => widget.type !== 'image');
-            let imageWidgets = prevWidgets.filter(widget => widget.type === 'image');
+          setWidgets((prevWidgets: Widget[]) => {
+            const nonImageWidgets = prevWidgets.filter((widget: Widget) => widget.type !== 'image');
+            let imageWidgets = prevWidgets.filter((widget: Widget) => widget.type === 'image');
             imageResults.forEach((base64Image, index) => {
               if (imageWidgets[index]) {
                 imageWidgets[index].data.src = `data:image/png;base64,${base64Image}`;
@@ -2085,11 +2086,11 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
             } as Task;
           })
           .filter((task): task is Task => task !== null);
-        setWidgets((prevWidgets) => {
+        setWidgets((prevWidgets: Widget[]) => {
           const ganttWidget = prevWidgets.find((widget) => widget.type === 'gantt');
           let updatedWidgets: Widget[];
           if (ganttWidget) {
-            updatedWidgets = prevWidgets.map((widget) => {
+            updatedWidgets = prevWidgets.map((widget: Widget) => {
               if (widget.id !== ganttWidget.id) return widget;
               if (widget.type === 'gantt') {
                 return {
@@ -2122,7 +2123,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         if (currentDashboard) {
           const updatedDashboard = {
             ...currentDashboard,
-            components: updatedWidgets,
+            components: widgets,
           };
           try {
             await axios.put(`/api/dashboards/${currentDashboard.id}`, updatedDashboard);
@@ -2263,8 +2264,8 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     }
     try {
       let updatedWidgets: Widget[] = [];
-      setWidgets((prevWidgets) => {
-        updatedWidgets = prevWidgets.map((widget) => {
+      setWidgets((prevWidgets: Widget[]) => {
+        updatedWidgets = prevWidgets.map((widget: Widget) => {
           if (widget.type === 'gantt') {
             const ganttData = widget.data as GanttWidgetData;
             return {

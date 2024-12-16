@@ -5,7 +5,6 @@ import { TdHTMLAttributes } from 'react';
 import { ChartType, ChartOptions, LegendOptions, TooltipOptions, ChartDataset, DefaultDataPoint } from 'chart.js';
 import { Layout } from 'react-grid-layout';
 
-// Define Widget Types
 export type WidgetType = 'title' | 'text' | 'chart' | 'gantt' | 'image' | 'metric' | 'report' | 'line';
 
 export interface TitleWidgetData {
@@ -55,7 +54,7 @@ export interface MetricWidget extends WidgetBase {
 
 export interface ReportWidgetType extends WidgetBase {
   type: 'report';
-  name: string; // Ensure 'name' is included
+  name: string;
   data: ReportData;
 }
 
@@ -69,7 +68,6 @@ export interface TitleWidget extends WidgetBase {
   data: TitleWidgetData;
 }
 
-// Union Type for Widget
 export type Widget =
   | TitleWidget
   | TextWidget
@@ -92,7 +90,6 @@ export type WidgetData<T extends WidgetType> =
   T extends 'line' ? LineWidgetData :
   never;
 
-// Metric Widget Data
 export interface MetricData {
   worksheetName: string;
   cellAddress: string;
@@ -107,7 +104,6 @@ export interface MetricData {
   titleAlignment: 'left' | 'center'| 'right';
 }
 
-// Report Item Interface
 export interface ReportItem {
   id: string;
   name: string;
@@ -118,7 +114,7 @@ export interface ReportItem {
 export interface ReportColumn<T> extends Omit<ColumnType<T>, 'title'> {
   dataIndex: string;
   key: string | number;
-  title: string; // Ensure title is always a string
+  title: string;
 }
 
 export interface ReportData<T = Record<string, any>> {
@@ -198,7 +194,7 @@ export interface ChartData {
   backgroundColor?: string;
   gridLineColor?: string;
   locale?: string;
-  associatedRange: string; // e.g., "A1:B10"
+  associatedRange: string;
   worksheetName: string;
   chartIndex?: number;
   datasets: ChartDataset<'line'>[];
