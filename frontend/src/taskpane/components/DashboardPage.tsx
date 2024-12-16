@@ -11,9 +11,21 @@ const DashboardPage: React.FC = () => {
   const [currentDashboard, setCurrentDashboard] = useState<DashboardItem | null>(null);
 
   useEffect(() => {
-    const dashboard = dashboards.find((d) => d.id === id);
-    if (dashboard) {
-      setCurrentDashboard(dashboard);
+    if (id) {
+      const dashboard = dashboards.find((d) => d.id === id);
+      if (dashboard) {
+        setCurrentDashboard(dashboard);
+      } else {
+        // If you have dashboards but didn't find a matching one, you might handle that scenario here
+        // For now, let's just consider it as a case of a dashboard not found.
+      }
+    } else {
+      setCurrentDashboard({
+        id: '',
+        title: '',
+        components: [],
+        layouts: {},
+      });
     }
   }, [id, dashboards]);
 

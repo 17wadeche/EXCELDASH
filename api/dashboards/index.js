@@ -18,7 +18,13 @@ module.exports = async function (context, req) {
         url += `/${id}`;
       }
       const response = await axios.get(url);
-      context.res = { status: 200, body: response.data };
+      const dashboards = response.data || [];
+
+      if (id && dashboards.length === 0) {
+        context.res = { status: 404, body: { error: 'Dashboard not found' } };
+      } else {
+        context.res = { status: 200, body: dashboards };
+      }
     } catch (error) {
       context.log.error('Error retrieving dashboard(s):', error);
       context.res = { status: 500, body: { error: error.message } };
