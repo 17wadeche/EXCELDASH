@@ -1,47 +1,64 @@
-const axios = require('axios');
+const initializeModels = require('../models');
+const { v4: uuidv4 } = require('uuid');
 
 module.exports = async function (context, req) {
   const method = req.method.toLowerCase();
   const id = req.params.id;
-  if (method === 'post') {
-    try {
-      const response = await axios.post('https://happy-forest-059a9d710.4.azurestaticapps.net/api/dashboards', req.body);
-      context.res = { status: 200, body: response.data };
-    } catch (error) {
-      context.log.error('Error creating dashboard:', error);
-      context.res = { status: 500, body: { error: error.message } };
-    }
-  } else if (method === 'get') {
-    try {
-      let url = 'https://happy-forest-059a9d710.4.azurestaticapps.net/api/dashboards';
-      if (id) {
-        url += `/${id}`;
+  try {
+    const { Dashboard } = await initializeModels();
+    if (method === 'post') {
+      const { title, components, layouts } = req.body;
+      if (!title || !components || !layouts) {
+        context.res = {
+          status: 400,
+          body: { error: 'title, components, and layouts are required.' }
+        };
+        return;
       }
-      const response = await axios.get(url);
-      const dashboards = response.data || [];
+      const newDashboard = await Dashboard.create({
+        id: uuidv4(),
+        title,
+        components,
+        layouts
+      });
+      context.res = { status: 200, body: newDashboard };
 
-      if (id && dashboards.length === 0) {
-        context.res = { status: 404, body: { error: 'Dashboard not found' } };
+    } else if (method === 'get') {
+      if (id) {
+        const dashboard = await Dashboard.findByPk(id);
+        if (!dashboard) {
+          context.res = { status: 404, body: { error: 'Dashboard not found' } };
+        } else {
+          context.res = { status: 200, body: dashboard };
+        }
       } else {
+        const dashboards = await Dashboard.findAll();
         context.res = { status: 200, body: dashboards };
       }
-    } catch (error) {
-      context.log.error('Error retrieving dashboard(s):', error);
-      context.res = { status: 500, body: { error: error.message } };
+    } else if (method === 'put') {
+      if (!id) {
+        context.res = {
+          status: 400,
+          body: { error: 'Dashboard ID is required for updating.' }
+        };
+        return;
+      }
+      const { title, components, layouts } = req.body;
+      const dashboard = await Dashboard.findByPk(id);
+      if (!dashboard) {
+        context.res = { status: 404, body: { error: 'Dashboard not found' } };
+        return;
+      }
+      if (title !== undefined) dashboard.title = title;
+      if (components !== undefined) dashboard.components = components;
+      if (layouts !== undefined) dashboard.layouts = layouts;
+      await dashboard.save();
+      context.res = { status: 200, body: dashboard };
+    } else {
+      context.res = { status: 405, body: { error: 'Method not allowed.' } };
     }
-  } else if (method === 'put') {
-    if (!id) {
-      context.res = { status: 400, body: { error: 'Dashboard ID is required for updating.' } };
-      return;
-    }
-    try {
-      const response = await axios.put(`https://happy-forest-059a9d710.4.azurestaticapps.net/api/dashboards/${id}`, req.body);
-      context.res = { status: 200, body: response.data };
-    } catch (error) {
-      context.log.error('Error updating dashboard:', error);
-      context.res = { status: 500, body: { error: error.message } };
-    }
-  } else {
-    context.res = { status: 405, body: { error: 'Method not allowed.' } };
+  } catch (error) {
+    context.log.error('Error handling dashboard request:', error);
+    context.res = { status: 500, body: { error: error.message } };
   }
 };
