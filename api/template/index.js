@@ -1,41 +1,66 @@
-const axios = require('axios');
+const initializeModels = require('../models');
+const { v4: uuidv4 } = require('uuid');
 
 module.exports = async function (context, req) {
   const method = req.method.toLowerCase();
   const id = req.params.id;
 
-  if (method === 'post') {
-    try {
-      const response = await axios.post('https://happy-forest-059a9d710.4.azurestaticapps.net/api/template', req.body);
-      context.res = { status: 200, body: response.data };
-    } catch (error) {
-      context.log.error('Error creating template:', error);
-      context.res = { status: 500, body: { error: error.message } };
-    }
-  } else if (method === 'get') {
-    try {
-      let url = 'https://happy-forest-059a9d710.4.azurestaticapps.net/api/template';
-      if (id) url += `/${id}`;
+  try {
+    const { Template } = await initializeModels();
 
-      const response = await axios.get(url);
-      context.res = { status: 200, body: response.data };
-    } catch (error) {
-      context.log.error('Error retrieving template(s):', error);
-      context.res = { status: 500, body: { error: error.message } };
+    if (method === 'post') {
+      const { name, widgets, layouts } = req.body;
+      if (!name || !widgets || !layouts) {
+        context.res = {
+          status: 400,
+          body: { error: 'name, widgets, and layouts are required.' },
+        };
+        return;
+      }
+      const newTemplate = await Template.create({
+        id: uuidv4(),
+        name,
+        widgets,
+        layouts
+      });
+      context.res = { status: 200, body: newTemplate };
+    } else if (method === 'get') {
+      if (id) {
+        const template = await Template.findByPk(id);
+        if (!template) {
+          context.res = { status: 404, body: { error: 'Template not found' } };
+        } else {
+          context.res = { status: 200, body: template };
+        }
+      } else {
+        const templates = await Template.findAll();
+        context.res = { status: 200, body: templates };
+      }
+    } else if (method === 'put') {
+      if (!id) {
+        context.res = {
+          status: 400,
+          body: { error: 'Template ID is required for updating.' }
+        };
+        return;
+      }
+      const { name, widgets, layouts } = req.body;
+      const template = await Template.findByPk(id);
+      if (!template) {
+        context.res = { status: 404, body: { error: 'Template not found' } };
+        return;
+      }
+      if (name !== undefined) template.name = name;
+      if (widgets !== undefined) template.widgets = widgets;
+      if (layouts !== undefined) template.layouts = layouts;
+
+      await template.save();
+      context.res = { status: 200, body: template };
+    } else {
+      context.res = { status: 405, body: { error: 'Method not allowed.' } };
     }
-  } else if (method === 'put') {
-    if (!id) {
-      context.res = { status: 400, body: { error: 'Template ID is required for updating.' } };
-      return;
-    }
-    try {
-      const response = await axios.put(`https://happy-forest-059a9d710.4.azurestaticapps.net/api/template/${id}`, req.body);
-      context.res = { status: 200, body: response.data };
-    } catch (error) {
-      context.log.error('Error updating template:', error);
-      context.res = { status: 500, body: { error: error.message } };
-    }
-  } else {
-    context.res = { status: 405, body: { error: 'Method not allowed.' } };
+  } catch (error) {
+    context.log.error('Error handling template request:', error);
+    context.res = { status: 500, body: { error: error.message } };
   }
 };
