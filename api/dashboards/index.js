@@ -4,7 +4,6 @@ const axios = require('axios');
 module.exports = async function (context, req) {
   const method = req.method.toLowerCase();
   const id = req.params.id;
-
   if (method === 'post') {
     const schema = Joi.object({
       name: Joi.string().required(),
@@ -12,7 +11,6 @@ module.exports = async function (context, req) {
       layouts: Joi.object().required(),
       title: Joi.string().required(),
     });
-
     const { error, value } = schema.validate(req.body);
     if (error) {
       context.res = {
@@ -21,7 +19,6 @@ module.exports = async function (context, req) {
       };
       return;
     }
-
     try {
       const response = await axios.post('https://happy-forest-059a9d710.4.azurestaticapps.net/api/dashboards', value);
       context.res = {
@@ -41,7 +38,6 @@ module.exports = async function (context, req) {
       if (id) {
         url += `/${id}`;
       }
-
       const response = await axios.get(url);
       context.res = {
         status: 200,
@@ -62,14 +58,12 @@ module.exports = async function (context, req) {
       };
       return;
     }
-
     const schema = Joi.object({
       name: Joi.string().required(),
       components: Joi.array().items(Joi.object()).required(),
       layouts: Joi.object().required(),
       title: Joi.string().required(),
     });
-
     const { error, value } = schema.validate(req.body);
     if (error) {
       context.res = {
@@ -78,7 +72,6 @@ module.exports = async function (context, req) {
       };
       return;
     }
-
     try {
       const response = await axios.put(`https://happy-forest-059a9d710.4.azurestaticapps.net/api/dashboards/${id}`, value);
       context.res = {

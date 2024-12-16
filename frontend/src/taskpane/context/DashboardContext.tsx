@@ -126,12 +126,12 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     const fetchDashboards = async () => {
       try {
         const response = await axios.get('/api/dashboards');
-        console.log('Fetched dashboards:', response.data);
         const fetchedDashboards: DashboardItem[] = response.data;
         setDashboards(fetchedDashboards);
         if (fetchedDashboards.length > 0) {
-          const firstDashboard = fetchedDashboards[0];
-          setCurrentDashboardId(firstDashboard.id);
+          setCurrentDashboardId(fetchedDashboards[0].id);
+        } else {
+          console.log('No dashboards available.');
         }
       } catch (error) {
         console.error('Error fetching dashboards:', error);
@@ -372,7 +372,9 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
   };
   useEffect(() => {
     const fetchWidgetsFromServer = async () => {
-      if (!currentDashboardId) return;
+      if (!currentDashboardId) {
+        return;
+      }
       try {
         const response = await axios.get(`/api/dashboards/${currentDashboardId}/widgets`);
         const fetchedWidgets = response.data;
