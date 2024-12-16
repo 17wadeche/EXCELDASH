@@ -7,7 +7,6 @@ module.exports = async function (context, req) {
 
   if (method === 'post') {
     const schema = Joi.object({
-      name: Joi.string().required(),
       content: Joi.string().required(),
     });
 
@@ -42,7 +41,6 @@ module.exports = async function (context, req) {
     }
 
     const schema = Joi.object({
-      name: Joi.string().required(),
       content: Joi.string().required(),
     });
 
