@@ -371,97 +371,102 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     setReports(updatedReports);
   };
   useEffect(() => {
-    const fetchWidgetsFromServer = async () => {
-      if (!currentDashboardId) {
-        return;
-      }
+    if (!currentDashboardId || !currentDashboard) return;
+  
+    const migrateWidgets = async () => {
       try {
-        const response = await axios.get(`/api/dashboards/${currentDashboardId}/widgets`);
-        const fetchedWidgets = response.data;
-        const needsMigration = fetchedWidgets.some(
-          (widget: Widget) => (widget.type === 'chart' || widget.type === 'image') && 'chartIndex' in widget.data
+        const serverWidgets: Widget[] = currentDashboard.components || [];
+        const needsMigration = serverWidgets.some(
+          (widget: Widget) =>
+            (widget.type === 'chart' || widget.type === 'image') &&
+            'chartIndex' in widget.data
         );
         if (needsMigration) {
-          migrateChartIndexToAssociatedRange();
+          await migrateChartIndexToAssociatedRange();
         } else {
-          const updatedWidgets = fetchedWidgets.map((widget: any) => {
-            switch (widget.type) {
-              case 'image': {
-                const imageData: ImageWidgetData = {
-                  src: widget.data.src || '',
-                };
-                return { ...widget, data: imageData };
+          const updatedWidgets = serverWidgets
+            .map((widget: any) => {
+              switch (widget.type) {
+                case 'image': {
+                  const imageData: ImageWidgetData = {
+                    src: widget.data.src || '',
+                  };
+                  return { ...widget, data: imageData };
+                }
+                case 'chart': {
+                  const chartData: ChartData = {
+                    type: widget.data.type || 'bar',
+                    title: widget.data.title || 'Sample Chart',
+                    labels: widget.data.labels || [],
+                    datasets: widget.data.datasets || [],
+                    titleAlignment: widget.data.titleAlignment || 'left',
+                    associatedRange: widget.data.associatedRange || '',
+                    worksheetName: widget.data.worksheetName || '',
+                  };
+                  return { ...widget, data: chartData };
+                }
+                case 'metric': {
+                  const metricData: MetricData = {
+                    cellAddress: widget.data.cellAddress || '',
+                    worksheetName: widget.data.worksheetName || '',
+                    targetValue: widget.data.targetValue ?? 0,
+                    comparison: widget.data.comparison || 'greater',
+                    fontSize: widget.data.fontSize ?? 28,
+                    displayName: widget.data.displayName || 'KPI',
+                    format: widget.data.format || 'number',
+                    currentValue: widget.data.currentValue ?? 0,
+                    titleAlignment: widget.data.titleAlignment || 'left',
+                    backgroundColor: '#ffffff',
+                    textColor: '#000000',
+                  };
+                  return { ...widget, data: metricData };
+                }
+                case 'text': {
+                  const textData: TextData = {
+                    content: widget.data.content || 'Your Dashboard Title',
+                    fontSize: widget.data.fontSize ?? 24,
+                    textColor: widget.data.textColor || '#000000',
+                    backgroundColor: widget.data.backgroundColor || '#ffffff',
+                    titleAlignment: widget.data.titleAlignment || 'left',
+                  };
+                  return { ...widget, data: textData };
+                }
+                case 'gantt': {
+                  const ganttData: GanttWidgetData = {
+                    tasks: widget.data.tasks || [],
+                    title: widget.data.title || 'Gantt Chart',
+                    titleAlignment: widget.data.titleAlignment || 'left',
+                  };
+                  return { ...widget, data: ganttData };
+                }
+                case 'report': {
+                  const reportData: ReportData = {
+                    columns: widget.data.columns || [],
+                    data: widget.data.data || [],
+                  };
+                  return { ...widget, data: reportData };
+                }
+                default:
+                  console.warn(`Unknown widget type: ${widget.type}. Widget will be skipped.`);
+                  return null;
               }
-              case 'chart': {
-                const chartData: ChartData = {
-                  type: widget.data.type || 'bar',
-                  title: widget.data.title || 'Sample Chart',
-                  labels: widget.data.labels || [],
-                  datasets: widget.data.datasets || [],
-                  titleAlignment: widget.data.titleAlignment || 'left',
-                  associatedRange: widget.data.associatedRange || '',
-                  worksheetName: widget.data.worksheetName || '',
-                };
-                return { ...widget, data: chartData };
-              }
-              case 'metric': {
-                const metricData: MetricData = {
-                  cellAddress: widget.data.cellAddress || '',
-                  worksheetName: widget.data.worksheetName || '',
-                  targetValue: widget.data.targetValue ?? 0,
-                  comparison: widget.data.comparison || 'greater',
-                  fontSize: widget.data.fontSize ?? 28,
-                  displayName: widget.data.displayName || 'KPI',
-                  format: widget.data.format || 'number',
-                  currentValue: widget.data.currentValue ?? 0,
-                  titleAlignment: widget.data.titleAlignment || 'left',
-                  backgroundColor: '#ffffff',
-                  textColor: '#000000',
-                };
-                return { ...widget, data: metricData };
-              }
-              case 'text': {
-                const textData: TextData = {
-                  content: widget.data.content || 'Your Dashboard Title',
-                  fontSize: widget.data.fontSize ?? 24,
-                  textColor: widget.data.textColor || '#000000',
-                  backgroundColor: widget.data.backgroundColor || '#ffffff',
-                  titleAlignment: widget.data.titleAlignment || 'left',
-                };
-                return { ...widget, data: textData };
-              }
-              case 'gantt': {
-                const ganttData: GanttWidgetData = {
-                  tasks: widget.data.tasks || [],
-                  title: widget.data.title || 'Gantt Chart',
-                  titleAlignment: widget.data.titleAlignment || 'left',
-                };
-                return { ...widget, data: ganttData };
-              }
-              case 'report': {
-                const reportData: ReportData = {
-                  columns: widget.data.columns || [],
-                  data: widget.data.data || [],
-                };
-                return { ...widget, data: reportData };
-              }
-              default:
-                console.warn(`Unknown widget type: ${widget.type}. Widget will be skipped.`);
-                return null;
-            }
-          }).filter((widget: Widget | null) => widget !== null);
+            })
+            .filter((widget: Widget | null) => widget !== null) as Widget[];
           if (!updatedWidgets.some((w: Widget) => w.type === 'title')) {
             updatedWidgets.unshift(defaultTitleWidget);
+            updateLayoutsForNewWidgets([defaultTitleWidget]);
           }
           setWidgets(updatedWidgets);
+          updateLayoutsForNewWidgets(updatedWidgets);
         }
       } catch (error) {
-        console.error('Failed to fetch widgets:', error);
+        console.error('Error fetching and migrating widgets:', error);
         message.error('Failed to load widgets from server.');
       }
     };
-    fetchWidgetsFromServer();
-  }, [currentDashboardId]); 
+    migrateWidgets();
+  }, [currentDashboardId, currentDashboard]);
+  
   const saveAsTemplate = async () => {
     try {
       const template = {
@@ -1461,92 +1466,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     },
     [currentDashboard, dashboards, editDashboard, setDashboards, setCurrentDashboard, dashboardTitle, layouts, currentDashboardId]
   );
-  useEffect(() => {
-    if (!currentDashboardId) return;
-    const migrateWidgets = async () => {
-      try {
-        const response = await axios.get(`/api/dashboards/${currentDashboardId}/widgets`);
-        const serverWidgets: Widget[] = response.data;
-        const migratedWidgets = serverWidgets
-          .map((widget) => {
-            switch (widget.type) {
-              case 'image': {
-                const imageData: ImageWidgetData = {
-                  src: widget.data.src || '',
-                };
-                return { ...widget, data: imageData };
-              }
-              case 'chart': {
-                const chartData: ChartData = {
-                  type: widget.data.type || 'bar',
-                  title: widget.data.title || 'Sample Chart',
-                  labels: widget.data.labels || [],
-                  datasets: widget.data.datasets || [],
-                  titleAlignment: widget.data.titleAlignment || 'left',
-                  associatedRange: widget.data.associatedRange || '',
-                  worksheetName: widget.data.worksheetName || '',
-                };
-                return { ...widget, data: chartData };
-              }
-              case 'metric': {
-                const metricData: MetricData = {
-                  cellAddress: widget.data.cellAddress || '',
-                  worksheetName: widget.data.worksheetName || '',
-                  targetValue: widget.data.targetValue ?? 0,
-                  comparison: widget.data.comparison || 'greater',
-                  fontSize: widget.data.fontSize ?? 28,
-                  displayName: widget.data.displayName || 'KPI',
-                  format: widget.data.format || 'number',
-                  currentValue: widget.data.currentValue ?? 0,
-                  titleAlignment: widget.data.titleAlignment || 'left',
-                  backgroundColor: widget.data.backgroundColor || '#ffffff',
-                  textColor: widget.data.textColor || '#000000',
-                };
-                return { ...widget, data: metricData };
-              }
-              case 'text': {
-                const textData: TextData = {
-                  content: widget.data.content || 'Your Dashboard Title',
-                  fontSize: widget.data.fontSize ?? 24,
-                  textColor: widget.data.textColor || '#000000',
-                  backgroundColor: widget.data.backgroundColor || '#ffffff',
-                  titleAlignment: widget.data.titleAlignment || 'left',
-                };
-                return { ...widget, data: textData };
-              }
-              case 'gantt': {
-                const ganttData: GanttWidgetData = {
-                  tasks: widget.data.tasks || [],
-                  title: widget.data.title || 'Gantt Chart',
-                  titleAlignment: widget.data.titleAlignment || 'left',
-                };
-                return { ...widget, data: ganttData };
-              }
-              case 'report': {
-                const reportData: ReportData = {
-                  columns: widget.data.columns || [],
-                  data: widget.data.data || [],
-                };
-                return { ...widget, data: reportData };
-              }
-              default:
-                return null;
-            }
-          })
-          .filter((widget: Widget | null) => widget !== null) as Widget[];
-        if (!migratedWidgets.some((w: Widget) => w.type === 'title')) {
-          migratedWidgets.unshift(defaultTitleWidget);
-          updateLayoutsForNewWidgets([defaultTitleWidget]);
-        }
-        setWidgets(migratedWidgets);
-        updateLayoutsForNewWidgets(migratedWidgets);
-      } catch (error) {
-        console.error('Error fetching and migrating widgets:', error);
-        message.error('Failed to load widgets from server.');
-      }
-    };
-    migrateWidgets();
-  }, [currentDashboardId]);
   const migrateChartIndexToAssociatedRange = async () => {
     if (!currentDashboardId || !currentDashboard) {
       console.warn('No current dashboard available for migration.');
@@ -1562,7 +1481,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         for (const sheet of worksheets.items) {
           const charts = sheet.charts;
           charts.load('items');
-        }
         await context.sync();
         for (const sheet of worksheets.items) {
           for (const chart of sheet.charts.items) {
@@ -1570,7 +1488,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
             dataRange.load('address');
             chartMap[globalChartIndex] = {
               worksheetName: sheet.name,
-              associatedRange: '', 
+              associatedRange: '',
             };
             globalChartIndex++;
           }
@@ -1610,9 +1528,9 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
                   console.warn(
                     `No associatedRange found for chartIndex ${chartIndex} in ImageWidget ${widget.id}.`
                   );
-                  return widget;
                 }
               }
+              return widget;
             } else if (widget.type === 'chart') {
               const chartData = widget.data as ChartData & { chartIndex?: number };
               if ('chartIndex' in chartData && chartData.chartIndex !== undefined) {
@@ -1629,7 +1547,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
                   };
                 } else {
                   console.warn(`No associatedRange found for chartIndex ${chartIndex} in ChartWidget ${widget.id}.`);
-                  return widget;
                 }
               }
             }
@@ -1645,7 +1562,11 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
             }
             return widget;
           });
-          axios.put(`/api/dashboards/${currentDashboardId}/widgets`, cleanedWidgets)
+          const updatedDashboard = {
+            ...currentDashboard,
+            components: cleanedWidgets,
+          };
+          axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard)
             .then(() => {
               message.success('Widgets migrated to use associatedRange successfully.');
             })
@@ -1670,8 +1591,8 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     };
   };
   const importChartImageFromExcel = async () => {
-    if (!currentDashboardId) {
-      console.warn('No current dashboard ID available for importing chart images.');
+    if (!currentDashboardId || !currentDashboard) {
+      console.warn('No current dashboard ID or dashboard available.');
       return;
     }
     try {
@@ -1697,15 +1618,17 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
                 imageWidgets.push({
                   id: `image-${uuidv4()}`,
                   type: 'image',
-                  data: {
-                    src: `data:image/png;base64,${base64Image}`,
-                  },
+                  data: { src: `data:image/png;base64,${base64Image}` },
                 });
               }
             });
             imageWidgets = imageWidgets.slice(0, imageResults.length);
             const updatedWidgets = [...nonImageWidgets, ...imageWidgets];
-            axios.put(`/api/dashboards/${currentDashboardId}/widgets`, updatedWidgets)
+            const updatedDashboard = {
+              ...currentDashboard,
+              components: updatedWidgets,
+            };
+            axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard)
               .then(() => {
                 message.success('All chart images imported and updated successfully.');
               })

@@ -22,7 +22,6 @@ module.exports = async function (context, req) {
         layouts
       });
       context.res = { status: 200, body: newDashboard };
-
     } else if (method === 'get') {
       if (id) {
         const dashboard = await Dashboard.findByPk(id);

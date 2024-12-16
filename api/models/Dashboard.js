@@ -33,8 +33,8 @@ module.exports = (sequelize, DataTypes) => {
       }
     },
   }, {
-    tableName: 'Dashboards', // Ensure this matches your actual table name in the database
-    timestamps: true,        // Disable if you don't want automatic timestamps
+    tableName: 'Dashboards',
+    timestamps: true,
   });
   return Dashboard;
 };
