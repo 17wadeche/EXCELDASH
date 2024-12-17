@@ -31,11 +31,9 @@ const DashboardPage: React.FC = () => {
       });
     }
   }, [id, dashboards]);
-
   if (!currentDashboard) {
     return <div>Loading dashboard or not found...</div>;
   }
   return <Dashboard />;
 };
-
 export default DashboardPage;

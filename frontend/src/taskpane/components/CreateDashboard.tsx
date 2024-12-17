@@ -214,6 +214,7 @@ const CreateDashboard: React.FC = () => {
         components: [],
         layouts: {}
       });
+      addDashboard(createdDashboard);
       message.success('Dashboard created successfully!');
       navigate(`/dashboard/${createdDashboard.id}`);
     } catch (error) {
