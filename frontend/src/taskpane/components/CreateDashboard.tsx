@@ -212,7 +212,7 @@ const CreateDashboard: React.FC = () => {
       const createdDashboard = await createDashboard({
         title: dashboardTitle,
         components: [],
-        layouts: {}
+        layouts: {},
       });
       addDashboard(createdDashboard);
       message.success('Dashboard created successfully!');
@@ -225,23 +225,27 @@ const CreateDashboard: React.FC = () => {
     }
   };
 
-  const createDashboardFromTemplate = (template: any) => {
+  const createDashboardFromTemplate = async (template: any) => {
     if (!currentWorkbookId) {
       message.error('No workbook ID found. Cannot create dashboard from template.');
       return;
     }
-  
-    const newDashboard: DashboardItem = {
-      id: uuidv4(),
+    const dashboardToCreate: NewDashboard = {
       title: template.name || 'Untitled Dashboard',
       components: template.widgets || [],
       layouts: template.layouts || {},
-      workbookId: currentWorkbookId, // TypeScript now knows this is a string
+      workbookId: currentWorkbookId,
     };
-    addDashboard(newDashboard); // Add to dashboards array
-    setCurrentDashboardId(newDashboard.id); // Set current dashboard ID
-    navigate(`/dashboard/${newDashboard.id}`); // Navigate to the dashboard page
-    message.success(`Dashboard "${newDashboard.title}" created from template!`);
+    try {
+      const createdDashboard = await createDashboard(dashboardToCreate);
+      addDashboard(createdDashboard);
+      setCurrentDashboardId(createdDashboard.id);
+      navigate(`/dashboard/${createdDashboard.id}`);
+      message.success(`Dashboard "${createdDashboard.title}" created from template!`);
+    } catch (error) {
+      console.error('Error creating dashboard from template:', error);
+      message.error('Failed to create dashboard from template.');
+    }
   };
 
   const editTemplate = (template: any) => {
