@@ -288,11 +288,14 @@ const ChartFields: React.FC = () => {
         rules={[{ required: true, message: 'Please select chart type' }]}
       >
         <Select placeholder="Select chart type">
-          <Option value="line">Bar</Option>
-          <Option value="pie">Pie</Option>
+          <Option value="bar">Bar</Option>
           <Option value="line">Line</Option>
+          <Option value="pie">Pie</Option>
           <Option value="doughnut">Doughnut</Option>
-          {/* Add more chart types as needed */}
+          <Option value="radar">Radar</Option>
+          <Option value="polarArea">Polar Area</Option>
+          <Option value="bubble">Bubble</Option>
+          <Option value="scatter">Scatter</Option>
         </Select>
       </Form.Item>
       <Form.Item
