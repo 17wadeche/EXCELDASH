@@ -7,7 +7,7 @@ import { DashboardContext } from '../context/DashboardContext';
 import { DeleteOutlined, FolderAddOutlined, PlusOutlined } from '@ant-design/icons';
 import { v4 as uuidv4 } from 'uuid';
 import { setWorkbookIdInProperties } from '../utils/excelUtils';
-import { DashboardItem } from './types';
+import { DashboardItem, NewDashboard } from './types';
 const { Content } = Layout;
 const { Search } = Input;
 import { createCheckoutSession, checkSubscription, loginUser, registerUser, verifySubscription, checkRegistration, unsubscribeUser, createDashboard } from './../utils/api';

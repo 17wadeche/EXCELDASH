@@ -229,7 +229,14 @@ export interface DashboardComponent {
 }
 export type GridLayoutItem = Layout;
 export interface DashboardItem {
-  id?: string;
+  id: string;
+  title: string;
+  components: Widget[];
+  layouts?: { [key: string]: GridLayoutItem[] };
+  versions?: DashboardVersion[];
+  workbookId?: string;
+}
+export interface NewDashboard {
   title: string;
   components: Widget[];
   layouts?: { [key: string]: GridLayoutItem[] };

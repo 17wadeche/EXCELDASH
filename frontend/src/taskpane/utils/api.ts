@@ -1,6 +1,6 @@
 import { AxiosError } from "axios";
 import axios from 'axios';
-import { DashboardItem, TemplateItem } from '../components/types';
+import { DashboardItem, NewDashboard, TemplateItem } from '../components/types';
 
 const API_BASE_URL = 'https://happy-forest-059a9d710.4.azurestaticapps.net/api';
 
@@ -86,9 +86,9 @@ export const getDashboardById = async (id: string): Promise<DashboardItem> => {
   const response = await axios.get(`${API_BASE_URL}/dashboards/${id}`);
   return response.data;
 };
-export const createDashboard = async (dashboard: DashboardItem): Promise<DashboardItem> => {
+export const createDashboard = async (dashboard: NewDashboard): Promise<DashboardItem> => {
   const response = await axios.post(`${API_BASE_URL}/dashboards`, dashboard);
-  return response.data;
+  return response.data as DashboardItem;
 };
 export const updateDashboard = async (id: string, dashboard: DashboardItem): Promise<DashboardItem> => {
   const response = await axios.put(`${API_BASE_URL}/dashboards/${id}`, dashboard);
