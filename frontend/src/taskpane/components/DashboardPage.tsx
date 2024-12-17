@@ -19,12 +19,7 @@ const DashboardPage: React.FC = () => {
         setCurrentDashboard(dashboard);
       } else {
         console.warn(`No dashboard found with id ${id}`);
-        setCurrentDashboard({
-          id: '',
-          title: '',
-          components: [],
-          layouts: {},
-        });
+        setCurrentDashboard(null);
       }
     } else {
       console.log('No ID provided, setting up a new blank dashboard');
@@ -38,9 +33,8 @@ const DashboardPage: React.FC = () => {
   }, [id, dashboards]);
 
   if (!currentDashboard) {
-    return <div>Loading...</div>;
+    return <div>Loading dashboard or not found...</div>;
   }
-
   return <Dashboard />;
 };
 

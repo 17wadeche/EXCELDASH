@@ -106,7 +106,6 @@ const CreateDashboard: React.FC = () => {
           message.error('Failed to initiate checkout.');
           return;
         }
-
         const dialog = asyncResult.value;
         dialog.addEventHandler(Office.EventType.DialogEventReceived, () => {
           checkSubscription(email).then(result => {
