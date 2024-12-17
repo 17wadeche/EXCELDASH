@@ -1481,6 +1481,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         for (const sheet of worksheets.items) {
           const charts = sheet.charts;
           charts.load('items');
+        }
         await context.sync();
         for (const sheet of worksheets.items) {
           for (const chart of sheet.charts.items) {
@@ -1501,9 +1502,13 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
             const dataRange = chart.getDataBodyRange();
             if (dataRange.address) {
               chartMap[key].associatedRange = dataRange.address.toLowerCase();
-              console.log(`Mapped chartIndex ${key} to range "${chartMap[key].associatedRange}" on worksheet "${sheet.name}".`);
+              console.log(
+                `Mapped chartIndex ${key} to range "${chartMap[key].associatedRange}" on worksheet "${sheet.name}".`
+              );
             } else {
-              console.warn(`Chart "${chart.name}" on worksheet "${sheet.name}" has no associated data range.`);
+              console.warn(
+                `Chart "${chart.name}" on worksheet "${sheet.name}" has no associated data range.`
+              );
             }
             globalChartIndex++;
           }
@@ -1546,12 +1551,16 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
                     },
                   };
                 } else {
-                  console.warn(`No associatedRange found for chartIndex ${chartIndex} in ChartWidget ${widget.id}.`);
+                  console.warn(
+                    `No associatedRange found for chartIndex ${chartIndex} in ChartWidget ${widget.id}.`
+                  );
                 }
               }
+              return widget; // Added return statement for 'chart' type
             }
             return widget;
           });
+  
           const cleanedWidgets = newWidgets.map((widget) => {
             if (widget.type === 'image') {
               const { chartIndex, ...rest } = widget.data as ImageWidgetData & { chartIndex?: number };
@@ -1566,7 +1575,8 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
             ...currentDashboard,
             components: cleanedWidgets,
           };
-          axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard)
+          axios
+            .put(`/api/dashboards/${currentDashboardId}`, updatedDashboard)
             .then(() => {
               message.success('Widgets migrated to use associatedRange successfully.');
             })
