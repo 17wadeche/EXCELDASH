@@ -2,6 +2,7 @@ const initializeModels = require('../models');
 const Joi = require('joi');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { v4: uuidv4 } = require('uuid');
 
 module.exports = async function (context, req) {
   const schema = Joi.object({
@@ -18,11 +19,11 @@ module.exports = async function (context, req) {
   }
   const { email, password } = value;
   try {
-    const { User } = await initializeModels();
+    const { User, RefreshToken } = await initializeModels();
     const user = await User.findOne({ where: { email } });
     if (!user) {
       context.res = {
-        status: 400,
+        status: 401,
         body: { error: 'Invalid email or password.' },
       };
       return;
@@ -30,17 +31,29 @@ module.exports = async function (context, req) {
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) {
       context.res = {
-        status: 400,
+        status: 401,
         body: { error: 'Invalid email or password.' },
       };
       return;
     }
-    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
-      expiresIn: '7d',
+    const accessToken = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
+      expiresIn: '30d', // or shorter
+    });
+    const refreshTokenValue = uuidv4();
+    const refreshTokenExpires = new Date();
+    refreshTokenExpires.setDate(refreshTokenExpires.getDate() + 90);
+
+    await RefreshToken.create({
+      token: refreshTokenValue,
+      userId: user.id,
+      expiresAt: refreshTokenExpires
     });
     context.res = {
       status: 200,
-      body: { token },
+      body: { 
+        accessToken, 
+        refreshToken: refreshTokenValue 
+      },
     };
   } catch (error) {
     context.log.error('Error logging in:', error);

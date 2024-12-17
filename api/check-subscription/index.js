@@ -1,5 +1,4 @@
 // check-subscription/index.js
-
 const initializeModels = require('../models');
 
 module.exports = async function (context, req) {
