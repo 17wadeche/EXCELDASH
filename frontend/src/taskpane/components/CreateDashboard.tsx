@@ -10,7 +10,7 @@ import { setWorkbookIdInProperties } from '../utils/excelUtils';
 import { DashboardItem } from './types';
 const { Content } = Layout;
 const { Search } = Input;
-import { createCheckoutSession, checkSubscription, loginUser, registerUser, verifySubscription, checkRegistration, unsubscribeUser  } from './../utils/api';
+import { createCheckoutSession, checkSubscription, loginUser, registerUser, verifySubscription, checkRegistration, unsubscribeUser, createDashboard } from './../utils/api';
 import axios from 'axios';
 interface Widget {
   id: string;
@@ -205,24 +205,18 @@ const CreateDashboard: React.FC = () => {
       message.error('Dashboard title cannot be empty.');
       return;
     }
-
     setLoading(true);
     try {
-      const workbookId = uuidv4(); // Generate a new workbookId
+      const workbookId = uuidv4();
       await setWorkbookIdInProperties(workbookId);
-      setCurrentWorkbookId(workbookId); // Update context
-
-      const newDashboard = {
-        id: uuidv4(),
+      setCurrentWorkbookId(workbookId);
+      const createdDashboard = await createDashboard({
         title: dashboardTitle,
-        components: [], // Initialize with empty components
-        layouts: {}, // Initialize layouts
-        workbookId, // Assign the workbookId
-      };
-
-      addDashboard(newDashboard);
+        components: [],
+        layouts: {}
+      });
       message.success('Dashboard created successfully!');
-      navigate(`/dashboard/${newDashboard.id}`);
+      navigate(`/dashboard/${createdDashboard.id}`);
     } catch (error) {
       console.error(error);
       message.error('Failed to create dashboard. Please try again.');

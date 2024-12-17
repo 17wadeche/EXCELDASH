@@ -28,7 +28,7 @@ const App: React.FC = () => {
           <Route path="/reports-list" element={<ReportsList />} />
           <Route path="dashboard-list" element={<DashboardList />} />
           <Route path="create" element={<CreateDashboard />} />
-          <Route path="dashboard/:id" element={<DashboardPage /> }/>
+          <Route path="dashboard/:id" element={<DashboardPage />}/>
           <Route path="/full-screen" element={<Dashboard isFullScreen />} />
           <Route path="edit-dashboard/:id" element={<DashboardPage />} />
           <Route path="/reports-list" element={<ReportsList />} />
