@@ -14,6 +14,7 @@ import PromptWidgetDetailsModal from '../components/PromptWidgetDetailsModal';
 import { DashboardBorderSettings } from '../components/types';
 import TitleWidgetComponent from '../components/TitleWidget';
 import { capitalizeFirstLetter } from '../utils/stringUtils'; 
+import { deleteDashboardById } from '../utils/api';
 
 const { Option } = Select;
 interface DashboardContextProps {
@@ -1137,23 +1138,22 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       throw err;
     }
   };
-  const deleteDashboard = (id: string) => {
-    axios.delete(`/api/dashboards/${id}`)
-      .then(() => {
-        setDashboards((prev) => prev.filter(d => d.id !== id));
-        if (currentDashboardId === id) {
-          setCurrentDashboard(null);
-          setCurrentDashboardId(null);
-          setWidgets([defaultTitleWidget]);
-          setLayouts({});
-          setDashboardTitle('My Dashboard');
-        }
-        message.success('Dashboard deleted successfully!');
-      })
-      .catch(err => {
-        console.error('Error deleting dashboard on server:', err);
-        message.error('Failed to delete dashboard.');
-      });
+  const deleteDashboard = async (id: string) => {
+    try {
+      await deleteDashboardById(id);
+      setDashboards((prev) => prev.filter(d => d.id !== id));
+      if (currentDashboardId === id) {
+        setCurrentDashboard(null);
+        setCurrentDashboardId(null);
+        setWidgets([defaultTitleWidget]);
+        setLayouts({});
+        setDashboardTitle('My Dashboard');
+      }
+      message.success('Dashboard deleted successfully!');
+    } catch (err) {
+      console.error('Error deleting dashboard on server:', err);
+      message.error('Failed to delete dashboard.');
+    }
   };
   const setWidgetsAndLayouts = (newWidgets: Widget[]) => {
     setWidgets(newWidgets);
