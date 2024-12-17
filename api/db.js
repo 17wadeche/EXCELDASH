@@ -19,7 +19,6 @@ async function getAccessToken() {
 async function initializeSequelize() {
   try {
     const accessToken = await getAccessToken();
-
     const sequelize = new Sequelize(sqlDatabase, null, null, {
       host: sqlServer,
       dialect: 'mssql',

@@ -10,10 +10,8 @@ module.exports = async function (context, req) {
     };
     return;
   }
-
   try {
     const session = await stripe.checkout.sessions.retrieve(sessionId);
-
     if (session.payment_status === 'paid' && session.subscription) {
       context.res = {
         status: 200,

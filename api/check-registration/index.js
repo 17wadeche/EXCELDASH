@@ -12,7 +12,6 @@ module.exports = async function (context, req) {
     };
     return;
   }
-
   try {
     const { User } = await initializeModels();
     const user = await User.findOne({ where: { email } });
