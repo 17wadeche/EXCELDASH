@@ -211,6 +211,7 @@ const CreateDashboard: React.FC = () => {
       await setWorkbookIdInProperties(workbookId);
       setCurrentWorkbookId(workbookId);
       const createdDashboard = await createDashboard({
+        id: uuidv4(),
         title: dashboardTitle,
         components: [],
         layouts: {}
@@ -238,7 +239,6 @@ const CreateDashboard: React.FC = () => {
       layouts: template.layouts || {},
       workbookId: currentWorkbookId, // TypeScript now knows this is a string
     };
-  
     addDashboard(newDashboard); // Add to dashboards array
     setCurrentDashboardId(newDashboard.id); // Set current dashboard ID
     navigate(`/dashboard/${newDashboard.id}`); // Navigate to the dashboard page
