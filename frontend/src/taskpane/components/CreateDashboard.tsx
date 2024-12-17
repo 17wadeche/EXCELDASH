@@ -211,7 +211,6 @@ const CreateDashboard: React.FC = () => {
       await setWorkbookIdInProperties(workbookId);
       setCurrentWorkbookId(workbookId);
       const createdDashboard = await createDashboard({
-        id: uuidv4(),
         title: dashboardTitle,
         components: [],
         layouts: {}
