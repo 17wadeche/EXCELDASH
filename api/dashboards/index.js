@@ -53,6 +53,20 @@ module.exports = async function (context, req) {
       if (layouts !== undefined) dashboard.layouts = layouts;
       await dashboard.save();
       context.res = { status: 200, body: dashboard };
+    } else if (method === 'delete') {
+      if (!id) {
+        context.res = {
+          status: 400,
+          body: { error: 'Dashboard ID is required for deleting.' }
+        };
+        return;
+      }
+      const deletedCount = await Dashboard.destroy({ where: { id }});
+      if (deletedCount === 0) {
+        context.res = { status: 404, body: { error: 'Dashboard not found' } };
+      } else {
+        context.res = { status: 200, body: { message: 'Dashboard deleted successfully' } };
+      }
     } else {
       context.res = { status: 405, body: { error: 'Method not allowed.' } };
     }
