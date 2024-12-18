@@ -41,7 +41,7 @@ interface DashboardContextProps {
   currentDashboardId: string | null;
   setCurrentDashboardId: (id: string | null) => void;
   saveTemplate: () => void;
-  setCurrentWorkbookId: React.Dispatch<React.SetStateAction<string | undefined>>;
+  setCurrentWorkbookId: React.Dispatch<React.SetStateAction<string>>;
   currentDashboard: DashboardItem | null;
   addTaskToGantt: (task: Task) => Promise<void>;
   setCurrentDashboard: (dashboard: DashboardItem | null) => void;
@@ -87,7 +87,7 @@ interface DashboardProviderProps {
   initialAvailableWorksheets?: string[];
 }
 export const DashboardContext = createContext<DashboardContextProps | undefined>(undefined);
-export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, initialWidgets = [], initialLayouts = {}, initialWorkbookId = null, initialAvailableWorksheets = [] }) => {
+export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, initialWidgets = [], initialLayouts = {}, initialAvailableWorksheets = [] }) => {
   const defaultTitleWidget: Widget = {
     id: 'dashboard-title',
     type: 'title',
