@@ -228,15 +228,15 @@ export interface DashboardComponent {
   data: WidgetData<WidgetType>;
 }
 export type GridLayoutItem = Layout;
-export interface DashboardItem {
-  id: string;
+export interface NewDashboard {
   title: string;
   components: Widget[];
   layouts?: { [key: string]: GridLayoutItem[] };
   versions?: DashboardVersion[];
   workbookId?: string;
 }
-export interface NewDashboard {
+export interface DashboardItem extends Omit<NewDashboard, 'title' | 'components' | 'layouts'> {
+  id: string;
   title: string;
   components: Widget[];
   layouts?: { [key: string]: GridLayoutItem[] };
@@ -260,7 +260,9 @@ export interface Dataset {
 }
 
 export interface TemplateItem {
-  id?: string;
+  id: string;
   name: string;
-  content: string;
+  description?: string;
+  widgets: Widget[];
+  thumbnailUrl?: string;
 }

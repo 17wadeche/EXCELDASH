@@ -11,9 +11,7 @@ module.exports = function (context, req, next) {
     };
     return;
   }
-
   const token = authHeader.split(' ')[1];
-
   if (!token) {
     context.res = {
       status: 401,
@@ -21,7 +19,6 @@ module.exports = function (context, req, next) {
     };
     return;
   }
-
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.userId = decoded.userId;

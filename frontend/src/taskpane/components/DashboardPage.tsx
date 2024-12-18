@@ -31,8 +31,12 @@ const DashboardPage: React.FC = () => {
       });
     }
   }, [id, dashboards]);
-  if (!currentDashboard) {
-    return <div>Loading dashboard or not found...</div>;
+  if (!dashboards || dashboards.length === 0) {
+    return <div>Loading...</div>;
+  }
+  const dashboard = dashboards.find(d => d.id === id);
+  if (!dashboard) {
+    return <div>No dashboard found.</div>;
   }
   return <Dashboard />;
 };

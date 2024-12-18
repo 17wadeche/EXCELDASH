@@ -7,7 +7,7 @@ import { DashboardContext } from '../context/DashboardContext';
 import { DeleteOutlined, FolderAddOutlined, PlusOutlined } from '@ant-design/icons';
 import { v4 as uuidv4 } from 'uuid';
 import { setWorkbookIdInProperties } from '../utils/excelUtils';
-import { DashboardItem, NewDashboard } from './types';
+import { DashboardItem, NewDashboard, TemplateItem } from './types';
 const { Content } = Layout;
 const { Search } = Input;
 import { createCheckoutSession, checkSubscription, loginUser, registerUser, verifySubscription, checkRegistration, unsubscribeUser, createDashboard } from './../utils/api';
@@ -16,13 +16,6 @@ interface Widget {
   id: string;
   title: string;
   content: string;
-}
-interface Template {
-  id: string;
-  name: string;
-  description?: string;
-  widgets: Widget[];
-  thumbnailUrl?: string;
 }
 
 const CreateDashboard: React.FC = () => {
@@ -37,19 +30,19 @@ const CreateDashboard: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const location = useLocation();
   const [searchTerm, setSearchTerm] = useState('');
-  const [templates, setTemplates] = useState<Template[]>([]);
-  const [previewTemplate, setPreviewTemplate] = useState<Template | null>(null);
+  const [templates, setTemplates] = useState<TemplateItem[]>([]);
+  const [previewTemplate, setPreviewTemplate] = useState<TemplateItem | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const navigate = useNavigate();
   const {
     setDashboardTitle: setContextTitle,
     setWidgets,
     setCurrentTemplateId,
-    addDashboard,
     setCurrentWorkbookId,
     setCurrentDashboardId,
     currentWorkbookId,
     setLayouts,
+    setDashboards,
   } = useContext(DashboardContext)!;
 
   useEffect(() => {
@@ -209,12 +202,15 @@ const CreateDashboard: React.FC = () => {
       const workbookId = uuidv4();
       await setWorkbookIdInProperties(workbookId);
       setCurrentWorkbookId(workbookId);
-      const createdDashboard = await createDashboard({
+      const newDashboard: NewDashboard = {
         title: dashboardTitle,
         components: [],
         layouts: {},
-      });
-      addDashboard(createdDashboard);
+        workbookId: workbookId,
+      };
+      const createdDashboard: DashboardItem = await createDashboard(newDashboard);
+      setDashboards((prev) => [...prev, createdDashboard]);
+      setCurrentDashboardId(createdDashboard.id);
       message.success('Dashboard created successfully!');
       navigate(`/dashboard/${createdDashboard.id}`);
     } catch (error) {
@@ -238,7 +234,7 @@ const CreateDashboard: React.FC = () => {
     };
     try {
       const createdDashboard = await createDashboard(dashboardToCreate);
-      addDashboard(createdDashboard);
+      setDashboards((prev) => [...prev, createdDashboard]);
       setCurrentDashboardId(createdDashboard.id);
       navigate(`/dashboard/${createdDashboard.id}`);
       message.success(`Dashboard "${createdDashboard.title}" created from template!`);
@@ -248,7 +244,7 @@ const CreateDashboard: React.FC = () => {
     }
   };
 
-  const editTemplate = (template: any) => {
+  const editTemplate = (template: TemplateItem) => {
     setContextTitle(template.name || 'Untitled Template');
     setWidgets(template.widgets || []);
     setCurrentTemplateId(template.id);

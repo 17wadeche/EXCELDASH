@@ -54,7 +54,6 @@ interface DashboardContextProps {
   availableWorksheets: string[];
   setAvailableWorksheets: React.Dispatch<React.SetStateAction<string[]>>;
   setWidgets: React.Dispatch<React.SetStateAction<Widget[]>>;
-  addDashboard: (dashboard: DashboardItem) => void;
   saveDashboardVersion: () => void;
   restoreDashboardVersion: (versionId: string) => void;
   promptForWidgetDetails: (widget: Widget, onComplete: (updatedWidget: Widget) => void) => void;
@@ -69,6 +68,7 @@ interface DashboardContextProps {
   writeMetricValue: (id: string, newValue: number, worksheetName: string, cellAddress: string) => Promise<void>;
   currentTemplateId: string | null;
   setCurrentTemplateId: (id: string | null) => void;
+  setDashboards: React.Dispatch<React.SetStateAction<DashboardItem[]>>;
   applyDataValidation: () => void;
   dashboardBorderSettings: DashboardBorderSettings;
   setDashboardBorderSettings: React.Dispatch<React.SetStateAction<DashboardBorderSettings>>;
@@ -1071,23 +1071,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       });
       return updatedLayouts;
     });
-  };
-  const addDashboard = async (dashboard: DashboardItem) => {
-    let components = dashboard.components;
-    if (!components.some((w) => w.type === 'title')) {
-      components = [{ ...defaultTitleWidget }, ...components];
-    }
-    const updatedDashboard = { ...dashboard, components };
-    try {
-      const response = await axios.post('/api/dashboards', updatedDashboard);
-      const savedDashboard: DashboardItem = response.data;
-      setDashboards((prev) => [...prev, savedDashboard]);
-      setCurrentDashboardId(savedDashboard.id);
-      message.success('Dashboard saved successfully!');
-    } catch (err) {
-      console.error('Error saving new dashboard to server:', err);
-      message.error('Failed to save dashboard to server.');
-    }
   };
   const generateLayoutsForWidgets = (widgets: Widget[]): { [key: string]: GridLayoutItem[] } => {
     const updatedLayouts: { [key: string]: GridLayoutItem[] } = {};
@@ -2497,7 +2480,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         availableWorksheets,
         setAvailableWorksheets,
         setWidgets,
-        addDashboard,
+        setDashboards,
         saveDashboardVersion,
         restoreDashboardVersion,
         editDashboard,
