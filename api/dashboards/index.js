@@ -7,11 +7,11 @@ module.exports = async function (context, req) {
   try {
     const { Dashboard } = await initializeModels();
     if (method === 'post') {
-      const { title, components, layouts } = req.body;
-      if (!title || !components || !layouts) {
+      const { title, components, layouts, workbookId } = req.body;
+      if (!title || !components || !layouts || !workbookId) {
         context.res = {
           status: 400,
-          body: { error: 'title, components, and layouts are required.' }
+          body: { error: 'title, components, layouts, and workbookId are required.' }
         };
         return;
       }
@@ -19,7 +19,9 @@ module.exports = async function (context, req) {
         id: uuidv4(),
         title,
         components,
-        layouts
+        layouts,
+        workbookId,
+        versions: [],
       });
       context.res = { status: 200, body: newDashboard };
     } else if (method === 'get') {
@@ -42,7 +44,7 @@ module.exports = async function (context, req) {
         };
         return;
       }
-      const { title, components, layouts } = req.body;
+      const { title, components, layouts, workbookId } = req.body;
       const dashboard = await Dashboard.findByPk(id);
       if (!dashboard) {
         context.res = { status: 404, body: { error: 'Dashboard not found' } };
@@ -51,6 +53,7 @@ module.exports = async function (context, req) {
       if (title !== undefined) dashboard.title = title;
       if (components !== undefined) dashboard.components = components;
       if (layouts !== undefined) dashboard.layouts = layouts;
+      if (workbookId !== undefined) dashboard.workbookId = workbookId;
       await dashboard.save();
       context.res = { status: 200, body: dashboard };
     } else if (method === 'delete') {

@@ -959,7 +959,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       versions: limitedVersions,
       components: widgets,
       layouts,
-      title: dashboardTitle
+      title: dashboardTitle,
     };
     axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard)
       .then(() => {

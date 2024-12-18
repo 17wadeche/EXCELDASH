@@ -4,33 +4,24 @@ import React, { useContext } from 'react';
 import { Modal, List, Button } from 'antd';
 import { DashboardContext } from '../context/DashboardContext';
 import { DashboardVersion, DashboardItem } from '../components/types';
-
 interface VersionHistoryModalProps {
   visible: boolean;
   onClose: () => void;
 }
-
 const VersionHistoryModal: React.FC<VersionHistoryModalProps> = ({ visible, onClose }) => {
   const dashboardContext = useContext(DashboardContext);
-
   if (!dashboardContext) {
     return null;
   }
-
   const { dashboards, currentDashboardId, restoreDashboardVersion } = dashboardContext;
-
   if (!currentDashboardId) {
     return null;
   }
-
   const currentDashboard = dashboards.find((d: DashboardItem) => d.id === currentDashboardId);
-
   if (!currentDashboard || !currentDashboard.versions) {
     return null;
   }
-
   const versions = currentDashboard.versions;
-
   return (
     <Modal
       title="Version History"
@@ -58,5 +49,4 @@ const VersionHistoryModal: React.FC<VersionHistoryModalProps> = ({ visible, onCl
     </Modal>
   );
 };
-
 export default VersionHistoryModal;

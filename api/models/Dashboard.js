@@ -32,6 +32,22 @@ module.exports = (sequelize, DataTypes) => {
         this.setDataValue('layouts', JSON.stringify(value));
       }
     },
+    workbookId: {
+      type: DataTypes.CHAR(36),
+      allowNull: false,
+    },
+    versions: {
+      type: DataTypes.TEXT,
+      allowNull: false,
+      defaultValue: '[]',
+      get() {
+        const rawValue = this.getDataValue('versions');
+        return rawValue ? JSON.parse(rawValue) : [];
+      },
+      set(value) {
+        this.setDataValue('versions', JSON.stringify(value));
+      }
+    },
   }, {
     tableName: 'Dashboards',
     timestamps: true,

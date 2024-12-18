@@ -231,17 +231,17 @@ export type GridLayoutItem = Layout;
 export interface NewDashboard {
   title: string;
   components: Widget[];
-  layouts?: { [key: string]: GridLayoutItem[] };
+  layouts: { [key: string]: GridLayoutItem[] };
   versions?: DashboardVersion[];
-  workbookId?: string;
+  workbookId: string;
 }
 export interface DashboardItem extends Omit<NewDashboard, 'title' | 'components' | 'layouts'> {
   id: string;
   title: string;
   components: Widget[];
-  layouts?: { [key: string]: GridLayoutItem[] };
+  layouts: { [key: string]: GridLayoutItem[] };
   versions?: DashboardVersion[];
-  workbookId?: string;
+  workbookId: string;
 }
 export interface DashboardVersion {
   id: string;
