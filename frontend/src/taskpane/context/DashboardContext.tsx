@@ -56,6 +56,7 @@ interface DashboardContextProps {
   setWidgets: React.Dispatch<React.SetStateAction<Widget[]>>;
   saveDashboardVersion: () => void;
   restoreDashboardVersion: (versionId: string) => void;
+  getWorkbookIdFromProperties: () => Promise<string>;
   promptForWidgetDetails: (widget: Widget, onComplete: (updatedWidget: Widget) => void) => void;
   editDashboard: (dashboard: DashboardItem) => Promise<void>;
   deleteDashboard: (id: string) => void;
@@ -2496,6 +2497,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         currentDashboard,
         setCurrentDashboard,
         currentTemplateId,
+        getWorkbookIdFromProperties,
         setCurrentTemplateId,
         applyDataValidation,
         refreshAllCharts,
