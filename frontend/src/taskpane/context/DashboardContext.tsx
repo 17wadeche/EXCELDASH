@@ -107,7 +107,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
   const [currentTemplateId, setCurrentTemplateId] = useState<string | null>(null);
   const [widgetToPrompt, setWidgetToPrompt] = useState<{widget: Widget; onComplete: (updatedWidget: Widget) => void;} | null>(null);
   const [layouts, setLayouts] = useState<{ [key: string]: GridLayoutItem[] }>(initialLayouts);
-  const [currentWorkbookId, setCurrentWorkbookId] = useState<string | undefined>(initialWorkbookId ?? undefined);
+  const [currentWorkbookId, setCurrentWorkbookId] = useState<string>('');
   const [reports, setReports] = useState<ReportItem[]>([]);
   const [pastStates, setPastStates] = useState<{ widgets: Widget[]; layouts: { [key: string]: GridLayoutItem[] } }[] >([]);
   const [futureStates, setFutureStates] = useState<{ widgets: Widget[]; layouts: { [key: string]: GridLayoutItem[] } }[]>([]);
