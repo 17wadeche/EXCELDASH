@@ -1,25 +1,11 @@
 // src/utils/excelUtils.ts
-
 /// <reference types="office-js" />
-
 import { v4 as uuidv4 } from 'uuid';
 
-/**
- * Determines if the current context is running within a dialog.
- * Useful for deciding whether to execute certain operations.
- * 
- * @returns {boolean} True if running in a dialog; otherwise, false.
- */
 export const isInDialog = (): boolean => {
   return !!Office?.context?.ui?.messageParent;
 };
 
-/**
- * Sets the workbook ID in the workbook's custom properties.
- * If the code is running within a dialog, the operation is skipped.
- * 
- * @param {string} workbookId - The unique identifier to set for the workbook.
- */
 export const setWorkbookIdInProperties = async (workbookId: string): Promise<void> => {
   if (isInDialog()) {
     console.log('Running in dialog; skipping setWorkbookIdInProperties.');
@@ -43,13 +29,6 @@ export const setWorkbookIdInProperties = async (workbookId: string): Promise<voi
   }
 };
 
-/**
- * Retrieves the workbook ID from the workbook's custom properties.
- * If the ID does not exist, a new UUID is generated, set, and returned.
- * If running within a dialog or an Excel host is not detected, a UUID is generated and set.
- * 
- * @returns {Promise<string>} The workbook ID.
- */
 export const getWorkbookIdFromProperties = async (): Promise<string> => {
   if (isInDialog()) {
     console.log('Running in dialog; skipping getWorkbookIdFromProperties.');

@@ -155,12 +155,11 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
 
   useEffect(() => {
     const loadCurrentDashboard = async () => {
-      if (!currentDashboardId) return;
+      if (!currentDashboardId || !currentWorkbookId) return;
       try {
         const response = await axios.get(`/api/dashboards/${currentDashboardId}`);
         const db: DashboardItem = response.data;
-        const fetchedWorkbookId = await getWorkbookIdFromProperties();
-        if (db.workbookId !== fetchedWorkbookId) {
+        if (db.workbookId !== currentWorkbookId) {
           message.warning('The selected dashboard is not associated with this workbook.');
           return;
         }
@@ -182,7 +181,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       }
     };
     loadCurrentDashboard();
-  }, [currentDashboardId]);
+  }, [currentDashboardId, currentWorkbookId]);
 
   const syncCurrentDashboardToServer = async (
     updatedWidgets: Widget[],
@@ -1679,14 +1678,13 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       message.error('No dashboard or workbook ID found.');
       return;
     }
+    console.log('Current Workbook ID:', currentWorkbookId);
+    console.log('Dashboard Workbook ID:', currentDashboard.workbookId);
+    if (currentWorkbookId !== currentDashboard.workbookId) {
+      message.warning('This dashboard is not associated with the currently open workbook.');
+      return;
+    }
     try {
-      const currentWorkbookId = await getWorkbookIdFromProperties();
-      console.log('Current Workbook ID:', currentWorkbookId);
-      console.log('Dashboard Workbook ID:', currentDashboard.workbookId);
-      if (currentWorkbookId !== currentDashboard.workbookId) {
-        message.warning('This dashboard is not associated with the currently open workbook.');
-        return;
-      }
       let hasError = false;
       let errorMessages: string[] = [];
       await Excel.run(async (context: Excel.RequestContext) => {
@@ -1853,7 +1851,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         message.error("An unexpected error occurred while refreshing charts.");
       }
     }
-  }, [widgets, setWidgets, importChartImageFromExcel, updateWidgetFunc, addWidgetFunc, currentDashboard]);
+  }, [widgets, setWidgets, importChartImageFromExcel, updateWidgetFunc, addWidgetFunc, currentDashboard, currentWorkbookId]);
   const getRandomColor = () => {
     const letters = '0123456789ABCDEF';
     let color = '#';
@@ -1867,12 +1865,11 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       message.error('No dashboard or workbook ID found.');
       return;
     }
+    if (currentWorkbookId !== currentDashboard.workbookId) {
+      message.warning('This dashboard is not associated with the currently open workbook.');
+      return;
+    }
     try {
-      const currentWorkbookId = await getWorkbookIdFromProperties();
-      if (currentWorkbookId !== currentDashboard.workbookId) {
-        message.warning('This dashboard is not associated with the currently open workbook.');
-        return;
-      }
       await Excel.run(async (context: Excel.RequestContext) => {
         const sheet = context.workbook.worksheets.getActiveWorksheet();
         const range = sheet.getUsedRange();
@@ -1925,12 +1922,11 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       message.error('No dashboard or workbook ID found.');
       return;
     }
+    if (currentWorkbookId !== currentDashboard.workbookId) {
+      message.warning('This dashboard is not associated with the currently open workbook.');
+      return;
+    }
     try {
-      const currentWorkbookId = await getWorkbookIdFromProperties();
-      if (currentWorkbookId !== currentDashboard.workbookId) {
-        message.warning('This dashboard is not associated with the currently open workbook.');
-        return;
-      }
       await Excel.run(async (context: Excel.RequestContext) => {
         const sheet = context.workbook.worksheets.getItem('Gantt');
         sheet.load('name');
@@ -2118,7 +2114,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         console.warn('No dashboard or workbook ID found. Skipping Gantt event handler setup.');
         return;
       }
-      const currentWorkbookId = await getWorkbookIdFromProperties();
       if (currentWorkbookId !== currentDashboard.workbookId) {
         console.warn('Current workbook does not match the dashboard workbook. Skipping Gantt event handler setup.');
         return;
@@ -2168,7 +2163,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       };
       removeGanttEventHandlers();
     };
-  }, [currentDashboard?.id, currentDashboard?.workbookId]);
+  }, [currentDashboard?.id, currentDashboard?.workbookId, currentWorkbookId, readGanttDataFromExcel]);
   const isValidCellAddress = (address: string) => {
     const cellAddressRegex = /^[A-Za-z]{1,3}[1-9][0-9]{0,6}$/;
     return cellAddressRegex.test(address);
@@ -2438,7 +2433,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         currentDashboard,
         setCurrentDashboard,
         currentTemplateId,
-        getWorkbookIdFromProperties,
+        getWorkbookIdFromProperties: async () => currentWorkbookId,
         setCurrentTemplateId,
         applyDataValidation,
         refreshAllCharts,

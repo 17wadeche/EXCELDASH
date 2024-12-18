@@ -8,7 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 const DashboardPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const { dashboards, getWorkbookIdFromProperties } = useContext(DashboardContext)!;
+  const { dashboards, currentWorkbookId } = useContext(DashboardContext)!;
   const [currentDashboard, setCurrentDashboard] = useState<DashboardItem | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -24,14 +24,13 @@ const DashboardPage: React.FC = () => {
         }
       } else {
         console.log('No ID provided, setting up a new blank dashboard');
-        const workbookId = await getWorkbookIdFromProperties();
         const newDashboard: DashboardItem = {
           id: uuidv4(),
           title: 'Untitled Dashboard',
           components: [],
           layouts: {},
           versions: [],
-          workbookId,
+          workbookId: currentWorkbookId,
         };
         setCurrentDashboard(newDashboard);
       }
@@ -39,7 +38,7 @@ const DashboardPage: React.FC = () => {
     };
 
     initializeDashboard();
-  }, [id, dashboards, getWorkbookIdFromProperties]);
+  }, [id, dashboards, currentWorkbookId]);
 
   if (loading) {
     return <div>Loading...</div>;
