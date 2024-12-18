@@ -14,12 +14,11 @@ const GanttTable: React.FC<GanttTableProps> = ({ tasks }) => {
 
   useEffect(() => {
     const initialColumns = [
-      // Excluded Columns: Name, From, To
       {
         title: 'Progress',
         dataIndex: 'progress',
         key: 'progress',
-        width: 100, // Initial width
+        width: 100,
         render: (progress: number) => `${progress}%`,
       },
       {
