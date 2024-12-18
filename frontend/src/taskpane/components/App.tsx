@@ -14,7 +14,6 @@ import CustomReport from './CustomReport';
 import ReportsList from './ReportsList';
 import ReportView from './ReportView';
 import EditTemplate from './EditTemplate';
-import EditDashboard from './EditDashboard';
 
 const App: React.FC = () => {
   return (
