@@ -46,7 +46,7 @@ interface DashboardContextProps {
   addTaskToGantt: (task: Task) => Promise<void>;
   setCurrentDashboard: (dashboard: DashboardItem | null) => void;
   updateLayoutsForNewWidgets: (widgets: Widget[]) => void;
-  currentWorkbookId: string | undefined;
+  currentWorkbookId: string;
   exportDashboardAsPDF: () => Promise<void>;
   emailDashboard: () => void;
   dashboardTitle: string;
