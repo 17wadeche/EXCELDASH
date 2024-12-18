@@ -32,6 +32,10 @@ const EditDashboard: React.FC = () => {
   }, [id, dashboards, form, navigate]);
   const onFinish = (values: any) => {
     const { title, components } = values;
+    if (!dashboard) {
+      message.error('Dashboard data is missing.');
+      return;
+    }
     const updatedComponents: DashboardComponent = (components || []).map((comp: any) => {
       let componentData: ComponentData;
       switch (comp.type) {
@@ -83,7 +87,10 @@ const EditDashboard: React.FC = () => {
     const updatedDashboard: DashboardItem = {
       id: dashboard!.id,
       title,
-      components,
+      components: updatedComponents,
+      layouts: dashboard.layouts,
+      versions: dashboard.versions,
+      workbookId: dashboard.workbookId,
     };
     editDashboard(updatedDashboard);
     message.success('Dashboard updated successfully!');

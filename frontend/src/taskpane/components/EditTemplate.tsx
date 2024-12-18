@@ -22,24 +22,28 @@ const EditTemplate: React.FC = () => {
       navigate('/dashboard-list');
     }
   }, [id, dashboards, form, navigate]);
-
   const onFinish = (values: any) => {
     const { title, components } = values;
+    if (!template) {
+      message.error('Template data is missing.');
+      return;
+    }
     const updatedTemplate: DashboardItem = {
       id: template!.id,
       title,
       components,
+      layouts: template.layouts,
+      versions: template.versions,
+      workbookId: template.workbookId,
     };
     editDashboard(updatedTemplate);
-    saveTemplate(); // Update the template
+    saveTemplate();
     message.success('Template updated successfully!');
     navigate('/dashboard-list');
   };
-
   if (!template) {
     return <div>Loading...</div>;
   }
-
   return (
     <Form
       form={form}
@@ -58,7 +62,6 @@ const EditTemplate: React.FC = () => {
       >
         <Input placeholder="Enter template title" />
       </Form.Item>
-      {/* Add other fields as necessary */}
       <Form.Item>
         <Button type="primary" htmlType="submit">
           Update Template
@@ -67,5 +70,4 @@ const EditTemplate: React.FC = () => {
     </Form>
   );
 };
-
 export default EditTemplate;
