@@ -6,7 +6,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { Breakpoint, GRID_COLS, WIDGET_SIZES } from '../components/layoutConstants';
 import { message, Select } from 'antd';
 import html2canvas from 'html2canvas';
-import SalesChart from '../components/widgets/SalesChart';
 import isEqual from 'lodash.isequal'
 import jsPDF from 'jspdf';
 import axios from 'axios';
@@ -15,6 +14,7 @@ import { DashboardBorderSettings } from '../components/types';
 import TitleWidgetComponent from '../components/TitleWidget';
 import { capitalizeFirstLetter } from '../utils/stringUtils'; 
 import { deleteDashboardById } from '../utils/api';
+import { getWorkbookIdFromProperties, setWorkbookIdInProperties, isInDialog } from '../../utils/excelUtils';
 
 const { Option } = Select;
 interface DashboardContextProps {
@@ -159,6 +159,11 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       try {
         const response = await axios.get(`/api/dashboards/${currentDashboardId}`);
         const db: DashboardItem = response.data;
+        const fetchedWorkbookId = await getWorkbookIdFromProperties();
+        if (db.workbookId !== fetchedWorkbookId) {
+          message.warning('The selected dashboard is not associated with this workbook.');
+          return;
+        }
         setCurrentDashboard(db);
         let updatedWidgets = db.components;
         if (!updatedWidgets.some(w => w.type === 'title')) {
@@ -204,13 +209,13 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       const newWidgets = updateFn(prevWidgets);
       setPastStates((prev) => [...prev, { widgets: prevWidgets, layouts }]);
       setFutureStates([]);
-
       if (currentDashboardId && currentDashboard) {
         const updatedDashboard: DashboardItem = {
           ...currentDashboard,
           components: newWidgets,
           layouts,
           title: dashboardTitle,
+          workbookId: currentWorkbookId,
         };
         axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard).catch((err: unknown) => {
           console.error('Error syncing updates to server:', err);
@@ -295,16 +300,16 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     setWidgetToPrompt(null);
   };
   useEffect(() => {
+    const fetchSheets = async () => {
+      const sheets = await getAvailableWorksheets();
+      setAvailableWorksheets(sheets);
+    };
     if (!initialAvailableWorksheets.length) {
-      const fetchSheets = async () => {
-        const sheets = await getAvailableWorksheets();
-        setAvailableWorksheets(sheets);
-      };
       fetchSheets();
     } else {
       setAvailableWorksheets(initialAvailableWorksheets);
     }
-  }, []);
+  }, [initialAvailableWorksheets]);
   useEffect(() => {
     const autosaveInterval = setInterval(async () => {
       if (!currentDashboardId || !currentDashboard) {
@@ -329,19 +334,12 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     };
   }, [widgets, layouts, dashboardTitle, currentDashboard, currentDashboardId]);
   useEffect(() => {
-    if (!initialWorkbookId) {
-      const initializeWorkbookId = async () => {
-        const workbookId = await getWorkbookIdFromProperties();
-        setCurrentWorkbookId(workbookId);
-      };
-      initializeWorkbookId();
-    } else {
-      setCurrentWorkbookId(initialWorkbookId);
-    }
+    const initializeWorkbookId = async () => {
+      const workbookId = await getWorkbookIdFromProperties();
+      setCurrentWorkbookId(workbookId);
+    };
+    initializeWorkbookId();
   }, []);
-  const isInDialog = (): boolean => {
-    return !!Office?.context?.ui?.messageParent;
-  };
   const getAvailableWorksheets = async (): Promise<string[]> => {
     if (isInDialog()) {
       console.log('Running in dialog; skipping getAvailableWorksheets.');
@@ -374,7 +372,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
   };
   useEffect(() => {
     if (!currentDashboardId || !currentDashboard) return;
-  
     const migrateWidgets = async () => {
       try {
         const serverWidgets: Widget[] = currentDashboard.components || [];
@@ -510,10 +507,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       message.error('Failed to save dashboard to the server.');
     }
   };
-  enum ReferenceStyle {
-    a1 = 0,
-    r1c1 = 1,
-  }
   const excelSerialToDateString = (serial: number): string => {
     if (typeof serial !== 'number' || isNaN(serial)) {
       console.warn('Invalid serial number:', serial);
@@ -1045,8 +1038,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         const breakpointCols = GRID_COLS[breakpoint];
         const existingItemIds = new Set(updatedLayouts[breakpoint]?.map((item) => item.i));
         const widgetsToAdd = newWidgets.filter((widget) => !existingItemIds.has(widget.id));
-        let yOffset = 0;
-          updatedLayouts[breakpoint]?.reduce((maxY, item) => Math.max(maxY, item.y + item.h), 0) || 0;
+        let yOffset = updatedLayouts[breakpoint]?.reduce((maxY, item) => Math.max(maxY, item.y + item.h), 0) || 0;
         const newLayoutItems = widgetsToAdd.map((widget) => {
           let size = WIDGET_SIZES[widget.type] || { w: 8, h: 4 };
           if (size.w > breakpointCols) {
@@ -1689,6 +1681,8 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     }
     try {
       const currentWorkbookId = await getWorkbookIdFromProperties();
+      console.log('Current Workbook ID:', currentWorkbookId);
+      console.log('Dashboard Workbook ID:', currentDashboard.workbookId);
       if (currentWorkbookId !== currentDashboard.workbookId) {
         message.warning('This dashboard is not associated with the currently open workbook.');
         return;
@@ -2319,59 +2313,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       message.error('Failed to update metric value. Please ensure the cell address is valid.');
     }
   };
-  const setWorkbookIdInProperties = async (workbookId: string) => {
-    if (isInDialog()) {
-      console.log('Running in dialog; skipping setWorkbookIdInProperties.');
-      return;
-    }
-    try {
-      await Excel.run(async (context) => {
-        const customProps = context.workbook.properties.custom;
-        const existingProp = customProps.getItemOrNullObject("dashboardWorkbookId");
-        await context.sync();
-        if (!existingProp.isNullObject) {
-          existingProp.delete();
-          await context.sync();
-        }
-        customProps.add("dashboardWorkbookId", workbookId);
-        await context.sync();
-      });
-    } catch (error) {
-      console.error('Error setting workbook ID in custom properties:', error);
-    }
-  };
-  const getWorkbookIdFromProperties = async (): Promise<string> => {
-    if (isInDialog()) {
-      console.log('Running in dialog; skipping getWorkbookIdFromProperties.');
-      return '';
-    }
-    if (!(Office && Office.context && Office.context.host === Office.HostType.Excel)) {
-      const workbookId = uuidv4();
-      await setWorkbookIdInProperties(workbookId);
-      return workbookId;
-    }
-    try {
-      return await Excel.run(async (context) => {
-        const customProps = context.workbook.properties.custom;
-        const prop = customProps.getItemOrNullObject("dashboardWorkbookId");
-        await context.sync();
-        if (prop.isNullObject) {
-          const workbookId = uuidv4();
-          customProps.add("dashboardWorkbookId", workbookId);
-          await context.sync();
-          return workbookId;
-        }
-        prop.load("value");
-        await context.sync();
-        return prop.value;
-      });
-    } catch (error) {
-      console.error('Error getting workbook ID from custom properties:', error);
-      const workbookId = uuidv4();
-      await setWorkbookIdInProperties(workbookId);
-      return workbookId;
-    }
-  };
   const exportDashboardAsPDF = async (): Promise<void> => {
     const input = document.getElementById('dashboard-container');
     if (!input) {
@@ -2525,4 +2466,3 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     </DashboardContext.Provider>
   );
 };
-

@@ -6,7 +6,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { DashboardContext } from '../context/DashboardContext';
 import { DeleteOutlined, FolderAddOutlined, PlusOutlined } from '@ant-design/icons';
 import { v4 as uuidv4 } from 'uuid';
-import { setWorkbookIdInProperties } from '../utils/excelUtils';
 import { DashboardItem, NewDashboard, TemplateItem } from './types';
 const { Content } = Layout;
 const { Search } = Input;
@@ -39,6 +38,7 @@ const CreateDashboard: React.FC = () => {
     setWidgets,
     setCurrentTemplateId,
     setCurrentWorkbookId,
+    getWorkbookIdFromProperties,
     setCurrentDashboardId,
     currentWorkbookId,
     setLayouts,
@@ -199,9 +199,11 @@ const CreateDashboard: React.FC = () => {
     }
     setLoading(true);
     try {
-      const workbookId = uuidv4();
-      await setWorkbookIdInProperties(workbookId);
-      setCurrentWorkbookId(workbookId);
+      let workbookId = currentWorkbookId;
+      if (!workbookId) {
+        workbookId = await getWorkbookIdFromProperties();
+        setCurrentWorkbookId(workbookId);
+      }
       const newDashboard: NewDashboard = {
         title: dashboardTitle,
         components: [],

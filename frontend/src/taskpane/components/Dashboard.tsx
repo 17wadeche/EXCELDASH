@@ -27,8 +27,6 @@ import { debounce } from 'lodash';
 import LineWidget from './widgets/LineWidget';
 import html2canvas from 'html2canvas';
 import PresentationDashboard from './PresentationDashboard';
-
-
 const ResponsiveGridLayout = WidthProvider(Responsive);
 const defaultTitleWidget: Widget = {
   id: 'dashboard-title',
@@ -41,7 +39,6 @@ const defaultTitleWidget: Widget = {
     titleAlignment: 'center',
   } as TitleWidgetData,
 };
-
 interface DashboardProps {
   isPresenterMode?: boolean;
   closePresenterMode?: () => void;
@@ -49,7 +46,6 @@ interface DashboardProps {
   dashboardBorderSettings?: DashboardBorderSettings;
   isFullScreen?: boolean;
 }
-
 const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePresenterMode, isFullScreen }) => {
   const { widgets, addWidget, removeWidget, updateWidget, refreshAllCharts, editDashboard, layouts, setLayouts, setWidgets, dashboards, setDashboardBorderSettings, updateLayoutsForNewWidgets, undo, dashboardBorderSettings, redo, canUndo, dashboardTitle, canRedo, currentTemplateId, currentDashboardId, saveTemplate, currentDashboard, currentWorkbookId, availableWorksheets } = useContext(DashboardContext)!;
   const [isFullscreenActive, setIsFullscreenActive] = useState(false);
@@ -86,7 +82,6 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
     await refreshAllCharts();
     setIsRefreshing(false);
   };
-
   useEffect(() => {
     if (isPresenterMode) {
       return;
@@ -102,7 +97,6 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
       updateLayoutsForNewWidgets(widgetsWithoutLayout);
     }
   }, [widgets]);
-
   const handlePresentDashboard = async () => {
     if (!dashboardRef.current) {
       message.error('Dashboard container not found.');
@@ -138,10 +132,8 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
       const rect = dashboardRef.current.getBoundingClientRect();
       const width = rect.width;
       const height = rect.height;
-  
       message.loading({ content: 'Capturing screenshot...', key: 'screenshot' });
       await document.fonts.ready;
-  
       const canvas = await html2canvas(dashboardRef.current, {
         scale: window.devicePixelRatio || 1,
         useCORS: true,
@@ -150,10 +142,8 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
         scrollX: -window.scrollX,
         scrollY: -window.scrollY,
       });
-  
       const imgData = canvas.toDataURL('image/png');
       Object.assign(dashboardRef.current.style, originalStyle);
-  
       if (toolbar) {
         toolbar.style.display = 'block';
       }
@@ -191,18 +181,15 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
       } else {
         message.error('Office context is not available.');
       }
-  
       message.success({ content: 'Screenshot captured!', key: 'screenshot', duration: 2 });
     } catch (error) {
       console.error('Error capturing screenshot:', error);
       message.error('Failed to capture screenshot.');
     }
   };
-
   const handleExitPresentationMode = () => {
     setIsPresentationMode(false);
   };
-  
   const handleDialogMessage = (args: Office.DialogParentMessageReceivedEventArgs) => {
     const messageFromChild = JSON.parse(args.message);
     if (isPresenterMode && messageFromChild.type === 'getDataFromRange') {
@@ -240,7 +227,6 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
         break
     }
   };
-
   useEffect(() => {
     if (fullScreenDialog && !isUpdatingFromItem.current) {
       const dashboardData = {
@@ -260,7 +246,6 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
       );
     }
   }, [widgets, layouts, dashboardBorderSettings]);
-
   useEffect(() => {
     if (
       currentDashboard &&
@@ -275,7 +260,6 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
       updateLayoutsForNewWidgets(currentDashboard.components);
     }
   }, [currentDashboard]);
-
   const [theme, setTheme] = useState('light-theme');
   const dashboardRef = useRef<HTMLDivElement>(null);
   const handleSave = () => {
@@ -286,7 +270,6 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
       message.warning('No dashboard is currently active.');
     }
   };
-
   const handleLayoutChange = (
     _currentLayout: GridLayoutItem[],
     allLayouts: { [key: string]: GridLayoutItem[] }
@@ -312,7 +295,6 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
       }
     }
   };
-
   const copyWidget = (widget: Widget) => {
     const newWidget: Widget = {
       ...widget,
@@ -321,7 +303,6 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
     addWidget(widget.type, newWidget.data);
     message.success('Widget copied!');
   };
-
   const handleRemoveWidget = (id: string) => {
     const widgetToRemove = widgets.find((widget) => widget.id === id);
     if (widgetToRemove?.type === 'title') {
@@ -332,7 +313,6 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
       message.info('Widget removed!');
     }
   };
-
   useEffect(() => {
     if (!layouts || Object.keys(layouts).length === 0) {
       console.log('No layouts available. Skipping validation.');
@@ -348,7 +328,6 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
       updateLayoutsForNewWidgets(widgets);
     }
   }, [widgets]);
-
   const getLineStyle = (data: LineWidgetData): React.CSSProperties => {
     const { color, thickness, style, orientation } = data;
     const commonStyles = {
@@ -356,7 +335,6 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
       borderStyle: style,
       borderColor: color,
     };
-  
     if (orientation === 'horizontal') {
       return {
         ...commonStyles,
@@ -371,10 +349,8 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
       };
     }
   };
-
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [currentWidget, setCurrentWidget] = useState<Widget | null>(null);
-
   const handleEditWidget = (widget: Widget) => {
     setEditingWidget(widget);
     if (widget.type === 'line') {
@@ -384,12 +360,10 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
       setIsModalVisible(true);
     }
   };
-
   useEffect(() => {
     console.log('Widgets:', widgets);
     console.log('Layouts:', layouts);
   }, [widgets, layouts]);
-
   const handleLineSettingsSave = (updatedData: LineWidgetData) => {
     if (editingWidget) {
       updateWidget(editingWidget.id, updatedData);
@@ -397,17 +371,14 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
     setIsLineSettingsModalVisible(false);
     setEditingWidget(null);
   };
-
   const handleLineSettingsCancel = () => {
     setIsLineSettingsModalVisible(false);
     setEditingWidget(null);
   };
-
   const handleModalCancel = () => {
     setIsModalVisible(false);
     setCurrentWidget(null);
   };
-
   const handleModalOk = (updatedData: any) => {
     if (currentWidget) {
       updateWidget(currentWidget.id, updatedData);
@@ -415,7 +386,6 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
     setIsModalVisible(false);
     setCurrentWidget(null);
   };
-
   const openPresenterMode = () => {
     if (isOfficeInitialized) {
       const url = window.location.origin + '/fullScreenDashboard.html';
@@ -760,5 +730,4 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
     </div>
   );
 };
-
 export default Dashboard;
