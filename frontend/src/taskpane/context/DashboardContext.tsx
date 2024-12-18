@@ -41,7 +41,7 @@ interface DashboardContextProps {
   currentDashboardId: string | null;
   setCurrentDashboardId: (id: string | null) => void;
   saveTemplate: () => void;
-  setCurrentWorkbookId: (id: string | undefined) => void;
+  setCurrentWorkbookId: React.Dispatch<React.SetStateAction<string | undefined>>;
   currentDashboard: DashboardItem | null;
   addTaskToGantt: (task: Task) => Promise<void>;
   setCurrentDashboard: (dashboard: DashboardItem | null) => void;
