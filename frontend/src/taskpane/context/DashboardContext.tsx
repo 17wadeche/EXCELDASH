@@ -14,7 +14,7 @@ import { DashboardBorderSettings } from '../components/types';
 import TitleWidgetComponent from '../components/TitleWidget';
 import { capitalizeFirstLetter } from '../utils/stringUtils'; 
 import { deleteDashboardById } from '../utils/api';
-import { getWorkbookIdFromProperties, setWorkbookIdInProperties, isInDialog } from '../../utils/excelUtils';
+import { getWorkbookIdFromProperties, setWorkbookIdInProperties, isInDialog } from '../utils/excelUtils';
 
 const { Option } = Select;
 interface DashboardContextProps {
