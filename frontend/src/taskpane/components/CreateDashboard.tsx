@@ -202,8 +202,9 @@ const CreateDashboard: React.FC = () => {
       let workbookId = currentWorkbookId;
       if (!workbookId) {
         workbookId = await getWorkbookIdFromProperties();
-        setCurrentWorkbookId(workbookId);
       }
+      workbookId = workbookId.toLowerCase();
+      setCurrentWorkbookId(workbookId);
       console.log("Front-End: Using Workbook ID to create dashboard:", workbookId);
       console.log("Front-End: Current Workbook ID from state:", currentWorkbookId);
       const newDashboard: NewDashboard = {

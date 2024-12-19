@@ -16,12 +16,13 @@ module.exports = async function (context, req) {
         };
         return;
       }
+      const normalizedWorkbookId = workbookId ? workbookId.toLowerCase() : '';
       const newDashboard = await Dashboard.create({
         id: uuidv4(),
         title,
         components,
         layouts,
-        workbookId,
+        workbookId : normalizedWorkbookId,
         versions: [],
       });
       context.res = { status: 200, body: newDashboard };
@@ -58,8 +59,8 @@ module.exports = async function (context, req) {
       if (title !== undefined) dashboard.title = title;
       if (components !== undefined) dashboard.components = components;
       if (layouts !== undefined) dashboard.layouts = layouts;
-      if (workbookId !== undefined && workbookId !== null && workbookId.trim() !== '') {
-        dashboard.workbookId = workbookId;
+      if (workbookId !== undefined) {
+        dashboard.workbookId = workbookId.toLowerCase();
       }
       await dashboard.save();
       context.res = { status: 200, body: dashboard };
