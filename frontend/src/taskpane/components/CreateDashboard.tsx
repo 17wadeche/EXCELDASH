@@ -201,7 +201,8 @@ const CreateDashboard: React.FC = () => {
     try {
       let workbookId = currentWorkbookId;
       if (!workbookId) {
-        workbookId = await getWorkbookIdFromProperties();
+        message.info("Waiting for Workbook ID to be initialized...");
+        return;
       }
       workbookId = workbookId.toLowerCase();
       setCurrentWorkbookId(workbookId);
