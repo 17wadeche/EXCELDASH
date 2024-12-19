@@ -1334,16 +1334,11 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
             layouts,
             title: dashboardTitle,
           };
-          try {
-            const response = await axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard);
-            const savedDashboard = response.data;
-            setCurrentDashboard(savedDashboard);
-            setWidgets(savedDashboard.components);
-            setLayouts(savedDashboard.layouts);
-          } catch (err) {
-            console.error('Error syncing updates to server:', err);
-            message.error('Failed to save changes to server.');
-          }
+          axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard)
+            .catch(err => {
+              console.error('Error syncing updates to server:', err);
+              message.error('Failed to save changes to server.');
+            });
         }
         return newWidgets;
       });
