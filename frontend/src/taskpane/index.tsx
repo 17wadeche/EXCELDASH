@@ -16,12 +16,10 @@ Office.onReady(() => {
   }
   const root = ReactDOM.createRoot(container);
   root.render(
-    <React.StrictMode>
-      <MemoryRouter>
-        <DashboardProvider>
-          <App />
-        </DashboardProvider>
-      </MemoryRouter>
-    </React.StrictMode>
+    <MemoryRouter>
+      <DashboardProvider>
+        <App />
+      </DashboardProvider>
+    </MemoryRouter>
   );
 });
