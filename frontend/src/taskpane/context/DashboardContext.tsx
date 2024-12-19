@@ -159,22 +159,19 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       try {
         const response = await axios.get(`/api/dashboards/${currentDashboardId}`);
         const db: DashboardItem = response.data;
-        const dashboardWorkbookId = db.workbookId ? db.workbookId.toLowerCase() : '';
-        if (dashboardWorkbookId !== currentWorkbookId.toLowerCase()) {
-          message.warning('The selected dashboard is not associated with this workbook.');
-          return;
-        }
-        setCurrentDashboard(db);
-        let updatedWidgets = db.components;
-        if (!updatedWidgets.some(w => w.type === 'title')) {
-          updatedWidgets = [defaultTitleWidget, ...updatedWidgets];
-        }
-        setWidgetsState(updatedWidgets);
-        setDashboardTitle(db.title || 'My Dashboard');
-        if (db.layouts && Object.keys(db.layouts).length > 0) {
-          setLayouts(db.layouts);
-        } else {
-          updateLayoutsForNewWidgets(updatedWidgets);
+        if (!currentDashboard) {
+          setCurrentDashboard(db);
+          let updatedWidgets = db.components;
+          if (!updatedWidgets.some(w => w.type === 'title')) {
+            updatedWidgets = [defaultTitleWidget, ...updatedWidgets];
+          }
+          setWidgetsState(updatedWidgets);
+          setDashboardTitle(db.title || 'My Dashboard');
+          if (db.layouts && Object.keys(db.layouts).length > 0) {
+            setLayouts(db.layouts);
+          } else {
+            updateLayoutsForNewWidgets(updatedWidgets);
+          }
         }
       } catch (error) {
         console.error(`Error loading dashboard ${currentDashboardId}:`, error);
@@ -182,7 +179,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       }
     };
     loadCurrentDashboard();
-  }, [currentDashboardId, currentWorkbookId]);
+  }, [currentDashboardId, currentWorkbookId, currentDashboard]);
 
   const syncCurrentDashboardToServer = async (
     updatedWidgets: Widget[],
@@ -1338,16 +1335,20 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
             workbookId: currentWorkbookId
           };
           axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard)
-            .catch(err => {
-              console.error('Error syncing updates to server:', err);
-              message.error('Failed to save changes to server.');
-            });
-        }
-        return newWidgets;
-      });
-    },
-    [currentDashboard, dashboards, editDashboard, setDashboards, setCurrentDashboard, widgets, promptForWidgetDetails, dashboardTitle, layouts, currentDashboardId]
-  );
+          .then((res) => {
+            setCurrentDashboard(res.data);
+            setWidgetsState(res.data.components);
+            setLayouts(res.data.layouts || {});
+          })
+          .catch(err => {
+            console.error('Error syncing updates to server:', err);
+            message.error('Failed to save changes to server.');
+          });
+      }
+      return newWidgets;
+    });
+  }, [currentDashboard, currentDashboardId, currentWorkbookId, layouts, dashboardTitle]);
+
   const removeWidgetFunc = useCallback((id: string) => {
     updateWidgetsWithHistory((prevWidgets) => {
       const newWidgets = prevWidgets.filter((widget) => widget.id !== id);
