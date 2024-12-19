@@ -1326,7 +1326,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         });
         return;
       }
-      updateWidgetsWithHistory((prevWidgets: Widget[]) => {
+      updateWidgetsWithHistory((prevWidgets) => {
         const newWidgets = [...prevWidgets, newWidget];
         updateLayoutsForNewWidgets(newWidgets);
         if (currentDashboardId && currentDashboard) {
@@ -1335,6 +1335,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
             components: newWidgets,
             layouts,
             title: dashboardTitle,
+            workbookId: currentWorkbookId
           };
           axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard)
             .catch(err => {
@@ -2120,14 +2121,13 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
             const range = sheet.getRange(metricData.cellAddress);
             range.load('address');
             await context.sync();
-            const eventResult = sheet.onChanged.add(async (event: Excel.WorksheetChangedEventArgs) => {
+            const eventHandler = async (event: Excel.WorksheetChangedEventArgs) => {
               if (event.address.toLowerCase() === range.address.toLowerCase()) {
-                console.log(`Change detected in cell ${metricData.cellAddress} on sheet ${metricData.worksheetName}. Triggering update.`);
                 await updateMetricValue(widget.id);
               }
-            });
+            };
+            const eventResult = sheet.onChanged.add(eventHandler);
             eventResults.push(eventResult);
-            console.log(`Event handler added for widget ${widget.id} on cell ${metricData.worksheetName}!${metricData.cellAddress}`);
             await updateMetricValue(widget.id);
           }
         }
@@ -2137,12 +2137,12 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     };
     setupMetricEventHandlers();
     return () => {
-      eventResults.forEach((eventResult) => {
+      for (let eventResult of eventResults) {
         eventResult.remove();
-        console.log('Event handler removed.');
-      });
+      }
+      eventResults = [];
     };
-  }, [widgets, currentDashboard?.id, currentDashboard?.workbookId]);
+  }, [widgets, currentDashboardId, currentWorkbookId]); 
   useEffect(() => {
     const setupGanttEventHandlers = async () => {
       if (!currentDashboard || !currentDashboard.workbookId || !currentWorkbookId) {
