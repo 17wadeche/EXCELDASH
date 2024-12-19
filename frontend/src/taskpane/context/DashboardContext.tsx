@@ -2110,8 +2110,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
   }, [widgets, currentDashboard?.id, currentDashboard?.workbookId]);
   useEffect(() => {
     const setupGanttEventHandlers = async () => {
-      if (!currentDashboard || !currentDashboard.workbookId) {
-        console.warn('No dashboard or workbook ID found. Skipping Gantt event handler setup.');
+      if (!currentDashboard || !currentDashboard.workbookId || !currentWorkbookId) {
         return;
       }
       if (currentWorkbookId !== currentDashboard.workbookId) {
@@ -2128,11 +2127,16 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
             return;
           }
           const eventHandler = async (_event: Excel.WorksheetChangedEventArgs) => {
-            await readGanttDataFromExcel();
+            if (currentWorkbookId === currentDashboard?.workbookId) {
+              await readGanttDataFromExcel();
+            }
           };
-          sheet.onChanged.add(eventHandler);
-          ganttEventHandlersRef.current.push(eventHandler);
-          await context.sync();
+          if (ganttEventHandlersRef.current.length === 0) {
+            sheet.onChanged.add(eventHandler);
+            ganttEventHandlersRef.current.push(eventHandler);
+            await context.sync();
+            console.log('Gantt event handler set up successfully.');
+          }
         });
       } catch (error) {
         console.error('Error setting up Gantt event handlers:', error);
@@ -2150,11 +2154,10 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
               console.warn('Gantt sheet does not exist.');
               return;
             }
-            ganttEventHandlersRef.current.forEach((handler: (event: Excel.WorksheetChangedEventArgs) => Promise<void>) => {
+            ganttEventHandlersRef.current.forEach((handler) => {
               sheet.onChanged.remove(handler);
             });
             ganttEventHandlersRef.current = [];
-  
             await context.sync();
           });
         } catch (error) {
