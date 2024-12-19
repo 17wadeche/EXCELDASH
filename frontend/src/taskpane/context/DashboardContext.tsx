@@ -277,10 +277,10 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         console.log(`Widget ${widgetId} updated successfully`);
         message.success('Metric value updated successfully!');
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error writing metric value:', error);
-      if (error instanceof OfficeExtension.Error) {
-        message.error(`Office.js Error: ${error.code} - ${error.message}`);
+      if (error instanceof OfficeExtension.Error && error.code === 'InvalidOperationInCellEditMode') {
+        message.error("Excel is currently in cell-editing mode. Please press ENTER, TAB, or select another cell before trying again.");
       } else {
         message.error('Failed to update metric value.');
       }
@@ -367,9 +367,13 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         await context.sync();
         return sheets.items.map(sheet => sheet.name);
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching worksheets:", error);
-      message.error("Failed to fetch worksheets from Excel.");
+      if (error instanceof OfficeExtension.Error && error.code === 'InvalidOperationInCellEditMode') {
+        message.error("Excel is currently in cell-editing mode. Please press ENTER, TAB, or select another cell to exit edit mode, and then try again.");
+      } else {
+        message.error("Failed to fetch worksheets from Excel.");
+      }
       return [];
     }
   };
@@ -2351,21 +2355,20 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       return;
     }
     try {
-      const canvas = await html2canvas(input, { logging: true, useCORS: true });
+      const canvas = await html2canvas(input, { useCORS: true, scale: 2 });
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('p', 'mm', 'a4');
-      const imgWidth = 210;
-      const pageHeight = 297;
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = pdfWidth;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
-      let position = 0;
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
+      const totalPages = Math.ceil(imgHeight / pdfHeight);
+      for (let page = 0; page < totalPages; page++) {
+        const position = -(page * pdfHeight);
+        if (page > 0) {
+          pdf.addPage();
+        }
         pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
       }
       pdf.save('dashboard.pdf');
       message.success('Dashboard exported as PDF successfully!');
