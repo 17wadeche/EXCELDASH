@@ -2166,7 +2166,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       };
       removeGanttEventHandlers();
     };
-  }, [currentDashboard?.id, currentDashboard?.workbookId, currentWorkbookId, readGanttDataFromExcel]);
+  }, [currentDashboard?.id, currentDashboard?.workbookId, currentWorkbookId]);
   const isValidCellAddress = (address: string) => {
     const cellAddressRegex = /^[A-Za-z]{1,3}[1-9][0-9]{0,6}$/;
     return cellAddressRegex.test(address);
