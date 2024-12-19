@@ -84,10 +84,12 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
     await refreshAllCharts();
     setIsRefreshing(false);
   }, [isPresenterMode, refreshAllCharts]);
+
   useEffect(() => {
     if (isPresenterMode) {
       return;
     }
+    if (!layouts) return;
     const layoutItemIds = new Set(
       Object.values(layouts)
         .flat()
@@ -99,6 +101,7 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
       updateLayoutsForNewWidgets(widgetsWithoutLayout);
     }
   }, [widgets, isPresenterMode, layouts, updateLayoutsForNewWidgets]);
+
   const handlePresentDashboard = async () => {
     if (!dashboardRef.current) {
       message.error('Dashboard container not found.');
@@ -248,16 +251,16 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
       );
     }
   }, [widgets, layouts, dashboardBorderSettings, fullScreenDialog, currentDashboardId, dashboardTitle, currentWorkbookId, availableWorksheets]);
+
   useEffect(() => {
     if (
       currentDashboard &&
       currentDashboard.layouts &&
-      Object.keys(currentDashboard.layouts).length > 0
+      Object.keys(currentDashboard.layouts).length > 0 &&
+      !isEqual(currentDashboard.layouts, prevLayoutsRef.current)
     ) {
-      if (!isEqual(currentDashboard.layouts, prevLayoutsRef.current)) {
-        setLayouts(currentDashboard.layouts);
-        prevLayoutsRef.current = currentDashboard.layouts;
-      }
+      setLayouts(currentDashboard.layouts);
+      prevLayoutsRef.current = currentDashboard.layouts;
     } else if (currentDashboard && (!currentDashboard.layouts || Object.keys(currentDashboard.layouts).length === 0)) {
       updateLayoutsForNewWidgets(currentDashboard.components);
     }
@@ -323,20 +326,6 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
     },
     [widgets, removeWidget]
   );
-
-  useEffect(() => {
-    if (!layouts || Object.keys(layouts).length === 0) {
-      console.log('No layouts available. Skipping validation.');
-      return;
-    }
-    const areLayoutsValid = Object.values(layouts).every((layoutArray) =>
-      layoutArray.some((layoutItem) => widgets.some((widget) => widget.id === layoutItem.i))
-    );
-    if (!areLayoutsValid) {
-      console.log('Layouts are invalid or do not match widgets. Regenerating layouts.');
-      updateLayoutsForNewWidgets(widgets);
-    }
-  }, [widgets, layouts, updateLayoutsForNewWidgets]);
 
   const handleEditWidget = useCallback((widget: Widget) => {
     setEditingWidget(widget);
