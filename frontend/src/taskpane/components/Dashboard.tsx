@@ -698,15 +698,8 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
         >
           {widgetElements}
         </ResponsiveGridLayout>
-        {isPresentationMode && (
-          <PresentationDashboard />
-        )}
-        <Modal
-          title="Edit Widget"
-          open={isModalVisible}
-          onCancel={handleModalCancel}
-          footer={null}
-        >
+        {isPresentationMode && (<PresentationDashboard /> )}
+        <Modal title="Edit Widget" open={isModalVisible} onCancel={handleModalCancel} footer={null} >
           {currentWidget && (
             <EditWidgetForm
               widget={currentWidget}
@@ -727,5 +720,5 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
       </div>
     </div>
   );
-};
+});
 export default Dashboard;
