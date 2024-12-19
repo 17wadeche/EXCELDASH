@@ -55,9 +55,11 @@ export const getWorkbookIdFromProperties = async (): Promise<string> => {
         return lowerCaseId;
       } else {
         const workbookId = uuidv4().toLowerCase();
+        prop.delete();
+        await context.sync();
         customProps.add("dashboardWorkbookId", workbookId);
         await context.sync();
-        console.log(`Workbook ID "${workbookId}" generated and set.`);
+        console.log(`Workbook ID "${workbookId}" generated and set (was empty previously).`);
         return workbookId;
       }
     });
@@ -67,9 +69,7 @@ export const getWorkbookIdFromProperties = async (): Promise<string> => {
       throw error;
     } else {
       console.error('Error getting workbook ID from custom properties:', error);
-      const workbookId = uuidv4().toLowerCase();
-      await setWorkbookIdInProperties(workbookId);
-      return workbookId;
+      return '';
     }
   }
 };
