@@ -192,6 +192,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     try {
       const updatedDashboard: DashboardItem = {
         ...currentDashboard,
+        workbookId: currentWorkbookId,
         components: updatedWidgets,
         layouts: updatedLayouts,
         title: updatedTitle,
@@ -317,6 +318,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       try {
         const updatedDashboard: DashboardItem = {
           ...currentDashboard,
+          workbookId: currentWorkbookId,
           components: widgets,
           layouts: layouts,
           title: dashboardTitle,
@@ -461,6 +463,16 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
                   };
                   return { ...widget, data: reportData };
                 }
+                case 'title': {
+                  const titleData: TitleWidgetData = {
+                    content: widget.data.content || 'Your Dashboard Title',
+                    fontSize: widget.data.fontSize ?? 24,
+                    textColor: widget.data.textColor || '#000000',
+                    backgroundColor: widget.data.backgroundColor || '#ffffff',
+                    titleAlignment: widget.data.titleAlignment || 'center',
+                  };
+                  return { ...widget, data: titleData };
+                }
                 default:
                   console.warn(`Unknown widget type: ${widget.type}. Widget will be skipped.`);
                   return null;
@@ -481,7 +493,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     };
     migrateWidgets();
   }, [currentDashboardId, currentDashboard]);
-  
+
   const saveAsTemplate = async () => {
     try {
       const template = {
@@ -913,6 +925,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       if (currentDashboardId && currentDashboard) {
         const updatedDashboard: DashboardItem = {
           ...currentDashboard,
+          workbookId: currentWorkbookId,
           components: previousState.widgets,
           layouts: previousState.layouts,
           title: dashboardTitle,
@@ -935,6 +948,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       if (currentDashboardId && currentDashboard) {
         const updatedDashboard: DashboardItem = {
           ...currentDashboard,
+          workbookId: currentWorkbookId,
           components: nextState.widgets,
           layouts: nextState.layouts,
           title: dashboardTitle,
@@ -966,6 +980,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     const limitedVersions = updatedVersions.slice(0, 5);
     const updatedDashboard: DashboardItem = {
       ...currentDashboard,
+      workbookId: currentWorkbookId,
       versions: limitedVersions,
       components: widgets,
       layouts,
@@ -1005,9 +1020,10 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     setDashboardTitle(version.title);
     const updatedDashboard: DashboardItem = {
       ...currentDashboard,
+      workbookId: currentWorkbookId,
       components: version.components,
       layouts: version.layouts,
-      title: version.title
+      title: version.title,
     };
     axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard)
       .then(() => {
@@ -1113,6 +1129,9 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
   };
   const editDashboard = async (dashboard: DashboardItem): Promise<void> => {
     try {
+      if (!dashboard.workbookId) {
+        dashboard.workbookId = currentWorkbookId;
+      }
       const response = await axios.put(`/api/dashboards/${dashboard.id}`, dashboard);
       const updated = response.data as DashboardItem;
       setDashboards((prevDashboards) => {
