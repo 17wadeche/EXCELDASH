@@ -8,6 +8,7 @@ module.exports = async function (context, req) {
     const { Dashboard } = await initializeModels();
     if (method === 'post') {
       const { title, components, layouts, workbookId } = req.body;
+      console.log("Server: Received POST for dashboard creation. workbookId:", workbookId);
       if (!title || !components || !layouts || !workbookId) {
         context.res = {
           status: 400,
@@ -27,6 +28,7 @@ module.exports = async function (context, req) {
     } else if (method === 'get') {
       if (id) {
         const dashboard = await Dashboard.findByPk(id);
+        console.log("Server: Fetched dashboard from DB:", dashboard);
         if (!dashboard) {
           context.res = { status: 404, body: { error: 'Dashboard not found' } };
         } else {
@@ -45,11 +47,14 @@ module.exports = async function (context, req) {
         return;
       }
       const { title, components, layouts, workbookId } = req.body;
+      console.log("Server: Received PUT for dashboard:", id);
+      console.log("Server: Request body workbookId:", workbookId);
       const dashboard = await Dashboard.findByPk(id);
       if (!dashboard) {
         context.res = { status: 404, body: { error: 'Dashboard not found' } };
         return;
       }
+      console.log("Server: Existing dashboard workbookId (from DB):", dashboard.workbookId);
       if (title !== undefined) dashboard.title = title;
       if (components !== undefined) dashboard.components = components;
       if (layouts !== undefined) dashboard.layouts = layouts;
