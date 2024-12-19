@@ -11,11 +11,9 @@ declare const Office: any;
 
 Office.onReady(() => {
   const container = document.getElementById('container');
-
   if (!container) {
     throw new Error("Failed to find the root element.");
   }
-
   const root = ReactDOM.createRoot(container);
   root.render(
     <React.StrictMode>

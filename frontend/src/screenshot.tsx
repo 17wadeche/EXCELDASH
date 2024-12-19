@@ -1,30 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
-import { Spin, Button } from 'antd'; // Import Spin and Button for loading indicator and close button
+import { Spin, Button } from 'antd';
 
 const ScreenshotDialog = () => {
   const [imageData, setImageData] = useState<string | null>(null);
-
   useEffect(() => {
     Office.onReady()
       .then(() => {
-        // Request the image data immediately
         Office.context.ui.messageParent(JSON.stringify({ type: 'requestImage' }));
-
         const messageHandler = (arg: any) => {
           try {
             const message = JSON.parse(arg.message);
             if (message.type === 'imageData') {
               setImageData(message.data);
             } else if (message.type === 'close') {
-              // Optional: Handle any 'close' messages if needed
-              window.close(); // Close the dialog if needed
+              window.close();
             }
           } catch (error) {
             console.error('Error parsing message from parent:', error);
           }
         };
-
         Office.context.ui.addHandlerAsync(
           Office.EventType.DialogParentMessageReceived,
           messageHandler
@@ -34,12 +29,10 @@ const ScreenshotDialog = () => {
         console.error('Office.js is not ready:', error);
       });
   }, []);
-
   const handleClose = () => {
     Office.context.ui.messageParent(JSON.stringify({ type: 'close' }));
-    window.close(); // Ensure the dialog closes
+    window.close();
   };
-
   if (!imageData) {
     return (
       <div className="screenshot-container">
@@ -54,7 +47,6 @@ const ScreenshotDialog = () => {
       </div>
     );
   }
-
   return (
     <div className="screenshot-container">
       <Button
@@ -72,7 +64,6 @@ const ScreenshotDialog = () => {
     </div>
   );
 };
-
 Office.onReady()
   .then(() => {
     ReactDOM.render(<ScreenshotDialog />, document.getElementById('root'));

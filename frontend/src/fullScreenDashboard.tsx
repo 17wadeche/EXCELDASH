@@ -14,17 +14,13 @@ const FullScreenDashboardContent: React.FC = () => {
   const [isPresenterMode, setIsPresenterMode] = useState(true);
   const isUpdatingFromParent = useRef(false);
   const [currentWorkbookId, setCurrentWorkbookId] = useState<string | null>(null);
-
   const { setWidgets, setLayouts, setDashboardBorderSettings,  setCurrentDashboard, widgets, layouts, setAvailableWorksheets } = useContext(DashboardContext)!;
-
   const sendMessageToParent = (message: any) => {
     Office.context.ui.messageParent(JSON.stringify(message));
   };
-
   const closePresenterMode = () => {
     sendMessageToParent({ type: 'close' });
   };
-
   useEffect(() => {
     const messageHandler = (args: any) => {
       const data = JSON.parse(args.message);
@@ -58,7 +54,6 @@ const FullScreenDashboardContent: React.FC = () => {
   if (!dashboardData || !widgets || !layouts) {
     return <div>Loading...</div>;
   }
-
   return (
     <DashboardContent
       isPresenterMode={true}
@@ -73,7 +68,6 @@ const FullScreenDashboardContent: React.FC = () => {
     />
   );
 };
-
 interface DashboardContentProps {
   dashboardData: DashboardItem;
   isPresenterMode: boolean;
@@ -85,7 +79,6 @@ interface DashboardContentProps {
   layouts: { [key: string]: GridLayoutItem[] };
   isFullScreen?: boolean;
 }
-
 const DashboardContent: React.FC<DashboardContentProps> = ({
   dashboardData,
   isPresenterMode,
@@ -96,7 +89,6 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
   isFullScreen,
 }) => {
   const { widgets, layouts, dashboardBorderSettings } = useContext(DashboardContext)!;
-
   useEffect(() => {
     if (!isUpdatingFromParent.current) {
       const { id, title } = dashboardData;
@@ -110,7 +102,6 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
       sendMessageToParent({ type: 'updateDashboardData', dashboard: dashboardUpdateData });
     }
   }, [widgets, layouts, dashboardBorderSettings]);
-
   return (
     <CustomLayout>
       <Routes>
@@ -137,7 +128,6 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
     </CustomLayout>
   );
 };
-
 const FullScreenDashboard: React.FC = () => (
   <div style={{ width: '100%', height: '100%' }}>
     <MemoryRouter initialEntries={['/dashboard']}>
@@ -149,7 +139,6 @@ const FullScreenDashboard: React.FC = () => (
     </MemoryRouter>
   </div>
 );
-
 Office.onReady(() => {
   ReactDOM.render(<FullScreenDashboard />, document.getElementById('root'));
 });
