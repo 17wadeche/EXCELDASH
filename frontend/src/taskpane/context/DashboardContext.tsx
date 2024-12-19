@@ -155,7 +155,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
 
   useEffect(() => {
     const loadCurrentDashboard = async () => {
-      if (!currentDashboardId || !currentWorkbookId) return;
+      if (!currentDashboardId || !currentWorkbookId || currentDashboard) return; 
       try {
         const response = await axios.get(`/api/dashboards/${currentDashboardId}`);
         const db: DashboardItem = response.data;
@@ -184,7 +184,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       }
     };
     loadCurrentDashboard();
-  }, [currentDashboardId, currentWorkbookId]);
+  }, [currentDashboardId, currentWorkbookId, currentDashboard]);
 
   const syncCurrentDashboardToServer = async (
     updatedWidgets: Widget[],
@@ -1334,11 +1334,16 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
             layouts,
             title: dashboardTitle,
           };
-          axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard)
-            .catch(err => {
-              console.error('Error syncing updates to server:', err);
-              message.error('Failed to save changes to server.');
-            });
+          try {
+            const response = await axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard);
+            const savedDashboard = response.data;
+            setCurrentDashboard(savedDashboard);
+            setWidgets(savedDashboard.components);
+            setLayouts(savedDashboard.layouts);
+          } catch (err) {
+            console.error('Error syncing updates to server:', err);
+            message.error('Failed to save changes to server.');
+          }
         }
         return newWidgets;
       });
