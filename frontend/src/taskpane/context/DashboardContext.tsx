@@ -1337,8 +1337,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard)
           .then((res) => {
             setCurrentDashboard(res.data);
-            setWidgetsState(res.data.components);
-            setLayouts(res.data.layouts || {});
           })
           .catch(err => {
             console.error('Error syncing updates to server:', err);
