@@ -12,8 +12,7 @@ import {
 import { ReloadOutlined } from '@ant-design/icons';
 import { DashboardContext } from '../context/DashboardContext';
 import { v4 as uuidv4 } from 'uuid';
-import { Widget, ReportItem, ReportColumn } from './types'; // Adjust path as necessary
-import { getWorkbookIdFromProperties } from '../utils/excelUtils'; // Adjust path as necessary
+import { Widget, ReportItem, ReportColumn } from './types';
 
 const { Option } = Select;
 
@@ -161,7 +160,7 @@ const CustomReport: React.FC = () => {
 
   const handleSaveReportConfirm = async () => {
     if (reportName.trim()) {
-      const currentWorkbookId = await getWorkbookIdFromProperties();
+      const currentWorkbookId = dashboardContext.currentWorkbookId;
 
       if (!currentWorkbookId) {
         message.error('Failed to get the current workbook ID.');

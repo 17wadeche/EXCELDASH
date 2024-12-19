@@ -38,7 +38,6 @@ const CreateDashboard: React.FC = () => {
     setWidgets,
     setCurrentTemplateId,
     setCurrentWorkbookId,
-    getWorkbookIdFromProperties,
     setCurrentDashboardId,
     currentWorkbookId,
     setLayouts,
