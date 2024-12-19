@@ -1,6 +1,6 @@
 // src/taskpane/components/Dashboard.tsx
 
-import React, { useState, useEffect, useRef, useContext } from 'react';
+import React, { useState, useEffect, useRef, useContext, useMemo, useCallback } from 'react';
 import { Responsive, WidthProvider } from 'react-grid-layout';
 import { Modal, Card, Button, Input, Form, Tooltip, message } from 'antd';
 import EditWidgetForm from './EditWidgetForm';
@@ -46,42 +46,44 @@ interface DashboardProps {
   dashboardBorderSettings?: DashboardBorderSettings;
   isFullScreen?: boolean;
 }
-const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePresenterMode, isFullScreen }) => {
+const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = false, closePresenterMode, isFullScreen }) => {
   const { widgets, addWidget, removeWidget, updateWidget, refreshAllCharts, editDashboard, layouts, setLayouts, setWidgets, dashboards, setDashboardBorderSettings, updateLayoutsForNewWidgets, undo, dashboardBorderSettings, redo, canUndo, dashboardTitle, canRedo, currentTemplateId, currentDashboardId, saveTemplate, currentDashboard, currentWorkbookId, availableWorksheets } = useContext(DashboardContext)!;
   const [isFullscreenActive, setIsFullscreenActive] = useState(false);
   const isEditingEnabled = !isPresenterMode && !isFullscreenActive && !isFullScreen;
-  const [isVersionHistoryVisible, setIsVersionHistoryVisible] = useState(false);
-  const borderStyle: React.CSSProperties = dashboardBorderSettings?.showBorder
-    ? {
-        border: `${dashboardBorderSettings.thickness}px ${dashboardBorderSettings.style} ${dashboardBorderSettings.color}`,
-      }
-    : {};
-  const isUpdatingLayout = useRef(false);
-  const [rowHeight, setRowHeight] = useState<number>(5);
+  const borderStyle: React.CSSProperties = useMemo(() => {
+    return dashboardBorderSettings?.showBorder
+      ? {
+          border: `${dashboardBorderSettings.thickness}px ${dashboardBorderSettings.style} ${dashboardBorderSettings.color}`,
+        }
+      : {};
+  }, [dashboardBorderSettings]);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const dashboardRef = useRef<HTMLDivElement>(null);
   const [isLineSettingsModalVisible, setIsLineSettingsModalVisible] = useState(false);
   const [editingWidget, setEditingWidget] = useState<Widget | null>(null);
   const isUpdatingFromItem = useRef(false);
   const prevLayoutsRef = useRef<{ [key: string]: GridLayoutItem[] }>({});
   const [isPresentationMode, setIsPresentationMode] = useState(false);
-  const [fullScreenDialog, setFullScreenDialog] = useState<
-    Office.Dialog | null
-  >(null);
+  const [fullScreenDialog, setFullScreenDialog] = useState<Office.Dialog | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const isOfficeInitialized =
     typeof Office !== 'undefined' &&
     Office.context &&
     Office.context.ui &&
     typeof Office.context.ui.displayDialogAsync === 'function';
-  const handleRefresh = async () => {
+  const [theme, setTheme] = useState('light-theme');
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [currentWidget, setCurrentWidget] = useState<Widget | null>(null);
+
+  const handleRefresh = useCallback(async () => {
     if (isPresenterMode) {
       return;
     }
     setIsRefreshing(true);
     await refreshAllCharts();
     setIsRefreshing(false);
-  };
+  }, [isPresenterMode, refreshAllCharts]);
   useEffect(() => {
     if (isPresenterMode) {
       return;
@@ -96,7 +98,7 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
       console.log('Adding layouts for new widgets:', widgetsWithoutLayout.map((w) => w.id));
       updateLayoutsForNewWidgets(widgetsWithoutLayout);
     }
-  }, [widgets]);
+  }, [widgets, isPresenterMode, layouts, updateLayoutsForNewWidgets]);
   const handlePresentDashboard = async () => {
     if (!dashboardRef.current) {
       message.error('Dashboard container not found.');
@@ -245,7 +247,7 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
         })
       );
     }
-  }, [widgets, layouts, dashboardBorderSettings]);
+  }, [widgets, layouts, dashboardBorderSettings, fullScreenDialog, currentDashboardId, dashboardTitle, currentWorkbookId, availableWorksheets]);
   useEffect(() => {
     if (
       currentDashboard &&
@@ -259,99 +261,84 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
     } else if (currentDashboard && (!currentDashboard.layouts || Object.keys(currentDashboard.layouts).length === 0)) {
       updateLayoutsForNewWidgets(currentDashboard.components);
     }
-  }, [currentDashboard]);
-  const [theme, setTheme] = useState('light-theme');
-  const dashboardRef = useRef<HTMLDivElement>(null);
-  const handleSave = () => {
+  }, [currentDashboard, setLayouts, updateLayoutsForNewWidgets]);
+
+  const handleSave = useCallback(() => {
     if (currentDashboardId) {
       saveTemplate();
       message.success('Dashboard saved successfully!');
     } else {
       message.warning('No dashboard is currently active.');
     }
-  };
-  const handleLayoutChange = (
-    _currentLayout: GridLayoutItem[],
-    allLayouts: { [key: string]: GridLayoutItem[] }
-  ) => {
-    const syncedLayouts = { ...layouts };
-    BREAKPOINTS.forEach((bp) => {
-      if (!allLayouts[bp]) {
-        syncedLayouts[bp] = allLayouts.lg || allLayouts.md || [];
+  }, [currentDashboardId, saveTemplate]);
+
+  const handleLayoutChange = useCallback(
+    (_currentLayout: GridLayoutItem[], allLayouts: { [key: string]: GridLayoutItem[] }) => {
+      const syncedLayouts = { ...layouts };
+      BREAKPOINTS.forEach((bp) => {
+        if (!allLayouts[bp]) {
+          syncedLayouts[bp] = allLayouts.lg || allLayouts.md || [];
+        } else {
+          syncedLayouts[bp] = allLayouts[bp];
+        }
+      });
+      setLayouts(syncedLayouts);
+      if (!isEqual(allLayouts, prevLayoutsRef.current)) {
+        prevLayoutsRef.current = allLayouts;
+        if (currentDashboardId) {
+          const updatedDashboard: DashboardItem = {
+            ...dashboards.find((d) => d.id === currentDashboardId)!,
+            layouts: allLayouts,
+          };
+          editDashboard(updatedDashboard);
+          console.log('Layouts updated and saved immediately.');
+        }
+      }
+    },
+    [layouts, currentDashboardId, editDashboard, dashboards, setLayouts]
+  );
+
+  const copyWidgetCallback = useCallback(
+    (widget: Widget) => {
+      const newWidget: Widget = {
+        ...widget,
+        id: `${widget.type}-${uuidv4()}`,
+      };
+      addWidget(widget.type, newWidget.data);
+      message.success('Widget copied!');
+    },
+    [addWidget]
+  );
+
+  const handleRemoveWidget = useCallback(
+    (id: string) => {
+      const widgetToRemove = widgets.find((widget) => widget.id === id);
+      if (widgetToRemove?.type === 'title') {
+        message.warning('The title widget cannot be removed.');
+        return;
       } else {
-        syncedLayouts[bp] = allLayouts[bp];
+        removeWidget(id);
+        message.info('Widget removed!');
       }
-    });
-    setLayouts(syncedLayouts);
-    if (!isEqual(allLayouts, prevLayoutsRef.current)) {
-      prevLayoutsRef.current = allLayouts;
-      if (currentDashboardId) {
-        const updatedDashboard: DashboardItem = {
-          ...dashboards.find((d) => d.id === currentDashboardId)!,
-          layouts: allLayouts,
-        };
-        editDashboard(updatedDashboard);
-        console.log('Layouts updated and saved immediately.');
-      }
-    }
-  };
-  const copyWidget = (widget: Widget) => {
-    const newWidget: Widget = {
-      ...widget,
-      id: `${widget.type}-${uuidv4()}`,
-    };
-    addWidget(widget.type, newWidget.data);
-    message.success('Widget copied!');
-  };
-  const handleRemoveWidget = (id: string) => {
-    const widgetToRemove = widgets.find((widget) => widget.id === id);
-    if (widgetToRemove?.type === 'title') {
-      message.warning('The title widget cannot be removed.');
-      return;
-    } else {
-      removeWidget(id);
-      message.info('Widget removed!');
-    }
-  };
+    },
+    [widgets, removeWidget]
+  );
+
   useEffect(() => {
     if (!layouts || Object.keys(layouts).length === 0) {
       console.log('No layouts available. Skipping validation.');
       return;
     }
     const areLayoutsValid = Object.values(layouts).every((layoutArray) =>
-      layoutArray.some((layoutItem) =>
-        widgets.some((widget) => widget.id === layoutItem.i)
-      )
+      layoutArray.some((layoutItem) => widgets.some((widget) => widget.id === layoutItem.i))
     );
     if (!areLayoutsValid) {
       console.log('Layouts are invalid or do not match widgets. Regenerating layouts.');
       updateLayoutsForNewWidgets(widgets);
     }
-  }, [widgets]);
-  const getLineStyle = (data: LineWidgetData): React.CSSProperties => {
-    const { color, thickness, style, orientation } = data;
-    const commonStyles = {
-      backgroundColor: color,
-      borderStyle: style,
-      borderColor: color,
-    };
-    if (orientation === 'horizontal') {
-      return {
-        ...commonStyles,
-        height: thickness,
-        width: '100%',
-      };
-    } else {
-      return {
-        ...commonStyles,
-        width: thickness,
-        height: '100%',
-      };
-    }
-  };
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [currentWidget, setCurrentWidget] = useState<Widget | null>(null);
-  const handleEditWidget = (widget: Widget) => {
+  }, [widgets, layouts, updateLayoutsForNewWidgets]);
+
+  const handleEditWidget = useCallback((widget: Widget) => {
     setEditingWidget(widget);
     if (widget.type === 'line') {
       setIsLineSettingsModalVisible(true);
@@ -359,34 +346,41 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
       setCurrentWidget(widget);
       setIsModalVisible(true);
     }
-  };
-  useEffect(() => {
-    console.log('Widgets:', widgets);
-    console.log('Layouts:', layouts);
-  }, [widgets, layouts]);
-  const handleLineSettingsSave = (updatedData: LineWidgetData) => {
-    if (editingWidget) {
-      updateWidget(editingWidget.id, updatedData);
-    }
+  }, []);
+
+  const handleLineSettingsSave = useCallback(
+    (updatedData: LineWidgetData) => {
+      if (editingWidget) {
+        updateWidget(editingWidget.id, updatedData);
+      }
+      setIsLineSettingsModalVisible(false);
+      setEditingWidget(null);
+    },
+    [editingWidget, updateWidget]
+  );
+
+  const handleLineSettingsCancel = useCallback(() => {
     setIsLineSettingsModalVisible(false);
     setEditingWidget(null);
-  };
-  const handleLineSettingsCancel = () => {
-    setIsLineSettingsModalVisible(false);
-    setEditingWidget(null);
-  };
-  const handleModalCancel = () => {
+  }, []);
+
+  const handleModalCancel = useCallback(() => {
     setIsModalVisible(false);
     setCurrentWidget(null);
-  };
-  const handleModalOk = (updatedData: any) => {
-    if (currentWidget) {
-      updateWidget(currentWidget.id, updatedData);
-    }
-    setIsModalVisible(false);
-    setCurrentWidget(null);
-  };
-  const openPresenterMode = () => {
+  }, []);
+
+  const handleModalOk = useCallback(
+    (updatedData: any) => {
+      if (currentWidget) {
+        updateWidget(currentWidget.id, updatedData);
+      }
+      setIsModalVisible(false);
+      setCurrentWidget(null);
+    },
+    [currentWidget, updateWidget]
+  );
+
+  const openPresenterMode = useCallback(() => {
     if (isOfficeInitialized) {
       const url = window.location.origin + '/fullScreenDashboard.html';
       Office.context.ui.displayDialogAsync(
@@ -398,68 +392,65 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
           } else {
             const dialog = result.value;
             setFullScreenDialog(dialog);
-            dialog.addEventHandler(
-              Office.EventType.DialogMessageReceived,
-              (args: any) => {
-                const data = JSON.parse(args.message);
-                console.log('Received message from dialog:', data);
-                if (data.type === 'fullscreenActive') {
-                  setIsFullscreenActive(data.active);
-                } else if (data.type === 'requestState') {
-                  const dashboardData = {
-                    components: widgets,
-                    layouts,
-                    id: currentDashboardId,
-                    title: dashboardTitle,
-                    borderSettings: dashboardBorderSettings,
-                  };
-                  dialog.messageChild(
-                    JSON.stringify({
-                      type: 'initialState',
-                      dashboard: dashboardData,
-                      currentWorkbookId,
-                      availableWorksheets,
-                    })
-                  );
-                } else if (data.type === 'close') {
-                  dialog.close();
-                  setFullScreenDialog(null);
-                } else if (data.type === 'updateDashboardData') {
-                  isUpdatingFromItem.current = true;
-                  setWidgets(data.dashboard.components);
-                  setLayouts(data.dashboard.layouts);
-                  setDashboardBorderSettings(data.dashboard.borderSettings);
-                  isUpdatingFromItem.current = false;
-                } else if (data.type === 'getDataFromRange') {
-                  const { widgetId, worksheetName, associatedRange } = data;
-                  Excel.run(async (context) => {
-                    try {
-                      const sheet = context.workbook.worksheets.getItem(worksheetName);
-                      const range = sheet.getRange(associatedRange);
-                      range.load('values');
-                      await context.sync();
-                      const dataFromExcel = range.values;
-                      dialog.messageChild(
-                        JSON.stringify({
-                          type: 'dataFromRange',
-                          widgetId: widgetId,
-                          data: dataFromExcel,
-                        })
-                      );
-                    } catch (error: any) {
-                      console.error('Error getting data from range:', error);
-                      dialog.messageChild(
-                        JSON.stringify({
-                          type: 'dataFromRangeError',
-                          widgetId: widgetId,
-                          error: error.message || error.toString(),
-                        })
-                      );
-                    }
-                  });
-                }
+            dialog.addEventHandler(Office.EventType.DialogMessageReceived, (args: any) => {
+              const data = JSON.parse(args.message);
+              console.log('Received message from dialog:', data);
+              if (data.type === 'fullscreenActive') {
+                setIsFullscreenActive(data.active);
+              } else if (data.type === 'requestState') {
+                const dashboardData = {
+                  components: widgets,
+                  layouts,
+                  id: currentDashboardId,
+                  title: dashboardTitle,
+                  borderSettings: dashboardBorderSettings,
+                };
+                dialog.messageChild(
+                  JSON.stringify({
+                    type: 'initialState',
+                    dashboard: dashboardData,
+                    currentWorkbookId,
+                    availableWorksheets,
+                  })
+                );
+              } else if (data.type === 'close') {
+                dialog.close();
+                setFullScreenDialog(null);
+              } else if (data.type === 'updateDashboardData') {
+                isUpdatingFromItem.current = true;
+                setWidgets(data.dashboard.components);
+                setLayouts(data.dashboard.layouts);
+                setDashboardBorderSettings(data.dashboard.borderSettings);
+                isUpdatingFromItem.current = false;
+              } else if (data.type === 'getDataFromRange') {
+                const { widgetId, worksheetName, associatedRange } = data;
+                Excel.run(async (context) => {
+                  try {
+                    const sheet = context.workbook.worksheets.getItem(worksheetName);
+                    const range = sheet.getRange(associatedRange);
+                    range.load('values');
+                    await context.sync();
+                    const dataFromExcel = range.values;
+                    dialog.messageChild(
+                      JSON.stringify({
+                        type: 'dataFromRange',
+                        widgetId: widgetId,
+                        data: dataFromExcel,
+                      })
+                    );
+                  } catch (error: any) {
+                    console.error('Error getting data from range:', error);
+                    dialog.messageChild(
+                      JSON.stringify({
+                        type: 'dataFromRangeError',
+                        widgetId: widgetId,
+                        error: error.message || error.toString(),
+                      })
+                    );
+                  }
+                });
               }
-            );
+            });
             const dashboardData = {
               components: widgets,
               layouts,
@@ -481,7 +472,121 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
     } else {
       message.error('Presenter mode is not available outside of Office.');
     }
-  };
+  }, [
+    isOfficeInitialized,
+    widgets,
+    layouts,
+    currentDashboardId,
+    dashboardTitle,
+    dashboardBorderSettings,
+    currentWorkbookId,
+    availableWorksheets,
+    setFullScreenDialog,
+    setWidgets,
+    setLayouts,
+    setDashboardBorderSettings,
+    isUpdatingFromItem
+  ]);
+
+  const widgetElements = useMemo(() => {
+    return widgets.map((widget) => {
+      let content;
+      if (widget.type === 'text') {
+        content = <TextWidget data={widget.data as TextData} />;
+      } else if (widget.type === 'chart') {
+        const chartData = widget.data as ChartData;
+        content = <SalesChart key={widget.id} data={chartData} type={chartData.type} />;
+      } else if (widget.type === 'title') {
+        content = <TitleWidgetComponent data={widget.data as TitleWidgetData} />;
+      } else if (widget.type === 'image') {
+        content = <ImageWidget data={widget.data as ImageWidgetData} />;
+      } else if (widget.type === 'line') {
+        content = <LineWidget data={widget.data as LineWidgetData} />;
+      } else if (widget.type === 'gantt') {
+        content = (
+          <GanttChartComponent
+            tasks={(widget.data as GanttWidgetData).tasks}
+            title={(widget.data as GanttWidgetData).title}
+          />
+        );
+      } else if (widget.type === 'metric') {
+        content = <MetricWidget id={widget.id} data={widget.data as MetricData} />;
+      } else if (widget.type === 'report') {
+        const reportWidget = widget as ReportWidgetType;
+        content = (
+          <ReportWidget
+            key={reportWidget.id}
+            id={reportWidget.id}
+            name={reportWidget.name}
+            data={reportWidget.data as ReportData}
+            onDelete={handleRemoveWidget}
+          />
+        );
+      }
+
+      return (
+        <div
+          key={widget.id}
+          className="grid-item"
+          style={{ padding: 0, margin: 0, position: 'relative' }}
+        >
+          {isEditingEnabled && (
+            <div className="widget-actions">
+              <EditOutlined
+                onClick={() => handleEditWidget(widget)}
+                className="action-icon"
+                aria-label={`Edit ${widget.type} Widget`}
+              />
+              {widget.id !== 'dashboard-title' && (
+                <>
+                  <CloseOutlined
+                    onClick={() => handleRemoveWidget(widget.id)}
+                    className="action-icon"
+                    aria-label={`Remove ${widget.type} Widget`}
+                  />
+                  <CopyOutlined
+                    onClick={() => copyWidgetCallback(widget)}
+                    className="action-icon"
+                    aria-label={`Copy ${widget.type} Widget`}
+                  />
+                </>
+              )}
+            </div>
+          )}
+          {widget.type === 'line' ? (
+            <div
+              style={{
+                width: '100%',
+                height: '100%',
+                padding: 0,
+                margin: 0,
+                backgroundColor: 'white',
+              }}
+            >
+              {content}
+            </div>
+          ) : (
+            <Card
+              className="widget-card"
+              bordered={false}
+              style={{
+                width: '100%',
+                height: '100%',
+                position: 'relative',
+                margin: '0px',
+                padding: '0px',
+                boxShadow: 'none',
+                backgroundColor: 'white',
+              }}
+            >
+              {content}
+            </Card>
+          )}
+        </div>
+      );
+    });
+  }, [widgets, isEditingEnabled, handleRemoveWidget, handleEditWidget, copyWidgetCallback]);
+
   return (
     <div className="dashboard-wrapper" style={{ position: 'relative', width: '100%', height: '100vh' }}>
       <Draggable handle=".drag-handle">
@@ -542,15 +647,10 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
                   aria-label="Present Dashboard"
                 />
               </Tooltip>
-              {isPresentationMode && (
-                <PresentationDashboard />
-              )}
+              {isPresentationMode && <PresentationDashboard />}
             </>
           )}
-          <Tooltip
-            title={isCollapsed ? 'Expand Toolbar' : 'Collapse Toolbar'}
-            placement="left"
-          >
+          <Tooltip title={isCollapsed ? 'Expand Toolbar' : 'Collapse Toolbar'} placement="left" >
             <Button
               type="text"
               icon={isCollapsed ? <MenuOutlined /> : <CloseOutlined />}
@@ -563,11 +663,7 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
       </Draggable>
       {isPresenterMode && (
         <div className="full-screen-exit-button">
-          <Button
-            type="primary"
-            icon={<FullscreenExitOutlined />}
-            onClick={closePresenterMode}
-          >
+          <Button type="primary" icon={<FullscreenExitOutlined />} onClick={closePresenterMode} >
             Exit Full Screen
           </Button>
         </div>
@@ -600,105 +696,7 @@ const Dashboard: React.FC<DashboardProps> = ({ isPresenterMode = false, closePre
           margin={[0, 0]}
           containerPadding={[0, 0]}
         >
-          {widgets.map((widget) => {
-            let content;
-            if (widget.type === 'text') {
-              content = <TextWidget data={widget.data as TextData} />;
-            } else if (widget.type === 'chart') {
-              const chartData = widget.data as ChartData;
-              content = (
-                <SalesChart key={widget.id} data={chartData} type={chartData.type} />
-              );
-            } else if (widget.type === 'title') {
-              content = (
-                <TitleWidgetComponent data={widget.data as TitleWidgetData} />
-              );
-            } else if (widget.type === 'image') {
-              content = <ImageWidget data={widget.data as ImageWidgetData} />;
-            } else if (widget.type === 'line') {
-              content = <LineWidget data={widget.data as LineWidgetData} />;
-            } else if (widget.type === 'gantt') {
-              content = (
-                <GanttChartComponent
-                  tasks={(widget.data as GanttWidgetData).tasks}
-                  title={(widget.data as GanttWidgetData).title}
-                />
-              );
-            } else if (widget.type === 'metric') {
-              content = <MetricWidget id={widget.id} data={widget.data as MetricData} />;
-            } else if (widget.type === 'report') {
-              const reportWidget = widget as ReportWidgetType; // Type assertion
-              content = (
-                <ReportWidget
-                  key={reportWidget.id}
-                  id={reportWidget.id}
-                  name={reportWidget.name}
-                  data={reportWidget.data as ReportData}
-                  onDelete={handleRemoveWidget}
-                />
-              );
-            }
-            return (
-              <div
-                key={widget.id}
-                className="grid-item"
-                style={{ padding: 0, margin: 0, position: 'relative' }}
-              >
-                {isEditingEnabled && (
-                  <div className="widget-actions">
-                    <EditOutlined
-                      onClick={() => handleEditWidget(widget)}
-                      className="action-icon"
-                      aria-label={`Edit ${widget.type} Widget`}
-                    />
-                    {widget.id !== 'dashboard-title' && (
-                      <>
-                        <CloseOutlined
-                          onClick={() => handleRemoveWidget(widget.id)}
-                          className="action-icon"
-                          aria-label={`Remove ${widget.type} Widget`}
-                        />
-                        <CopyOutlined
-                          onClick={() => copyWidget(widget)}
-                          className="action-icon"
-                          aria-label={`Copy ${widget.type} Widget`}
-                        />
-                      </>
-                    )}
-                  </div>
-                )}
-                {widget.type === 'line' ? (
-                  <div
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      padding: 0,
-                      margin: 0,
-                      backgroundColor: 'white',
-                    }}
-                  >
-                    {content}
-                  </div>
-                ) : (
-                  <Card
-                    className="widget-card"
-                    bordered={false}
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      position: 'relative',
-                      margin: '0px',
-                      padding: '0px',
-                      boxShadow: 'none',
-                      backgroundColor: 'white',
-                    }}
-                  >
-                    {content}
-                  </Card>
-                )}
-              </div>
-            );
-          })}
+          {widgetElements}
         </ResponsiveGridLayout>
         {isPresentationMode && (
           <PresentationDashboard />
