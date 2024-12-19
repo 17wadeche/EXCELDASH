@@ -159,10 +159,10 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       try {
         const response = await axios.get(`/api/dashboards/${currentDashboardId}`);
         const db: DashboardItem = response.data;
+        const dashboardWorkbookId = db.workbookId ? db.workbookId.toLowerCase() : '';
         console.log("Front-End: Dashboard workbookId from server:", db.workbookId);
-        db.workbookId = db.workbookId.toLowerCase();
         console.log("Front-End: Current workbookId:", currentWorkbookId);
-        if (db.workbookId !== currentWorkbookId.toLowerCase()) {
+        if (dashboardWorkbookId !== currentWorkbookId.toLowerCase()) {
           message.warning('The selected dashboard is not associated with this workbook.');
           return;
         }
@@ -2099,7 +2099,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       if (!currentDashboard || !currentDashboard.workbookId) {
         return;
       }
-      if (currentWorkbookId !== currentDashboard.workbookId) {
+      if (currentWorkbookId.toLowerCase() !== currentDashboard.workbookId.toLowerCase()) {
         console.warn('Current workbook does not match the dashboard workbook. Skipping event handler setup.');
         return;
       }
@@ -2153,7 +2153,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       if (!currentDashboard || !currentDashboard.workbookId || !currentWorkbookId) {
         return;
       }
-      if (currentWorkbookId !== currentDashboard.workbookId) {
+      if (currentWorkbookId.toLowerCase() !== currentDashboard.workbookId.toLowerCase()) {
         console.warn('Current workbook does not match the dashboard workbook. Skipping Gantt event handler setup.');
         return;
       }
