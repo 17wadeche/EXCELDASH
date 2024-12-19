@@ -53,7 +53,9 @@ module.exports = async function (context, req) {
       if (title !== undefined) dashboard.title = title;
       if (components !== undefined) dashboard.components = components;
       if (layouts !== undefined) dashboard.layouts = layouts;
-      if (workbookId !== undefined) dashboard.workbookId = workbookId;
+      if (workbookId !== undefined && workbookId !== null && workbookId.trim() !== '') {
+        dashboard.workbookId = workbookId;
+      }
       await dashboard.save();
       context.res = { status: 200, body: dashboard };
     } else if (method === 'delete') {
