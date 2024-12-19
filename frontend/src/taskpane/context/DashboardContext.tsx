@@ -1326,7 +1326,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       }
       updateWidgetsWithHistory((prevWidgets: Widget[]) => {
         const newWidgets = [...prevWidgets, newWidget];
-        updateLayoutsForNewWidgets([newWidget]);
+        updateLayoutsForNewWidgets(newWidgets);
         if (currentDashboardId && currentDashboard) {
           const updatedDashboard = {
             ...currentDashboard,
