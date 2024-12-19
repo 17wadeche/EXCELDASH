@@ -338,13 +338,15 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     };
   }, [widgets, layouts, dashboardTitle, currentDashboard, currentDashboardId]);
   useEffect(() => {
-    const initializeWorkbookId = async () => {
-      const workbookId = (await getWorkbookIdFromProperties()).toLowerCase();
-      console.log("Front-End: Retrieved Workbook ID from properties:", workbookId);
-      setCurrentWorkbookId(workbookId);
-    };
-    initializeWorkbookId();
-  }, []);
+    if (!currentWorkbookId) {
+      const initializeWorkbookId = async () => {
+        const workbookId = (await getWorkbookIdFromProperties()).toLowerCase();
+        console.log("Front-End: Retrieved Workbook ID from properties:", workbookId);
+        setCurrentWorkbookId(workbookId);
+      };
+      initializeWorkbookId();
+    }
+  }, [currentWorkbookId]);
   useEffect(() => {
     if (currentDashboardId && dashboards.length > 0 && currentWorkbookId) {
       const foundDashboard = dashboards.find(d => d.id === currentDashboardId);
