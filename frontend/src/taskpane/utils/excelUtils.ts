@@ -34,11 +34,6 @@ export const getWorkbookIdFromProperties = async (): Promise<string> => {
     console.log('Running in dialog; skipping getWorkbookIdFromProperties.');
     return '';
   }
-  if (!(Office && Office.context && Office.context.host === Office.HostType.Excel)) {
-    const workbookId = uuidv4();
-    await setWorkbookIdInProperties(workbookId);
-    return workbookId;
-  }
   try {
     return await Excel.run(async (context: Excel.RequestContext) => {
       const customProps = context.workbook.properties.custom;
@@ -65,9 +60,14 @@ export const getWorkbookIdFromProperties = async (): Promise<string> => {
       }
     });
   } catch (error) {
-    console.error('Error getting workbook ID from custom properties:', error);
-    const workbookId = uuidv4();
-    await setWorkbookIdInProperties(workbookId);
-    return workbookId;
+    if (error instanceof OfficeExtension.Error && error.code === "InvalidOperationInCellEditMode") {
+      message.error("Please exit cell editing mode (press Enter or Tab) and try again.");
+      throw error;
+    } else {
+      console.error('Error getting workbook ID from custom properties:', error);
+      const workbookId = uuidv4();
+      await setWorkbookIdInProperties(workbookId);
+      return workbookId;
+    }
   }
 };

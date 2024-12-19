@@ -339,6 +339,23 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     };
     initializeWorkbookId();
   }, []);
+  useEffect(() => {
+    const initializeWorkbookAndDashboard = async () => {
+      try {
+        const wbId = await getWorkbookIdFromProperties();
+        setCurrentWorkbookId(wbId);
+        if (currentDashboardId && dashboards.length > 0) {
+          const foundDashboard = dashboards.find(d => d.id === currentDashboardId);
+          if (foundDashboard) {
+            setCurrentDashboard(foundDashboard);
+          }
+        }
+      } catch (error) {
+        console.warn("Initialization failed due to cell-editing mode or another error.");
+      }
+    };
+    initializeWorkbookAndDashboard();
+  }, [currentDashboardId, dashboards]);
   const getAvailableWorksheets = async (): Promise<string[]> => {
     if (isInDialog()) {
       console.log('Running in dialog; skipping getAvailableWorksheets.');
@@ -1675,7 +1692,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
   };
   const refreshAllCharts = useCallback(async () => {
     if (!currentDashboard || !currentDashboard.workbookId) {
-      message.error('No dashboard or workbook ID found.');
+      message.error('No dashboard or workbook ID found. Please ensure the dashboard is loaded and try again.');
       return;
     }
     console.log('Current Workbook ID:', currentWorkbookId);
