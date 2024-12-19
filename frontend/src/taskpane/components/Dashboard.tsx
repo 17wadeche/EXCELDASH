@@ -86,9 +86,7 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
   }, [isPresenterMode, refreshAllCharts]);
 
   useEffect(() => {
-    if (isPresenterMode) {
-      return;
-    }
+    if (isPresenterMode) return;
     if (!layouts) return;
     const layoutItemIds = new Set(
       Object.values(layouts)
@@ -261,10 +259,8 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
     ) {
       setLayouts(currentDashboard.layouts);
       prevLayoutsRef.current = currentDashboard.layouts;
-    } else if (currentDashboard && (!currentDashboard.layouts || Object.keys(currentDashboard.layouts).length === 0)) {
-      updateLayoutsForNewWidgets(currentDashboard.components);
     }
-  }, [currentDashboard, setLayouts, updateLayoutsForNewWidgets]);
+  }, [currentDashboard, setLayouts]);
 
   const handleSave = useCallback(() => {
     if (currentDashboardId) {
