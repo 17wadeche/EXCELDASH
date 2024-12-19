@@ -7,6 +7,7 @@ export const isInDialog = (): boolean => {
 };
 
 export const setWorkbookIdInProperties = async (workbookId: string): Promise<void> => {
+  const lowerCaseId = workbookId.toLowerCase();
   if (isInDialog()) {
     console.log('Running in dialog; skipping setWorkbookIdInProperties.');
     return;
@@ -20,9 +21,9 @@ export const setWorkbookIdInProperties = async (workbookId: string): Promise<voi
         existingProp.delete();
         await context.sync();
       }
-      customProps.add("dashboardWorkbookId", workbookId);
+      customProps.add("dashboardWorkbookId", lowerCaseId);
       await context.sync();
-      console.log(`Workbook ID "${workbookId}" set successfully in custom properties.`);
+      console.log(`Workbook ID "${lowerCaseId}" set successfully in custom properties.`);
     });
   } catch (error) {
     console.error('Error setting workbook ID in custom properties:', error);
@@ -40,7 +41,7 @@ export const getWorkbookIdFromProperties = async (): Promise<string> => {
       const prop = customProps.getItemOrNullObject("dashboardWorkbookId");
       await context.sync();
       if (prop.isNullObject) {
-        const workbookId = uuidv4();
+        const workbookId = uuidv4().toLowerCase();
         customProps.add("dashboardWorkbookId", workbookId);
         await context.sync();
         console.log(`Workbook ID "${workbookId}" generated and set.`);
@@ -49,10 +50,11 @@ export const getWorkbookIdFromProperties = async (): Promise<string> => {
       prop.load("value");
       await context.sync();
       if (prop.value) {
-        console.log(`Workbook ID "${prop.value}" retrieved from custom properties.`);
-        return prop.value;
+        const lowerCaseId = prop.value.toLowerCase();
+        console.log(`Workbook ID "${lowerCaseId}" retrieved from custom properties.`);
+        return lowerCaseId;
       } else {
-        const workbookId = uuidv4();
+        const workbookId = uuidv4().toLowerCase();
         customProps.add("dashboardWorkbookId", workbookId);
         await context.sync();
         console.log(`Workbook ID "${workbookId}" generated and set.`);
@@ -65,7 +67,7 @@ export const getWorkbookIdFromProperties = async (): Promise<string> => {
       throw error;
     } else {
       console.error('Error getting workbook ID from custom properties:', error);
-      const workbookId = uuidv4();
+      const workbookId = uuidv4().toLowerCase();
       await setWorkbookIdInProperties(workbookId);
       return workbookId;
     }

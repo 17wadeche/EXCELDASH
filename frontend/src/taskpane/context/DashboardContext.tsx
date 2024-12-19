@@ -162,7 +162,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         console.log("Front-End: Dashboard data received from server:", db);
         console.log("Front-End: Dashboard workbookId from server:", db.workbookId);
         console.log("Front-End: Current workbookId:", currentWorkbookId);
-        if (db.workbookId !== currentWorkbookId) {
+        if (db.workbookId.toLowerCase() !== currentWorkbookId.toLowerCase()) {
           message.warning('The selected dashboard is not associated with this workbook.');
           return;
         }
@@ -339,7 +339,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
   }, [widgets, layouts, dashboardTitle, currentDashboard, currentDashboardId]);
   useEffect(() => {
     const initializeWorkbookId = async () => {
-      const workbookId = await getWorkbookIdFromProperties();
+      const workbookId = (await getWorkbookIdFromProperties()).toLowerCase();
       console.log("Front-End: Retrieved Workbook ID from properties:", workbookId);
       setCurrentWorkbookId(workbookId);
     };
