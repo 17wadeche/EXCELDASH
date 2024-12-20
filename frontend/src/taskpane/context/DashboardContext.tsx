@@ -225,9 +225,10 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       ...currentDashboard,
       workbookId: currentWorkbookId,
       components: widgets,
-      layouts,
+      layouts: layouts,
       title: dashboardTitle,
     };
+    console.log('Sending updated dashboard to server:', updatedDashboard);
     axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard)
       .then((res) => {
         console.log('Server sync successful:', res.data);
