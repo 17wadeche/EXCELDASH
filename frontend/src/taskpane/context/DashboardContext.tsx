@@ -156,34 +156,32 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
   };
 
   useEffect(() => {
-    if (!currentDashboardId || !currentWorkbookId || dashboardLoaded) return;
-    const loadCurrentDashboard = async () => {
-      if (currentDashboard) return;
+    const loadInitialDashboard = async () => {
+      if (!currentDashboardId) return;
       try {
         const response = await axios.get(`/api/dashboards/${currentDashboardId}`);
         const db: DashboardItem = response.data;
         setCurrentDashboard(db);
-        let updatedWidgets = db.components || [];
-        if (!updatedWidgets.some(w => w.type === 'title')) {
-          updatedWidgets = [defaultTitleWidget, ...updatedWidgets];
+        let initialWidgets = db.components || [];
+        if (!initialWidgets.some(w => w.type === 'title')) {
+          initialWidgets = [defaultTitleWidget, ...initialWidgets];
         }
-        setWidgetsState(updatedWidgets);
+        setWidgets(initialWidgets);
         setDashboardTitle(db.title || 'My Dashboard');
         if (db.layouts && Object.keys(db.layouts).length > 0) {
           setLayouts(db.layouts);
         } else {
-          updateLayoutsForNewWidgets(updatedWidgets);
+          updateLayoutsForNewWidgets(initialWidgets);
         }
-        setDashboardLoaded(true);
       } catch (error) {
         console.error(`Error loading dashboard ${currentDashboardId}:`, error);
         message.error('Failed to load the selected dashboard.');
       }
-    };
-    if (!currentDashboard) {
-      loadCurrentDashboard();
-    }
-  }, [currentDashboardId, currentWorkbookId, currentDashboard, dashboardLoaded]);
+  };
+  
+  useEffect(() => {
+    loadInitialDashboard();
+  }, []);
 
   const syncCurrentDashboardToServer = async (
     updatedWidgets: Widget[],
