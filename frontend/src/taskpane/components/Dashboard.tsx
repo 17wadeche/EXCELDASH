@@ -5,14 +5,14 @@ import { Responsive, WidthProvider } from 'react-grid-layout';
 import { Modal, Card, Button, Input, Form, Tooltip, message } from 'antd';
 import EditWidgetForm from './EditWidgetForm';
 import MetricWidget from './widgets/MetricWidget';
-import { BREAKPOINTS, GRID_COLS, WIDGET_SIZES } from './layoutConstants';
+import { BREAKPOINTS, GRID_COLS } from './layoutConstants';
 import { isEqual } from 'lodash';
 import LineSettingsModal from './LineSettingsModal';
 import TitleWidgetComponent from './TitleWidget';
-import { ReloadOutlined, CloseOutlined, EditOutlined, UndoOutlined, FundProjectionScreenOutlined, RedoOutlined, FullscreenOutlined, FullscreenExitOutlined, CopyOutlined, SaveOutlined, FileAddOutlined, ZoomInOutlined, ZoomOutOutlined, MenuOutlined } from '@ant-design/icons';
+import { ReloadOutlined, CloseOutlined, EditOutlined, UndoOutlined, FundProjectionScreenOutlined, RedoOutlined, FullscreenExitOutlined, CopyOutlined, SaveOutlined, MenuOutlined } from '@ant-design/icons';
 import './Dashboard.css';
 import { DashboardContext } from '../context/DashboardContext';
-import { Widget, ChartData, TextData, ImageWidgetData, ReportData, GridLayoutItem, ReportWidgetType, DashboardBorderSettings , LineWidgetData, TitleWidget, TitleWidgetData, GanttWidgetData, MetricData, DashboardItem } from './types';
+import { Widget, ChartData, TextData, ImageWidgetData, ReportData, GridLayoutItem, ReportWidgetType, DashboardBorderSettings, LineWidgetData, TitleWidgetData, GanttWidgetData, MetricData, DashboardItem } from './types';
 import TextWidget from './widgets/TextWidget';
 import SalesChart from './widgets/SalesChart';
 import GanttChartComponent from './widgets/GanttChart';
@@ -26,8 +26,10 @@ import Draggable from 'react-draggable';
 import { debounce } from 'lodash';
 import LineWidget from './widgets/LineWidget';
 import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 import PresentationDashboard from './PresentationDashboard';
 import axios from 'axios';
+
 const ResponsiveGridLayout = WidthProvider(Responsive);
 const defaultTitleWidget: Widget = {
   id: 'dashboard-title',
@@ -40,6 +42,7 @@ const defaultTitleWidget: Widget = {
     titleAlignment: 'center',
   } as TitleWidgetData,
 };
+
 interface DashboardProps {
   isPresenterMode?: boolean;
   closePresenterMode?: () => void;
@@ -47,10 +50,18 @@ interface DashboardProps {
   dashboardBorderSettings?: DashboardBorderSettings;
   isFullScreen?: boolean;
 }
+
 const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = false, closePresenterMode, isFullScreen }) => {
-  const { widgets, addWidget, removeWidget, updateWidget, refreshAllCharts, editDashboard, layouts, setLayouts, setWidgets, dashboards, setDashboardBorderSettings, updateLayoutsForNewWidgets, undo, dashboardBorderSettings, redo, canUndo, dashboardTitle, canRedo, currentTemplateId, currentDashboardId, saveTemplate, currentDashboard, currentWorkbookId, availableWorksheets, setCurrentDashboard } = useContext(DashboardContext)!;
+  const { 
+    widgets, addWidget, removeWidget, updateWidget, refreshAllCharts, editDashboard, layouts, setLayouts, setWidgets, 
+    dashboards, setDashboardBorderSettings, updateLayoutsForNewWidgets, undo, dashboardBorderSettings, redo, canUndo, 
+    dashboardTitle, canRedo, currentTemplateId, currentDashboardId, saveTemplate, currentDashboard, currentWorkbookId, 
+    availableWorksheets, setCurrentDashboard, exportDashboardAsPDF 
+  } = useContext(DashboardContext)!;
+
   const [isFullscreenActive, setIsFullscreenActive] = useState(false);
   const isEditingEnabled = !isPresenterMode && !isFullscreenActive && !isFullScreen;
+
   const borderStyle: React.CSSProperties = useMemo(() => {
     return dashboardBorderSettings?.showBorder
       ? {
@@ -58,6 +69,7 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
         }
       : {};
   }, [dashboardBorderSettings]);
+
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const dashboardRef = useRef<HTMLDivElement>(null);
@@ -67,12 +79,16 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
   const prevLayoutsRef = useRef<{ [key: string]: GridLayoutItem[] }>({});
   const [isPresentationMode, setIsPresentationMode] = useState(false);
   const [fullScreenDialog, setFullScreenDialog] = useState<Office.Dialog | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+
   const isOfficeInitialized =
     typeof Office !== 'undefined' &&
     Office.context &&
     Office.context.ui &&
     typeof Office.context.ui.displayDialogAsync === 'function';
+
   const [theme, setTheme] = useState('light-theme');
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [currentWidget, setCurrentWidget] = useState<Widget | null>(null);
@@ -106,94 +122,106 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
       message.error('Dashboard container not found.');
       return;
     }
+
+    message.info('Exporting dashboard as PDF (existing method)...');
+    await exportDashboardAsPDF(); 
+    message.success('PDF downloaded using existing export method.');
+
+    message.info('Generating in-memory PDF for embedding...');
+    const pdfBlob = await generatePdfBlobFromDom(dashboardRef.current);
+    const objectUrl = URL.createObjectURL(pdfBlob);
+    setPdfUrl(objectUrl);
+    message.success('In-memory PDF generated and embedded below.');
+  };
+
+  async function generatePdfBlobFromDom(dashboardElement: HTMLDivElement): Promise<Blob> {
+    const originalStyles = saveOriginalStyles(dashboardElement);
     try {
-      const toolbar = document.querySelector('.fixed-vertical-toolbar') as HTMLElement | null;
-      if (toolbar) {
-        toolbar.style.display = 'none';
-      }
-      const originalStyle = {
-        position: dashboardRef.current.style.position,
-        top: dashboardRef.current.style.top,
-        left: dashboardRef.current.style.left,
-        width: dashboardRef.current.style.width,
-        height: dashboardRef.current.style.height,
-        overflow: dashboardRef.current.style.overflow,
-        transform: dashboardRef.current.style.transform,
-        boxSizing: dashboardRef.current.style.boxSizing,
-        padding: dashboardRef.current.style.padding,
-      };
-      dashboardRef.current.style.position = 'relative';
-      dashboardRef.current.style.top = '0px';
-      dashboardRef.current.style.left = '0px';
-      dashboardRef.current.style.width = `${dashboardRef.current.scrollWidth}px`;
-      dashboardRef.current.style.height = `${dashboardRef.current.scrollHeight}px`;
-      dashboardRef.current.style.overflow = 'visible';
-      dashboardRef.current.style.transform = 'none';
-      dashboardRef.current.style.boxSizing = 'border-box';
-      dashboardRef.current.style.padding = '0';
-      dashboardRef.current.style.opacity = '1';
-      await new Promise((resolve) => setTimeout(resolve, 100));
-      const rect = dashboardRef.current.getBoundingClientRect();
-      const width = rect.width;
-      const height = rect.height;
-      message.loading({ content: 'Capturing screenshot...', key: 'screenshot' });
-      await document.fonts.ready;
-      const canvas = await html2canvas(dashboardRef.current, {
-        scale: window.devicePixelRatio || 1,
+      prepareForCapture(dashboardElement);
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+      window.scrollTo(0, 0);
+      const rect = dashboardElement.getBoundingClientRect();
+      const captureWidth = Math.ceil(rect.width);
+      const captureHeight = Math.ceil(rect.height);
+      document.documentElement.style.height = captureHeight + 'px';
+      document.body.style.height = captureHeight + 'px';
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+      const canvas = await html2canvas(dashboardElement, {
         useCORS: true,
-        width: width,
-        height: height,
-        scrollX: -window.scrollX,
-        scrollY: -window.scrollY,
+        scrollX: 0,
+        scrollY: 0,
+        width: captureWidth,
+        height: captureHeight,
+        windowWidth: captureWidth,
+        windowHeight: captureHeight,
+        backgroundColor: '#ffffff',
+        scale: 2
       });
       const imgData = canvas.toDataURL('image/png');
-      Object.assign(dashboardRef.current.style, originalStyle);
-      if (toolbar) {
-        toolbar.style.display = 'block';
-      }
-      if (Office && Office.context && Office.context.ui) {
-        const url = `${window.location.origin}/screenshot.html`;
-        Office.context.ui.displayDialogAsync(
-          url,
-          { height: 100, width: 100, displayInIframe: true },
-          (result) => {
-            if (result.status === Office.AsyncResultStatus.Failed) {
-              message.error('Failed to open presentation dialog.');
-            } else {
-              const dialog = result.value;
-              setFullScreenDialog(dialog);
-              dialog.addEventHandler(
-                Office.EventType.DialogMessageReceived,
-                (args) => {
-                  if ('message' in args) {
-                    try {
-                      const messageFromChild = JSON.parse(args.message);
-                      if (messageFromChild.type === 'requestImage') {
-                        dialog.messageChild(JSON.stringify({ type: 'imageData', data: imgData }));
-                      } else if (messageFromChild.type === 'close') {
-                        dialog.close();
-                      }
-                    } catch (parseError) {
-                      console.error('Failed to parse message from dialog:', parseError);
-                    }
-                  }
-                }
-              );
-            }
-          }
-        );
-      } else {
-        message.error('Office context is not available.');
-      }
-      message.success({ content: 'Screenshot captured!', key: 'screenshot', duration: 2 });
-    } catch (error) {
-      console.error('Error capturing screenshot:', error);
-      message.error('Failed to capture screenshot.');
+      const pdf = new jsPDF('p', 'pt', [canvas.width, canvas.height]);
+      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height, undefined, 'FAST');
+      const pdfBlob = pdf.output('blob');
+      return pdfBlob;
+    } finally {
+      restoreOriginalStyles(dashboardElement, originalStyles);
+    }
+  }
+
+  function saveOriginalStyles(el: HTMLDivElement) {
+    return {
+      htmlOverflow: document.documentElement.style.overflow,
+      bodyOverflow: document.body.style.overflow,
+      elPosition: el.style.position,
+      elWidth: el.style.width,
+      elHeight: el.style.height,
+      elOverflow: el.style.overflow,
+      elMargin: el.style.margin,
+      elPadding: el.style.padding
+    };
+  }
+
+  function restoreOriginalStyles(el: HTMLDivElement, styles: any) {
+    document.documentElement.style.overflow = styles.htmlOverflow;
+    document.body.style.overflow = styles.bodyOverflow;
+    el.style.position = styles.elPosition;
+    el.style.width = styles.elWidth;
+    el.style.height = styles.elHeight;
+    el.style.overflow = styles.elOverflow;
+    el.style.margin = styles.elMargin;
+    el.style.padding = styles.elPadding;
+  }
+
+  function prepareForCapture(el: HTMLDivElement) {
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+    el.style.position = 'absolute';
+    el.style.top = '0';
+    el.style.left = '0';
+    el.style.width = `${el.scrollWidth}px`;
+    el.style.height = `${el.scrollHeight}px`;
+    el.style.overflow = 'hidden';
+    el.style.margin = '0';
+    el.style.padding = '0';
+  }
+
+  const handleIframeLoad = async () => {
+    if (!iframeRef.current) return;
+    // Give some time for PDF to render fully
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    const iframeDocument = iframeRef.current.contentDocument;
+    if (iframeDocument) {
+      const iframeContent = iframeDocument.documentElement;
+      const canvas = await html2canvas(iframeContent, { useCORS: true, scale: 2 });
+      const screenshot = canvas.toDataURL('image/png');
+      console.log('Captured screenshot of rendered PDF:', screenshot);
+      message.success('Screenshot of the rendered PDF captured successfully!');
     }
   };
+
   const handleExitPresentationMode = () => {
     setIsPresentationMode(false);
   };
+
   const handleDialogMessage = (args: Office.DialogParentMessageReceivedEventArgs) => {
     const messageFromChild = JSON.parse(args.message);
     if (isPresenterMode && messageFromChild.type === 'getDataFromRange') {
@@ -228,9 +256,10 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
             }));
           }
         });
-        break
+        break;
     }
   };
+
   useEffect(() => {
     if (fullScreenDialog && !isUpdatingFromItem.current) {
       const dashboardData = {
@@ -647,7 +676,7 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
               {isPresentationMode && <PresentationDashboard />}
             </>
           )}
-          <Tooltip title={isCollapsed ? 'Expand Toolbar' : 'Collapse Toolbar'} placement="left" >
+          <Tooltip title={isCollapsed ? 'Expand Toolbar' : 'Collapse Toolbar'} placement="left">
             <Button
               type="text"
               icon={isCollapsed ? <MenuOutlined /> : <CloseOutlined />}
@@ -658,13 +687,27 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
           </Tooltip>
         </div>
       </Draggable>
+
       {isPresenterMode && (
         <div className="full-screen-exit-button">
-          <Button type="primary" icon={<FullscreenExitOutlined />} onClick={closePresenterMode} >
+          <Button type="primary" icon={<FullscreenExitOutlined />} onClick={closePresenterMode}>
             Exit Full Screen
           </Button>
         </div>
       )}
+
+      {/* Conditionally render the embedded PDF iframe once pdfUrl is available */}
+      {pdfUrl && (
+        <div style={{ width: '100%', height: '600px', marginTop: '20px' }}>
+          <iframe
+            ref={iframeRef}
+            src={pdfUrl}
+            style={{ width: '100%', height: '100%' }}
+            onLoad={handleIframeLoad}
+          />
+        </div>
+      )}
+
       <div
         id="dashboard-container"
         ref={dashboardRef}
@@ -695,8 +738,10 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
         >
           {widgetElements}
         </ResponsiveGridLayout>
+
         {isPresentationMode && (<PresentationDashboard /> )}
-        <Modal title="Edit Widget" open={isModalVisible} onCancel={handleModalCancel} footer={null} >
+
+        <Modal title="Edit Widget" open={isModalVisible} onCancel={handleModalCancel} footer={null}>
           {currentWidget && (
             <EditWidgetForm
               widget={currentWidget}
@@ -706,6 +751,7 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
             />
           )}
         </Modal>
+
         {isLineSettingsModalVisible && editingWidget && editingWidget.type === 'line' && (
           <LineSettingsModal
             visible={isLineSettingsModalVisible}
@@ -718,4 +764,5 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
     </div>
   );
 });
+
 export default Dashboard;
