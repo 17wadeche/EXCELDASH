@@ -1193,8 +1193,10 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         message.warning('A title widget already exists.');
         return;
       }
+  
       const newKey = `${type}-${uuidv4()}`;
       let newWidget: Widget;
+  
       if (data) {
         newWidget = {
           id: newKey,
@@ -1301,19 +1303,37 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
               } as ReportData,
             };
             break;
+          case 'title':
+            newWidget = {
+              id: newKey,
+              type: 'title',
+              data: {
+                content: 'Your Dashboard Title',
+                fontSize: 24,
+                textColor: '#000000',
+                backgroundColor: '#ffffff',
+                titleAlignment: 'center',
+              } as TitleWidgetData,
+            };
+            break;
           default:
             throw new Error(`Unsupported widget type: ${type}`);
-          }
         }
+      }
+  
       let missingFields: string[] = [];
       if (type === 'metric') {
-        if (!('worksheetName' in newWidget.data) || !('cellAddress' in newWidget.data)) {
+        const metricData = newWidget.data as MetricData;
+        if (!metricData.worksheetName || !metricData.cellAddress) {
           missingFields.push('worksheetName', 'cellAddress');
         }
       }
+  
       if (missingFields.length > 0) {
         message.warning(`Please provide the following fields: ${missingFields.join(', ')}`);
+        // Do not add the widget now. Prompt for details first.
         promptForWidgetDetails(newWidget, (updatedWidget: Widget) => {
+          // Once user has provided details, add the widget to the state
           updateWidgetsWithHistory((prevWidgets) => {
             const newWidgets = [...prevWidgets, updatedWidget];
             updateLayoutsForNewWidgets(newWidgets);
@@ -1323,7 +1343,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
                 components: newWidgets,
                 layouts,
                 title: dashboardTitle,
-                workbookId: currentWorkbookId
+                workbookId: currentWorkbookId,
               };
               axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard)
                 .then((res) => {
