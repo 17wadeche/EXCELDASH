@@ -2325,11 +2325,12 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     const originalInputOverflow = input.style.overflow;
     const originalInputHeight = input.style.height;
     try {
-      document.documentElement.style.overflow = 'hidden';
-      document.body.style.overflow = 'hidden';
-      input.style.overflow = 'visible'; 
-      input.style.height = 'auto';
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      document.documentElement.style.overflow = 'visible';
+      document.body.style.overflow = 'visible';
+      input.style.overflow = 'visible';
+      const totalHeight = input.scrollHeight;
+      input.style.height = totalHeight + 'px';
+      await new Promise((resolve) => requestAnimationFrame(resolve));
       window.scrollTo(0, 0);
       const canvas = await html2canvas(input, {
         useCORS: true,
@@ -2337,7 +2338,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         scrollX: 0,
         scrollY: 0,
         windowWidth: document.documentElement.scrollWidth,
-        windowHeight: document.documentElement.scrollHeight,
+        windowHeight: totalHeight,
       });
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('p', 'mm', 'a4');
