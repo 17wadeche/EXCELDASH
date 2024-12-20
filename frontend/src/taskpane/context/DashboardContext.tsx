@@ -2327,7 +2327,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     try {
       document.documentElement.style.overflow = 'hidden';
       document.body.style.overflow = 'hidden';
-      input.style.overflow = 'visible';
+      input.style.overflow = 'hidden';
       const totalHeight = input.scrollHeight;
       input.style.height = totalHeight + 'px';
       await new Promise((resolve) => requestAnimationFrame(resolve));
@@ -2344,18 +2344,15 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       const pdf = new jsPDF('p', 'mm', 'a4');
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
-      const imgWidth = pdfWidth;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
-      let position = 0;
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
-      heightLeft -= pdfHeight;
-      while (heightLeft > 0) {
-        pdf.addPage();
-        position = heightLeft - imgHeight;
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
-        heightLeft -= pdfHeight;
-      }
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+      const widthRatio = pdfWidth / imgWidth;
+      const heightRatio = pdfHeight / imgHeight;
+      const ratio = Math.min(widthRatio, heightRatio);
+      const finalWidth = imgWidth * ratio * (72 / 96);
+      const finalHeight = imgHeight * ratio * (72 / 96);
+      pdf.addImage(imgData, 'PNG', 0, 0, finalWidth, finalHeight, undefined, 'FAST');
+  
       pdf.save('dashboard.pdf');
       message.success('Dashboard exported as PDF successfully!');
     } catch (error) {
