@@ -47,9 +47,9 @@ const PresentationDashboard: React.FC = () => {
           isResizable={false}
           compactType={null}
           preventCollision={false}
-          allowOverlap={true}
+          allowOverlap={false}
           margin={[0, 0]}
-          containerPadding={[0, 0]}
+          containerPadding={[2, 2]}
         >
           {widgets.map((widget) => {
             switch (widget.type) {
