@@ -2325,8 +2325,8 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     const originalInputOverflow = input.style.overflow;
     const originalInputHeight = input.style.height;
     try {
-      document.documentElement.style.overflow = 'visible';
-      document.body.style.overflow = 'visible';
+      document.documentElement.style.overflow = 'hidden';
+      document.body.style.overflow = 'hidden';
       input.style.overflow = 'visible';
       const totalHeight = input.scrollHeight;
       input.style.height = totalHeight + 'px';
