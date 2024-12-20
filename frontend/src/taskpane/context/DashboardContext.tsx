@@ -285,19 +285,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
   const promptForWidgetDetails = useCallback((widget: Widget, onComplete: (updatedWidget: Widget) => void) => {
     setWidgetToPrompt({ widget, onComplete });
   }, []);
-  const handleWidgetDetailsComplete = (updatedWidget: Widget) => {
-    if (!widgetToPrompt) {
-      console.warn('widgetToPrompt is null.');
-      return;
-    }
-    const { widget, onComplete } = widgetToPrompt;
-    updateWidgetsWithHistory((prevWidgets) => {
-      const newWidgets = prevWidgets.map((w) => (w.id === widget.id ? updatedWidget : w));
-      return newWidgets;
-    });
-    onComplete(updatedWidget);
-    setWidgetToPrompt(null);
-  };
   useEffect(() => {
     const fetchSheets = async () => {
       const sheets = await getAvailableWorksheets();
