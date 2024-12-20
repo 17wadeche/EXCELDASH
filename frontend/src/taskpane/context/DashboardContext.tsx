@@ -1351,9 +1351,9 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
                   message.error('Failed to save changes to server.');
                 });
             }
+            message.success(`${type.charAt(0).toUpperCase() + type.slice(1)} widget added successfully!`);
             return newWidgets;
           });
-          message.success(`${type.charAt(0).toUpperCase() + type.slice(1)} widget added successfully!`);
         });
         return;
       }
