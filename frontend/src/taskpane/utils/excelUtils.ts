@@ -70,7 +70,6 @@ export const getWorkbookIdFromProperties = async (): Promise<string> => {
       });
     } catch (error) {
       if (error instanceof OfficeExtension.Error && error.code === "InvalidOperationInCellEditMode") {
-        console.error("Please exit cell editing mode (press Enter or Tab) and try again.");
         throw error;
       } else {
         console.error('Error getting workbook ID from custom properties:', error);
