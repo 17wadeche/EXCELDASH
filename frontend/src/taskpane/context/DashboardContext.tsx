@@ -118,6 +118,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
   const canUndo = pastStates.length > 0;
   const canRedo = futureStates.length > 0;
   const isUndoRedoRef = useRef(false);
+  const [pendingWidget, setPendingWidget] = useState<Widget | null>(null);
   const [dashboardBorderSettings, setDashboardBorderSettings] = useState<DashboardBorderSettings>({
     showBorder: false,
     color: '#000000',
@@ -1328,34 +1329,15 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         }
       }
       if (missingFields.length > 0) {
+        // Missing fields: Do NOT add the widget to widgets yet.
         message.warning(`Please provide the following fields: ${missingFields.join(', ')}`);
-        promptForWidgetDetails(newWidget, (updatedWidget: Widget) => {
-          updateWidgetsWithHistory((prevWidgets) => {
-            const newWidgets = [...prevWidgets, updatedWidget];
-            updateLayoutsForNewWidgets(newWidgets);
   
-            if (currentDashboardId && currentDashboard) {
-              const updatedDashboard = {
-                ...currentDashboard,
-                components: newWidgets,
-                layouts,
-                title: dashboardTitle,
-                workbookId: currentWorkbookId,
-              };
-              axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard)
-                .then((res) => setCurrentDashboard(res.data))
-                .catch(err => {
-                  console.error('Error syncing updates to server:', err);
-                  message.error('Failed to save changes to server.');
-                });
-            }
-            message.success(`${type.charAt(0).toUpperCase() + type.slice(1)} widget added successfully!`);
-            return newWidgets;
-          });
-        });
-  
-        return;
+        // Set this widget as pending and show the modal
+        setPendingWidget(newWidget);
+        return; // No changes to widgets happen here
       }
+  
+      // No missing fields, add widget immediately
       updateWidgetsWithHistory((prevWidgets) => {
         const newWidgets = [...prevWidgets, newWidget];
         updateLayoutsForNewWidgets(newWidgets);
@@ -1365,10 +1347,12 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
             components: newWidgets,
             layouts,
             title: dashboardTitle,
-            workbookId: currentWorkbookId
+            workbookId: currentWorkbookId,
           };
           axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard)
-            .then((res) => setCurrentDashboard(res.data))
+            .then((res) => {
+              setCurrentDashboard(res.data);
+            })
             .catch(err => {
               console.error('Error syncing updates to server:', err);
               message.error('Failed to save changes to server.');
@@ -1377,8 +1361,46 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         return newWidgets;
       });
     },
-    [currentDashboard, currentDashboardId, currentWorkbookId, layouts, dashboardTitle, widgets, promptForWidgetDetails, updateWidgetsWithHistory, updateLayoutsForNewWidgets, setCurrentDashboard]
+    [currentDashboard, currentDashboardId, currentWorkbookId, layouts, dashboardTitle, widgets, updateWidgetsWithHistory, updateLayoutsForNewWidgets, setCurrentDashboard]
   );
+  
+  const handleWidgetDetailsComplete = (updatedWidget: Widget) => {
+    if (pendingWidget && updatedWidget.id === pendingWidget.id) {
+      setPendingWidget(null);
+      updateWidgetsWithHistory((prevWidgets) => {
+        const newWidgets = [...prevWidgets, updatedWidget];
+        updateLayoutsForNewWidgets(newWidgets);
+        if (currentDashboardId && currentDashboard) {
+          const updatedDashboard = {
+            ...currentDashboard,
+            components: newWidgets,
+            layouts,
+            title: dashboardTitle,
+            workbookId: currentWorkbookId,
+          };
+          axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard)
+            .then((res) => {
+              setCurrentDashboard(res.data);
+            })
+            .catch(err => {
+              console.error('Error syncing updates to server:', err);
+              message.error('Failed to save changes to server.');
+            });
+        }
+        message.success(`${updatedWidget.type.charAt(0).toUpperCase() + updatedWidget.type.slice(1)} widget added successfully!`);
+        return newWidgets;
+      });
+    } else {
+      if (!widgetToPrompt) return;
+      const { widget, onComplete } = widgetToPrompt;
+      updateWidgetsWithHistory((prevWidgets) => {
+        const newWidgets = prevWidgets.map((w) => (w.id === widget.id ? updatedWidget : w));
+        return newWidgets;
+      });
+      onComplete(updatedWidget);
+    }
+    setWidgetToPrompt(null);
+  };
   const removeWidgetFunc = useCallback((id: string) => {
     updateWidgetsWithHistory((prevWidgets) => {
       const newWidgets = prevWidgets.filter((widget) => widget.id !== id);
