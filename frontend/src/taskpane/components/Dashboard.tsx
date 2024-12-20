@@ -262,14 +262,25 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
     }
   }, [currentDashboard, setLayouts]);
 
-  const handleSave = useCallback(() => {
-    if (currentDashboardId) {
-      saveTemplate();
+  const handleSave = async () => {
+    if (!currentDashboardId || !currentDashboard) return;
+    const updatedDashboard: DashboardItem = {
+      ...currentDashboard,
+      workbookId: currentWorkbookId,
+      components: widgets,
+      layouts: layouts,
+      title: dashboardTitle,
+    };
+    try {
+      const res = await axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard);
+      const savedDashboard = res.data;
+      setCurrentDashboard(savedDashboard);
       message.success('Dashboard saved successfully!');
-    } else {
-      message.warning('No dashboard is currently active.');
+    } catch (err) {
+      console.error('Error saving dashboard:', err);
+      message.error('Failed to save changes to server.');
     }
-  }, [currentDashboardId, saveTemplate]);
+  };
 
   const handleLayoutChange = useCallback(
     (_currentLayout: GridLayoutItem[], allLayouts: { [key: string]: GridLayoutItem[] }) => {

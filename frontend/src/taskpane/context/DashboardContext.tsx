@@ -218,26 +218,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       return newWidgets;
     });
   };
-
-  useEffect(() => {
-    if (!currentDashboardId || !currentDashboard) return;
-    const updatedDashboard: DashboardItem = {
-      ...currentDashboard,
-      workbookId: currentWorkbookId,
-      components: widgets,
-      layouts: layouts,
-      title: dashboardTitle,
-    };
-    console.log('Sending updated dashboard to server:', updatedDashboard);
-    axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard)
-      .then((res) => {
-        console.log('Server sync successful:', res.data);
-      })
-      .catch((err) => {
-        console.error('Error syncing dashboard to server:', err);
-        message.error('Failed to save changes to server.');
-      });
-  }, [widgets, layouts, dashboardTitle, currentDashboardId, currentDashboard, currentWorkbookId]);
   
   useEffect(() => {
     if (isUndoRedoRef.current) {
