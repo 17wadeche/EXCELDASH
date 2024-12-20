@@ -155,32 +155,32 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
   };
 
   useEffect(() => {
+    if (!currentDashboardId || !currentWorkbookId) return;
     const loadCurrentDashboard = async () => {
-      if (!currentDashboardId || !currentWorkbookId || currentDashboard) return; 
       try {
         const response = await axios.get(`/api/dashboards/${currentDashboardId}`);
         const db: DashboardItem = response.data;
-        if (!currentDashboard) {
-          setCurrentDashboard(db);
-          let updatedWidgets = db.components;
-          if (!updatedWidgets.some(w => w.type === 'title')) {
-            updatedWidgets = [defaultTitleWidget, ...updatedWidgets];
-          }
-          setWidgetsState(updatedWidgets);
-          setDashboardTitle(db.title || 'My Dashboard');
-          if (db.layouts && Object.keys(db.layouts).length > 0) {
-            setLayouts(db.layouts);
-          } else {
-            updateLayoutsForNewWidgets(updatedWidgets);
-          }
+        setCurrentDashboard(db);
+        let updatedWidgets = db.components;
+        if (!updatedWidgets.some(w => w.type === 'title')) {
+          updatedWidgets = [defaultTitleWidget, ...updatedWidgets];
+        }
+        setWidgetsState(updatedWidgets);
+        setDashboardTitle(db.title || 'My Dashboard');
+        if (db.layouts && Object.keys(db.layouts).length > 0) {
+          setLayouts(db.layouts);
+        } else {
+          updateLayoutsForNewWidgets(updatedWidgets);
         }
       } catch (error) {
         console.error(`Error loading dashboard ${currentDashboardId}:`, error);
         message.error('Failed to load the selected dashboard.');
       }
     };
-    loadCurrentDashboard();
-  }, [currentDashboardId, currentWorkbookId, currentDashboard]);
+    if (!currentDashboard) {
+      loadCurrentDashboard();
+    }
+  }, [currentDashboardId, currentWorkbookId]);
 
   const syncCurrentDashboardToServer = async (
     updatedWidgets: Widget[],
@@ -1316,15 +1316,10 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         }
       }
       if (missingFields.length > 0) {
-        // Missing fields: Do NOT add the widget to widgets yet.
         message.warning(`Please provide the following fields: ${missingFields.join(', ')}`);
-  
-        // Set this widget as pending and show the modal
         setPendingWidget(newWidget);
-        return; // No changes to widgets happen here
+        return;
       }
-  
-      // No missing fields, add widget immediately
       updateWidgetsWithHistory((prevWidgets) => {
         const newWidgets = [...prevWidgets, newWidget];
         updateLayoutsForNewWidgets(newWidgets);
