@@ -125,6 +125,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     thickness: 1,
     style: 'solid',
   });
+  const [dashboardLoaded, setDashboardLoaded] = useState(false);
   useEffect(() => {
     const fetchDashboards = async () => {
       try {
@@ -155,7 +156,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
   };
 
   useEffect(() => {
-    if (!currentDashboardId || !currentWorkbookId) return;
+    if (!currentDashboardId || !currentWorkbookId || dashboardLoaded) return;
     const loadCurrentDashboard = async () => {
       if (currentDashboard) return;
       try {
@@ -173,6 +174,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         } else {
           updateLayoutsForNewWidgets(updatedWidgets);
         }
+        setDashboardLoaded(true);
       } catch (error) {
         console.error(`Error loading dashboard ${currentDashboardId}:`, error);
         message.error('Failed to load the selected dashboard.');
@@ -181,7 +183,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     if (!currentDashboard) {
       loadCurrentDashboard();
     }
-  }, [currentDashboardId, currentWorkbookId]);
+  }, [currentDashboardId, currentWorkbookId, currentDashboard, dashboardLoaded]);
 
   const syncCurrentDashboardToServer = async (
     updatedWidgets: Widget[],
@@ -2526,10 +2528,12 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       {children}
       {widgetToPrompt && (
         <PromptWidgetDetailsModal
-          widget={widgetToPrompt.widget}
-          onComplete={handleWidgetDetailsComplete}
-          onCancel={() => setWidgetToPrompt(null)}
-        />
+        widget={widgetToPrompt.widget}
+        onComplete={(updatedWidget) => {
+          handleWidgetDetailsComplete(updatedWidget);
+        }}
+        onCancel={() => setWidgetToPrompt(null)}
+      />
       )}
     </DashboardContext.Provider>
   );
