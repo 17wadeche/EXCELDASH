@@ -2323,6 +2323,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     const originalBodyOverflow = document.body.style.overflow;
     const originalHtmlOverflow = document.documentElement.style.overflow;
     const originalInputOverflow = input.style.overflow;
+    const originalInputHeight = input.style.height;
     const originalInputMargin = input.style.margin;
     const originalInputPadding = input.style.padding;
     try {
@@ -2331,10 +2332,12 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       input.style.overflow = 'hidden';
       input.style.margin = '0';
       input.style.padding = '0';
+      input.style.height = 'auto';
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+      window.scrollTo(0, 0);
       const rect = input.getBoundingClientRect();
       const captureWidth = Math.ceil(rect.width);
       const captureHeight = Math.ceil(rect.height);
-      await new Promise((resolve) => requestAnimationFrame(resolve));
       const canvas = await html2canvas(input, {
         useCORS: true,
         scrollX: 0,
@@ -2356,6 +2359,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       document.body.style.overflow = originalBodyOverflow;
       document.documentElement.style.overflow = originalHtmlOverflow;
       input.style.overflow = originalInputOverflow;
+      input.style.height = originalInputHeight;
       input.style.margin = originalInputMargin;
       input.style.padding = originalInputPadding;
     }
