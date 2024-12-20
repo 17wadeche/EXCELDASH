@@ -2320,9 +2320,25 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       message.error('Dashboard container not found.');
       return;
     }
+    const originalBodyOverflow = document.body.style.overflow;
+    const originalHtmlOverflow = document.documentElement.style.overflow;
+    const originalInputOverflow = input.style.overflow;
+    const originalInputHeight = input.style.height;
     try {
+      document.documentElement.style.overflow = 'hidden';
+      document.body.style.overflow = 'hidden';
+      input.style.overflow = 'visible'; 
+      input.style.height = 'auto';
+      await new Promise((resolve) => setTimeout(resolve, 100));
       window.scrollTo(0, 0);
-      const canvas = await html2canvas(input, {useCORS: true, scale: 2 });
+      const canvas = await html2canvas(input, {
+        useCORS: true,
+        scale: 2,
+        scrollX: 0,
+        scrollY: 0,
+        windowWidth: document.documentElement.scrollWidth,
+        windowHeight: document.documentElement.scrollHeight,
+      });
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('p', 'mm', 'a4');
       const pdfWidth = pdf.internal.pageSize.getWidth();
@@ -2331,12 +2347,12 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
       let heightLeft = imgHeight;
       let position = 0;
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
       heightLeft -= pdfHeight;
       while (heightLeft > 0) {
         pdf.addPage();
         position = heightLeft - imgHeight;
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
         heightLeft -= pdfHeight;
       }
       pdf.save('dashboard.pdf');
@@ -2344,6 +2360,11 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     } catch (error) {
       console.error('Error exporting dashboard as PDF:', error);
       message.error('Failed to export dashboard as PDF.');
+    } finally {
+      document.body.style.overflow = originalBodyOverflow;
+      document.documentElement.style.overflow = originalHtmlOverflow;
+      input.style.overflow = originalInputOverflow;
+      input.style.height = originalInputHeight;
     }
   };
   const emailDashboard = () => {
