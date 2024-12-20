@@ -634,7 +634,6 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
       );
     });
   }, [widgets, isEditingEnabled, handleRemoveWidget, handleEditWidget, copyWidgetCallback]);
-
   return (
     <div className="dashboard-wrapper" style={{ position: 'relative', width: '100%', height: '100vh' }}>
       <Draggable handle=".drag-handle">
@@ -746,9 +745,7 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
         >
           {widgetElements}
         </ResponsiveGridLayout>
-
         {isPresentationMode && (<PresentationDashboard /> )}
-
         <Modal title="Edit Widget" open={isModalVisible} onCancel={handleModalCancel} footer={null}>
           {currentWidget && (
             <EditWidgetForm
@@ -759,7 +756,6 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
             />
           )}
         </Modal>
-
         {isLineSettingsModalVisible && editingWidget && editingWidget.type === 'line' && (
           <LineSettingsModal
             visible={isLineSettingsModalVisible}

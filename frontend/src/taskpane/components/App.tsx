@@ -20,7 +20,7 @@ const App: React.FC = () => {
     <DashboardProvider>
       <Routes>
         <Route path="/" element={<CustomLayout />}>
-          <Route index element={ <CreateDashboard />} />
+          <Route index element={<CreateDashboard />} />
           <Route path="dashboard-editor" element={<DashboardPage />} />
           <Route path="custom-report" element={<CustomReport />} />
           <Route path="template/:id/edit" element={<EditTemplate />} />

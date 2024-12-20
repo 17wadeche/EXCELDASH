@@ -196,8 +196,6 @@ const CustomLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) =>
           )}
         </Menu>
       </Sider>
-
-      {/* Main Layout */}
       <Layout
         style={{
           marginLeft: !isFullScreen ? (collapsed ? 80 : 250) : 0,
