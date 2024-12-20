@@ -2323,36 +2323,30 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     const originalBodyOverflow = document.body.style.overflow;
     const originalHtmlOverflow = document.documentElement.style.overflow;
     const originalInputOverflow = input.style.overflow;
-    const originalInputHeight = input.style.height;
+    const originalInputMargin = input.style.margin;
+    const originalInputPadding = input.style.padding;
     try {
       document.documentElement.style.overflow = 'hidden';
       document.body.style.overflow = 'hidden';
       input.style.overflow = 'hidden';
-      const totalHeight = input.scrollHeight;
-      input.style.height = totalHeight + 'px';
+      input.style.margin = '0';
+      input.style.padding = '0';
+      const rect = input.getBoundingClientRect();
+      const captureWidth = Math.ceil(rect.width);
+      const captureHeight = Math.ceil(rect.height);
       await new Promise((resolve) => requestAnimationFrame(resolve));
-      window.scrollTo(0, 0);
       const canvas = await html2canvas(input, {
         useCORS: true,
-        scale: 2,
         scrollX: 0,
         scrollY: 0,
-        windowWidth: document.documentElement.scrollWidth,
-        windowHeight: totalHeight,
+        width: captureWidth,
+        height: captureHeight,
+        backgroundColor: '#ffffff',
+        scale: 2
       });
       const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-      const imgWidth = canvas.width;
-      const imgHeight = canvas.height;
-      const widthRatio = pdfWidth / imgWidth;
-      const heightRatio = pdfHeight / imgHeight;
-      const ratio = Math.min(widthRatio, heightRatio);
-      const finalWidth = imgWidth * ratio * (72 / 96);
-      const finalHeight = imgHeight * ratio * (72 / 96);
-      pdf.addImage(imgData, 'PNG', 0, 0, finalWidth, finalHeight, undefined, 'FAST');
-  
+      const pdf = new jsPDF('p', 'pt', [canvas.width, canvas.height]);
+      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height, undefined, 'FAST');
       pdf.save('dashboard.pdf');
       message.success('Dashboard exported as PDF successfully!');
     } catch (error) {
@@ -2362,7 +2356,8 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       document.body.style.overflow = originalBodyOverflow;
       document.documentElement.style.overflow = originalHtmlOverflow;
       input.style.overflow = originalInputOverflow;
-      input.style.height = originalInputHeight;
+      input.style.margin = originalInputMargin;
+      input.style.padding = originalInputPadding;
     }
   };
   const emailDashboard = () => {
