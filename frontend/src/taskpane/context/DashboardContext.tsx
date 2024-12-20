@@ -1320,7 +1320,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
             throw new Error(`Unsupported widget type: ${type}`);
         }
       }
-  
       let missingFields: string[] = [];
       if (type === 'metric') {
         const metricData = newWidget.data as MetricData;
@@ -1334,6 +1333,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           updateWidgetsWithHistory((prevWidgets) => {
             const newWidgets = [...prevWidgets, updatedWidget];
             updateLayoutsForNewWidgets(newWidgets);
+  
             if (currentDashboardId && currentDashboard) {
               const updatedDashboard = {
                 ...currentDashboard,
@@ -1343,9 +1343,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
                 workbookId: currentWorkbookId,
               };
               axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard)
-                .then((res) => {
-                  setCurrentDashboard(res.data);
-                })
+                .then((res) => setCurrentDashboard(res.data))
                 .catch(err => {
                   console.error('Error syncing updates to server:', err);
                   message.error('Failed to save changes to server.');
@@ -1355,6 +1353,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
             return newWidgets;
           });
         });
+  
         return;
       }
       updateWidgetsWithHistory((prevWidgets) => {
@@ -1369,9 +1368,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
             workbookId: currentWorkbookId
           };
           axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard)
-            .then((res) => {
-              setCurrentDashboard(res.data);
-            })
+            .then((res) => setCurrentDashboard(res.data))
             .catch(err => {
               console.error('Error syncing updates to server:', err);
               message.error('Failed to save changes to server.');
@@ -1380,7 +1377,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         return newWidgets;
       });
     },
-    [currentDashboard, currentDashboardId, currentWorkbookId, layouts, dashboardTitle]
+    [currentDashboard, currentDashboardId, currentWorkbookId, layouts, dashboardTitle, widgets, promptForWidgetDetails, updateWidgetsWithHistory, updateLayoutsForNewWidgets, setCurrentDashboard]
   );
   const removeWidgetFunc = useCallback((id: string) => {
     updateWidgetsWithHistory((prevWidgets) => {
