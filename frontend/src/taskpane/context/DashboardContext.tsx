@@ -2260,6 +2260,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       }
     }
   };
+  
   const updateMetricValue = async (widgetId: string) => {
     try {
       console.log(`Updating metric value for widget ID: ${widgetId}`);
@@ -2320,20 +2321,22 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       return;
     }
     try {
-      const canvas = await html2canvas(input, { useCORS: true, scale: 2 });
+      const canvas = await html2canvas(input, {useCORS: true, scale: 2, scrollX: 0, scrollY: -window.scrollY });
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('p', 'mm', 'a4');
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
       const imgWidth = pdfWidth;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      const totalPages = Math.ceil(imgHeight / pdfHeight);
-      for (let page = 0; page < totalPages; page++) {
-        const position = -(page * pdfHeight);
-        if (page > 0) {
-          pdf.addPage();
-        }
+      let heightLeft = imgHeight;
+      let position = 0;
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pdfHeight;
+      while (heightLeft > 0) {
+        pdf.addPage();
+        position = heightLeft - imgHeight;
         pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pdfHeight;
       }
       pdf.save('dashboard.pdf');
       message.success('Dashboard exported as PDF successfully!');

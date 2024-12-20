@@ -35,7 +35,7 @@ const PresentationDashboard: React.FC = () => {
     : {};
 
   return (
-    <div className="presentation-dashboard-wrapper" style={borderStyle}>
+    <div id="dashboard-container" className="presentation-dashboard-wrapper" style={borderStyle}>
       <div className="presentation-container">
         <ResponsiveGridLayout
           className="layout"
