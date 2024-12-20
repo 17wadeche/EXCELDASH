@@ -1328,12 +1328,9 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           missingFields.push('worksheetName', 'cellAddress');
         }
       }
-  
       if (missingFields.length > 0) {
         message.warning(`Please provide the following fields: ${missingFields.join(', ')}`);
-        // Do not add the widget now. Prompt for details first.
         promptForWidgetDetails(newWidget, (updatedWidget: Widget) => {
-          // Once user has provided details, add the widget to the state
           updateWidgetsWithHistory((prevWidgets) => {
             const newWidgets = [...prevWidgets, updatedWidget];
             updateLayoutsForNewWidgets(newWidgets);
