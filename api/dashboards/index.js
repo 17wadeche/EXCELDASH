@@ -7,7 +7,7 @@ module.exports = async function (context, req) {
   try {
     const { Dashboard } = await initializeModels();
     if (method === 'post') {
-      const { title, components, layouts, workbookId } = req.body;
+      const { title, components, layouts, workbookId, borderSettings } = req.body;
       console.log("Server: Received POST for dashboard creation. workbookId:", workbookId);
       if (!title || !components || !layouts || !workbookId) {
         context.res = {
@@ -24,6 +24,7 @@ module.exports = async function (context, req) {
         layouts,
         workbookId : normalizedWorkbookId,
         versions: [],
+        borderSettings: borderSettings || undefined, 
       });
       context.res = { status: 200, body: newDashboard };
     } else if (method === 'get') {

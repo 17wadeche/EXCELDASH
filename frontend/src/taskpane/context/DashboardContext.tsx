@@ -163,6 +163,16 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         const response = await axios.get(`/api/dashboards/${currentDashboardId}`);
         const db: DashboardItem = response.data;
         setCurrentDashboard(db);
+        if (db.borderSettings) {
+          setDashboardBorderSettings(db.borderSettings);
+        } else {
+          setDashboardBorderSettings({
+            showBorder: false,
+            color: '#000000',
+            thickness: 1,
+            style: 'solid',
+          });
+        }
         let updatedWidgets = db.components || [];
         if (!updatedWidgets.some(w => w.type === 'title')) {
           updatedWidgets = [defaultTitleWidget, ...updatedWidgets];
@@ -474,6 +484,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         title: dashboardTitle,
         components: widgets,
         layouts: layouts,
+        borderSettings: dashboardBorderSettings,
       }
       const response = await axios.put(`/api/dashboards/${currentDashboardId}`, dashboardToSave);
       const updatedDashboard = response.data;

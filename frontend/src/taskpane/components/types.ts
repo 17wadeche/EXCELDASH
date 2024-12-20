@@ -242,6 +242,7 @@ export interface DashboardItem extends Omit<NewDashboard, 'title' | 'components'
   layouts: { [key: string]: GridLayoutItem[] };
   versions?: DashboardVersion[];
   workbookId: string;
+  borderSettings?: DashboardBorderSettings;
 }
 export interface DashboardVersion {
   id: string;

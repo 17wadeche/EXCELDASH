@@ -2,7 +2,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { HashRouter } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
 import { DashboardProvider } from './context/DashboardContext';
 import App from './components/App';
 import './taskpane.css';
@@ -16,10 +16,10 @@ Office.onReady(() => {
   }
   const root = ReactDOM.createRoot(container);
   root.render(
-    <HashRouter>
+    <MemoryRouter>
       <DashboardProvider>
         <App />
       </DashboardProvider>
-    </HashRouter>
+    </MemoryRouter>
   );
 });

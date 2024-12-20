@@ -48,6 +48,28 @@ module.exports = (sequelize, DataTypes) => {
         this.setDataValue('versions', JSON.stringify(value));
       }
     },
+    borderSettings: {
+      type: DataTypes.TEXT,
+      allowNull: false,
+      defaultValue: JSON.stringify({
+        showBorder: false,
+        color: '#000000',
+        thickness: 1,
+        style: 'solid',
+      }),
+      get() {
+        const rawValue = this.getDataValue('borderSettings');
+        return rawValue ? JSON.parse(rawValue) : {
+          showBorder: false,
+          color: '#000000',
+          thickness: 1,
+          style: 'solid',
+        };
+      },
+      set(value) {
+        this.setDataValue('borderSettings', JSON.stringify(value));
+      }
+    },
   }, {
     tableName: 'Dashboards',
     timestamps: true,
