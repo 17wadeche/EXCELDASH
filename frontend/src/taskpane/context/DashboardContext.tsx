@@ -344,7 +344,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     setReports(updatedReports);
   };
   useEffect(() => {
-    if (!currentDashboardId || !currentDashboard) return;
+    if (!currentDashboardId || !currentDashboard || dashboardLoaded) return;
     const migrateWidgets = async () => {
       try {
         const serverWidgets: Widget[] = currentDashboard.components || [];
@@ -447,7 +447,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       }
     };
     migrateWidgets();
-  }, [currentDashboardId, currentDashboard]);
+  }, [currentDashboardId, currentDashboard, dashboardLoaded]);
 
   const saveAsTemplate = async () => {
     try {
