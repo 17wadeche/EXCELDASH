@@ -290,30 +290,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       setAvailableWorksheets(initialAvailableWorksheets);
     }
   }, [initialAvailableWorksheets]);
-  useEffect(() => {
-    const autosaveInterval = setInterval(async () => {
-      if (!currentDashboardId || !currentDashboard) {
-        return;
-      }
-      try {
-        const updatedDashboard: DashboardItem = {
-          ...currentDashboard,
-          workbookId: currentWorkbookId,
-          components: widgets,
-          layouts: layouts,
-          title: dashboardTitle,
-        };
-        await axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard);
-        console.log('Server-based autosave completed at', new Date().toLocaleTimeString());
-      } catch (error) {
-        console.error('Error during server-based autosave:', error);
-        message.error('Failed to autosave dashboard to the server.');
-      }
-    }, 2 * 60 * 1000);
-    return () => {
-      clearInterval(autosaveInterval);
-    };
-  }, [widgets, layouts, dashboardTitle, currentDashboard, currentDashboardId]);
+
   useEffect(() => {
     if (!currentWorkbookId) {
       const initializeWorkbookId = async () => {
