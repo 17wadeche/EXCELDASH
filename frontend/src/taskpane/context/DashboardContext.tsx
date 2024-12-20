@@ -1313,15 +1313,29 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       }
       if (missingFields.length > 0) {
         message.warning(`Please provide the following fields: ${missingFields.join(', ')}`);
-        updateWidgetsWithHistory((prevWidgets) => {
-          const newWidgets = [...prevWidgets, newWidget];
-          updateLayoutsForNewWidgets(newWidgets);
-          return newWidgets;
-        });
         promptForWidgetDetails(newWidget, (updatedWidget: Widget) => {
-          updateWidgetsWithHistory((prevWidgets) =>
-            prevWidgets.map((w) => (w.id === updatedWidget.id ? updatedWidget : w))
-          );
+          updateWidgetsWithHistory((prevWidgets) => {
+            const newWidgets = [...prevWidgets, updatedWidget];
+            updateLayoutsForNewWidgets(newWidgets);
+            if (currentDashboardId && currentDashboard) {
+              const updatedDashboard = {
+                ...currentDashboard,
+                components: newWidgets,
+                layouts,
+                title: dashboardTitle,
+                workbookId: currentWorkbookId
+              };
+              axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard)
+                .then((res) => {
+                  setCurrentDashboard(res.data);
+                })
+                .catch(err => {
+                  console.error('Error syncing updates to server:', err);
+                  message.error('Failed to save changes to server.');
+                });
+            }
+            return newWidgets;
+          });
           message.success(`${type.charAt(0).toUpperCase() + type.slice(1)} widget added successfully!`);
         });
         return;
@@ -1338,20 +1352,19 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
             workbookId: currentWorkbookId
           };
           axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard)
-          .then((res) => {
-            setCurrentDashboard(res.data);
-          })
-          .catch(err => {
-            console.error('Error syncing updates to server:', err);
-            message.error('Failed to save changes to server.');
-          });
+            .then((res) => {
+              setCurrentDashboard(res.data);
+            })
+            .catch(err => {
+              console.error('Error syncing updates to server:', err);
+              message.error('Failed to save changes to server.');
+            });
         }
         return newWidgets;
       });
     },
     [currentDashboard, currentDashboardId, currentWorkbookId, layouts, dashboardTitle]
   );
-
   const removeWidgetFunc = useCallback((id: string) => {
     updateWidgetsWithHistory((prevWidgets) => {
       const newWidgets = prevWidgets.filter((widget) => widget.id !== id);
