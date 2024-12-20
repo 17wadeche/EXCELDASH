@@ -215,30 +215,29 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       console.log('updateWidgetsWithHistory: Past states updated.');
       setFutureStates([]);
       console.log('updateWidgetsWithHistory: Future states cleared.');
-      if (currentDashboardId && currentDashboard) {
-        const updatedDashboard: DashboardItem = {
-          ...currentDashboard,
-          workbookId: currentWorkbookId,
-          components: newWidgets,
-          layouts: layouts,
-          title: dashboardTitle,
-        };
-        console.log('updateWidgetsWithHistory: Updated dashboard object prepared for server:', updatedDashboard);
-        axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard)
-          .then((res) => {
-            console.log('updateWidgetsWithHistory: Server response:', res.data);
-            setCurrentDashboard(res.data);
-          })
-          .catch((err: unknown) => {
-            console.error('updateWidgetsWithHistory: Error syncing updates to server:', err);
-            message.error('Failed to save changes to server.');
-          });
-      }
-  
       return newWidgets;
     });
   };
 
+  useEffect(() => {
+    if (!currentDashboardId || !currentDashboard) return;
+    const updatedDashboard: DashboardItem = {
+      ...currentDashboard,
+      workbookId: currentWorkbookId,
+      components: widgets,
+      layouts,
+      title: dashboardTitle,
+    };
+    axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard)
+      .then((res) => {
+        console.log('Server sync successful:', res.data);
+      })
+      .catch((err) => {
+        console.error('Error syncing dashboard to server:', err);
+        message.error('Failed to save changes to server.');
+      });
+  }, [widgets, layouts, dashboardTitle, currentDashboardId, currentDashboard, currentWorkbookId]);
+  
   useEffect(() => {
     if (isUndoRedoRef.current) {
       isUndoRedoRef.current = false;
@@ -1186,6 +1185,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       return newLayouts;
     });
   };
+
   const addWidgetFunc = useCallback(
     (
       type: 'text' | 'chart' | 'gantt' | 'image' | 'metric' | 'report' | 'line' | 'title' ,
@@ -1339,25 +1339,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         console.log('addWidgetFunc: New widgets after addition:', newWidgets);
         updateLayoutsForNewWidgets(newWidgets);
         console.log('addWidgetFunc: Layouts updated for new widgets.');
-        if (currentDashboardId && currentDashboard) {
-          const updatedDashboard = {
-            ...currentDashboard,
-            components: newWidgets,
-            layouts,
-            title: dashboardTitle,
-            workbookId: currentWorkbookId,
-          };
-          console.log('addWidgetFunc: Updated dashboard object for server sync:', updatedDashboard);
-          axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard)
-            .then((res) => {
-              console.log('addWidgetFunc: Server response after adding widget:', res.data);
-              setCurrentDashboard(res.data);
-            })
-            .catch(err => {
-              console.error('Error syncing updates to server:', err);
-              message.error('Failed to save changes to server.');
-            });
-        }
         return newWidgets;
       });
     },
@@ -1413,22 +1394,10 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         );
         return updatedLayouts;
       });
-      if (currentDashboardId && currentDashboard) {
-        const updatedDashboard = {
-          ...currentDashboard,
-          components: newWidgets,
-          layouts,
-          title: dashboardTitle,
-        };
-        axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard)
-          .catch(err => {
-            console.error('Error syncing updates to server:', err);
-            message.error('Failed to save changes to server.');
-          });
-      }
       return newWidgets;
     });
   }, [currentDashboard, dashboards, editDashboard, setDashboards, setCurrentDashboard, dashboardTitle, layouts, currentDashboardId]);
+
   const updateWidgetFunc = useCallback(
     (
       id: string,
@@ -1511,19 +1480,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
             return widget;
           }
         });
-        if (currentDashboardId && currentDashboard) {
-          const updatedDashboard = {
-            ...currentDashboard,
-            components: newWidgets,
-            layouts,
-            title: dashboardTitle,
-          };
-          axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard)
-            .catch(err => {
-              console.error('Error syncing updates to server:', err);
-              message.error('Failed to save changes to server.');
-            });
-        }
         return newWidgets;
       });
       message.success('Widget updated successfully!');
