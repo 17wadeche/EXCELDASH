@@ -2322,28 +2322,49 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     }
     const originalBodyOverflow = document.body.style.overflow;
     const originalHtmlOverflow = document.documentElement.style.overflow;
+    const originalHtmlMargin = document.documentElement.style.margin;
+    const originalHtmlPadding = document.documentElement.style.padding;
+    const originalBodyMargin = document.body.style.margin;
+    const originalBodyPadding = document.body.style.padding;
+    const originalHtmlHeight = document.documentElement.style.height;
+    const originalBodyHeight = document.body.style.height;
     const originalInputOverflow = input.style.overflow;
     const originalInputHeight = input.style.height;
+    const originalInputPosition = input.style.position;
+    const originalInputTop = input.style.top;
+    const originalInputLeft = input.style.left;
     const originalInputMargin = input.style.margin;
     const originalInputPadding = input.style.padding;
     try {
+      document.documentElement.style.margin = '0';
+      document.documentElement.style.padding = '0';
+      document.body.style.margin = '0';
+      document.body.style.padding = '0';
       document.documentElement.style.overflow = 'hidden';
       document.body.style.overflow = 'hidden';
       input.style.overflow = 'hidden';
       input.style.margin = '0';
       input.style.padding = '0';
+      input.style.position = 'absolute';
+      input.style.top = '0';
+      input.style.left = '0';
       input.style.height = 'auto';
       await new Promise((resolve) => requestAnimationFrame(resolve));
       window.scrollTo(0, 0);
       const rect = input.getBoundingClientRect();
       const captureWidth = Math.ceil(rect.width);
       const captureHeight = Math.ceil(rect.height);
+      document.documentElement.style.height = captureHeight + 'px';
+      document.body.style.height = captureHeight + 'px';
+      await new Promise((resolve) => requestAnimationFrame(resolve));
       const canvas = await html2canvas(input, {
         useCORS: true,
         scrollX: 0,
         scrollY: 0,
         width: captureWidth,
         height: captureHeight,
+        windowWidth: captureWidth,
+        windowHeight: captureHeight,
         backgroundColor: '#ffffff',
         scale: 2
       });
@@ -2356,10 +2377,19 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       console.error('Error exporting dashboard as PDF:', error);
       message.error('Failed to export dashboard as PDF.');
     } finally {
+      document.documentElement.style.margin = originalHtmlMargin;
+      document.documentElement.style.padding = originalHtmlPadding;
+      document.body.style.margin = originalBodyMargin;
+      document.body.style.padding = originalBodyPadding;
       document.body.style.overflow = originalBodyOverflow;
       document.documentElement.style.overflow = originalHtmlOverflow;
+      document.documentElement.style.height = originalHtmlHeight;
+      document.body.style.height = originalBodyHeight;
       input.style.overflow = originalInputOverflow;
       input.style.height = originalInputHeight;
+      input.style.position = originalInputPosition;
+      input.style.top = originalInputTop;
+      input.style.left = originalInputLeft;
       input.style.margin = originalInputMargin;
       input.style.padding = originalInputPadding;
     }
