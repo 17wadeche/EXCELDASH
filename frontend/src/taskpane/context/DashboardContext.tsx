@@ -567,8 +567,8 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           'Start Date',
           'End Date',
           'Completed Date',
-          'Duration (Days)',
-          'Actual Duration (Days)',
+          'Duration (Days)',        // Column F
+          'Actual Duration (Days)', // Column G
           'Progress %',
           'Dependencies',
         ];
@@ -591,10 +591,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         const dateToExcelSerial = (date: Date): number => {
           return date.getTime() / 86400000 + 25569;
         };
-        const calculateDuration = (start: Date, end: Date): number => {
-          const diffInMillis = end.getTime() - start.getTime();
-          return Math.round(diffInMillis / (1000 * 60 * 60 * 24));
-        };
         const sampleData = [
           [
             'Design Interface',
@@ -602,8 +598,8 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
             dateToExcelSerial(parseDate('01/01/2023')),
             dateToExcelSerial(parseDate('01/09/2023')),
             dateToExcelSerial(parseDate('01/10/2023')),
-            '=D2-C2',
-            '=E2-C2',
+            '', // Duration (Days) - Will be calculated
+            '', // Actual Duration (Days) - Will be calculated
             50, 
             '',
           ],
@@ -613,8 +609,8 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
             dateToExcelSerial(parseDate('01/05/2023')),
             dateToExcelSerial(parseDate('01/19/2023')),
             '', 
-            '=D3-C3',
-            '=E3-C3',
+            '',
+            '',
             30, 
             'Design Interface',
           ],
@@ -624,8 +620,8 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
             dateToExcelSerial(parseDate('01/15/2023')),
             dateToExcelSerial(parseDate('01/24/2023')),
             '', 
-            '=D4-C4',
-            '=E4-C4',
+            '',
+            '',
             0, 
             'Develop Backend',
           ],
@@ -635,8 +631,8 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
             dateToExcelSerial(parseDate('01/30/2023')),
             dateToExcelSerial(parseDate('01/30/2023')),
             dateToExcelSerial(parseDate('01/30/2023')),
-            '=D5-C5',
-            '=E5-C5',
+            '',
+            '',
             0, 
             'Testing',
           ],
@@ -646,8 +642,8 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
             dateToExcelSerial(parseDate('01/01/2023')),
             dateToExcelSerial(parseDate('01/29/2023')),
             dateToExcelSerial(parseDate('01/30/2023')),
-            '=D6-C6',
-            '=E6-C6',
+            '',
+            '',
             100,
             '',
           ],
@@ -683,6 +679,34 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           console.error('Failed to create GanttTable:', tableError);
           throw tableError; 
         }
+        try {
+          const table = sheet.tables.getItem('GanttTable');
+          const durationColumn = table.columns.getItemAt(5);
+          const durationRange = durationColumn.getDataBodyRange();
+          durationRange.formulas = [['=[@End Date]-[@Start Date]']];
+          console.log('Calculated formula set for Duration (Days) column.');
+          const actualDurationColumn = table.columns.getItemAt(6);
+          const actualDurationRange = actualDurationColumn.getDataBodyRange();
+          actualDurationRange.formulas = [['=[@Completed Date]-[@Start Date]']];
+          console.log('Calculated formula set for Actual Duration (Days) column.');
+          await context.sync();
+          console.log('Calculated columns formulas applied successfully.');
+        } catch (calcError) {
+          console.error('Error setting calculated columns:', calcError);
+          throw calcError;
+        }
+        const taskTypeOptions = ['Task', 'Milestone', 'Project'];
+        const taskTypeValues = taskTypeOptions.join(',');
+        const taskTypeRangeAddress = `B${dataRowStart}:B${dataRowEnd}`;
+        const taskTypeRange = sheet.getRange(taskTypeRangeAddress);
+        applyListDataValidation(
+          taskTypeRange,
+          taskTypeValues,
+          `Please select a valid Task Type: ${taskTypeOptions.join(', ')}`,
+          'Invalid Task Type',
+          'Select a Task Type from the dropdown.',
+          'Task Type'
+        );
         const taskNamesRangeName = 'TaskNames';
         const taskNamesRangeAddress = `A${dataRowStart}:A${dataRowEnd}`; 
         const taskNamesRange = sheet.getRange(taskNamesRangeAddress);
@@ -701,21 +725,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           console.error(`Error creating named range '${taskNamesRangeName}':`, nameError);
           throw nameError;
         }
-        const taskTypeOptions = ['Task', 'Milestone', 'Project'];
-        const taskTypeValues = taskTypeOptions.join(',');
-        const taskTypeRangeAddress = `B${dataRowStart}:B${dataRowEnd}`;
-        const taskTypeRange = sheet.getRange(taskTypeRangeAddress);
-        applyListDataValidation(
-          taskTypeRange,
-          taskTypeValues,
-          `Please select a valid Task Type: ${taskTypeOptions.join(', ')}`,
-          'Invalid Task Type',
-          'Select a Task Type from the dropdown.',
-          'Task Type'
-        );
-        taskTypeRange.dataValidation.load(['rule', 'errorAlert', 'prompt']);
-        await context.sync();
-        console.log(`Data validation for Task Type applied to range ${taskTypeRangeAddress}`);
         const dependenciesRangeAddress = `I${dataRowStart}:I${dataRowEnd}`;
         const dependenciesRange = sheet.getRange(dependenciesRangeAddress);
         applyListDataValidation(
