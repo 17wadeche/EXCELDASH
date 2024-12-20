@@ -1313,12 +1313,15 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       }
       if (missingFields.length > 0) {
         message.warning(`Please provide the following fields: ${missingFields.join(', ')}`);
+        updateWidgetsWithHistory((prevWidgets) => {
+          const newWidgets = [...prevWidgets, newWidget];
+          updateLayoutsForNewWidgets(newWidgets);
+          return newWidgets;
+        });
         promptForWidgetDetails(newWidget, (updatedWidget: Widget) => {
-          setWidgets((prevWidgets: Widget[]) => {
-            const newWidgets = [...prevWidgets, updatedWidget];
-            updateLayoutsForNewWidgets(newWidgets);
-            return newWidgets;
-          });
+          updateWidgetsWithHistory((prevWidgets) =>
+            prevWidgets.map((w) => (w.id === updatedWidget.id ? updatedWidget : w))
+          );
           message.success(`${type.charAt(0).toUpperCase() + type.slice(1)} widget added successfully!`);
         });
         return;
@@ -1342,10 +1345,12 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
             console.error('Error syncing updates to server:', err);
             message.error('Failed to save changes to server.');
           });
-      }
-      return newWidgets;
-    });
-  }, [currentDashboard, currentDashboardId, currentWorkbookId, layouts, dashboardTitle]);
+        }
+        return newWidgets;
+      });
+    },
+    [currentDashboard, currentDashboardId, currentWorkbookId, layouts, dashboardTitle]
+  );
 
   const removeWidgetFunc = useCallback((id: string) => {
     updateWidgetsWithHistory((prevWidgets) => {
