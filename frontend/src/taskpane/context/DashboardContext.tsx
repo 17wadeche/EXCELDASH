@@ -2260,7 +2260,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       }
     }
   };
-  
+
   const updateMetricValue = async (widgetId: string) => {
     try {
       console.log(`Updating metric value for widget ID: ${widgetId}`);
@@ -2321,7 +2321,8 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       return;
     }
     try {
-      const canvas = await html2canvas(input, {useCORS: true, scale: 2, scrollX: 0, scrollY: -window.scrollY });
+      window.scrollTo(0, 0);
+      const canvas = await html2canvas(input, {useCORS: true, scale: 2 });
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('p', 'mm', 'a4');
       const pdfWidth = pdf.internal.pageSize.getWidth();
