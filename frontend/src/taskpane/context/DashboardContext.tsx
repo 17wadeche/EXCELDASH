@@ -157,11 +157,12 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
   useEffect(() => {
     if (!currentDashboardId || !currentWorkbookId) return;
     const loadCurrentDashboard = async () => {
+      if (currentDashboard) return;
       try {
         const response = await axios.get(`/api/dashboards/${currentDashboardId}`);
         const db: DashboardItem = response.data;
         setCurrentDashboard(db);
-        let updatedWidgets = db.components;
+        let updatedWidgets = db.components || [];
         if (!updatedWidgets.some(w => w.type === 'title')) {
           updatedWidgets = [defaultTitleWidget, ...updatedWidgets];
         }
