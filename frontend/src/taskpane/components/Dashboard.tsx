@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useContext, useMemo, useCallback } from 'react';
 import { Responsive, WidthProvider } from 'react-grid-layout';
-import { Modal, Card, Button, Input, Form, Tooltip, message } from 'antd';
+import { Modal, Card, Button, Tooltip, message } from 'antd';
 import EditWidgetForm from './EditWidgetForm';
 import MetricWidget from './widgets/MetricWidget';
 import { BREAKPOINTS, GRID_COLS } from './layoutConstants';
@@ -80,9 +80,6 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
   const [isPresentationMode, setIsPresentationMode] = useState(false);
   const [fullScreenDialog, setFullScreenDialog] = useState<Office.Dialog | null>(null);
 
-  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-
   const isOfficeInitialized =
     typeof Office !== 'undefined' &&
     Office.context &&
@@ -129,9 +126,46 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
 
     message.info('Generating in-memory PDF for embedding...');
     const pdfBlob = await generatePdfBlobFromDom(dashboardRef.current);
-    const objectUrl = URL.createObjectURL(pdfBlob);
-    setPdfUrl(objectUrl);
-    message.success('In-memory PDF generated and embedded below.');
+    const tempUrl = URL.createObjectURL(pdfBlob);
+    message.success('In-memory PDF generated.');
+
+    const newWin = window.open('', 'PDFPresentation', 'width=1200,height=800,resizable,scrollbars=yes');
+    if (!newWin) {
+      message.error('Failed to open new window for presentation.');
+      return;
+    }
+
+    const htmlContent = `
+    <!DOCTYPE html>
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title>${dashboardTitle || 'Dashboard Presentation'}</title>
+        <style>
+          html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            background: #fff;
+          }
+          iframe {
+            border: none;
+            width: 100%;
+            height: 100%;
+          }
+        </style>
+      </head>
+      <body>
+        <iframe src="${tempUrl}" title="Dashboard PDF"></iframe>
+      </body>
+    </html>
+    `;
+
+    newWin.document.open();
+    newWin.document.write(htmlContent);
+    newWin.document.close();
   };
 
   async function generatePdfBlobFromDom(dashboardElement: HTMLDivElement): Promise<Blob> {
@@ -140,12 +174,14 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
       prepareForCapture(dashboardElement);
       await new Promise((resolve) => requestAnimationFrame(resolve));
       window.scrollTo(0, 0);
+
       const rect = dashboardElement.getBoundingClientRect();
       const captureWidth = Math.ceil(rect.width);
       const captureHeight = Math.ceil(rect.height);
       document.documentElement.style.height = captureHeight + 'px';
       document.body.style.height = captureHeight + 'px';
       await new Promise((resolve) => requestAnimationFrame(resolve));
+
       const canvas = await html2canvas(dashboardElement, {
         useCORS: true,
         scrollX: 0,
@@ -160,8 +196,7 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('p', 'pt', [canvas.width, canvas.height]);
       pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height, undefined, 'FAST');
-      const pdfBlob = pdf.output('blob');
-      return pdfBlob;
+      return pdf.output('blob');
     } finally {
       restoreOriginalStyles(dashboardElement, originalStyles);
     }
@@ -204,20 +239,6 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
     el.style.padding = '0';
   }
 
-  const handleIframeLoad = async () => {
-    if (!iframeRef.current) return;
-    // Give some time for PDF to render fully
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    const iframeDocument = iframeRef.current.contentDocument;
-    if (iframeDocument) {
-      const iframeContent = iframeDocument.documentElement;
-      const canvas = await html2canvas(iframeContent, { useCORS: true, scale: 2 });
-      const screenshot = canvas.toDataURL('image/png');
-      console.log('Captured screenshot of rendered PDF:', screenshot);
-      message.success('Screenshot of the rendered PDF captured successfully!');
-    }
-  };
-
   const handleExitPresentationMode = () => {
     setIsPresentationMode(false);
   };
@@ -233,7 +254,7 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
       return;
     }
     switch (messageFromChild.type) {
-      case 'getDataFromRange':
+      case 'getDataFromRange': {
         const { widgetId, worksheetName, associatedRange } = messageFromChild;
         Excel.run(async (context) => {
           try {
@@ -257,6 +278,7 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
           }
         });
         break;
+      }
     }
   };
 
@@ -687,7 +709,6 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
           </Tooltip>
         </div>
       </Draggable>
-
       {isPresenterMode && (
         <div className="full-screen-exit-button">
           <Button type="primary" icon={<FullscreenExitOutlined />} onClick={closePresenterMode}>
@@ -695,19 +716,6 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
           </Button>
         </div>
       )}
-
-      {/* Conditionally render the embedded PDF iframe once pdfUrl is available */}
-      {pdfUrl && (
-        <div style={{ width: '100%', height: '600px', marginTop: '20px' }}>
-          <iframe
-            ref={iframeRef}
-            src={pdfUrl}
-            style={{ width: '100%', height: '100%' }}
-            onLoad={handleIframeLoad}
-          />
-        </div>
-      )}
-
       <div
         id="dashboard-container"
         ref={dashboardRef}
