@@ -14,6 +14,7 @@ import { DashboardBorderSettings } from '../components/types';
 import { capitalizeFirstLetter } from '../utils/stringUtils'; 
 import { deleteDashboardById } from '../utils/api';
 import { getWorkbookIdFromProperties, isInDialog } from '../utils/excelUtils';
+import debounce from 'lodash.debounce';
 const { Option } = Select;
 interface DashboardContextProps {
   widgets: Widget[];
@@ -115,6 +116,8 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
   const canRedo = futureStates.length > 0;
   const isUndoRedoRef = useRef(false);
   const [pendingWidget, setPendingWidget] = useState<Widget | null>(null);
+  const isGanttHandlerRegistered = useRef(false);
+  const isReadGanttDataInProgress = useRef(false);
   const [dashboardBorderSettings, setDashboardBorderSettings] = useState<DashboardBorderSettings>({
     showBorder: false,
     color: '#000000',
@@ -1962,11 +1965,32 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       message.error('Failed to read data from Excel.');
     }
   };
+  const debouncedReadGanttData = useRef(
+    debounce(async () => {
+      if (isReadGanttDataInProgress.current) {
+        console.warn('readGanttDataFromExcel is already in progress.');
+        return;
+      }
+      isReadGanttDataInProgress.current = true;
+      try {
+        await readGanttDataFromExcel();
+      } catch (error) {
+        console.error('Error in debouncedReadGanttData:', error);
+      } finally {
+        isReadGanttDataInProgress.current = false;
+      }
+    }, 300)
+  ).current;
   const readGanttDataFromExcel = async () => {
     if (!currentDashboard || !currentDashboard.workbookId) {
       message.error('No dashboard or workbook ID found.');
       return;
     }
+    if (isReadGanttDataInProgress.current) {
+      console.warn('readGanttDataFromExcel is already in progress.');
+      return;
+    }
+    isReadGanttDataInProgress.current = true;
     if (currentWorkbookId !== currentDashboard.workbookId) {
       message.warning('This dashboard is not associated with the currently open workbook.');
       return;
@@ -2095,6 +2119,8 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     } catch (error) {
       console.error('Error reading Gantt data from Excel:', error);
       message.error('Failed to read Gantt data from Excel.');
+    } finally {
+      isReadGanttDataInProgress.current = false;
     }
   };
   useEffect(() => {
@@ -2161,6 +2187,10 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         console.warn('Current workbook does not match the dashboard workbook. Skipping Gantt event handler setup.');
         return;
       }
+      if (isGanttHandlerRegistered.current) {
+        console.log('Gantt event handler already registered.');
+        return;
+      }
       try {
         await Excel.run(async (context: Excel.RequestContext) => {
           const sheet = context.workbook.worksheets.getItemOrNullObject('Gantt');
@@ -2172,15 +2202,14 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           }
           const eventHandler = async (_event: Excel.WorksheetChangedEventArgs) => {
             if (currentWorkbookId === currentDashboard?.workbookId) {
-              await readGanttDataFromExcel();
+              await debouncedReadGanttData();
             }
           };
-          if (ganttEventHandlersRef.current.length === 0) {
-            sheet.onChanged.add(eventHandler);
-            ganttEventHandlersRef.current.push(eventHandler);
-            await context.sync();
-            console.log('Gantt event handler set up successfully.');
-          }
+  
+          sheet.onChanged.add(eventHandler);
+          ganttEventHandlersRef.current.push(eventHandler);
+          isGanttHandlerRegistered.current = true;
+          console.log('Gantt event handler set up successfully.');
         });
       } catch (error) {
         console.error('Error setting up Gantt event handlers:', error);
@@ -2202,6 +2231,9 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
               sheet.onChanged.remove(handler);
             });
             ganttEventHandlersRef.current = [];
+            isGanttHandlerRegistered.current = false;
+            debouncedReadGanttData.cancel();
+            console.log('Gantt event handlers removed successfully.');
             await context.sync();
           });
         } catch (error) {
@@ -2210,7 +2242,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       };
       removeGanttEventHandlers();
     };
-  }, [currentDashboard?.id, currentDashboard?.workbookId, currentWorkbookId]);
+  }, [currentDashboard?.id, currentDashboard?.workbookId, currentWorkbookId, debouncedReadGanttData]);
   const isValidCellAddress = (address: string) => {
     const cellAddressRegex = /^[A-Za-z]{1,3}[1-9][0-9]{0,6}$/;
     return cellAddressRegex.test(address);
