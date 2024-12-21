@@ -1761,6 +1761,18 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
               }
               break;
             }
+            case "table": {
+              const tableWidgetData = widget.data as TableData;
+              if (tableWidgetData.sheetName && tableWidgetData.tableName) {
+                await readTableFromExcel(widget.id, tableWidgetData.sheetName, tableWidgetData.tableName);
+              } else {
+                hasError = true;
+                errorMessages.push(
+                  `Table widget "${widget.id}" is missing sheetName or tableName.`
+                );
+              }
+              break;
+            }
             case "metric": {
               const metricData = widget.data as MetricData;
               if (metricData.worksheetName && metricData.cellAddress) {
