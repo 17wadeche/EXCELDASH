@@ -11,10 +11,9 @@ import MetricWidget from './widgets/MetricWidget';
 import ImageWidget from './widgets/ImageWidget';
 import LineWidget from './widgets/LineWidget';
 import GanttChartComponent from './widgets/GanttChart';
-import ReportWidget from './widgets/ReportWidget';
 import {
-  ReportData,
-  ReportWidgetType,
+  TableData,
+  TableWidgetType,
   GanttWidgetData,
   LineWidgetData,
   MetricData,
@@ -95,13 +94,13 @@ const PresentationDashboard: React.FC = () => {
                     />
                   </div>
                 );
-              case 'report':
+              case 'table':
                 return (
                   <div key={widget.id} className="grid-item">
-                    <ReportWidget
+                    <TableWidget
                       id={widget.id}
-                      name={(widget as ReportWidgetType).name}
-                      data={(widget as ReportWidgetType).data as ReportData}
+                      name={(widget as TableWidgetType).name}
+                      data={(widget as TableWidgetType).data as TableData}
                       onDelete={() => {
                         /* No delete in presentation mode */
                       }}

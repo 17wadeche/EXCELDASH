@@ -115,24 +115,9 @@ const CustomLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) =>
           <Menu.Item key="/create" icon={<PlusOutlined />}>
             <Link to="/create">Create Dashboard</Link>
           </Menu.Item>
-          {isLoggedIn ? (
-            <Menu.Item key="/dashboard-list" icon={<UnorderedListOutlined />}>
-              <Link to="/dashboard-list">Dashboard List</Link>
-            </Menu.Item>
-          ) : (
-            <Menu.Item key="dashboard-list-disabled" icon={<UnorderedListOutlined />} disabled>
-              <span>Dashboard List (Login required)</span>
-            </Menu.Item>
-          )}
-          {isLoggedIn ? (
-            <Menu.Item key="/reports-list" icon={<FileOutlined />}>
-              <Link to="/reports-list">Reports List</Link>
-            </Menu.Item>
-          ) : (
-            <Menu.Item key="reports-list-disabled" icon={<FileOutlined />} disabled>
-              <span>Reports List (Login required)</span>
-            </Menu.Item>
-          )}
+          <Menu.Item key="/dashboard-list" icon={<UnorderedListOutlined />}>
+            <Link to="/dashboard-list">Dashboard List</Link>
+          </Menu.Item>
           {isInDashboard && (
             <SubMenu key="add-visuals" icon={<PictureOutlined />} title="Add Visuals">
               <Menu.Item key="dashboard-settings" icon={<BorderOutlined />} onClick={() => setIsSettingsModalVisible(true)}>
@@ -164,8 +149,8 @@ const CustomLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) =>
               <Menu.Item key="add-metric" icon={<DashboardOutlined />} onClick={() => addWidget('metric')}>
                 Metric
               </Menu.Item>
-              <Menu.Item key="/custom-report" icon={<TableOutlined />} onClick={() => navigate('/custom-report')}>
-                Custom Reports
+              <Menu.Item key="add-table" icon={<TableOutlined />} onClick={() => addWidget('table')}>
+                Table
               </Menu.Item>
             </SubMenu>
           )}

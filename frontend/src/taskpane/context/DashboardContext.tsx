@@ -1,7 +1,7 @@
 /// <reference types="office-js" />
 // src/taskpane/context/DashboardContext.tsx
 import React, { createContext, useState, useEffect, useCallback, useRef} from 'react';
-import { Widget, TextData, ChartData, GanttWidgetData, ImageWidgetData, TitleWidgetData, TitleWidget, ReportData, DashboardVersion, GridLayoutItem, DashboardItem, ReportItem, LineWidgetData, MetricData, Task} from '../components/types';
+import { Widget, TextData, ChartData, GanttWidgetData, ImageWidgetData, TitleWidgetData, TitleWidget, TableData, DashboardVersion, GridLayoutItem, DashboardItem, TableLineWidgetData, MetricData, Task} from '../components/types';
 import { v4 as uuidv4 } from 'uuid';
 import { Breakpoint, GRID_COLS, WIDGET_SIZES } from '../components/layoutConstants';
 import { message, Select } from 'antd';
@@ -20,17 +20,17 @@ const { Option } = Select;
 interface DashboardContextProps {
   widgets: Widget[];
   dashboards: DashboardItem[];
-  addWidget: (type: 'title' | 'text' | 'chart' | 'gantt' | 'image' | 'metric' | 'report' | 'line' , data?: any) => void;
+  addWidget: (type: 'title' | 'text' | 'chart' | 'gantt' | 'image' | 'metric' | 'table' | 'line' , data?: any) => void;
   removeWidget: (id: string) => void;
   updateWidget: (
     id: string,
-    updatedData: Partial< TitleWidgetData | TextData | ChartData | GanttWidgetData | ImageWidgetData | ReportData | MetricData | LineWidgetData>
+    updatedData: Partial< TitleWidgetData | TextData | ChartData | GanttWidgetData | ImageWidgetData | TableData | MetricData | LineWidgetData>
   ) => void;
   copyWidget: (widget: Widget) => void;
   importChartImageFromExcel: () => void;
   readDataFromExcel: () => void;
   readGanttDataFromExcel: () => void;
-  setReports: React.Dispatch<React.SetStateAction<ReportItem[]>>;
+  setTables: React.Dispatch<React.SetStateAction<TableItem[]>>;
   selectedRangeAddress: string | null;
   setSelectedRangeAddress: (address: string | null) => void;
   generateProjectManagementTemplateAndGanttChart: () => void;
@@ -74,10 +74,10 @@ interface DashboardContextProps {
   dashboardBorderSettings: DashboardBorderSettings;
   setDashboardBorderSettings: React.Dispatch<React.SetStateAction<DashboardBorderSettings>>;
   refreshAllCharts: () => void;
-  reports: ReportItem[];
-  addReport: (report: ReportItem) => void;
-  editReport: (report: ReportItem) => void;
-  deleteReport: (id: string) => void;
+  tables: TableItem[];
+  addTable: (table: TableItem) => void;
+  editTable: (table: TableItem) => void;
+  deleteTable: (id: string) => void;
 }
 interface DashboardProviderProps {
   children: React.ReactNode;
@@ -108,7 +108,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
   const [widgetToPrompt, setWidgetToPrompt] = useState<{widget: Widget; onComplete: (updatedWidget: Widget) => void;} | null>(null);
   const [layouts, setLayouts] = useState<{ [key: string]: GridLayoutItem[] }>(initialLayouts);
   const [currentWorkbookId, setCurrentWorkbookId] = useState<string>('');
-  const [reports, setReports] = useState<ReportItem[]>([]);
+  const [tables, setTables] = useState<TableItem[]>([]);
   const [pastStates, setPastStates] = useState<{ widgets: Widget[]; layouts: { [key: string]: GridLayoutItem[] } }[] >([]);
   const [futureStates, setFutureStates] = useState<{ widgets: Widget[]; layouts: { [key: string]: GridLayoutItem[] } }[]>([]);
   const [availableWorksheets, setAvailableWorksheets] = useState<string[]>([]);
@@ -341,17 +341,17 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       return [];
     }
   };
-  const addReport = (report: ReportItem) => {
-    const updatedReports = [...reports, report];
-    setReports(updatedReports);
+  const addTable = (table: TableItem) => {
+    const updatedTables = [...tables, table];
+    setTables(updatedTables);
   };
-  const editReport = (report: ReportItem) => {
-    const updatedReports = reports.map((r) => (r.id === report.id ? report : r));
-    setReports(updatedReports);
+  const editTable = (table: TableItem) => {
+    const updatedTables = tables.map((r) => (r.id === table.id ? table : r));
+    setTables(updatedTables);
   };
-  const deleteReport = (id: string) => {
-    const updatedReports = reports.filter((r) => r.id !== id);
-    setReports(updatedReports);
+  const deleteTable = (id: string) => {
+    const updatedTables = tables.filter((r) => r.id !== id);
+    setTables(updatedTables);
   };
   useEffect(() => {
     if (!currentDashboardId || !currentDashboard || dashboardLoaded) return;
@@ -421,12 +421,12 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
                   };
                   return { ...widget, data: ganttData };
                 }
-                case 'report': {
-                  const reportData: ReportData = {
+                case 'table': {
+                  const tableData: TableData = {
                     columns: widget.data.columns || [],
                     data: widget.data.data || [],
                   };
-                  return { ...widget, data: reportData };
+                  return { ...widget, data: tableData };
                 }
                 case 'title': {
                   const titleData: TitleWidgetData = {
@@ -1169,8 +1169,8 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
 
   const addWidgetFunc = useCallback(
     (
-      type: 'text' | 'chart' | 'gantt' | 'image' | 'metric' | 'report' | 'line' | 'title' ,
-      data?: TextData | ChartData | GanttWidgetData | ImageWidgetData | MetricData | ReportData | LineWidgetData | TitleWidgetData
+      type: 'text' | 'chart' | 'gantt' | 'image' | 'metric' | 'table' | 'line' | 'title' ,
+      data?: TextData | ChartData | GanttWidgetData | ImageWidgetData | MetricData | TableData | LineWidgetData | TitleWidgetData
     ) => {
       if (type === 'title' && widgets.some((w) => w.type === 'title')) {
         message.warning('A title widget already exists.');
@@ -1275,15 +1275,15 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
               } as GanttWidgetData,
             };
             break;
-          case 'report':
+          case 'table':
             newWidget = {
               id: newKey,
-              type: 'report',
-              name: 'New Report',
+              type: 'table',
+              name: 'New Table',
               data: {
                 columns: [],
                 data: [],
-              } as ReportData,
+              } as TableData,
             };
             break;
           case 'title':
@@ -1382,7 +1382,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
   const updateWidgetFunc = useCallback(
     (
       id: string,
-      updatedData: Partial<TextData | ChartData | GanttWidgetData | ImageWidgetData | ReportData | MetricData | LineWidgetData | TitleWidgetData>
+      updatedData: Partial<TextData | ChartData | GanttWidgetData | ImageWidgetData | TableData | MetricData | LineWidgetData | TitleWidgetData>
     ) => {
       updateWidgetsWithHistory((prevWidgets) => {
         const newWidgets = prevWidgets.map((widget) => {
@@ -1449,13 +1449,13 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
                 ...updatedData,
               } as ImageWidgetData,
             };
-          case 'report':
+          case 'table':
             return {
               ...widget,
               data: {
                 ...widget.data,
                 ...updatedData,
-              } as ReportData,
+              } as TableData,
             };
           default:
             return widget;
@@ -2516,14 +2516,14 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         setCurrentTemplateId,
         applyDataValidation,
         refreshAllCharts,
-        reports,
+        tables,
         updateLayoutsForNewWidgets,
-        addReport,
-        setReports,
-        editReport,
+        addTable,
+        setTables,
+        editTable,
         addTaskToGantt,
         currentWorkbookId,
-        deleteReport,
+        deleteTable,
         setCurrentWorkbookId,
         writeMetricValue,
         promptForWidgetDetails: (widget: Widget, onComplete: (updatedWidget: Widget) => void ) => { setWidgetToPrompt({ widget, onComplete });},

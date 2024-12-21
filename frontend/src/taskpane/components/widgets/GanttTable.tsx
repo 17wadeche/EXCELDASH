@@ -45,7 +45,6 @@ const GanttTable: React.FC<GanttTableProps> = ({ tasks }) => {
           </span>
         ),
       },
-      // Add other desired columns with width
     ];
 
     setColumns(initialColumns);
@@ -69,8 +68,6 @@ const GanttTable: React.FC<GanttTableProps> = ({ tasks }) => {
       onResize: handleResize(index),
     }),
   }));
-
-  // Prepare data source without excluding any fields
   const dataSource = tasks.map(task => ({
     key: task.id,
     name: task.name,       // Retained in dataSource but not displayed
@@ -79,7 +76,6 @@ const GanttTable: React.FC<GanttTableProps> = ({ tasks }) => {
     progress: task.progress,
     type: task.type,
     dependencies: task.dependencies,
-    // Include other fields as needed
   }));
 
   return (

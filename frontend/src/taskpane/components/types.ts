@@ -5,7 +5,7 @@ import { TdHTMLAttributes } from 'react';
 import { ChartType, ChartOptions, LegendOptions, TooltipOptions, ChartDataset, DefaultDataPoint } from 'chart.js';
 import { Layout } from 'react-grid-layout';
 
-export type WidgetType = 'title' | 'text' | 'chart' | 'gantt' | 'image' | 'metric' | 'report' | 'line';
+export type WidgetType = 'title' | 'text' | 'chart' | 'gantt' | 'image' | 'metric' | 'table' | 'line';
 
 export interface TitleWidgetData {
   content: string;
@@ -52,10 +52,10 @@ export interface MetricWidget extends WidgetBase {
   data: MetricData;
 }
 
-export interface ReportWidgetType extends WidgetBase {
-  type: 'report';
+export interface TableWidgetType extends WidgetBase {
+  type: 'table';
   name: string;
-  data: ReportData;
+  data: TableData;
 }
 
 export interface LineWidget extends WidgetBase {
@@ -75,7 +75,7 @@ export type Widget =
   | GanttWidget
   | ImageWidget
   | MetricWidget
-  | ReportWidgetType
+  | TableWidgetType
   | LineWidget;
 
 
@@ -86,7 +86,7 @@ export type WidgetData<T extends WidgetType> =
   T extends 'gantt' ? GanttWidgetData :
   T extends 'image' ? ImageWidgetData :
   T extends 'metric' ? MetricData :
-  T extends 'report' ? ReportData :
+  T extends 'table' ? TableData :
   T extends 'line' ? LineWidgetData :
   never;
 
@@ -104,21 +104,21 @@ export interface MetricData {
   titleAlignment: 'left' | 'center'| 'right';
 }
 
-export interface ReportItem {
+export interface TableItem {
   id: string;
   name: string;
-  data: ReportData;
+  data: TableData;
   workbookId: string;
 }
 
-export interface ReportColumn<T> extends Omit<ColumnType<T>, 'title'> {
+export interface TableColumn<T> extends Omit<ColumnType<T>, 'title'> {
   dataIndex: string;
   key: string | number;
   title: string;
 }
 
-export interface ReportData<T = Record<string, any>> {
-  columns: ReportColumn<T>[];
+export interface TableData<T = Record<string, any>> {
+  columns: TableColumn<T>[];
   data: T[];
 }
 
@@ -224,7 +224,7 @@ export { ChartType, ChartDataset };
 export type ComponentData = TextData | ChartData | GanttWidgetData;
 export interface DashboardComponent {
   id: string;
-  type: 'gantt' | 'chart' | 'text' | 'image'| 'metric' | 'report' | 'line';
+  type: 'gantt' | 'chart' | 'text' | 'image'| 'metric' | 'table' | 'line';
   data: WidgetData<WidgetType>;
 }
 export type GridLayoutItem = Layout;
