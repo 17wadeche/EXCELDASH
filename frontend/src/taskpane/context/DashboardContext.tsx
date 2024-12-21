@@ -408,6 +408,8 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
                   const tableData: TableData = {
                     columns: widget.data.columns || [],
                     data: widget.data.data || [],
+                    sheetName: widget.data.sheetName || '',
+                    tableName: widget.data.tableName || '',
                   };
                   return { ...widget, data: tableData };
                 }
