@@ -682,7 +682,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           const table = sheet.tables.getItem('GanttTable');
           const durationColumn = table.columns.getItemAt(5);
           const durationRange = durationColumn.getDataBodyRange();
-          durationRange.formulas = "=[@End Date]-[@Start Date]"; 
+          durationRange.formulas = "=[@End Date]-[@Start Date]";
           console.log('Calculated formula set for Duration (Days) column.');
           const actualDurationColumn = table.columns.getItemAt(6);
           const actualDurationRange = actualDurationColumn.getDataBodyRange();
@@ -1905,7 +1905,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
             key: header,
           };
         });
-        const data = dataRows.map((row: any[], rowIndex: number) => {
+        const data = dataRows.map((row: any[], _rowIndex: number) => {
           const rowObject: any = {};
           row.forEach((cellValue, colIndex) => {
             rowObject[`col${colIndex}`] = cellValue;
