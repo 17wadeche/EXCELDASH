@@ -12,7 +12,7 @@ import TitleWidgetComponent from './TitleWidget';
 import { ReloadOutlined, CloseOutlined, EditOutlined, UndoOutlined, FundProjectionScreenOutlined, RedoOutlined, FullscreenExitOutlined, CopyOutlined, SaveOutlined, MenuOutlined } from '@ant-design/icons';
 import './Dashboard.css';
 import { DashboardContext } from '../context/DashboardContext';
-import { Widget, ChartData, TextData, ImageWidgetData, TableData, GridLayoutItem, TableWidgetType, DashboardBorderSettings, LineWidgetData, TitleWidgetData, GanttWidgetData, MetricData, DashboardItem } from './types';
+import { Widget, ChartData, TextData, ImageWidgetData, TableData, GridLayoutItem, TableWidget, DashboardBorderSettings, LineWidgetData, TitleWidgetData, GanttWidgetData, MetricData, DashboardItem } from './types';
 import TextWidget from './widgets/TextWidget';
 import SalesChart from './widgets/SalesChart';
 import GanttChartComponent from './widgets/GanttChart';
@@ -568,7 +568,7 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
       } else if (widget.type === 'metric') {
         content = <MetricWidget id={widget.id} data={widget.data as MetricData} />;
       } else if (widget.type === 'table') {
-        const tableWidget = widget as TableWidgetType;
+        const tableWidget = widget as TableWidget;
         content = (
           <TableWidget
             key={tableWidget.id}

@@ -1,7 +1,7 @@
 /// <reference types="office-js" />
 // src/taskpane/context/DashboardContext.tsx
 import React, { createContext, useState, useEffect, useCallback, useRef} from 'react';
-import { Widget, TextData, ChartData, GanttWidgetData, ImageWidgetData, TitleWidgetData, TitleWidget, TableData, DashboardVersion, GridLayoutItem, DashboardItem, LineWidgetData, MetricData, Task, TableWidgetType} from '../components/types';
+import { Widget, TextData, ChartData, GanttWidgetData, ImageWidgetData, TitleWidgetData, TitleWidget, TableData, DashboardVersion, GridLayoutItem, DashboardItem, LineWidgetData, MetricData, Task, TableWidget} from '../components/types';
 import { v4 as uuidv4 } from 'uuid';
 import { Breakpoint, GRID_COLS, WIDGET_SIZES } from '../components/layoutConstants';
 import { message, Select } from 'antd';
@@ -30,7 +30,7 @@ interface DashboardContextProps {
   importChartImageFromExcel: () => void;
   readDataFromExcel: () => void;
   readGanttDataFromExcel: () => void;
-  setTables: React.Dispatch<React.SetStateAction<TableWidgetType[]>>;
+  setTables: React.Dispatch<React.SetStateAction<TableWidget[]>>;
   selectedRangeAddress: string | null;
   setSelectedRangeAddress: (address: string | null) => void;
   generateProjectManagementTemplateAndGanttChart: () => void;
@@ -75,7 +75,7 @@ interface DashboardContextProps {
   dashboardBorderSettings: DashboardBorderSettings;
   setDashboardBorderSettings: React.Dispatch<React.SetStateAction<DashboardBorderSettings>>;
   refreshAllCharts: () => void;
-  tables: TableWidgetType[];
+  tables: TableWidget[];
   deleteTable: (id: string) => void;
 }
 interface DashboardProviderProps {
@@ -107,7 +107,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
   const [widgetToPrompt, setWidgetToPrompt] = useState<{widget: Widget; onComplete: (updatedWidget: Widget) => void;} | null>(null);
   const [layouts, setLayouts] = useState<{ [key: string]: GridLayoutItem[] }>(initialLayouts);
   const [currentWorkbookId, setCurrentWorkbookId] = useState<string>('');
-  const [tables, setTables] = useState<TableWidgetType[]>([]);
+  const [tables, setTables] = useState<TableWidget[]>([]);
   const [pastStates, setPastStates] = useState<{ widgets: Widget[]; layouts: { [key: string]: GridLayoutItem[] } }[] >([]);
   const [futureStates, setFutureStates] = useState<{ widgets: Widget[]; layouts: { [key: string]: GridLayoutItem[] } }[]>([]);
   const [availableWorksheets, setAvailableWorksheets] = useState<string[]>([]);

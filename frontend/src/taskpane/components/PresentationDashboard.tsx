@@ -14,7 +14,7 @@ import GanttChartComponent from './widgets/GanttChart';
 import TableWidget from './widgets/TableWidget';
 import {
   TableData,
-  TableWidgetType,
+  TableWidget,
   GanttWidgetData,
   LineWidgetData,
   MetricData,
@@ -100,8 +100,8 @@ const PresentationDashboard: React.FC = () => {
                   <div key={widget.id} className="grid-item">
                     <TableWidget
                       id={widget.id}
-                      name={(widget as TableWidgetType).name}
-                      data={(widget as TableWidgetType).data as TableData}
+                      name={(widget as TableWidget).name}
+                      data={(widget as TableWidget).data as TableData}
                       onDelete={() => {
                         /* No delete in presentation mode */
                       }}
