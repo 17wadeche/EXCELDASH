@@ -660,7 +660,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         progressRange.numberFormat = progressFormats;
         console.log('Progress column formatted as number');
         try {
-          const table = sheet.tables.add(`A1:I${dataRowEnd}`, true); 
+          const table = sheet.tables.add(`A1:I${dataRowEnd}`, true);
           table.name = 'GanttTable';
           console.log('GanttTable created successfully.');
         } catch (tableError) {
@@ -669,10 +669,16 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         }
         try {
           const table = sheet.tables.getItem('GanttTable');
-          const durationColumn = table.columns.getItemAt(5);
-          const actualDurationColumn = table.columns.getItemAt(6);
-          durationColumn.getDataBodyRange().formulas = sampleData.map(() => ["=[@[End Date]]-[@[Start Date]]"]);
-          actualDurationColumn.getDataBodyRange().formulas = sampleData.map(() => ["=[@[Completed Date]]-[@[Start Date]]"]);
+          const durationColumn = table.columns.getItemAt(5); // Column F
+          const actualDurationColumn = table.columns.getItemAt(6); // Column G
+          const durationFormula = "=[@[End Date]]-[@[Start Date]]";
+          const actualDurationFormula = "=[@[Completed Date]]-[@[Start Date]]";
+          durationColumn.formula = durationFormula;
+          actualDurationColumn.formula = actualDurationFormula;
+          await context.sync();
+          console.log('Calculated column formulas set.');
+          durationColumn.getDataBodyRange().calculate();
+          actualDurationColumn.getDataBodyRange().calculate();
           await context.sync();
         } catch (calcError) {
           console.error('Error setting calculated columns:', calcError);
