@@ -2,13 +2,14 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { Modal, Select, message } from 'antd';
 import { DashboardContext } from '../context/DashboardContext';
-import { Widget, TableData } from '../components/types';
+import { TableWidget, TableData } from '../components/types'; 
+import TableWidgetComponent from './widgets/TableWidget';
 const { Option } = Select;
 
 interface SelectTableModalProps {
   visible: boolean;
-  widget: Widget;
-  onComplete: (updatedWidget: Widget) => void;
+  widget: TableWidget;
+  onComplete: (updatedWidget: TableWidget) => void;
   onCancel: () => void;
 }
 
@@ -41,7 +42,7 @@ const SelectTableModal: React.FC<SelectTableModalProps> = ({ visible, widget, on
         sheetName: selectedTable.sheetName,
         tableName: selectedTable.name,
       } as Partial<TableData>);
-      const updatedWidget = {
+      const updatedWidget: TableWidget = {
         ...widget,
         data: {
           ...widget.data,

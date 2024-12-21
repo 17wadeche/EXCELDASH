@@ -52,7 +52,7 @@ export interface MetricWidget extends WidgetBase {
   data: MetricData;
 }
 
-export interface TableWidgetType extends WidgetBase {
+export interface TableWidget extends WidgetBase {
   type: 'table';
   name: string;
   data: TableData;
@@ -75,7 +75,7 @@ export type Widget =
   | GanttWidget
   | ImageWidget
   | MetricWidget
-  | TableWidgetType
+  | TableWidget
   | LineWidget;
 
 

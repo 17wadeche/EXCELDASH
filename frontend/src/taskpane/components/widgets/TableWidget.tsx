@@ -1,3 +1,4 @@
+// src/taskpane/components/widgets/TableWidget.tsx
 import React from 'react';
 import { Button, Table } from 'antd';
 import { ColumnsType } from 'antd/es/table';
@@ -10,7 +11,13 @@ interface TableWidgetProps {
   onDelete: (id: string) => void;
 }
 
-const TableWidget: React.FC<TableWidgetProps> = ({ id, name, data, onDelete }) => {
+// Renamed default export:
+const TableWidgetComponent: React.FC<TableWidgetProps> = ({
+  id,
+  name,
+  data,
+  onDelete,
+}) => {
   return (
     <div style={{ width: '100%', height: '100%' }}>
       <h3>{name}</h3>
@@ -20,7 +27,7 @@ const TableWidget: React.FC<TableWidgetProps> = ({ id, name, data, onDelete }) =
         pagination={false}
         rowKey={(record: any) => record.someUniqueId || JSON.stringify(record)}
         style={{ width: '100%' }}
-        />
+      />
       <Button danger onClick={() => onDelete(id)}>
         Remove Table
       </Button>
@@ -28,4 +35,4 @@ const TableWidget: React.FC<TableWidgetProps> = ({ id, name, data, onDelete }) =
   );
 };
 
-export default TableWidget;
+export default TableWidgetComponent;
