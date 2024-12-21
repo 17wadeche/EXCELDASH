@@ -15,6 +15,7 @@ import { capitalizeFirstLetter } from '../utils/stringUtils';
 import { deleteDashboardById } from '../utils/api';
 import { getWorkbookIdFromProperties, isInDialog } from '../utils/excelUtils';
 import debounce from 'lodash.debounce';
+import SelectTableModal from '../components/SelectTableModal';
 const { Option } = Select;
 interface DashboardContextProps {
   widgets: Widget[];
@@ -116,6 +117,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
   const canRedo = futureStates.length > 0;
   const isUndoRedoRef = useRef(false);
   const [pendingWidget, setPendingWidget] = useState<Widget | null>(null);
+  const [isSelectTableModalVisible, setIsSelectTableModalVisible] = useState(false);
   const isGanttHandlerRegistered = useRef(false);
   const isReadGanttDataInProgress = useRef(false);
   const [dashboardBorderSettings, setDashboardBorderSettings] = useState<DashboardBorderSettings>({
@@ -1149,7 +1151,24 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       return newLayouts;
     });
   };
-
+  const getAvailableTables = async (): Promise<{ name: string; sheetName: string; rangeAddress: string }[]> => {
+    try {
+      return await Excel.run(async (context: Excel.RequestContext) => {
+        const tables = context.workbook.tables;
+        tables.load('items/name, items/worksheet/name');
+        await context.sync();
+        return tables.items.map(table => ({
+          name: table.name,
+          sheetName: table.worksheet.name,
+          rangeAddress: table.name, // Assuming table name corresponds to range name
+        }));
+      });
+    } catch (error) {
+      console.error('Error fetching tables from Excel:', error);
+      message.error('Failed to fetch tables from Excel.');
+      return [];
+    }
+  };
   const addWidgetFunc = useCallback(
     (
       type: 'text' | 'chart' | 'gantt' | 'image' | 'metric' | 'table' | 'line' | 'title' ,
@@ -1159,10 +1178,39 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         message.warning('A title widget already exists.');
         return;
       }
-  
       const newKey = `${type}-${uuidv4()}`;
       let newWidget: Widget;
+      if (type === 'table') {
+        const availableTables = await getAvailableTables();
+        if (availableTables.length === 0) {
+          message.warning('No tables found in the Excel workbook.');
+          return;
+        }
+        newWidget = {
+          id: newKey,
+          type,
+          name: 'New Table',
+          data: {
+            columns: [],
+            data: [],
+            sheetName: '',
+            tableName: '',
+          } as TableData,
+        };
+        setWidgetToPrompt({
+          widget: newWidget,
+          onComplete: async (updatedWidget: Widget) => {
+            const { sheetName, tableName } = updatedWidget.data as TableData;
+            if (sheetName && tableName) {
+              await readTableFromExcel(newWidget.id, sheetName, tableName);
+            } else {
+              message.error('Sheet name or table name is missing.');
+            }
+          },
+        });
   
+        return;
+      }
       if (data) {
         newWidget = {
           id: newKey,
@@ -1258,17 +1306,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
               } as GanttWidgetData,
             };
             break;
-          case 'table':
-            newWidget = {
-              id: newKey,
-              type: 'table',
-              name: 'New Table',
-              data: {
-                columns: [],
-                data: [],
-              } as TableData,
-            };
-            break;
           case 'title':
             newWidget = {
               id: newKey,
@@ -1312,29 +1349,16 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
   const handleWidgetDetailsComplete = (updatedWidget: Widget) => {
     if (pendingWidget && updatedWidget.id === pendingWidget.id) {
       setPendingWidget(null);
-      updateWidgetsWithHistory((prevWidgets) => {
-        const newWidgets = [...prevWidgets, updatedWidget];
-        updateLayoutsForNewWidgets(newWidgets);
-        if (currentDashboardId && currentDashboard) {
-          const updatedDashboard = {
-            ...currentDashboard,
-            components: newWidgets,
-            layouts,
-            title: dashboardTitle,
-            workbookId: currentWorkbookId,
-          };
-          axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard)
-            .then((res) => {
-              console.log('Server sync successful:', res.data);
-            })
-            .catch(err => {
-              console.error('Error syncing updates to server:', err);
-              message.error('Failed to save changes to server.');
-            });
-        }
+      if (updatedWidget.type === 'table') {
+        setIsSelectTableModalVisible(true);
+      } else {
+        updateWidgetsWithHistory((prevWidgets) => {
+          const newWidgets = [...prevWidgets, updatedWidget];
+          updateLayoutsForNewWidgets(newWidgets);
+          return newWidgets;
+        });
         message.success(`${updatedWidget.type.charAt(0).toUpperCase() + updatedWidget.type.slice(1)} widget added successfully!`);
-        return newWidgets;
-      });
+      }
     } else {
       if (!widgetToPrompt) return;
       const { widget, onComplete } = widgetToPrompt;
@@ -1869,39 +1893,38 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     }
     return color;
   };
-  async function readTableFromExcel(widgetId: string, sheetName: string, rangeAddress: string) {
+  async function readTableFromExcel(widgetId: string, sheetName: string, tableName: string) {
     try {
       await Excel.run(async (context) => {
         const sheet = context.workbook.worksheets.getItem(sheetName);
-        const range = sheet.getRange(rangeAddress);
+        const table = sheet.tables.getItem(tableName);
+        const range = table.getRange();
         range.load(['values']);
         await context.sync();
         const values = range.values;
         if (!values || values.length < 2) {
-          message.warning('Not enough data in the specified range');
+          message.warning('The selected table does not contain enough data.');
           return;
         }
         const headers = values[0] as string[];
         const dataRows = values.slice(1);
-        const columns = headers.map((header, colIndex) => {
-          return {
-            title: header,
-            dataIndex: `col${colIndex}`,
-            key: header,
-          };
-        });
-        const data = dataRows.map((row: any[], _rowIndex: number) => {
-          const rowObject: any = {};
+        const columns = headers.map((header, colIndex) => ({
+          title: header,
+          dataIndex: `col${colIndex}`,
+          key: `col${colIndex}`,
+        }));
+        const data = dataRows.map((row: any[], rowIndex: number) => {
+          const rowObject: any = { key: rowIndex };
           row.forEach((cellValue, colIndex) => {
             rowObject[`col${colIndex}`] = cellValue;
           });
           return rowObject;
         });
-        updateWidgetFunc(widgetId, {
+        dashboardContext.updateWidget(widgetId, {
           columns,
           data,
-        });
-        message.success('Excel table read successfully and widget updated!');
+        } as Partial<TableData>);
+        message.success('Excel table data loaded into the widget successfully!');
       });
     } catch (error) {
       console.error('Error reading table data from Excel', error);
@@ -2579,15 +2602,27 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       }}
     >
       {children}
-      {widgetToPrompt && (
-        <PromptWidgetDetailsModal
+    {widgetToPrompt && widgetToPrompt.widget.type !== 'table' && (
+      <PromptWidgetDetailsModal
         widget={widgetToPrompt.widget}
         onComplete={(updatedWidget) => {
           handleWidgetDetailsComplete(updatedWidget);
         }}
         onCancel={() => setWidgetToPrompt(null)}
       />
-      )}
-    </DashboardContext.Provider>
-  );
+    )}
+    <SelectTableModal
+      visible={isSelectTableModalVisible && widgetToPrompt?.widget.type === 'table'}
+      widget={widgetToPrompt?.widget}
+      onComplete={() => {
+        setIsSelectTableModalVisible(false);
+        setWidgetToPrompt(null);
+      }}
+      onCancel={() => {
+        setIsSelectTableModalVisible(false);
+        setWidgetToPrompt(null);
+      }}
+    />
+  </DashboardContext.Provider>
+);
 };

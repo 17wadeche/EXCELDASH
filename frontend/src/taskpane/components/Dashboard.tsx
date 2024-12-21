@@ -335,7 +335,10 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
   };
 
   const handleLayoutChange = useCallback(
-    (_currentLayout: GridLayoutItem[], allLayouts: { [key: string]: GridLayoutItem[] }) => {
+    (
+      _currentLayout: GridLayoutItem[],
+      allLayouts: { [key: string]: GridLayoutItem[] }
+    ) => {
       const syncedLayouts = { ...layouts };
       BREAKPOINTS.forEach((bp) => {
         if (!allLayouts[bp]) {
@@ -347,20 +350,14 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
       setLayouts(syncedLayouts);
       if (!isEqual(allLayouts, prevLayoutsRef.current)) {
         prevLayoutsRef.current = allLayouts;
-        if (currentDashboardId) {
-          const updatedDashboard: DashboardItem = {
-            ...dashboards.find((d) => d.id === currentDashboardId)!,
-            layouts: allLayouts,
-            borderSettings: dashboardBorderSettings,
-          };
-          editDashboard(updatedDashboard);
-          console.log('Layouts updated and saved immediately.');
-        }
+        console.log('Layouts updated locally (not saved).');
       }
     },
-    [layouts, currentDashboardId, editDashboard, dashboards, setLayouts, dashboardBorderSettings]
+    [
+      layouts,
+      setLayouts,
+    ]
   );
-
   const copyWidgetCallback = useCallback(
     (widget: Widget) => {
       const newWidget: Widget = {
