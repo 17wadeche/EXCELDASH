@@ -40,7 +40,6 @@ interface DashboardContextProps {
   setIsFullscreenActive: React.Dispatch<React.SetStateAction<boolean>>;
   currentDashboardId: string | null;
   setCurrentDashboardId: (id: string | null) => void;
-  saveTemplate: () => void;
   setCurrentWorkbookId: React.Dispatch<React.SetStateAction<string>>;
   currentDashboard: DashboardItem | null;
   addTaskToGantt: (task: Task) => Promise<void>;
@@ -443,24 +442,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     };
     migrateWidgets();
   }, [currentDashboardId, currentDashboard, dashboardLoaded]);
-
   const saveAsTemplate = async () => {
-    try {
-      const template = {
-        id: uuidv4(),
-        name: dashboardTitle || 'Untitled Template',
-        widgets: widgets,
-        layouts: layouts,
-        borderSettings: dashboardBorderSettings,
-      };
-      const response = await axios.post('/api/templates', template);
-      message.success('Dashboard saved as template!');
-    } catch (error) {
-      console.error('Error saving template:', error);
-      message.error('Failed to save template to the server.');
-    }
-  };
-  const saveTemplate = async () => {
     if (!currentDashboardId) {
       message.warning('No dashboard is currently active.');
       return;
@@ -1205,6 +1187,8 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           setWidgetToPrompt({
             widget: newWidget,
             onComplete: async (updatedWidget: Widget) => {
+              updateWidgetsWithHistory((prevWidgets) => [...prevWidgets, updatedWidget]);
+              updateLayoutsForNewWidgets([...widgets, updatedWidget]);
               const { sheetName, tableName } = updatedWidget.data as TableData;
               if (sheetName && tableName) {
                 await readTableFromExcel(newWidget.id, sheetName, tableName);
@@ -2583,7 +2567,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         generateProjectManagementTemplateAndGanttChart,
         insertProjectManagementTemplate: insertProjectManagementTemplate,
         saveAsTemplate,
-        saveTemplate,
         layouts,
         setLayouts,
         exportDashboardAsPDF,
