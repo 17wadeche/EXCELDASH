@@ -2645,7 +2645,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     )}
     <SelectTableModal
       visible={isSelectTableModalVisible && widgetToPrompt?.widget.type === 'table'}
-      widget={widgetToPrompt?.widget}
+      widget={widgetToPrompt?.widget!}
       onComplete={() => {
         setIsSelectTableModalVisible(false);
         setWidgetToPrompt(null);
