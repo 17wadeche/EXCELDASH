@@ -21,6 +21,7 @@ import './themes.css';
 import { v4 as uuidv4 } from 'uuid';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
+import TableWidget from './widgets/TableWidget';
 import Draggable from 'react-draggable';
 import { debounce } from 'lodash';
 import LineWidget from './widgets/LineWidget';

@@ -11,10 +11,10 @@ import jsPDF from 'jspdf';
 import axios from 'axios';
 import PromptWidgetDetailsModal from '../components/PromptWidgetDetailsModal';
 import { DashboardBorderSettings } from '../components/types';
-import TitleWidgetComponent from '../components/TitleWidget';
+import TableWidget from './widgets/TableWidget';
 import { capitalizeFirstLetter } from '../utils/stringUtils'; 
 import { deleteDashboardById } from '../utils/api';
-import { getWorkbookIdFromProperties, setWorkbookIdInProperties, isInDialog } from '../utils/excelUtils';
+import { getWorkbookIdFromProperties, isInDialog } from '../utils/excelUtils';
 
 const { Option } = Select;
 interface DashboardContextProps {
@@ -30,7 +30,7 @@ interface DashboardContextProps {
   importChartImageFromExcel: () => void;
   readDataFromExcel: () => void;
   readGanttDataFromExcel: () => void;
-  setTables: React.Dispatch<React.SetStateAction<TableItem[]>>;
+  setTables: React.Dispatch<React.SetStateAction<TableWidget[]>>;
   selectedRangeAddress: string | null;
   setSelectedRangeAddress: (address: string | null) => void;
   generateProjectManagementTemplateAndGanttChart: () => void;
@@ -74,9 +74,9 @@ interface DashboardContextProps {
   dashboardBorderSettings: DashboardBorderSettings;
   setDashboardBorderSettings: React.Dispatch<React.SetStateAction<DashboardBorderSettings>>;
   refreshAllCharts: () => void;
-  tables: TableItem[];
-  addTable: (table: TableItem) => void;
-  editTable: (table: TableItem) => void;
+  tables: TableWidget[];
+  addTable: (table: TableWidget) => void;
+  editTable: (table: TableWidget) => void;
   deleteTable: (id: string) => void;
 }
 interface DashboardProviderProps {
@@ -108,7 +108,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
   const [widgetToPrompt, setWidgetToPrompt] = useState<{widget: Widget; onComplete: (updatedWidget: Widget) => void;} | null>(null);
   const [layouts, setLayouts] = useState<{ [key: string]: GridLayoutItem[] }>(initialLayouts);
   const [currentWorkbookId, setCurrentWorkbookId] = useState<string>('');
-  const [tables, setTables] = useState<TableItem[]>([]);
+  const [tables, setTables] = useState<TableWidget[]>([]);
   const [pastStates, setPastStates] = useState<{ widgets: Widget[]; layouts: { [key: string]: GridLayoutItem[] } }[] >([]);
   const [futureStates, setFutureStates] = useState<{ widgets: Widget[]; layouts: { [key: string]: GridLayoutItem[] } }[]>([]);
   const [availableWorksheets, setAvailableWorksheets] = useState<string[]>([]);
@@ -341,11 +341,11 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       return [];
     }
   };
-  const addTable = (table: TableItem) => {
+  const addTable = (table: TableWidget) => {
     const updatedTables = [...tables, table];
     setTables(updatedTables);
   };
-  const editTable = (table: TableItem) => {
+  const editTable = (table: TableWidget) => {
     const updatedTables = tables.map((r) => (r.id === table.id ? table : r));
     setTables(updatedTables);
   };
@@ -1886,6 +1886,45 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     }
     return color;
   };
+  async function readTableFromExcel(widgetId: string, sheetName: string, rangeAddress: string) {
+    try {
+      await Excel.run(async (context) => {
+        const sheet = context.workbook.worksheets.getItem(sheetName);
+        const range = sheet.getRange(rangeAddress);
+        range.load(['values']);
+        await context.sync();
+        const values = range.values;
+        if (!values || values.length < 2) {
+          message.warning('Not enough data in the specified range');
+          return;
+        }
+        const headers = values[0] as string[];
+        const dataRows = values.slice(1);
+        const columns = headers.map((header, colIndex) => {
+          return {
+            title: header,
+            dataIndex: `col${colIndex}`,
+            key: header,
+          };
+        });
+        const data = dataRows.map((row: any[], rowIndex: number) => {
+          const rowObject: any = {};
+          row.forEach((cellValue, colIndex) => {
+            rowObject[`col${colIndex}`] = cellValue;
+          });
+          return rowObject;
+        });
+        updateWidget(widgetId, {
+          columns,
+          data,
+        });
+        message.success('Excel table read successfully and widget updated!');
+      });
+    } catch (error) {
+      console.error('Error reading table data from Excel', error);
+      message.error('Failed to read table data from Excel.');
+    }
+  }
   const readDataFromExcel = async () => {
     if (!currentDashboard || !currentDashboard.workbookId) {
       message.error('No dashboard or workbook ID found.');

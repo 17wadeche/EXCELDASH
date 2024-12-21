@@ -11,6 +11,7 @@ import MetricWidget from './widgets/MetricWidget';
 import ImageWidget from './widgets/ImageWidget';
 import LineWidget from './widgets/LineWidget';
 import GanttChartComponent from './widgets/GanttChart';
+import TableWidget from './widgets/TableWidget';
 import {
   TableData,
   TableWidgetType,
