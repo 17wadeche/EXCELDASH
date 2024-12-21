@@ -1722,10 +1722,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     }
     console.log('Current Workbook ID:', currentWorkbookId);
     console.log('Dashboard Workbook ID:', currentDashboard.workbookId);
-    if (currentWorkbookId !== currentDashboard.workbookId) {
-      message.warning('This dashboard is not associated with the currently open workbook.');
-      return;
-    }
     try {
       let hasError = false;
       let errorMessages: string[] = [];
