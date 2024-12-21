@@ -81,6 +81,7 @@
     "@babel/preset-typescript": "^7.23.3",
     "@types/chartjs-plugin-annotation": "^0.5.5",
     "@types/dom-to-image": "^2.6.7",
+    "@types/lodash.debounce": "^4.0.9",
     "@types/lodash.isequal": "^4.5.8",
     "@types/office-js": "^1.0.448",
     "@types/office-runtime": "^1.0.35",
