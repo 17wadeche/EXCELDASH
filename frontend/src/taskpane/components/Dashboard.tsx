@@ -29,6 +29,7 @@ import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import PresentationDashboard from './PresentationDashboard';
 import axios from 'axios';
+import { useParams } from 'react-router-dom';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 const defaultTitleWidget: Widget = {
@@ -52,16 +53,9 @@ interface DashboardProps {
 }
 
 const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = false, closePresenterMode, isFullScreen }) => {
-  const { 
-    widgets, addWidget, removeWidget, updateWidget, refreshAllCharts, editDashboard, layouts, setLayouts, setWidgets, 
-    dashboards, setDashboardBorderSettings, updateLayoutsForNewWidgets, undo, dashboardBorderSettings, redo, canUndo, 
-    dashboardTitle, canRedo, currentTemplateId, currentDashboardId, saveTemplate, currentDashboard, currentWorkbookId, 
-    availableWorksheets, setCurrentDashboard, exportDashboardAsPDF 
-  } = useContext(DashboardContext)!;
-
+  const { widgets, addWidget, removeWidget, updateWidget, refreshAllCharts, editDashboard, layouts, setLayouts, setWidgets, dashboards, setDashboardBorderSettings, updateLayoutsForNewWidgets, undo, dashboardBorderSettings, redo, canUndo, dashboardTitle, canRedo, currentTemplateId, currentDashboardId, saveTemplate, currentDashboard, currentWorkbookId, availableWorksheets, setCurrentDashboard, exportDashboardAsPDF, setCurrentDashboardId } = useContext(DashboardContext)!;
   const [isFullscreenActive, setIsFullscreenActive] = useState(false);
   const isEditingEnabled = !isPresenterMode && !isFullscreenActive && !isFullScreen;
-
   const borderStyle: React.CSSProperties = useMemo(() => {
     return dashboardBorderSettings?.showBorder
       ? {
@@ -301,7 +295,11 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
       );
     }
   }, [widgets, layouts, dashboardBorderSettings, fullScreenDialog, currentDashboardId, dashboardTitle, currentWorkbookId, availableWorksheets]);
-
+  useEffect(() => {
+    if (id) {
+      setCurrentDashboardId(id);
+    }
+  }, [id, setCurrentDashboardId]);
   useEffect(() => {
     if (
       currentDashboard &&

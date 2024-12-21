@@ -1,46 +1,24 @@
 // src/taskpane/components/DashboardList.tsx
 
 import React, { useContext, useState, useEffect } from 'react';
-import {
-  Layout,
-  List,
-  Button,
-  Typography,
-  Modal,
-  message,
-  Card,
-  Tooltip,
-  Row,
-  Col,
-  Input,
-  Spin,
-  Divider,
-  Empty,
-} from 'antd';
-import {
-  DeleteOutlined,
-  EyeOutlined,
-  EditOutlined,
-  PlusOutlined,
-  SearchOutlined,
-} from '@ant-design/icons';
+import { Layout, List, Button, Typography, Modal, message, Card, Tooltip, Row, Col, Input, Spin, Divider,Empty } from 'antd';
+import { DeleteOutlined, EyeOutlined, EditOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { DashboardContext } from '../context/DashboardContext';
-import { DashboardItem } from './types'; // Adjust the path as needed
+import { DashboardItem } from './types';
 
 const { Content } = Layout;
 const { Title } = Typography;
 const { Search } = Input;
 
 const DashboardList: React.FC = () => {
-  const { dashboards, deleteDashboard } = useContext(DashboardContext)!;
+  const { dashboards, deleteDashboard, setCurrentDashboardId } = useContext(DashboardContext)!;
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredDashboards, setFilteredDashboards] = useState<DashboardItem[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    // Simulate loading time
     setLoading(true);
     const timer = setTimeout(() => {
       const filtered = dashboards.filter((dashboard) =>
@@ -68,10 +46,12 @@ const DashboardList: React.FC = () => {
   };
 
   const handleView = (id: string) => {
+    setCurrentDashboardId(id);
     navigate(`/dashboard/${id}`);
   };
 
   const handleEdit = (id: string) => {
+    setCurrentDashboardId(id);
     navigate(`/dashboard/${id}/edit`);
   };
 

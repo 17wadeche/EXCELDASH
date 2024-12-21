@@ -129,7 +129,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         const fetchedDashboards: DashboardItem[] = response.data;
         setDashboards(fetchedDashboards);
         if (fetchedDashboards.length > 0) {
-          setCurrentDashboardId(fetchedDashboards[0].id);
         } else {
           console.log('No dashboards available.');
         }
