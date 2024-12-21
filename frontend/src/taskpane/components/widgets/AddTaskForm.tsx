@@ -1,6 +1,6 @@
 // src/taskpane/components/widgets/AddTaskForm.tsx
 
-import React, { useContext } from 'react';
+import React, { useContext, useMemo } from 'react';
 import { Modal, Form, Input, DatePicker, InputNumber, Select, Button } from 'antd';
 import { DashboardContext } from '../../context/DashboardContext';
 import { Task } from '../types';
