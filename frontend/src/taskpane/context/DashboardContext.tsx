@@ -74,7 +74,6 @@ interface DashboardContextProps {
   refreshAllCharts: () => void;
   tables: TableWidgetType[];
   addTable: (table: TableWidgetType) => void;
-  editTable: (table: TableWidgetType) => void;
   deleteTable: (id: string) => void;
 }
 interface DashboardProviderProps {
@@ -341,10 +340,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
   };
   const addTable = (table: TableWidget) => {
     const updatedTables = [...tables, table];
-    setTables(updatedTables);
-  };
-  const editTable = (table: TableWidget) => {
-    const updatedTables = tables.map((r) => (r.id === table.id ? table : r));
     setTables(updatedTables);
   };
   const deleteTable = (id: string) => {
@@ -2557,7 +2552,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         updateLayoutsForNewWidgets,
         addTable,
         setTables,
-        editTable,
         addTaskToGantt,
         currentWorkbookId,
         deleteTable,
