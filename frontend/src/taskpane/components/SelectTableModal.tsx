@@ -1,16 +1,14 @@
 // src/taskpane/components/SelectTableModal.tsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { Modal, Select, message } from 'antd';
 import { DashboardContext } from '../context/DashboardContext';
-import { useContext } from 'react';
-import { Widget } from '../components/types';
-import { TableData } from '../components/types';
+import { Widget, TableData } from '../components/types';
 const { Option } = Select;
 
 interface SelectTableModalProps {
   visible: boolean;
   widget: Widget;
-  onComplete: () => void;
+  onComplete: (updatedWidget: Widget) => void;
   onCancel: () => void;
 }
 
@@ -35,7 +33,7 @@ const SelectTableModal: React.FC<SelectTableModalProps> = ({ visible, widget, on
       };
       fetchTables();
     }
-  }, [visible, dashboardContext, message, onCancel]);
+  }, [visible, dashboardContext, onCancel]);
 
   const handleOk = () => {
     if (selectedTable) {
@@ -43,7 +41,15 @@ const SelectTableModal: React.FC<SelectTableModalProps> = ({ visible, widget, on
         sheetName: selectedTable.sheetName,
         tableName: selectedTable.name,
       } as Partial<TableData>);
-      onComplete();
+      const updatedWidget = {
+        ...widget,
+        data: {
+          ...widget.data,
+          sheetName: selectedTable.sheetName,
+          tableName: selectedTable.name,
+        },
+      };
+      onComplete(updatedWidget);
       message.success('Table widget added successfully!');
     } else {
       message.warning('Please select a table.');

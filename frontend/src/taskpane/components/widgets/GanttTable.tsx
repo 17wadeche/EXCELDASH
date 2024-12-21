@@ -70,9 +70,9 @@ const GanttTable: React.FC<GanttTableProps> = ({ tasks }) => {
   }));
   const dataSource = tasks.map(task => ({
     key: task.id,
-    name: task.name,       // Retained in dataSource but not displayed
-    start: task.start,     // Retained in dataSource but not displayed
-    end: task.end,         // Retained in dataSource but not displayed
+    name: task.name,
+    start: task.start,
+    end: task.end,
     progress: task.progress,
     type: task.type,
     dependencies: task.dependencies,

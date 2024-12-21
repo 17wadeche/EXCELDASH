@@ -672,16 +672,14 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           const durationColumn = table.columns.getItemAt(5); // Column F
           const actualDurationColumn = table.columns.getItemAt(6); // Column G
           const durationFormula = "=[@[End Date]]-[@[Start Date]]";
-          const actualDurationFormula = "=[@[Completed Date]]-[@[Start Date]]";
+          const actualDurationFormula = '=IF([@[Completed Date]]="", "", [@[Completed Date]] - [@[Start Date]])';
           const durationDataRange = durationColumn.getDataBodyRange();
           const actualDurationDataRange = actualDurationColumn.getDataBodyRange();
           durationDataRange.load('rowCount');
           actualDurationDataRange.load('rowCount');
           await context.sync();
-          const durationFormulas = Array(durationDataRange.rowCount)
-            .fill([durationFormula]);
-          const actualDurationFormulas = Array(actualDurationDataRange.rowCount)
-            .fill([actualDurationFormula]);
+          const durationFormulas = Array(durationDataRange.rowCount).fill([durationFormula]);
+          const actualDurationFormulas = Array(actualDurationDataRange.rowCount).fill([actualDurationFormula]);
           durationDataRange.formulas = durationFormulas;
           actualDurationDataRange.formulas = actualDurationFormulas;
           await context.sync();
@@ -1225,7 +1223,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           return;
         }
       }
-  
       if (data) {
         newWidget = {
           id: newKey,
