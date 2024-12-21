@@ -73,7 +73,6 @@ interface DashboardContextProps {
   setDashboardBorderSettings: React.Dispatch<React.SetStateAction<DashboardBorderSettings>>;
   refreshAllCharts: () => void;
   tables: TableWidgetType[];
-  addTable: (table: TableWidgetType) => void;
   deleteTable: (id: string) => void;
 }
 interface DashboardProviderProps {
@@ -337,10 +336,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       }
       return [];
     }
-  };
-  const addTable = (table: TableWidget) => {
-    const updatedTables = [...tables, table];
-    setTables(updatedTables);
   };
   const deleteTable = (id: string) => {
     const updatedTables = tables.filter((r) => r.id !== id);
@@ -677,11 +672,11 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           const table = sheet.tables.getItem('GanttTable');
           const durationColumn = table.columns.getItemAt(5);
           const durationRange = durationColumn.getDataBodyRange();
-          durationRange.formulas = "=[@End Date]-[@Start Date]";
+          durationRange.formulas = "=[[@End Date]]-[[@Start Date]]";
           console.log('Calculated formula set for Duration (Days) column.');
           const actualDurationColumn = table.columns.getItemAt(6);
           const actualDurationRange = actualDurationColumn.getDataBodyRange();
-          actualDurationRange.formulas = "=[@Completed Date]-[@Start Date]";
+          actualDurationRange.formulas = "=[[@Completed Date]]-[[@Start Date]]";
           console.log('Calculated formula set for Actual Duration (Days) column.');
           await context.sync();
           console.log('Calculated columns formulas applied successfully.');
@@ -2550,7 +2545,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         refreshAllCharts,
         tables,
         updateLayoutsForNewWidgets,
-        addTable,
         setTables,
         addTaskToGantt,
         currentWorkbookId,
