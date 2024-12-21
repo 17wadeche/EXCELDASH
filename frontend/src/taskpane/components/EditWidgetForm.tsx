@@ -289,9 +289,11 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
               ? task.completed.format('YYYY-MM-DD')
               : undefined,
             progress: task.progress,
-            dependencies: task.dependencies
-              ? task.dependencies.join(',')
-              : '',
+            dependencies: typeof task.dependencies === 'string'
+              ? task.dependencies.split(',')
+              : Array.isArray(task.dependencies)
+                ? task.dependencies
+                : [],
             color: task.color,
           })),
           title: cleanedValues.title,
