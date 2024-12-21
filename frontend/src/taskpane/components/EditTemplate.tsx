@@ -7,7 +7,7 @@ import { DashboardItem } from './types';
 
 const EditTemplate: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const { dashboards, editDashboard, saveTemplate } = useContext(DashboardContext)!;
+  const { dashboards, editDashboard, saveAsTemplate } = useContext(DashboardContext)!;
   const navigate = useNavigate();
   const [template, setTemplate] = useState<DashboardItem | null>(null);
   const [form] = Form.useForm();
@@ -37,7 +37,7 @@ const EditTemplate: React.FC = () => {
       workbookId: template.workbookId,
     };
     editDashboard(updatedTemplate);
-    saveTemplate();
+    saveAsTemplate();
     message.success('Template updated successfully!');
     navigate('/dashboard-list');
   };
