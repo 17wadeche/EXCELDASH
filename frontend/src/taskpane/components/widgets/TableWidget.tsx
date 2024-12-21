@@ -29,19 +29,27 @@ const TableWidgetComponent: React.FC<TableWidgetProps> = ({
   };
   return (
     <div style={{ width: '100%', height: '100%' }}>
-      {isEditing ? (
-        <Input
-          autoFocus
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          onBlur={handleBlur}
-          onPressEnter={handleBlur}
-        />
-      ) : (
-        <h3 style={{ cursor: 'pointer' }} onClick={() => setIsEditing(true)}>
-          {title}
-        </h3>
-      )}
+      <div
+        className="widget-drag-handle"
+        style={{ cursor: 'move', marginBottom: 8 }}
+      >
+        {isEditing ? (
+          <Input
+            autoFocus
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            onBlur={handleBlur}
+            onPressEnter={handleBlur}
+          />
+        ) : (
+          <h3
+            style={{ cursor: 'pointer', margin: 0 }}
+            onClick={() => setIsEditing(true)}
+          >
+            {title}
+          </h3>
+        )}
+      </div>
       <Table
         columns={data.columns as ColumnsType<any>}
         dataSource={data.data}
