@@ -214,6 +214,8 @@ const CreateDashboard: React.FC = () => {
         workbookId: workbookId,
       };
       const createdDashboard: DashboardItem = await createDashboard(newDashboard);
+      setWidgets([]);
+      setLayouts({});
       setDashboards((prev) => [...prev, createdDashboard]);
       setCurrentDashboardId(createdDashboard.id);
       message.success('Dashboard created successfully!');
