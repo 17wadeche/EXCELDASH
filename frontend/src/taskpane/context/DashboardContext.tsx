@@ -29,7 +29,7 @@ interface DashboardContextProps {
   importChartImageFromExcel: () => void;
   readDataFromExcel: () => void;
   readGanttDataFromExcel: () => void;
-  setTables: React.Dispatch<React.SetStateAction<TableWidget[]>>;
+  setTables: React.Dispatch<React.SetStateAction<TableWidgetType[]>>;
   selectedRangeAddress: string | null;
   setSelectedRangeAddress: (address: string | null) => void;
   generateProjectManagementTemplateAndGanttChart: () => void;
@@ -73,9 +73,9 @@ interface DashboardContextProps {
   dashboardBorderSettings: DashboardBorderSettings;
   setDashboardBorderSettings: React.Dispatch<React.SetStateAction<DashboardBorderSettings>>;
   refreshAllCharts: () => void;
-  tables: TableWidget[];
-  addTable: (table: TableWidget) => void;
-  editTable: (table: TableWidget) => void;
+  tables: TableWidgetType[];
+  addTable: (table: TableWidgetType) => void;
+  editTable: (table: TableWidgetType) => void;
   deleteTable: (id: string) => void;
 }
 interface DashboardProviderProps {
