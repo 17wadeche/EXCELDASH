@@ -673,15 +673,8 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           const actualDurationColumn = table.columns.getItemAt(6); // Column G
           const durationFormula = "=[@[End Date]]-[@[Start Date]]";
           const actualDurationFormula = '=IF([@[Completed Date]]="", "", [@[Completed Date]] - [@[Start Date]])';
-          const durationDataRange = durationColumn.getDataBodyRange();
-          const actualDurationDataRange = actualDurationColumn.getDataBodyRange();
-          durationDataRange.load('rowCount');
-          actualDurationDataRange.load('rowCount');
-          await context.sync();
-          const durationFormulas = Array(durationDataRange.rowCount).fill([durationFormula]);
-          const actualDurationFormulas = Array(actualDurationDataRange.rowCount).fill([actualDurationFormula]);
-          durationDataRange.formulas = durationFormulas;
-          actualDurationDataRange.formulas = actualDurationFormulas;
+          durationColumn.setPredefinedFormula(durationFormula);
+          actualDurationColumn.setPredefinedFormula(actualDurationFormula);
           await context.sync();
         } catch (calcError) {
           console.error('Error setting calculated columns:', calcError);
@@ -1216,7 +1209,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
             },
           });
           setIsSelectTableModalVisible(true);
-          return;
         } catch (error) {
           console.error('Error adding table widget:', error);
           message.error('Failed to add table widget.');

@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { DashboardItem, NewDashboard, TemplateItem } from './types';
 const { Content } = Layout;
 const { Search } = Input;
-import { createCheckoutSession, checkSubscription, loginUser, registerUser, verifySubscription, checkRegistration, unsubscribeUser, createDashboard } from './../utils/api';
+import { createCheckoutSession, checkSubscription, loginUser, registerUser, verifySubscription, checkRegistration, unsubscribeUser, createDashboard, getTemplates } from './../utils/api';
 import axios from 'axios';
 
 interface Widget {
@@ -120,6 +120,20 @@ const CreateDashboard: React.FC = () => {
       setIsSubscriptionModalVisible(false);
     }
   };
+  useEffect(() => {
+    async function fetchTemplates() {
+      setLoading(true);
+      try {
+        const serverTemplates = await getTemplates();
+        setTemplates(serverTemplates);
+      } catch (err) {
+        console.error('Error loading templates:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchTemplates();
+  }, []);
 
   useEffect(() => {
     function handleMessage(event: MessageEvent) {
