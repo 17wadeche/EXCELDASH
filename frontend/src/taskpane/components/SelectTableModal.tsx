@@ -20,7 +20,7 @@ const SelectTableModal: React.FC<SelectTableModalProps> = ({ visible, widget, on
     throw new Error('DashboardContext must be used within a DashboardProvider');
   }
 
-  const { getAvailableTables, updateWidget } = dashboardContext;
+  const { getAvailableTables, updateWidget } = DashboardContext;
 
   const [tables, setTables] = useState<{ name: string; sheetName: string }[]>([]);
   const [selectedTable, setSelectedTable] = useState<{ name: string; sheetName: string } | null>(null);
