@@ -1397,6 +1397,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     }
     setWidgetToPrompt(null);
   };
+
   const removeWidgetFunc = useCallback((id: string) => {
     updateWidgetsWithHistory((prevWidgets) => {
       const newWidgets = prevWidgets.filter((widget) => widget.id !== id);
@@ -2643,7 +2644,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     )}
     <SelectTableModal
       visible={isSelectTableModalVisible && widgetToPrompt?.widget.type === 'table'}
-      widget={widgetToPrompt?.widget!}
+      widget={widgetToPrompt?.widget as TableWidget}
       onComplete={() => {
         setIsSelectTableModalVisible(false);
         setWidgetToPrompt(null);
