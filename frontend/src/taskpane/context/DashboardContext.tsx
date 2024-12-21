@@ -673,8 +673,13 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           const actualDurationColumn = table.columns.getItemAt(6); // Column G
           const durationFormula = "=[@[End Date]]-[@[Start Date]]";
           const actualDurationFormula = '=IF([@[Completed Date]]="", "", [@[Completed Date]] - [@[Start Date]])';
-          durationColumn.setPredefinedFormula(durationFormula);
-          actualDurationColumn.setPredefinedFormula(actualDurationFormula);
+          const durationRange = durationColumn.getDataBodyRange();
+          const actualDurationRange = actualDurationColumn.getDataBodyRange();
+          durationRange.load('rowCount');
+          actualDurationRange.load('rowCount');
+          await context.sync();
+          durationRange.formulas = Array(durationRange.rowCount).fill([durationFormula]);
+          actualDurationRange.formulas = Array(actualDurationRange.rowCount).fill([actualDurationFormula]);
           await context.sync();
         } catch (calcError) {
           console.error('Error setting calculated columns:', calcError);
