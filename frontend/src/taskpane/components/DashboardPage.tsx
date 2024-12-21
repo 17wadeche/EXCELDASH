@@ -27,14 +27,14 @@ const DashboardPage: React.FC = () => {
         } else {
           console.warn(`No dashboard found with id ${id} in local array`);
           setCurrentDashboard(null);
-          setWidgets([]);
-          setLayouts({});
+          setWidgets(createdDashboard.components || []);
+          setLayouts(createdDashboard.layouts || {});
           message.warning(`Dashboard with ID ${id} not found, showing blank.`);
         }
       } else {
         console.log('No ID provided, setting up a new blank dashboard');
-        setWidgets([]);
-        setLayouts({});
+        setWidgets(createdDashboard.components || []);
+        setLayouts(createdDashboard.layouts || {});
         const newDashboard: DashboardItem = {
           id: uuidv4(),
           title: 'Untitled Dashboard',
