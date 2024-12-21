@@ -684,7 +684,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
             .fill([actualDurationFormula]);
           durationDataRange.formulas = durationFormulas;
           actualDurationDataRange.formulas = actualDurationFormulas;
-        
           await context.sync();
         } catch (calcError) {
           console.error('Error setting calculated columns:', calcError);
