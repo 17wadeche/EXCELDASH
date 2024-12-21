@@ -21,7 +21,7 @@ import './themes.css';
 import { v4 as uuidv4 } from 'uuid';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
-import TableWidget from './widgets/TableWidget';
+import TableWidgetComponent from './widgets/TableWidget';
 import Draggable from 'react-draggable';
 import { debounce } from 'lodash';
 import LineWidget from './widgets/LineWidget';
@@ -570,7 +570,7 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
       } else if (widget.type === 'table') {
         const tableWidget = widget as TableWidget;
         content = (
-          <TableWidget
+          <TableWidgetComponent
             key={tableWidget.id}
             id={tableWidget.id}
             name={tableWidget.name}

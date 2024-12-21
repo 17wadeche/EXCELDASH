@@ -11,7 +11,7 @@ import MetricWidget from './widgets/MetricWidget';
 import ImageWidget from './widgets/ImageWidget';
 import LineWidget from './widgets/LineWidget';
 import GanttChartComponent from './widgets/GanttChart';
-import TableWidget from './widgets/TableWidget';
+import TableWidgetComponent from './widgets/TableWidget';
 import {
   TableData,
   TableWidget,
@@ -98,7 +98,7 @@ const PresentationDashboard: React.FC = () => {
               case 'table':
                 return (
                   <div key={widget.id} className="grid-item">
-                    <TableWidget
+                    <TableWidgetComponent
                       id={widget.id}
                       name={(widget as TableWidget).name}
                       data={(widget as TableWidget).data as TableData}
