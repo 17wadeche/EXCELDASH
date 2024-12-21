@@ -737,7 +737,7 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
           isDraggable={isEditingEnabled}
           compactType={null}
           preventCollision={false}
-          allowOverlap={false}
+          allowOverlap={true}
           margin={[0, 0]}
           containerPadding={[0, 0]}
         >

@@ -11,12 +11,9 @@ import axios from 'axios';
 
 const DashboardPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-
   const { dashboards,  currentWorkbookId,  setWidgets,  setLayouts } = useContext(DashboardContext)!;
-
   const [currentDashboard, setCurrentDashboard] = useState<DashboardItem | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-
   useEffect(() => {
     const initializeDashboard = async () => {
       try {
