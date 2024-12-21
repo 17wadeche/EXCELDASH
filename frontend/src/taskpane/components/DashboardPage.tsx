@@ -7,6 +7,7 @@ import { DashboardContext } from '../context/DashboardContext';
 import { DashboardItem } from './types';
 import { v4 as uuidv4 } from 'uuid';
 import { message } from 'antd';
+import axios from 'axios';
 
 const DashboardPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
