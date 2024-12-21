@@ -28,6 +28,9 @@ const AddTaskForm: React.FC<AddTaskFormProps> = ({ visible, onCancel }) => {
   const handleOk = async () => {
     try {
       const values = await form.validateFields();
+      const startDate = moment(values.start);
+      const endDate = moment(values.end);
+      const duration = endDate.diff(startDate, 'days');
       const newTask: Task = {
         id: `task-${uuidv4()}`,
         name: values.name,
@@ -37,6 +40,7 @@ const AddTaskForm: React.FC<AddTaskFormProps> = ({ visible, onCancel }) => {
         progress: values.progress,
         dependencies: values.dependencies ? values.dependencies.split(',').map((dep: string) => dep.trim()) : [],
         color: values.color,
+        duration,
       };
       await addTaskToGantt(newTask);
       form.resetFields();

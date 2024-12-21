@@ -2330,13 +2330,14 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         const dependenciesValue = Array.isArray(newTask.dependencies)
           ? newTask.dependencies.join(', ')
           : (newTask.dependencies ?? '');
+        const durationValue = newTask.duration ?? '';
         const rowData: (string | number | boolean)[] = [
           newTask.name,
           capitalizeFirstLetter(newTask.type ?? ''),
           newTask.start,
           newTask.end,
           '',
-          '',
+          durationValue,
           '',
           newTask.progress,
           dependenciesValue,
