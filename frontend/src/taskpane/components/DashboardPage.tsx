@@ -69,15 +69,13 @@ const DashboardPage: React.FC = () => {
       }
     };
     initializeDashboard();
-  }, [id, dashboards, currentWorkbookId, setWidgets, setLayouts]);
+  }, [id]);
   if (loading) {
     return <div>Loading...</div>;
   }
   if (id && !currentDashboard) {
     return <div>No dashboard found.</div>;
   }
-
   return <Dashboard />;
 };
-
 export default DashboardPage;
