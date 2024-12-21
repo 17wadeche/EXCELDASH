@@ -1181,10 +1181,8 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         message.warning('A title widget already exists.');
         return;
       }
-  
       const newKey = `${type}-${uuidv4()}`;
       let newWidget: Widget;
-  
       if (type === 'table') {
         try {
           const availableTables = await getAvailableTables();
@@ -1192,7 +1190,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
             message.warning('No tables found in the Excel workbook.');
             return;
           }
-  
           newWidget = {
             id: newKey,
             type,
@@ -1204,7 +1201,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
               tableName: '',
             } as TableData,
           };
-  
           setWidgetToPrompt({
             widget: newWidget,
             onComplete: async (updatedWidget: Widget) => {
@@ -1216,7 +1212,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
               }
             },
           });
-  
+          setIsSelectTableModalVisible(true);
           return;
         } catch (error) {
           console.error('Error adding table widget:', error);
@@ -1952,8 +1948,8 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         updateWidgetFunc(widgetId, {
           columns,
           data,
-          sheetName: "Sheet1",
-          tableName: "SomeTableName",
+          sheetName,
+          tableName,
         } as TableData);
         message.success('Excel table data loaded into the widget successfully!');
       });
