@@ -1947,7 +1947,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           });
           return rowObject;
         });
-        dashboardContext.updateWidget(widgetId, {
+        updateWidgetFunc(widgetId, {
           columns,
           data,
           sheetName: "Sheet1",
