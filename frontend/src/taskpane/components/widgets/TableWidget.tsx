@@ -3,15 +3,12 @@ import React from 'react';
 import { Button, Table } from 'antd';
 import { ColumnsType } from 'antd/es/table';
 import { TableData } from '../types';
-
 interface TableWidgetProps {
   id: string;
   name: string;
   data: TableData;
   onDelete: (id: string) => void;
 }
-
-// Renamed default export:
 const TableWidgetComponent: React.FC<TableWidgetProps> = ({
   id,
   name,
@@ -28,11 +25,7 @@ const TableWidgetComponent: React.FC<TableWidgetProps> = ({
         rowKey={(record: any) => record.someUniqueId || JSON.stringify(record)}
         style={{ width: '100%' }}
       />
-      <Button danger onClick={() => onDelete(id)}>
-        Remove Table
-      </Button>
     </div>
   );
 };
-
 export default TableWidgetComponent;
