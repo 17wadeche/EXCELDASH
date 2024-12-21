@@ -1014,7 +1014,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
   const updateLayoutsForNewWidgets = (newWidgets: Widget[]) => {
     setLayouts((prevLayouts) => {
       const updatedLayouts: { [key: string]: GridLayoutItem[] } = {...prevLayouts};
-      const breakpointList: Breakpoint[] = ['lg', 'md', 'sm'];
+      const breakpointList: Breakpoint[] = ['lg', 'md', 'sm', 'xl', 'xxl'];
       breakpointList.forEach((breakpoint) => {
         const breakpointCols = GRID_COLS[breakpoint];
         const existingItemIds = new Set(updatedLayouts[breakpoint]?.map((item) => item.i));
