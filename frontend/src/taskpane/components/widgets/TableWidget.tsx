@@ -18,9 +18,9 @@ const TableWidget: React.FC<TableWidgetProps> = ({ id, name, data, onDelete }) =
         columns={data.columns as ColumnsType<any>}
         dataSource={data.data}
         pagination={false}
-        rowKey={(_record: any, index: number) => index.toString()}
+        rowKey={(record: any) => record.someUniqueId || JSON.stringify(record)}
         style={{ width: '100%' }}
-      />
+        />
       <Button danger onClick={() => onDelete(id)}>
         Remove Table
       </Button>
