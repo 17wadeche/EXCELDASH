@@ -14,7 +14,6 @@ import { DashboardBorderSettings } from '../components/types';
 import { capitalizeFirstLetter } from '../utils/stringUtils'; 
 import { deleteDashboardById } from '../utils/api';
 import { getWorkbookIdFromProperties, isInDialog } from '../utils/excelUtils';
-import TableWidget from '../components/widgets/TableWidget';
 const { Option } = Select;
 interface DashboardContextProps {
   widgets: Widget[];
@@ -107,7 +106,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
   const [widgetToPrompt, setWidgetToPrompt] = useState<{widget: Widget; onComplete: (updatedWidget: Widget) => void;} | null>(null);
   const [layouts, setLayouts] = useState<{ [key: string]: GridLayoutItem[] }>(initialLayouts);
   const [currentWorkbookId, setCurrentWorkbookId] = useState<string>('');
-  const [tables, setTables] = useState<TableWidget[]>([]);
+  const [tables, setTables] = useState<TableWidgetType[]>([]);
   const [pastStates, setPastStates] = useState<{ widgets: Widget[]; layouts: { [key: string]: GridLayoutItem[] } }[] >([]);
   const [futureStates, setFutureStates] = useState<{ widgets: Widget[]; layouts: { [key: string]: GridLayoutItem[] } }[]>([]);
   const [availableWorksheets, setAvailableWorksheets] = useState<string[]>([]);
