@@ -323,12 +323,14 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
       title: dashboardTitle,
       borderSettings: dashboardBorderSettings,
     };
+    setCurrentDashboard(updatedDashboard);
     try {
       const res = await axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard);
       const savedDashboard = res.data;
       setCurrentDashboard(savedDashboard);
       message.success('Dashboard saved successfully!');
     } catch (err) {
+      setCurrentDashboard(currentDashboard); 
       console.error('Error saving dashboard:', err);
       message.error('Failed to save changes to server.');
     }

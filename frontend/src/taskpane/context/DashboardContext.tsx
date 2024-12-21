@@ -472,10 +472,14 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         layouts: layouts,
         borderSettings: dashboardBorderSettings,
       }
+      setCurrentDashboard((prev) => (prev ? { ...prev, ...dashboardToSave } : null));
       const response = await axios.put(`/api/dashboards/${currentDashboardId}`, dashboardToSave);
       const updatedDashboard = response.data;
+      setCurrentDashboard(updatedDashboard);
+      setWidgets(updatedDashboard.components || []);
+      setLayouts(updatedDashboard.layouts || {});
       setDashboards((prevDashboards) => {
-        const index = prevDashboards.findIndex(d => d.id === currentDashboardId);
+        const index = prevDashboards.findIndex((d) => d.id === currentDashboardId);
         if (index === -1) return prevDashboards;
         const newDashboards = [...prevDashboards];
         newDashboards[index] = updatedDashboard;
@@ -645,13 +649,11 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           const range = sheet.getRange(`${col}${dataRowStart}:${col}${dataRowEnd}`);
           range.numberFormat = [['mm/dd/yyyy']];
         });
-        console.log('Date columns formatted as mm/dd/yyyy');
         const durationColumns = ['F', 'G'];
         durationColumns.forEach((col) => {
           const range = sheet.getRange(`${col}${dataRowStart}:${col}${dataRowEnd}`);
           range.numberFormat = [['0']];
         });
-        console.log('Duration columns formatted as integers');
         const progressRange = sheet.getRange(`H${dataRowStart}:H${dataRowEnd}`);
         const progressFormat = '0'; 
         const progressFormats = Array.from({ length: dataRowEnd - dataRowStart + 1 }, () => [progressFormat]);
@@ -668,18 +670,10 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         try {
           const table = sheet.tables.getItem('GanttTable');
           const durationColumn = table.columns.getItemAt(5);
-          const durationRange = durationColumn.getDataBodyRange();
           const actualDurationColumn = table.columns.getItemAt(6);
-          const actualDurationRange = actualDurationColumn.getDataBodyRange();
-          const rowCount = sampleData.length; 
-          const durationFormulas = Array(rowCount).fill(["=@[End Date]-@[Start Date]"]);
-          const actualDurationFormulas = Array(rowCount).fill(["=@[Completed Date]-@[Start Date]"]);
-          durationRange.formulas = durationFormulas;
-          console.log('Calculated formula set for Duration (Days) column.');
-          actualDurationRange.formulas = actualDurationFormulas;
-          console.log('Calculated formula set for Actual Duration (Days) column.');
+          durationColumn.getDataBodyRange().formulas = sampleData.map(() => ["=[@[End Date]]-[@[Start Date]]"]);
+          actualDurationColumn.getDataBodyRange().formulas = sampleData.map(() => ["=[@[Completed Date]]-[@[Start Date]]"]);
           await context.sync();
-          console.log('Calculated columns formulas applied successfully.');
         } catch (calcError) {
           console.error('Error setting calculated columns:', calcError);
           throw calcError;
@@ -739,7 +733,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           const border = dataRange.format.borders.getItem(edge);
           border.style = Excel.BorderLineStyle.continuous;
           border.weight = Excel.BorderWeight.thin;
-          border.color = '#000000'; // Black border
+          border.color = '#000000';
         });
         console.log('Borders applied to data range');
         sheet.getUsedRange().format.autofitColumns();
