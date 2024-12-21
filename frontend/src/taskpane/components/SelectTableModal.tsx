@@ -4,7 +4,7 @@ import { Modal, Select, message } from 'antd';
 import { DashboardContext } from '../context/DashboardContext';
 import { useContext } from 'react';
 import { Widget } from '../components/types';
-
+import { TableData } from '../components/types';
 const { Option } = Select;
 
 interface SelectTableModalProps {

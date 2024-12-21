@@ -1183,12 +1183,11 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       let newWidget: Widget;
       if (type === 'table') {
         try {
-          const availableTables = await getAvailableTables();
+          const availableTables = await DashboardContext.getAvailableTables();
           if (availableTables.length === 0) {
             message.warning('No tables found in the Excel workbook.');
             return;
           }
-  
           newWidget = {
             id: newKey,
             type,
@@ -1200,7 +1199,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
               tableName: '',
             } as TableData,
           };
-  
           setWidgetToPrompt({
             widget: newWidget,
             onComplete: async (updatedWidget: Widget) => {
@@ -1352,7 +1350,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         return newWidgets;
       });
     },
-    [currentDashboard, currentDashboardId, currentWorkbookId, layouts, dashboardTitle, widgets, updateWidgetsWithHistory, updateLayoutsForNewWidgets, setCurrentDashboard, readTableFromExcel, getAvailableTables]
+    [currentDashboard, DashboardContext, currentDashboardId, currentWorkbookId, layouts, dashboardTitle, widgets, updateWidgetsWithHistory, updateLayoutsForNewWidgets, setCurrentDashboard, readTableFromExcel, getAvailableTables]
   );
   
   const handleWidgetDetailsComplete = (updatedWidget: Widget) => {
@@ -1929,7 +1927,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           });
           return rowObject;
         });
-        dashboardContext.updateWidget(widgetId, {
+        DashboardContext.updateWidget(widgetId, {
           columns,
           data,
         } as Partial<TableData>);
