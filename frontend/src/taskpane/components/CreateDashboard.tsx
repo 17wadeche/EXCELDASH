@@ -33,6 +33,7 @@ const CreateDashboard: React.FC = () => {
   const [previewTemplate, setPreviewTemplate] = useState<TemplateItem | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const navigate = useNavigate();
+  const createdDashboard: DashboardItem = await createDashboard(newDashboard);
   const {
     setDashboardTitle: setContextTitle,
     setWidgets,
@@ -214,8 +215,8 @@ const CreateDashboard: React.FC = () => {
         workbookId: workbookId,
       };
       const createdDashboard: DashboardItem = await createDashboard(newDashboard);
-      setWidgets([]);
-      setLayouts({});
+      setWidgets(createdDashboard.components || []);
+      setLayouts(createdDashboard.layouts || {});
       setDashboards((prev) => [...prev, createdDashboard]);
       setCurrentDashboardId(createdDashboard.id);
       message.success('Dashboard created successfully!');
