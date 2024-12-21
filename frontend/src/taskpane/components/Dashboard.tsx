@@ -53,7 +53,7 @@ interface DashboardProps {
 }
 
 const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = false, closePresenterMode, isFullScreen }) => {
-  const { widgets, addWidget, removeWidget, updateWidget, refreshAllCharts, editDashboard, layouts, setLayouts, setWidgets, dashboards, setDashboardBorderSettings, updateLayoutsForNewWidgets, undo, dashboardBorderSettings, redo, canUndo, dashboardTitle, canRedo, currentTemplateId, currentDashboardId, saveTemplate, currentDashboard, currentWorkbookId, availableWorksheets, setCurrentDashboard, exportDashboardAsPDF, setCurrentDashboardId } = useContext(DashboardContext)!;
+  const { widgets, addWidget, removeWidget, updateWidget, refreshAllCharts, editDashboard, layouts, setLayouts, setWidgets, dashboards, setDashboardBorderSettings, updateLayoutsForNewWidgets, undo, dashboardBorderSettings, redo, canUndo, dashboardTitle, canRedo, currentTemplateId, currentDashboardId, saveTemplate, currentDashboard, currentWorkbookId, availableWorksheets, setCurrentDashboard, exportDashboardAsPDF, setCurrentDashboardId, setDashboards } = useContext(DashboardContext)!;
   const { id } = useParams<{ id: string }>();
   const [isFullscreenActive, setIsFullscreenActive] = useState(false);
   const isEditingEnabled = !isPresenterMode && !isFullscreenActive && !isFullScreen;
@@ -327,8 +327,8 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
       const res = await axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard);
       const savedDashboard = res.data;
       setCurrentDashboard(savedDashboard);
-      setDashboards((prev) => {
-        const idx = prev.findIndex((d) => d.id === savedDashboard.id);
+      setDashboards((prev: DashboardItem[]) => {
+        const idx = prev.findIndex((d: DashboardItem) => d.id === savedDashboard.id);
         if (idx === -1) {
           return [...prev, savedDashboard];
         } else {
