@@ -11,11 +11,10 @@ import jsPDF from 'jspdf';
 import axios from 'axios';
 import PromptWidgetDetailsModal from '../components/PromptWidgetDetailsModal';
 import { DashboardBorderSettings } from '../components/types';
-import TableWidget from './widgets/TableWidget';
 import { capitalizeFirstLetter } from '../utils/stringUtils'; 
 import { deleteDashboardById } from '../utils/api';
 import { getWorkbookIdFromProperties, isInDialog } from '../utils/excelUtils';
-
+import TableWidget from '../components/widgets/TableWidget';
 const { Option } = Select;
 interface DashboardContextProps {
   widgets: Widget[];
