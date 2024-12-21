@@ -143,6 +143,7 @@ export interface Task {
   type?: string;
   color?: string;
   duration?: number;
+  completed?: string;
 }
 
 export interface GanttWidgetData {

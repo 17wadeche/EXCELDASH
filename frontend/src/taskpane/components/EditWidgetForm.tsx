@@ -285,12 +285,12 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
             name: task.name,
             start: task.start.format('YYYY-MM-DD'),
             end: task.end.format('YYYY-MM-DD'),
+            completed: task.completed
+              ? task.completed.format('YYYY-MM-DD')
+              : undefined,
             progress: task.progress,
             dependencies: task.dependencies
-              ? task.dependencies
-                  .split(',')
-                  .map((dep: string) => dep.trim())
-                  .join(',')
+              ? task.dependencies.join(',')
               : '',
             color: task.color,
           })),
@@ -951,6 +951,13 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                     >
                       <DatePicker />
                     </Form.Item>
+                    <Form.Item
+                      {...restField}
+                      name={[name, 'completed']}
+                      label="Completed Date"
+                    >
+                      <DatePicker />
+                    </Form.Item>
                     {/* Progress */}
                     <Form.Item
                       {...restField}
@@ -963,9 +970,19 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                     <Form.Item
                       {...restField}
                       name={[name, 'dependencies']}
-                      label="Dependencies (comma-separated IDs)"
+                      label="Dependencies"
                     >
-                      <Input />
+                      <Select mode="multiple" allowClear>
+                        {form.getFieldValue('tasks')?.map((t: any) => {
+                          const taskName = t.name;
+                          if (!taskName) return null;
+                          return (
+                            <Select.Option key={taskName} value={taskName}>
+                              {taskName}
+                            </Select.Option>
+                          );
+                        })}
+                      </Select>
                     </Form.Item>
                     {/* Task Color */}
                     <Form.Item

@@ -23,13 +23,20 @@ const AddTaskForm: React.FC<AddTaskFormProps> = ({ visible, onCancel }) => {
     return null;
   }
 
-  const { addTaskToGantt } = dashboardContext;
+  const { addTaskToGantt, widgets } = dashboardContext;
+  const existingTaskNames = useMemo(() => {
+    const ganttWidget = widgets.find(w => w.type === 'gantt');
+    if (!ganttWidget) return [];
+    const ganttData = ganttWidget.data;
+    return ganttData.tasks.map((t: Task) => t.name);
+  }, [widgets]);
 
   const handleOk = async () => {
     try {
       const values = await form.validateFields();
       const startDate = moment(values.start);
       const endDate = moment(values.end);
+      const completed = values.completed ? moment(values.completed) : null;
       const duration = endDate.diff(startDate, 'days');
       const newTask: Task = {
         id: `task-${uuidv4()}`,
@@ -37,8 +44,9 @@ const AddTaskForm: React.FC<AddTaskFormProps> = ({ visible, onCancel }) => {
         type: values.type,
         start: values.start.format('YYYY-MM-DD'),
         end: values.end.format('YYYY-MM-DD'),
+        completed: completed ? completed.format('YYYY-MM-DD') : undefined,
         progress: values.progress,
-        dependencies: values.dependencies ? values.dependencies.split(',').map((dep: string) => dep.trim()) : [],
+        dependencies: values.dependencies?.join(',') || '',
         color: values.color,
         duration,
       };
@@ -98,18 +106,31 @@ const AddTaskForm: React.FC<AddTaskFormProps> = ({ visible, onCancel }) => {
           <DatePicker style={{ width: '100%' }} />
         </Form.Item>
         <Form.Item
+          name="completed"
+          label="Completed Date"
+          tooltip="If the task is already completed, pick a date"
+        >
+          <DatePicker style={{ width: '100%' }} />
+        </Form.Item>
+        <Form.Item
           name="progress"
           label="Progress (%)"
           rules={[{ required: true, message: 'Please enter the progress' }]}
         >
           <InputNumber min={0} max={100} style={{ width: '100%' }} />
         </Form.Item>
-        <Form.Item
-          name="dependencies"
-          label="Dependencies"
-          tooltip="Comma-separated list of task names"
-        >
-          <Input placeholder="e.g., Design Interface, Develop Backend" />
+        <Form.Item name="dependencies" label="Dependencies">
+          <Select
+            mode="multiple"
+            placeholder="Select dependencies"
+            allowClear
+          >
+            {existingTaskNames.map(taskName => (
+              <Option key={taskName} value={taskName}>
+                {taskName}
+              </Option>
+            ))}
+          </Select>
         </Form.Item>
         <Form.Item
           name="color"
