@@ -1171,23 +1171,26 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     }
   };
   const addWidgetFunc = useCallback(
-    (
-      type: 'text' | 'chart' | 'gantt' | 'image' | 'metric' | 'table' | 'line' | 'title' ,
+    async (
+      type: 'text' | 'chart' | 'gantt' | 'image' | 'metric' | 'table' | 'line' | 'title',
       data?: TextData | ChartData | GanttWidgetData | ImageWidgetData | MetricData | TableData | LineWidgetData | TitleWidgetData
-    ) => {
+    ): Promise<void> => {
       if (type === 'title' && widgets.some((w) => w.type === 'title')) {
         message.warning('A title widget already exists.');
         return;
       }
+  
       const newKey = `${type}-${uuidv4()}`;
       let newWidget: Widget;
+  
       if (type === 'table') {
         try {
-          const availableTables = await DashboardContext.getAvailableTables();
+          const availableTables = await getAvailableTables();
           if (availableTables.length === 0) {
             message.warning('No tables found in the Excel workbook.');
             return;
           }
+  
           newWidget = {
             id: newKey,
             type,
@@ -1199,6 +1202,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
               tableName: '',
             } as TableData,
           };
+  
           setWidgetToPrompt({
             widget: newWidget,
             onComplete: async (updatedWidget: Widget) => {
@@ -1218,6 +1222,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           return;
         }
       }
+  
       if (data) {
         newWidget = {
           id: newKey,
@@ -1330,6 +1335,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
             throw new Error(`Unsupported widget type: ${type}`);
         }
       }
+  
       let missingFields: string[] = [];
       if (type === 'metric') {
         const metricData = newWidget.data as MetricData;
@@ -1337,11 +1343,13 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           missingFields.push('worksheetName', 'cellAddress');
         }
       }
+  
       if (missingFields.length > 0) {
         message.warning(`Please provide the following fields: ${missingFields.join(', ')}`);
         setPendingWidget(newWidget);
         return;
       }
+  
       updateWidgetsWithHistory((prevWidgets) => {
         const newWidgets = [...prevWidgets, newWidget];
         console.log('addWidgetFunc: New widgets after addition:', newWidgets);
@@ -1350,7 +1358,19 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         return newWidgets;
       });
     },
-    [currentDashboard, DashboardContext, currentDashboardId, currentWorkbookId, layouts, dashboardTitle, widgets, updateWidgetsWithHistory, updateLayoutsForNewWidgets, setCurrentDashboard, readTableFromExcel, getAvailableTables]
+    [
+      currentDashboard,
+      currentDashboardId,
+      currentWorkbookId,
+      layouts,
+      dashboardTitle,
+      widgets,
+      updateWidgetsWithHistory,
+      updateLayoutsForNewWidgets,
+      setCurrentDashboard,
+      readTableFromExcel,
+      getAvailableTables,
+    ]
   );
   
   const handleWidgetDetailsComplete = (updatedWidget: Widget) => {
