@@ -324,11 +324,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       });
     } catch (error: any) {
       console.error("Error fetching worksheets:", error);
-      if (error instanceof OfficeExtension.Error && error.code === 'InvalidOperationInCellEditMode') {
-        message.error("Excel is currently in cell-editing mode. Please press ENTER, TAB, or select another cell to exit edit mode, and then try again.");
-      } else {
-        message.error("Failed to fetch worksheets from Excel.");
-      }
       return [];
     }
   };
