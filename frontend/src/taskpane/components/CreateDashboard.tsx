@@ -11,6 +11,7 @@ const { Content } = Layout;
 const { Search } = Input;
 import { createCheckoutSession, checkSubscription, loginUser, registerUser, verifySubscription, checkRegistration, unsubscribeUser, createDashboard } from './../utils/api';
 import axios from 'axios';
+
 interface Widget {
   id: string;
   title: string;
@@ -33,7 +34,6 @@ const CreateDashboard: React.FC = () => {
   const [previewTemplate, setPreviewTemplate] = useState<TemplateItem | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const navigate = useNavigate();
-  const createdDashboard: DashboardItem = await createDashboard(newDashboard);
   const {
     setDashboardTitle: setContextTitle,
     setWidgets,
@@ -48,14 +48,12 @@ const CreateDashboard: React.FC = () => {
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
     const savedEmail = localStorage.getItem('userEmail');
-
     if (storedToken && savedEmail) {
       setIsLoggedIn(true);
       setEmail(savedEmail);
       checkRegistration(savedEmail).then(registrationResult => {
         setIsRegistered(registrationResult.registered);
       }).catch(console.error);
-
       checkSubscription(savedEmail).then(result => {
         setIsSubscribed(result.subscribed);
       }).catch(console.error);
