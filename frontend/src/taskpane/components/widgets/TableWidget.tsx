@@ -7,7 +7,6 @@ interface TableWidgetProps {
   id: string;
   name: string;
   data: TableData;
-  onDelete: (id: string) => void;
   onUpdateName?: (id: string, newName: string) => void;
 }
 
@@ -15,7 +14,6 @@ const TableWidgetComponent: React.FC<TableWidgetProps> = ({
   id,
   name,
   data,
-  onDelete,
   onUpdateName,
 }) => {
   const [title, setTitle] = useState(name);
