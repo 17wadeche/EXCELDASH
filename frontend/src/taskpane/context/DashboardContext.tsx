@@ -1375,7 +1375,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
   
   const handleWidgetDetailsComplete = (updatedWidget: Widget) => {
     if (pendingWidget && updatedWidget.id === pendingWidget.id) {
-      setPendingWidget(null);
+      setPendingWidget(undefined);
       if (updatedWidget.type === 'table') {
         setIsSelectTableModalVisible(true);
       } else {
