@@ -250,6 +250,7 @@ export interface DashboardVersion {
   title: string;
   components: Widget[];
   layouts: { [key: string]: GridLayoutItem[] };
+  borderSettings?: DashboardBorderSettings;
 }
 
 export interface Dataset {

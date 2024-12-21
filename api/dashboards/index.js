@@ -48,7 +48,7 @@ module.exports = async function (context, req) {
         };
         return;
       }
-      const { title, components, layouts, workbookId } = req.body;
+      const { title, components, layouts, workbookId, borderSettings } = req.body;
       console.log("Server: Received PUT for dashboard:", id);
       console.log("Server: Request body workbookId:", workbookId);
       const dashboard = await Dashboard.findByPk(id);
@@ -62,6 +62,9 @@ module.exports = async function (context, req) {
       if (layouts !== undefined) dashboard.layouts = layouts;
       if (workbookId !== undefined) {
         dashboard.workbookId = workbookId.toLowerCase();
+      }
+      if (borderSettings !== undefined) {
+        dashboard.borderSettings = borderSettings;
       }
       await dashboard.save();
       context.res = { status: 200, body: dashboard };

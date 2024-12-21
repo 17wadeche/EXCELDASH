@@ -322,6 +322,7 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
       components: widgets,
       layouts: layouts,
       title: dashboardTitle,
+      borderSettings: dashboardBorderSettings,
     };
     try {
       const res = await axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard);
@@ -351,13 +352,14 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
           const updatedDashboard: DashboardItem = {
             ...dashboards.find((d) => d.id === currentDashboardId)!,
             layouts: allLayouts,
+            borderSettings: dashboardBorderSettings,
           };
           editDashboard(updatedDashboard);
           console.log('Layouts updated and saved immediately.');
         }
       }
     },
-    [layouts, currentDashboardId, editDashboard, dashboards, setLayouts]
+    [layouts, currentDashboardId, editDashboard, dashboards, setLayouts, dashboardBorderSettings]
   );
 
   const copyWidgetCallback = useCallback(

@@ -466,6 +466,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         name: dashboardTitle || 'Untitled Template',
         widgets: widgets,
         layouts: layouts,
+        borderSettings: dashboardBorderSettings,
       };
       const response = await axios.post('/api/templates', template);
       message.success('Dashboard saved as template!');
@@ -947,6 +948,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       title: dashboardTitle,
       components: widgets,
       layouts,
+      borderSettings: dashboardBorderSettings,
     };
     const updatedVersions = [newVersion];
     if (currentDashboard.versions && currentDashboard.versions.length > 0) {
@@ -960,6 +962,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       components: widgets,
       layouts,
       title: dashboardTitle,
+      borderSettings: dashboardBorderSettings,
     };
     axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard)
       .then(() => {
