@@ -120,6 +120,8 @@ export interface TableColumn<T> extends Omit<ColumnType<T>, 'title'> {
 export interface TableData<T = Record<string, any>> {
   columns: TableColumn<T>[];
   data: T[];
+  sheetName: string;
+  tableName: string;
 }
 
 export interface TextData {

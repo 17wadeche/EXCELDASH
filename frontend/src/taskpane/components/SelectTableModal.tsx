@@ -45,13 +45,15 @@ const SelectTableModal: React.FC<SelectTableModalProps> = ({ visible, widget, on
       updateWidget(widget.id, {
         sheetName: selectedTable.sheetName,
         tableName: selectedTable.name,
-      }).then(() => {
-        onComplete();
-        message.success('Table widget added successfully!');
-      }).catch((error: any) => {
-        console.error('Error updating widget:', error);
-        message.error('Failed to add table widget.');
-      });
+      } as Partial<TableData>)
+        .then(() => {
+          onComplete();
+          message.success('Table widget added successfully!');
+        })
+        .catch((error: any) => {
+          console.error('Error updating widget:', error);
+          message.error('Failed to add table widget.');
+        });
     } else {
       message.warning('Please select a table.');
     }

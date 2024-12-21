@@ -58,6 +58,7 @@ interface DashboardContextProps {
   restoreDashboardVersion: (versionId: string) => void;
   getWorkbookIdFromProperties: () => Promise<string>;
   promptForWidgetDetails: (widget: Widget, onComplete: (updatedWidget: Widget) => void) => void;
+  getAvailableTables: () => Promise<{ name: string; sheetName: string; rangeAddress: string }[]>;
   editDashboard: (dashboard: DashboardItem) => Promise<void>;
   deleteDashboard: (id: string) => void;
   undo: () => void;
@@ -1181,35 +1182,43 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       const newKey = `${type}-${uuidv4()}`;
       let newWidget: Widget;
       if (type === 'table') {
-        const availableTables = await getAvailableTables();
-        if (availableTables.length === 0) {
-          message.warning('No tables found in the Excel workbook.');
+        try {
+          const availableTables = await getAvailableTables();
+          if (availableTables.length === 0) {
+            message.warning('No tables found in the Excel workbook.');
+            return;
+          }
+  
+          newWidget = {
+            id: newKey,
+            type,
+            name: 'New Table',
+            data: {
+              columns: [],
+              data: [],
+              sheetName: '',
+              tableName: '',
+            } as TableData,
+          };
+  
+          setWidgetToPrompt({
+            widget: newWidget,
+            onComplete: async (updatedWidget: Widget) => {
+              const { sheetName, tableName } = updatedWidget.data as TableData;
+              if (sheetName && tableName) {
+                await readTableFromExcel(newWidget.id, sheetName, tableName);
+              } else {
+                message.error('Sheet name or table name is missing.');
+              }
+            },
+          });
+  
+          return;
+        } catch (error) {
+          console.error('Error adding table widget:', error);
+          message.error('Failed to add table widget.');
           return;
         }
-        newWidget = {
-          id: newKey,
-          type,
-          name: 'New Table',
-          data: {
-            columns: [],
-            data: [],
-            sheetName: '',
-            tableName: '',
-          } as TableData,
-        };
-        setWidgetToPrompt({
-          widget: newWidget,
-          onComplete: async (updatedWidget: Widget) => {
-            const { sheetName, tableName } = updatedWidget.data as TableData;
-            if (sheetName && tableName) {
-              await readTableFromExcel(newWidget.id, sheetName, tableName);
-            } else {
-              message.error('Sheet name or table name is missing.');
-            }
-          },
-        });
-  
-        return;
       }
       if (data) {
         newWidget = {
@@ -1343,7 +1352,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         return newWidgets;
       });
     },
-    [currentDashboard, currentDashboardId, currentWorkbookId, layouts, dashboardTitle, widgets, updateWidgetsWithHistory, updateLayoutsForNewWidgets, setCurrentDashboard]
+    [currentDashboard, currentDashboardId, currentWorkbookId, layouts, dashboardTitle, widgets, updateWidgetsWithHistory, updateLayoutsForNewWidgets, setCurrentDashboard, readTableFromExcel, getAvailableTables]
   );
   
   const handleWidgetDetailsComplete = (updatedWidget: Widget) => {
