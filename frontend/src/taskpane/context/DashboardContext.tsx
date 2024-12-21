@@ -117,7 +117,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
   const canUndo = pastStates.length > 0;
   const canRedo = futureStates.length > 0;
   const isUndoRedoRef = useRef(false);
-  const [pendingWidget, setPendingWidget] = useState<Widget | null>(null);
+  const [pendingWidget, setPendingWidget] = useState<Widget | undefined>(undefined);
   const [isSelectTableModalVisible, setIsSelectTableModalVisible] = useState(false);
   const isGanttHandlerRegistered = useRef(false);
   const isReadGanttDataInProgress = useRef(false);
@@ -1947,10 +1947,12 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           });
           return rowObject;
         });
-        DashboardContext.updateWidget(widgetId, {
+        dashboardContext.updateWidget(widgetId, {
           columns,
           data,
-        } as Partial<TableData>);
+          sheetName: "Sheet1",
+          tableName: "SomeTableName",
+        } as TableData);
         message.success('Excel table data loaded into the widget successfully!');
       });
     } catch (error) {
