@@ -575,7 +575,6 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
             id={tableWidget.id}
             name={tableWidget.name}
             data={tableWidget.data as TableData}
-            onDelete={handleRemoveWidget}
           />
         );
       }

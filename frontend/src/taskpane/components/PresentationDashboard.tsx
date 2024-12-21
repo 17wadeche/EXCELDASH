@@ -102,9 +102,6 @@ const PresentationDashboard: React.FC = () => {
                       id={widget.id}
                       name={(widget as TableWidget).name}
                       data={(widget as TableWidget).data as TableData}
-                      onDelete={() => {
-                        /* No delete in presentation mode */
-                      }}
                     />
                   </div>
                 );
