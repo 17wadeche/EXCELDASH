@@ -275,11 +275,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       });
     } catch (error: any) {
       console.error('Error writing metric value:', error);
-      if (error instanceof OfficeExtension.Error && error.code === 'InvalidOperationInCellEditMode') {
-        message.error("Excel is currently in cell-editing mode. Please press ENTER, TAB, or select another cell before trying again.");
-      } else {
-        message.error('Failed to update metric value.');
-      }
     }
   };
   const promptForWidgetDetails = useCallback((widget: Widget, onComplete: (updatedWidget: Widget) => void) => {
@@ -672,11 +667,14 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           const table = sheet.tables.getItem('GanttTable');
           const durationColumn = table.columns.getItemAt(5);
           const durationRange = durationColumn.getDataBodyRange();
-          durationRange.formulas = [["=[[@End Date]]-[[@Start Date]]"]];
-          console.log('Calculated formula set for Duration (Days) column.');
           const actualDurationColumn = table.columns.getItemAt(6);
           const actualDurationRange = actualDurationColumn.getDataBodyRange();
-          actualDurationRange.formulas = [["=[[@Completed Date]]-[[@Start Date]]"]];
+          const rowCount = sampleData.length; 
+          const durationFormulas = Array(rowCount).fill(["=@[End Date]-@[Start Date]"]);
+          const actualDurationFormulas = Array(rowCount).fill(["=@[Completed Date]-@[Start Date]"]);
+          durationRange.formulas = durationFormulas;
+          console.log('Calculated formula set for Duration (Days) column.');
+          actualDurationRange.formulas = actualDurationFormulas;
           console.log('Calculated formula set for Actual Duration (Days) column.');
           await context.sync();
           console.log('Calculated columns formulas applied successfully.');
