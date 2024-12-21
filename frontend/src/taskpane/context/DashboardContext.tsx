@@ -1910,6 +1910,54 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     }
     return color;
   };
+
+  async function syncGanttDataToExcel(ganttTasks: Task[]) {
+    try {
+      await Excel.run(async (context) => {
+        const sheet = context.workbook.worksheets.getItemOrNullObject("Gantt");
+        sheet.load("name");
+        await context.sync();
+        if (sheet.isNullObject) {
+          console.warn("Gantt sheet does not exist.");
+          return;
+        }
+        const table = sheet.tables.getItemOrNullObject("GanttTable");
+        table.load(["name", "rows"]);
+        await context.sync();
+        if (table.isNullObject) {
+          message.error("GanttTable not found in the Gantt worksheet.");
+          return;
+        }
+        table.rows.remove();
+        const newRows = ganttTasks.map((t) => {
+          const dependenciesValue = Array.isArray(t.dependencies)
+            ? t.dependencies.join(", ")
+            : t.dependencies || "";
+          const completedValue = t.completed || "";
+          return [
+            t.name,                           // Task Name
+            t.type ? capitalizeFirstLetter(t.type) : "Task",
+            t.start,                          // Start Date (Excel serial or ISO)
+            t.end,                            // End Date
+            completedValue,                   // Completed Date or empty
+            t.duration || "",                 // Duration
+            "",                               // Actual Duration placeholder
+            t.progress ?? 0,                  // Progress
+            dependenciesValue,                // Dependencies
+          ];
+        });
+        if (newRows.length > 0) {
+          table.rows.add(undefined, newRows);
+        }
+        await context.sync();
+        message.success("Excel GanttTable updated successfully!");
+      });
+    } catch (error) {
+      console.error("Error syncing Gantt data to Excel:", error);
+      message.error("Failed to sync Gantt data to Excel.");
+    }
+  }
+
   async function readTableFromExcel(widgetId: string, sheetName: string, tableName: string) {
     try {
       await Excel.run(async (context) => {
