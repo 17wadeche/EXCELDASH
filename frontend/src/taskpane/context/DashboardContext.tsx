@@ -1,7 +1,7 @@
 /// <reference types="office-js" />
 // src/taskpane/context/DashboardContext.tsx
 import React, { createContext, useState, useEffect, useCallback, useRef} from 'react';
-import { Widget, TextData, ChartData, GanttWidgetData, ImageWidgetData, TitleWidgetData, TitleWidget, TableData, DashboardVersion, GridLayoutItem, DashboardItem, TableLineWidgetData, MetricData, Task} from '../components/types';
+import { Widget, TextData, ChartData, GanttWidgetData, ImageWidgetData, TitleWidgetData, TitleWidget, TableData, DashboardVersion, GridLayoutItem, DashboardItem, LineWidgetData, MetricData, Task} from '../components/types';
 import { v4 as uuidv4 } from 'uuid';
 import { Breakpoint, GRID_COLS, WIDGET_SIZES } from '../components/layoutConstants';
 import { message, Select } from 'antd';
@@ -684,11 +684,11 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           const table = sheet.tables.getItem('GanttTable');
           const durationColumn = table.columns.getItemAt(5);
           const durationRange = durationColumn.getDataBodyRange();
-          durationRange.formulas = [['=[@End Date]-[@Start Date]']];
+          durationRange.formulas = "=[@End Date]-[@Start Date]"; 
           console.log('Calculated formula set for Duration (Days) column.');
           const actualDurationColumn = table.columns.getItemAt(6);
           const actualDurationRange = actualDurationColumn.getDataBodyRange();
-          actualDurationRange.formulas = [['=[@Completed Date]-[@Start Date]']];
+          actualDurationRange.formulas = "=[@Completed Date]-[@Start Date]";
           console.log('Calculated formula set for Actual Duration (Days) column.');
           await context.sync();
           console.log('Calculated columns formulas applied successfully.');
