@@ -279,28 +279,49 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
         } as ChartData;
         break;
       case 'gantt':
+        const existingData = widget.data as GanttWidgetData;
+        const existingTasks = existingData.tasks || [];
+        const mergedTasks = existingTasks.map((oldTask) => {
+          const updatedTask = cleanedValues.tasks.find(
+            (t: any) => t.id === oldTask.id
+          );
+          if (!updatedTask) {
+            return oldTask;
+          }
+          return {
+            ...oldTask,
+            name: updatedTask.name,
+            start: updatedTask.start.format('YYYY-MM-DD'),
+            end: updatedTask.end.format('YYYY-MM-DD'),
+            completed: updatedTask.completed ? updatedTask.completed.format('YYYY-MM-DD') : undefined,
+            progress: updatedTask.progress,
+            dependencies: Array.isArray(updatedTask.dependencies) ? updatedTask.dependencies : (updatedTask.dependencies || '').split(','),
+            color: updatedTask.color || oldTask.color,
+          };
+        });
+        const newTasks = cleanedValues.tasks.filter(
+          (t: any) => !existingTasks.some((old) => old.id === t.id)
+        ).map((t: any) => ({
+          id: t.id,
+          name: t.name,
+          start: t.start.format('YYYY-MM-DD'),
+          end: t.end.format('YYYY-MM-DD'),
+          completed: t.completed ? t.completed.format('YYYY-MM-DD') : undefined,
+          progress: t.progress,
+          dependencies: Array.isArray(t.dependencies) ? t.dependencies : (t.dependencies || '').split(','),
+          color: t.color || '#FF0000',
+        }));
+        const finalTasks = [...mergedTasks, ...newTasks];
         updatedData = {
-          ...(widget.data as GanttWidgetData),
-          tasks: cleanedValues.tasks.map((task: any) => ({
-            id: task.id,
-            name: task.name,
-            start: task.start.format('YYYY-MM-DD'),
-            end: task.end.format('YYYY-MM-DD'),
-            completed: task.completed ? task.completed.format('YYYY-MM-DD') : undefined,
-            progress: task.progress,
-            dependencies: typeof task.dependencies === 'string'
-              ? task.dependencies.split(',')
-              : Array.isArray(task.dependencies)
-                ? task.dependencies
-                : [],
-            color: task.color,
-          })),
+          ...existingData,
+          tasks: finalTasks,
           title: cleanedValues.title,
-          titleAlignment: cleanedValues.titleAlignment || 'left',
+          titleAlignment:
+            cleanedValues.titleAlignment || existingData.titleAlignment || 'left',
         } as GanttWidgetData;
         onSubmit(updatedData);
         if (syncGanttDataToExcel) {
-          syncGanttDataToExcel(updatedData.tasks);
+          syncGanttDataToExcel(finalTasks);
         }
         break;
       case 'metric':
