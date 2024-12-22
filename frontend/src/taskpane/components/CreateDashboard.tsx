@@ -43,6 +43,7 @@ const CreateDashboard: React.FC = () => {
     currentWorkbookId,
     setLayouts,
     setDashboards,
+    deleteTemplateById,
   } = useContext(DashboardContext)!;
 
   useEffect(() => {
@@ -193,17 +194,6 @@ const CreateDashboard: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    setLoading(true);
-    const storedTemplates = JSON.parse(
-      localStorage.getItem('dashboardTemplates') || '[]'
-    ) as any[];
-    setTimeout(() => {
-      setTemplates(storedTemplates);
-      setLoading(false);
-    }, 500);
-  }, []);
-
   const handleCreate = async () => {
     if (!dashboardTitle.trim()) {
       message.error('Dashboard title cannot be empty.');
@@ -281,11 +271,19 @@ const CreateDashboard: React.FC = () => {
     });
   };
 
-  const deleteTemplate = (id: string) => {
-    const updatedTemplates = templates.filter((template) => template.id !== id);
-    setTemplates(updatedTemplates);
-    localStorage.setItem('dashboardTemplates', JSON.stringify(updatedTemplates));
-    message.success('Template deleted successfully!');
+  const deleteTemplate = async (id: string) => {
+    setIsLoading(true);
+    try {
+      await deleteTemplateById(id);
+      const updatedTemplates = templates.filter((template) => template.id !== id);
+      setTemplates(updatedTemplates);
+      message.success('Template deleted successfully!');
+    } catch (error: any) {
+      console.error('Error deleting template:', error);
+      message.error('Failed to delete template. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const filteredTemplates = templates.filter((template) =>
