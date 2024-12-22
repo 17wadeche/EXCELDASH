@@ -7,9 +7,15 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true,
       allowNull: false,
     },
-    email: {
+    userEmail: {
       type: DataTypes.STRING(255),
       allowNull: false,
+      references: {
+        model: 'Users',
+        key: 'email',
+      },
+      onUpdate: 'CASCADE',
+      onDelete: 'CASCADE',
     },
     status: {
       type: DataTypes.STRING(50),
@@ -22,14 +28,6 @@ module.exports = (sequelize, DataTypes) => {
     currentPeriodEnd: {
       type: DataTypes.DATE,
       allowNull: false,
-    },
-    userId: {
-      type: DataTypes.CHAR(36),
-      allowNull: true,
-      references: {
-        model: 'Users', // Ensure this matches your Users table name
-        key: 'id',
-      },
     },
     paid_amount: {
       type: DataTypes.INTEGER,

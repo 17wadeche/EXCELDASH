@@ -15,9 +15,15 @@ module.exports = (sequelize) => {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      userId: {
-        type: DataTypes.CHAR(36),
+      userEmail: {
+        type: DataTypes.STRING,
         allowNull: false,
+        references: {
+          model: 'Users',   // references the Users table
+          key: 'email',     // referencing the 'email' column
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE',
       },
       expiresAt: {
         type: DataTypes.DATE,

@@ -28,8 +28,8 @@ module.exports = async function (context, req) {
       };
       return;
     }
-    const userId = storedToken.userId;
-    const newAccessToken = jwt.sign({ userId }, process.env.JWT_SECRET, {
+    const userEmail = storedToken.userEmail;
+    const newAccessToken = jwt.sign({ email: userEmail }, process.env.JWT_SECRET, {
       expiresIn: '30d',
     });
     const newRefreshToken = uuidv4();

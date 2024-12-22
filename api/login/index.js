@@ -38,7 +38,7 @@ module.exports = async function (context, req) {
       };
       return;
     }
-    const accessToken = jwt.sign({ userId: user.id, email: user.email }, process.env.JWT_SECRET, {
+    const accessToken = jwt.sign({ email: user.email }, process.env.JWT_SECRET, {
       expiresIn: '30d', // or shorter
     });
     const refreshTokenValue = uuidv4();
@@ -47,7 +47,7 @@ module.exports = async function (context, req) {
 
     await RefreshToken.create({
       token: refreshTokenValue,
-      userId: user.id,
+      userEmail: user.email,
       expiresAt: refreshTokenExpires
     });
     context.res = {

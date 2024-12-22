@@ -57,7 +57,7 @@ module.exports = async function (context, req) {
       return;
     }
     const subscription = await Subscription.findOne({
-      where: { userId: user.id, status: 'active' },
+      where: { userEmail: user.email, status: 'active' },
       transaction
     });
     if (!subscription) {

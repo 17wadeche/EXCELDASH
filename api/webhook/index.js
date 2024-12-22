@@ -46,11 +46,10 @@ module.exports = async function (context, req) {
       const currency = subscription.items.data[0]?.price?.currency || 'usd';
       const subscriptionData = {
         subscription_id: subscription.id,
-        userId: user.id,
         status: subscription.status,
         subscription_plan: subscriptionPlan,
         currentPeriodEnd: new Date(subscription.current_period_end * 1000),
-        email: customerEmail,
+        userEmail: customerEmail,
         paid_amount: paidAmount,
         currency: currency,
       };
@@ -92,7 +91,7 @@ module.exports = async function (context, req) {
       const currency = invoice.currency || 'usd';
       const subscriptionData = {
         subscription_id: subscription.id,
-        userId: user.id,
+        userEmail: user.email,
         status: subscription.status,
         subscription_plan: subscriptionPlan,
         currentPeriodEnd: new Date(subscription.current_period_end * 1000),
