@@ -1996,11 +1996,37 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           sheetName,
           tableName,
         } as TableData);
-        message.success('Excel table data loaded into the widget successfully!');
+        setTables((prevTables) => {
+          const idx = prevTables.findIndex((t) => t.id === widgetId);
+          if (idx === -1) {
+            const newTable: TableWidget = {
+              id: widgetId,
+              type: "table",
+              data: { columns, data, sheetName, tableName },
+            };
+            return [...prevTables, newTable];
+          } else {
+            const updatedTable = {
+              ...prevTables[idx],
+              data: {
+                ...prevTables[idx].data,
+                columns,
+                data,
+                sheetName,
+                tableName,
+              },
+            };
+            return [
+              ...prevTables.slice(0, idx),
+              updatedTable,
+              ...prevTables.slice(idx + 1),
+            ];
+          }
+        });
       });
     } catch (error) {
-      console.error('Error reading table data from Excel', error);
-      message.error('Failed to read table data from Excel.');
+      console.error("Error reading table data from Excel", error);
+      message.error("Failed to read table data from Excel.");
     }
   }
   const readDataFromExcel = async () => {
