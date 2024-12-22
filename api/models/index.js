@@ -14,6 +14,10 @@ async function initializeModels() {
   const RefreshToken = defineRefreshToken(sequelize, sequelize.Sequelize.DataTypes);
   User.hasOne(Subscription, { foreignKey: 'userId' });
   Subscription.belongsTo(User, { foreignKey: 'userId' });
+  User.hasMany(Dashboard, { foreignKey: 'userId' });
+  Dashboard.belongsTo(User, { foreignKey: 'userId' });
+  User.hasMany(Template, { foreignKey: 'userId' });
+  Template.belongsTo(User, { foreignKey: 'userId' });
   await sequelize.sync();
   console.log('All models were synchronized successfully.');
   return { sequelize, User, Subscription, Dashboard, Template, RefreshToken };

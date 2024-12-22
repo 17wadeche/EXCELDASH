@@ -1,14 +1,31 @@
+// dashboard/index.js
+
 const initializeModels = require('../models');
 const { v4: uuidv4 } = require('uuid');
+const authMiddleware = require('../middleware/authMiddleware'); // Adjust the path as needed
 
 module.exports = async function (context, req) {
+  await new Promise((resolve) => authMiddleware(context, req, resolve));
   const method = req.method.toLowerCase();
   const id = req.params.id;
+  const userEmail = req.userEmail;
+  
+  if (!userEmail) {
+    context.res = {
+      status: 401,
+      body: { error: 'Unauthorized access.' },
+    };
+    return;
+  }
+
   try {
     const { Dashboard } = await initializeModels();
+
     if (method === 'post') {
       const { title, components, layouts, workbookId, borderSettings } = req.body;
-      console.log("Server: Received POST for dashboard creation. workbookId:", workbookId);
+
+      console.log("Server: Received POST for dashboard creation. userEmail:", userEmail);
+
       if (!title || !components || !layouts || !workbookId) {
         context.res = {
           status: 400,
@@ -16,13 +33,14 @@ module.exports = async function (context, req) {
         };
         return;
       }
-      const normalizedWorkbookId = workbookId ? workbookId.toLowerCase() : '';
+      const normalizedWorkbookId = workbookId.toLowerCase();
       const newDashboard = await Dashboard.create({
         id: uuidv4(),
         title,
         components,
         layouts,
-        workbookId : normalizedWorkbookId,
+        workbookId: normalizedWorkbookId,
+        userEmail,
         versions: [],
         borderSettings: borderSettings || undefined, 
       });
@@ -33,11 +51,17 @@ module.exports = async function (context, req) {
         console.log("Server: Fetched dashboard from DB:", dashboard);
         if (!dashboard) {
           context.res = { status: 404, body: { error: 'Dashboard not found' } };
-        } else {
-          context.res = { status: 200, body: dashboard };
+          return;
         }
+        if (dashboard.userEmail !== userEmail) {
+          context.res = { status: 403, body: { error: 'Access denied.' } };
+          return;
+        }
+        context.res = { status: 200, body: dashboard };
       } else {
-        const dashboards = await Dashboard.findAll();
+        const dashboards = await Dashboard.findAll({
+          where: { userEmail },
+        });
         context.res = { status: 200, body: dashboards };
       }
     } else if (method === 'put') {
@@ -54,6 +78,10 @@ module.exports = async function (context, req) {
       const dashboard = await Dashboard.findByPk(id);
       if (!dashboard) {
         context.res = { status: 404, body: { error: 'Dashboard not found' } };
+        return;
+      }
+      if (dashboard.userEmail !== userEmail) {
+        context.res = { status: 403, body: { error: 'Access denied.' } };
         return;
       }
       console.log("Server: Existing dashboard workbookId (from DB):", dashboard.workbookId);
@@ -76,12 +104,17 @@ module.exports = async function (context, req) {
         };
         return;
       }
-      const deletedCount = await Dashboard.destroy({ where: { id }});
-      if (deletedCount === 0) {
+      const dashboard = await Dashboard.findByPk(id);
+      if (!dashboard) {
         context.res = { status: 404, body: { error: 'Dashboard not found' } };
-      } else {
-        context.res = { status: 200, body: { message: 'Dashboard deleted successfully' } };
+        return;
       }
+      if (dashboard.userEmail !== userEmail) {
+        context.res = { status: 403, body: { error: 'Access denied.' } };
+        return;
+      }
+      await dashboard.destroy();
+      context.res = { status: 200, body: { message: 'Dashboard deleted successfully' } };
     } else {
       context.res = { status: 405, body: { error: 'Method not allowed.' } };
     }

@@ -5,7 +5,6 @@ import { Layout, Form, Input, Button, message, Modal, Tooltip, Row, Col, Card, L
 import { useNavigate, useLocation } from 'react-router-dom';
 import { DashboardContext } from '../context/DashboardContext';
 import { DeleteOutlined, FolderAddOutlined, PlusOutlined } from '@ant-design/icons';
-import { v4 as uuidv4 } from 'uuid';
 import { DashboardItem, NewDashboard, TemplateItem } from './types';
 const { Content } = Layout;
 const { Search } = Input;
@@ -209,7 +208,7 @@ const CreateDashboard: React.FC = () => {
       setCurrentWorkbookId(workbookId);
       console.log("Front-End: Using Workbook ID to create dashboard:", workbookId);
       console.log("Front-End: Current Workbook ID from state:", currentWorkbookId);
-      const newDashboard: NewDashboard = {
+      const newDashboard: Omit<NewDashboard, 'userEmail'>  = {
         title: dashboardTitle,
         components: [],
         layouts: {},

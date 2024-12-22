@@ -14,6 +14,16 @@ module.exports = (sequelize) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
+    userEmail: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      references: {
+        model: 'Users',
+        key: 'email',
+      },
+      onUpdate: 'CASCADE',
+      onDelete: 'CASCADE',
+    },
     widgets: {
       type: DataTypes.TEXT,
       allowNull: false,

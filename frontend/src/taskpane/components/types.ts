@@ -247,6 +247,7 @@ export interface DashboardItem extends Omit<NewDashboard, 'title' | 'components'
   versions?: DashboardVersion[];
   workbookId: string;
   borderSettings?: DashboardBorderSettings;
+  userEmail: string;
 }
 export interface DashboardVersion {
   id: string;

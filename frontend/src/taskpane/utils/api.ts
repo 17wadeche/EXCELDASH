@@ -1,4 +1,3 @@
-import { AxiosError } from "axios";
 import axios from 'axios';
 import { DashboardItem, NewDashboard, TemplateItem } from '../components/types';
 
@@ -86,7 +85,7 @@ export const getDashboardById = async (id: string): Promise<DashboardItem> => {
   const response = await axios.get(`${API_BASE_URL}/dashboards/${id}`);
   return response.data;
 };
-export const createDashboard = async (dashboard: NewDashboard): Promise<DashboardItem> => {
+export const createDashboard = async (dashboard: Omit<NewDashboard, 'userEmail'>): Promise<DashboardItem> => {
   const response = await axios.post(`${API_BASE_URL}/dashboards`, dashboard);
   return response.data as DashboardItem;
 };
@@ -102,9 +101,9 @@ export const getTemplateById = async (id: string): Promise<TemplateItem> => {
   const response = await axios.get(`${API_BASE_URL}/templates/${id}`);
   return response.data;
 };
-export const createTemplate = async (template: TemplateItem): Promise<TemplateItem> => {
+export const createTemplate = async (template: Omit<TemplateItem, 'userEmail'>): Promise<TemplateItem> => {
   const response = await axios.post(`${API_BASE_URL}/templates`, template);
-  return response.data;
+  return response.data as TemplateItem;
 };
 export const updateTemplate = async (id: string, template: TemplateItem): Promise<TemplateItem> => {
   const response = await axios.put(`${API_BASE_URL}/templates/${id}`, template);

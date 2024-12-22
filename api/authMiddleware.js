@@ -1,4 +1,4 @@
-//authMiddleware.js
+// middleware/authMiddleware.js
 
 const jwt = require('jsonwebtoken');
 
@@ -21,7 +21,7 @@ module.exports = function (context, req, next) {
   }
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.userId = decoded.userId;
+    req.userEmail = decoded.email;
     next();
   } catch (error) {
     context.res = {
