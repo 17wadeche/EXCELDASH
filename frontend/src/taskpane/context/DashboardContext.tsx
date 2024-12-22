@@ -331,10 +331,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       return [];
     }
   };
-  const deleteTable = (id: string) => {
-    const updatedTables = tables.filter((r) => r.id !== id);
-    setTables(updatedTables);
-  };
   useEffect(() => {
     if (!currentDashboardId || !currentDashboard || dashboardLoaded) return;
     const migrateWidgets = async () => {
@@ -2690,12 +2686,9 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         getAvailableTables,
         applyDataValidation,
         refreshAllCharts,
-        tables,
         updateLayoutsForNewWidgets,
-        setTables,
         addTaskToGantt,
         currentWorkbookId,
-        deleteTable,
         setCurrentWorkbookId,
         writeMetricValue,
         promptForWidgetDetails: (widget: Widget, onComplete: (updatedWidget: Widget) => void ) => { setWidgetToPrompt({ widget, onComplete });},
