@@ -208,7 +208,7 @@ const CreateDashboard: React.FC = () => {
       setCurrentWorkbookId(workbookId);
       console.log("Front-End: Using Workbook ID to create dashboard:", workbookId);
       console.log("Front-End: Current Workbook ID from state:", currentWorkbookId);
-      const newDashboard: Omit<NewDashboard, 'userEmail'>  = {
+      const newDashboard: NewDashboard = {
         title: dashboardTitle,
         components: [],
         layouts: {},
