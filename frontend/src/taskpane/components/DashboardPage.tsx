@@ -11,7 +11,7 @@ import axios from 'axios';
 
 const DashboardPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const { dashboards,  currentWorkbookId,  setWidgets,  setLayouts } = useContext(DashboardContext)!;
+  const { dashboards,  currentWorkbookId,  setWidgets,  setLayouts, userEmail } = useContext(DashboardContext)!;
   const [currentDashboard, setCurrentDashboard] = useState<DashboardItem | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   useEffect(() => {
@@ -50,7 +50,7 @@ const DashboardPage: React.FC = () => {
             layouts: {},
             versions: [],
             workbookId: currentWorkbookId,
-            
+            userEmail: userEmail,
           };
           setCurrentDashboard(newDashboard);
           setWidgets(newDashboard.components);

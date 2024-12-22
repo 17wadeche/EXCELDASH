@@ -39,6 +39,8 @@ interface DashboardContextProps {
   setIsFullscreenActive: React.Dispatch<React.SetStateAction<boolean>>;
   currentDashboardId: string | null;
   setCurrentDashboardId: (id: string | null) => void;
+  userEmail: string;
+  setUserEmail: React.Dispatch<React.SetStateAction<string>>;
   setCurrentWorkbookId: React.Dispatch<React.SetStateAction<string>>;
   currentDashboard: DashboardItem | null;
   addTaskToGantt: (task: Task) => Promise<void>;
@@ -118,6 +120,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
   const [isSelectTableModalVisible, setIsSelectTableModalVisible] = useState(false);
   const isGanttHandlerRegistered = useRef(false);
   const isReadGanttDataInProgress = useRef(false);
+  const [userEmail, setUserEmail] = useState<string>('');
   const [dashboardBorderSettings, setDashboardBorderSettings] = useState<DashboardBorderSettings>({
     showBorder: false,
     color: '#000000',
@@ -125,6 +128,23 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     style: 'solid',
   });
   const [dashboardLoaded, setDashboardLoaded] = useState(false);
+  const fetchUserEmail = async () => {
+    try {
+      if (Office && Office.context && Office.context.mailbox) {
+        const email = Office.context.mailbox.userProfile.emailAddress;
+        setUserEmail(email);
+      } else {
+        const email = await getUserEmailFromAuthProvider();
+        setUserEmail(email);
+      }
+    } catch (error) {
+      console.error('Error fetching user email:', error);
+      message.error('Failed to retrieve user email.');
+    }
+  };
+  useEffect(() => {
+    fetchUserEmail();
+  }, []);
   useEffect(() => {
     const fetchDashboards = async () => {
       try {
@@ -1074,6 +1094,9 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     try {
       if (!dashboard.workbookId) {
         dashboard.workbookId = currentWorkbookId;
+      }
+      if (!dashboard.userEmail) {
+        dashboard.userEmail = userEmail;
       }
       const response = await axios.put(`/api/dashboards/${dashboard.id}`, dashboard);
       const updated = response.data as DashboardItem;
@@ -2709,6 +2732,8 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         addTaskToGantt,
         currentWorkbookId,
         setCurrentWorkbookId,
+        userEmail,
+        setUserEmail,
         writeMetricValue,
         promptForWidgetDetails: (widget: Widget, onComplete: (updatedWidget: Widget) => void ) => { setWidgetToPrompt({ widget, onComplete });},
       }}
