@@ -50,6 +50,7 @@ const DashboardPage: React.FC = () => {
             layouts: {},
             versions: [],
             workbookId: currentWorkbookId,
+            
           };
           setCurrentDashboard(newDashboard);
           setWidgets(newDashboard.components);

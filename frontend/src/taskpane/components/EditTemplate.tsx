@@ -28,15 +28,12 @@ const EditTemplate: React.FC = () => {
       message.error('Template data is missing.');
       return;
     }
-    const updatedTemplate: DashboardItem = {
-      id: template!.id,
+    const updatedTemplate: Partial<DashboardItem> = {
       title,
       components,
       layouts: template.layouts,
-      versions: template.versions,
-      workbookId: template.workbookId,
     };
-    editDashboard(updatedTemplate);
+    editDashboard(template.id, updatedTemplate);
     saveAsTemplate();
     message.success('Template updated successfully!');
     navigate('/dashboard-list');
