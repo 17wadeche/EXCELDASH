@@ -35,6 +35,11 @@ const TableWidgetComponent: React.FC<TableWidgetProps> = ({
         className="drag-handle"
         style={{ cursor: 'move', marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
       >
+        {onRefresh && (
+          <Button size="small" onClick={() => onRefresh(id)}>
+            Refresh
+          </Button>
+        )}
         {isEditing ? (
           <Input
             autoFocus
@@ -48,11 +53,6 @@ const TableWidgetComponent: React.FC<TableWidgetProps> = ({
           <h3 style={{ cursor: 'pointer', margin: 0 }} onClick={() => setIsEditing(true)} >
             {title}
           </h3>
-        )}
-        {onRefresh && (
-          <Button size="small" onClick={() => onRefresh(id)}>
-            Refresh
-          </Button>
         )}
       </div>
       <Table
