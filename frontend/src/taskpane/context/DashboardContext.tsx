@@ -1760,8 +1760,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
               }
               break;
             }
-            case 'table':
-              return widget;
             case "metric": {
               const metricData = widget.data as MetricData;
               if (metricData.worksheetName && metricData.cellAddress) {
