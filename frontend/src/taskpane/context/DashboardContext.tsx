@@ -1929,7 +1929,11 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           message.error("GanttTable not found in the Gantt worksheet.");
           return;
         }
-        table.rows.remove();
+        table.rows.load("items");
+        await context.sync();
+        for (const row of table.rows.items) {
+          row.delete();
+        }
         const newRows = ganttTasks.map((t) => {
           const dependenciesValue = Array.isArray(t.dependencies)
             ? t.dependencies.join(", ")
