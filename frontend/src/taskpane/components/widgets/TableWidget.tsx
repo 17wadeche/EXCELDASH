@@ -30,7 +30,7 @@ const TableWidgetComponent: React.FC<TableWidgetProps> = ({
   return (
     <div style={{ width: '100%', height: '100%' }}>
       <div
-        className="widget-drag-handle"
+        className="drag-handle"
         style={{ cursor: 'move', marginBottom: 8 }}
       >
         {isEditing ? (
