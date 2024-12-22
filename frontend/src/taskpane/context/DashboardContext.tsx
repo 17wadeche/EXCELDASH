@@ -1935,15 +1935,15 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
             : t.dependencies || "";
           const completedValue = t.completed || "";
           return [
-            t.name,                           // Task Name
+            t.name,
             t.type ? capitalizeFirstLetter(t.type) : "Task",
-            t.start,                          // Start Date (Excel serial or ISO)
-            t.end,                            // End Date
-            completedValue,                   // Completed Date or empty
-            t.duration || "",                 // Duration
-            "",                               // Actual Duration placeholder
-            t.progress ?? 0,                  // Progress
-            dependenciesValue,                // Dependencies
+            t.start,
+            t.end,
+            completedValue,
+            t.duration || "",
+            "",
+            t.progress ?? 0,
+            dependenciesValue,
           ];
         });
         if (newRows.length > 0) {
@@ -2637,6 +2637,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         availableWorksheets,
         setAvailableWorksheets,
         setWidgets,
+        syncGanttDataToExcel,
         setDashboards,
         saveDashboardVersion,
         restoreDashboardVersion,

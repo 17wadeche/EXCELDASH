@@ -7,7 +7,7 @@ import { MinusCircleOutlined, PlusOutlined, SelectOutlined } from '@ant-design/i
 import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
 import { DashboardContext } from '../context/DashboardContext';
-import { Widget, TextData, ChartData, GanttWidgetData, MetricData, TitleWidgetData } from './types';
+import { Widget, TextData, ChartData, GanttWidgetData, MetricData, TitleWidgetData, Task } from './types';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -145,7 +145,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
   useEffect(() => {
     form.setFieldsValue(initialValues());
   }, [widget]);
-
+  const { syncGanttDataToExcel } = useContext(DashboardContext)!;
   const handleFinish = (values: any) => {
     const cleanedValues: Record<string, any> = Object.entries(values).reduce(
       (acc: Record<string, any>, [key, value]) => {
@@ -285,9 +285,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
             name: task.name,
             start: task.start.format('YYYY-MM-DD'),
             end: task.end.format('YYYY-MM-DD'),
-            completed: task.completed
-              ? task.completed.format('YYYY-MM-DD')
-              : undefined,
+            completed: task.completed ? task.completed.format('YYYY-MM-DD') : undefined,
             progress: task.progress,
             dependencies: typeof task.dependencies === 'string'
               ? task.dependencies.split(',')
@@ -299,6 +297,10 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           title: cleanedValues.title,
           titleAlignment: cleanedValues.titleAlignment || 'left',
         } as GanttWidgetData;
+        onSubmit(updatedData);
+        if (syncGanttDataToExcel) {
+          syncGanttDataToExcel(updatedData.tasks);
+        }
         break;
       case 'metric':
         updatedData = {
