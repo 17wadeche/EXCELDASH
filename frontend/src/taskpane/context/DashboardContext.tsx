@@ -54,6 +54,7 @@ interface DashboardContextProps {
   setAvailableWorksheets: React.Dispatch<React.SetStateAction<string[]>>;
   setWidgets: React.Dispatch<React.SetStateAction<Widget[]>>;
   saveDashboardVersion: () => void;
+  refreshTableWidgetData: (widgetId: string) => Promise<void>;
   restoreDashboardVersion: (versionId: string) => void;
   getWorkbookIdFromProperties: () => Promise<string>;
   promptForWidgetDetails: (widget: Widget, onComplete: (updatedWidget: Widget) => void) => void;
@@ -1940,14 +1941,12 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           })
         );
       });
-    } catch (error) {
-      console.error('Error refreshing table data:', error);
+    } catch (error:any) {
       if (error.code === 'InvalidOperationInCellEditMode') {
-        message.error(
-          'Excel is in cell-editing mode. Please press Enter or Esc to exit, then click refresh again.'
-        );
+        message.error('Excel is in cell-editing mode. Please press Enter or Esc...');
       } else {
-        message.error('Failed to refresh table data. See console for details.');
+        console.error('Error refreshing table data:', error);
+        message.error('Failed to refresh table data.');
       }
     }
   }
