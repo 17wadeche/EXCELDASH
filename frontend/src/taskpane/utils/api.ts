@@ -95,19 +95,19 @@ export const updateDashboard = async (id: string, dashboard: DashboardItem): Pro
   return response.data;
 };
 export const getTemplates = async (): Promise<TemplateItem[]> => {
-  const response = await axios.get(`${API_BASE_URL}/template`);
+  const response = await axios.get(`${API_BASE_URL}/templates`);
   return response.data;
 };
 export const getTemplateById = async (id: string): Promise<TemplateItem> => {
-  const response = await axios.get(`${API_BASE_URL}/template/${id}`);
+  const response = await axios.get(`${API_BASE_URL}/templates/${id}`);
   return response.data;
 };
 export const createTemplate = async (template: TemplateItem): Promise<TemplateItem> => {
-  const response = await axios.post(`${API_BASE_URL}/template`, template);
+  const response = await axios.post(`${API_BASE_URL}/templates`, template);
   return response.data;
 };
 export const updateTemplate = async (id: string, template: TemplateItem): Promise<TemplateItem> => {
-  const response = await axios.put(`${API_BASE_URL}/template/${id}`, template);
+  const response = await axios.put(`${API_BASE_URL}/templates/${id}`, template);
   return response.data;
 };
 export const deleteDashboardById = async (id: string): Promise<void> => {

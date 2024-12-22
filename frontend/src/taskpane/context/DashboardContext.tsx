@@ -1921,31 +1921,33 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         }
         table.rows.load("items");
         await context.sync();
-        for (const row of table.rows.items) {
-          row.delete();
-        }
-        const newRows = ganttTasks.map((t) => {
-          const dependenciesValue = Array.isArray(t.dependencies)
-            ? t.dependencies.join(", ")
-            : t.dependencies || "";
-          const completedValue = t.completed || "";
-          return [
+        const existingRows = table.rows.items.map((row) => row.values[0]);
+        for (const t of ganttTasks) {
+          const rowIndex = existingRows.findIndex((r) => r[0] === t.name);
+          const dependenciesValue = Array.isArray(t.dependencies) 
+            ? t.dependencies.join(", ") 
+            : t.dependencies ?? "";
+          const completedValue = t.completed ?? "";
+          const newRowValues = [
             t.name,
-            t.type ? capitalizeFirstLetter(t.type) : "Task",
+            capitalizeFirstLetter(t.type ?? "Task"),
             t.start,
             t.end,
             completedValue,
             t.duration || "",
             "",
             t.progress ?? 0,
-            dependenciesValue,
+            dependenciesValue
           ];
-        });
-        if (newRows.length > 0) {
-          table.rows.add(undefined, newRows);
+          if (rowIndex >= 0) {
+            table.rows.getItemAt(rowIndex).values = [newRowValues];
+          } else {
+            table.rows.add(undefined, [newRowValues]);
+            existingRows.push(newRowValues);
+          }
         }
         await context.sync();
-        message.success("Excel GanttTable updated successfully!");
+        message.success("Gantt data synced to Excel without deleting other rows!");
       });
     } catch (error) {
       console.error("Error syncing Gantt data to Excel:", error);
