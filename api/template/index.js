@@ -44,7 +44,7 @@ module.exports = async function (context, req) {
         };
         return;
       }
-      const deletedCount = await Dashboard.destroy({ where: { id }});
+      const deletedCount = await Template.destroy({ where: { id }});
       if (deletedCount === 0) {
         context.res = { status: 404, body: { error: 'Template not found' } };
       } else {
