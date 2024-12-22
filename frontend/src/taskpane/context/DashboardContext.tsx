@@ -1958,17 +1958,17 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     }
   }
 
-  async function readTableFromExcel(widgetId: string, sheetName: string, tableName: string) {
+  async function readTableFromExcel( widgetId: string, sheetName: string, tableName: string ) {
     try {
       await Excel.run(async (context) => {
         const sheet = context.workbook.worksheets.getItem(sheetName);
         const table = sheet.tables.getItem(tableName);
         const range = table.getRange();
-        range.load(['values']);
+        range.load(["values"]);
         await context.sync();
         const values = range.values;
         if (!values || values.length < 2) {
-          message.warning('The selected table does not contain enough data.');
+          message.warning("The selected table does not contain enough data.");
           return;
         }
         const headers = values[0] as string[];
@@ -1979,7 +1979,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           key: `col${colIndex}`,
         }));
         const data = dataRows.map((row: any[], rowIndex: number) => {
-          const rowObject: any = { key: rowIndex };
+          const rowObject: Record<string, any> = { key: rowIndex };
           row.forEach((cellValue, colIndex) => {
             rowObject[`col${colIndex}`] = cellValue;
           });
@@ -1991,34 +1991,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           sheetName,
           tableName,
         } as TableData);
-        setTables((prevTables) => {
-          const idx = prevTables.findIndex((t) => t.id === widgetId);
-          if (idx === -1) {
-            const newTable: TableWidget = {
-              id: widgetId,
-              type: "table",
-              name: "New Table",
-              data: { columns, data, sheetName, tableName },
-            };
-            return [...prevTables, newTable];
-          } else {
-            const updatedTable = {
-              ...prevTables[idx],
-              data: {
-                ...prevTables[idx].data,
-                columns,
-                data,
-                sheetName,
-                tableName,
-              },
-            };
-            return [
-              ...prevTables.slice(0, idx),
-              updatedTable,
-              ...prevTables.slice(idx + 1),
-            ];
-          }
-        });
       });
     } catch (error) {
       console.error("Error reading table data from Excel", error);
