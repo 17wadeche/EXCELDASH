@@ -130,12 +130,12 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
   const [dashboardLoaded, setDashboardLoaded] = useState(false);
   const fetchUserEmail = async () => {
     try {
-      if (Office && Office.context && Office.context.mailbox) {
-        const email = Office.context.mailbox.userProfile.emailAddress;
-        setUserEmail(email);
+      const storedEmail = localStorage.getItem('userEmail');
+      if (storedEmail) {
+        setUserEmail(storedEmail);
       } else {
-        const email = await getUserEmailFromAuthProvider();
-        setUserEmail(email);
+        console.warn('User email not found in localStorage.');
+        setUserEmail('');
       }
     } catch (error) {
       console.error('Error fetching user email:', error);

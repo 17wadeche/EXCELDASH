@@ -32,6 +32,7 @@ export const loginUser = async (email: string, password: string): Promise<string
   });
   const token = response.data.accessToken;
   localStorage.setItem('token', token);
+  localStorage.setItem('userEmail', email);
   axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
   return token;
 };
