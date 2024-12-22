@@ -1709,12 +1709,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     }
   };
   const refreshAllCharts = useCallback(async () => {
-    if (!currentDashboard || !currentDashboard.workbookId) {
-      message.error('No dashboard or workbook ID found. Please ensure the dashboard is loaded and try again.');
-      return;
-    }
-    console.log('Current Workbook ID:', currentWorkbookId);
-    console.log('Dashboard Workbook ID:', currentDashboard.workbookId);
     try {
       let hasError = false;
       let errorMessages: string[] = [];
@@ -1753,7 +1747,11 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
             case "table": {
               const tableWidgetData = widget.data as TableData;
               if (tableWidgetData.sheetName && tableWidgetData.tableName) {
-                await readTableFromExcel(widget.id, tableWidgetData.sheetName, tableWidgetData.tableName);
+                await readTableFromExcel(
+                  widget.id,
+                  tableWidgetData.sheetName,
+                  tableWidgetData.tableName
+                );
               } else {
                 hasError = true;
                 errorMessages.push(
@@ -1762,6 +1760,8 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
               }
               break;
             }
+            case 'table':
+              return widget;
             case "metric": {
               const metricData = widget.data as MetricData;
               if (metricData.worksheetName && metricData.cellAddress) {
