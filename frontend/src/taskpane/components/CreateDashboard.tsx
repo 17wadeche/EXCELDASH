@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { DashboardItem, NewDashboard, TemplateItem } from './types';
 const { Content } = Layout;
 const { Search } = Input;
-import { createCheckoutSession, checkSubscription, loginUser, registerUser, verifySubscription, checkRegistration, unsubscribeUser, createDashboard, getTemplates } from './../utils/api';
+import { createCheckoutSession, checkSubscription, loginUser, registerUser, verifySubscription, checkRegistration, unsubscribeUser, createDashboard, getTemplates, deleteTemplateById } from './../utils/api';
 import axios from 'axios';
 
 interface Widget {
@@ -43,7 +43,6 @@ const CreateDashboard: React.FC = () => {
     currentWorkbookId,
     setLayouts,
     setDashboards,
-    deleteTemplateById,
   } = useContext(DashboardContext)!;
 
   useEffect(() => {
