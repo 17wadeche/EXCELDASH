@@ -23,9 +23,7 @@ module.exports = async function (context, req) {
 
     if (method === 'post') {
       const { title, components, layouts, workbookId, borderSettings } = req.body;
-
       console.log("Server: Received POST for dashboard creation. userEmail:", userEmail);
-
       if (!title || !components || !layouts || !workbookId) {
         context.res = {
           status: 400,
