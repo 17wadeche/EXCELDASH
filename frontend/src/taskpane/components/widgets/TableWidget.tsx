@@ -8,6 +8,7 @@ interface TableWidgetProps {
   name: string;
   data: TableData;
   onUpdateName?: (id: string, newName: string) => void;
+  onRefresh?: (id: string) => void;
 }
 
 const TableWidgetComponent: React.FC<TableWidgetProps> = ({
@@ -15,6 +16,7 @@ const TableWidgetComponent: React.FC<TableWidgetProps> = ({
   name,
   data,
   onUpdateName,
+  onRefresh,
 }) => {
   const [title, setTitle] = useState(name);
   const [isEditing, setIsEditing] = useState(false);
@@ -31,7 +33,7 @@ const TableWidgetComponent: React.FC<TableWidgetProps> = ({
     <div style={{ width: '100%', height: '100%' }}>
       <div
         className="drag-handle"
-        style={{ cursor: 'move', marginBottom: 8 }}
+        style={{ cursor: 'move', marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
       >
         {isEditing ? (
           <Input
@@ -40,14 +42,17 @@ const TableWidgetComponent: React.FC<TableWidgetProps> = ({
             onChange={(e) => setTitle(e.target.value)}
             onBlur={handleBlur}
             onPressEnter={handleBlur}
+            style={{ width: '70%' }}
           />
         ) : (
-          <h3
-            style={{ cursor: 'pointer', margin: 0 }}
-            onClick={() => setIsEditing(true)}
-          >
+          <h3 style={{ cursor: 'pointer', margin: 0 }} onClick={() => setIsEditing(true)} >
             {title}
           </h3>
+        )}
+        {onRefresh && (
+          <Button size="small" onClick={() => onRefresh(id)}>
+            Refresh
+          </Button>
         )}
       </div>
       <Table

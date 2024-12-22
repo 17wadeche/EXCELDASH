@@ -1744,22 +1744,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
               }
               break;
             }
-            case "table": {
-              const tableWidgetData = widget.data as TableData;
-              if (tableWidgetData.sheetName && tableWidgetData.tableName) {
-                await readTableFromExcel(
-                  widget.id,
-                  tableWidgetData.sheetName,
-                  tableWidgetData.tableName
-                );
-              } else {
-                hasError = true;
-                errorMessages.push(
-                  `Table widget "${widget.id}" is missing sheetName or tableName.`
-                );
-              }
-              break;
-            }
             case "metric": {
               const metricData = widget.data as MetricData;
               if (metricData.worksheetName && metricData.cellAddress) {
@@ -1901,6 +1885,72 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     }
     return color;
   };
+
+  async function refreshTableWidgetData(widgetId: string) {
+    const widget = widgets.find(w => w.id === widgetId && w.type === 'table');
+    if (!widget) {
+      message.error(`No table widget found with ID: ${widgetId}`);
+      return;
+    }
+    const tableData = widget.data as TableData;
+    const { sheetName, tableName } = tableData;
+    if (!sheetName || !tableName) {
+      message.error('Sheet name or table name is missing on this widget.');
+      return;
+    }
+    try {
+      await Excel.run(async (context) => {
+        const sheet = context.workbook.worksheets.getItem(sheetName);
+        const table = sheet.tables.getItem(tableName);
+        const range = table.getRange();
+        range.load(['values']);
+        await context.sync();
+        const values = range.values;
+        if (!values || values.length < 2) {
+          message.warning('The selected table does not contain enough data.');
+          return;
+        }
+        const headers = values[0] as string[];
+        const dataRows = values.slice(1);
+        const columns = headers.map((header, colIndex) => ({
+          title: header,
+          dataIndex: `col${colIndex}`,
+          key: `col${colIndex}`,
+        }));
+        const data = dataRows.map((row: any[], rowIndex: number) => {
+          const rowObject: Record<string, any> = { key: rowIndex };
+          row.forEach((cellValue, colIndex) => {
+            rowObject[`col${colIndex}`] = cellValue;
+          });
+          return rowObject;
+        });
+        updateWidgetsWithHistory(prevWidgets =>
+          prevWidgets.map((w) => {
+            if (w.id === widgetId && w.type === 'table') {
+              return {
+                ...w,
+                data: {
+                  ...w.data,
+                  columns,
+                  data,
+                } as TableData
+              };
+            }
+            return w;
+          })
+        );
+      });
+    } catch (error) {
+      console.error('Error refreshing table data:', error);
+      if (error.code === 'InvalidOperationInCellEditMode') {
+        message.error(
+          'Excel is in cell-editing mode. Please press Enter or Esc to exit, then click refresh again.'
+        );
+      } else {
+        message.error('Failed to refresh table data. See console for details.');
+      }
+    }
+  }
 
   async function syncGanttDataToExcel(ganttTasks: Task[]) {
     try {
@@ -2642,6 +2692,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         setSelectedRangeAddress,
         isFullscreenActive,
         setIsFullscreenActive,
+        refreshTableWidgetData,
         deleteDashboard,
         undo,
         redo,
