@@ -36,6 +36,20 @@ module.exports = async function (context, req) {
         const templates = await Template.findAll();
         context.res = { status: 200, body: templates };
       }
+    } else if (method === 'delete') {
+      if (!id) {
+        context.res = {
+          status: 400,
+          body: { error: 'Template ID is required for deleting.' }
+        };
+        return;
+      }
+      const deletedCount = await Dashboard.destroy({ where: { id }});
+      if (deletedCount === 0) {
+        context.res = { status: 404, body: { error: 'Template not found' } };
+      } else {
+        context.res = { status: 200, body: { message: 'Template deleted successfully' } };
+      }
     } else if (method === 'put') {
       if (!id) {
         context.res = {

@@ -54,7 +54,7 @@ const TableWidgetComponent: React.FC<TableWidgetProps> = ({
         columns={data.columns as ColumnsType<any>}
         dataSource={data.data}
         pagination={false}
-        rowKey="id"
+        rowKey="key"
         style={{ width: '100%' }}
       />
     </div>

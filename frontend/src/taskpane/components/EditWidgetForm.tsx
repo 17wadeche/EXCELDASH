@@ -280,6 +280,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
         break;
       case 'gantt':
         updatedData = {
+          ...(widget.data as GanttWidgetData),
           tasks: cleanedValues.tasks.map((task: any) => ({
             id: task.id,
             name: task.name,

@@ -110,6 +110,9 @@ export const updateTemplate = async (id: string, template: TemplateItem): Promis
   const response = await axios.put(`${API_BASE_URL}/templates/${id}`, template);
   return response.data;
 };
+export const deleteTemplateById = async (id: string): Promise<void> => {
+  await axios.delete(`${API_BASE_URL}/templates/${id}`);
+};
 export const deleteDashboardById = async (id: string): Promise<void> => {
   await axios.delete(`${API_BASE_URL}/dashboards/${id}`);
 };
