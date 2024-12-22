@@ -2002,6 +2002,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
             const newTable: TableWidget = {
               id: widgetId,
               type: "table",
+              name: "New Table",
               data: { columns, data, sheetName, tableName },
             };
             return [...prevTables, newTable];
