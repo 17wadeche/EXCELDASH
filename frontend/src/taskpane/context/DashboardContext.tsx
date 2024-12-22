@@ -2117,11 +2117,19 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     }, 300)
   ).current;
   const readGanttDataFromExcel = async () => {
+    if (!currentDashboard || !currentDashboard.workbookId) {
+      message.error('No dashboard or workbook ID found.');
+      return;
+    }
     if (isReadGanttDataInProgress.current) {
       console.warn('readGanttDataFromExcel is already in progress.');
       return;
     }
     isReadGanttDataInProgress.current = true;
+    if (currentWorkbookId !== currentDashboard.workbookId) {
+      message.warning('This dashboard is not associated with the currently open workbook.');
+      return;
+    }
     try {
       await Excel.run(async (context: Excel.RequestContext) => {
         const sheet = context.workbook.worksheets.getItem('Gantt');
