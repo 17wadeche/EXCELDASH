@@ -6,6 +6,8 @@ const API_BASE_URL = 'https://happy-forest-059a9d710.4.azurestaticapps.net/api';
 const storedToken = localStorage.getItem('token');
 if (storedToken) {
   axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
+} else {
+  console.error('Token not found in localStorage.');
 }
 export const createCheckoutSession = async (plan: 'monthly' | 'yearly', email: string) => {
   const response = await axios.post(`${API_BASE_URL}/create-checkout-session`, {
