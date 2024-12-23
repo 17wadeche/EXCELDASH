@@ -7,7 +7,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
     },
     title: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(255),
       allowNull: false,
     },
     userEmail: {
@@ -43,7 +43,7 @@ module.exports = (sequelize, DataTypes) => {
       }
     },
     workbookId: {
-      type: DataTypes.CHAR(36),
+      type: DataTypes.UUID,
       allowNull: false,
     },
     versions: {
