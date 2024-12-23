@@ -15,7 +15,7 @@ module.exports = async function (context, req) {
   try {
     const { User, Subscription } = await initializeModels();
     const user = await User.findOne({
-      where: { email },
+      where: { userEmail: email },
       include: [
         {
           model: Subscription,

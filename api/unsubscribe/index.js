@@ -39,7 +39,7 @@ module.exports = async function (context, req) {
   const { User, Subscription, sequelize } = await initializeModels();
   const transaction = await sequelize.transaction();
   try {
-    const user = await User.findOne({ where: { email }, transaction });
+    const user = await User.findOne({ where: { UserEmail: email }, transaction });
     if (!user) {
       await transaction.rollback();
       context.res = {

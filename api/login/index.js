@@ -22,7 +22,7 @@ module.exports = async function (context, req) {
   const { email, password } = value;
   try {
     const { User, RefreshToken } = await initializeModels();
-    const user = await User.findOne({ where: { email } });
+    const user = await User.findOne({ where: { userEmail: email } });
     if (!user) {
       context.res = {
         status: 401,
