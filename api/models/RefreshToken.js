@@ -19,8 +19,8 @@ module.exports = (sequelize) => {
         type: DataTypes.STRING,
         allowNull: false,
         references: {
-          model: 'Users',   // references the Users table
-          key: 'email',     // referencing the 'email' column
+          model: 'Users',
+          key: 'userEmail',
         },
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE',
