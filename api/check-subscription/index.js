@@ -1,4 +1,3 @@
-// check-subscription/index.js
 const initializeModels = require('../models');
 
 module.exports = async function (context, req) {
@@ -14,6 +13,7 @@ module.exports = async function (context, req) {
   }
   try {
     const { User, Subscription } = await initializeModels();
+    context.log(`check-subscription: Looking for userEmail = "${email}"`);
     const user = await User.findOne({
       where: { userEmail: email },
       include: [
@@ -23,8 +23,16 @@ module.exports = async function (context, req) {
         },
       ],
     });
+    if (user) {
+      context.log(
+        `Found user: id=${user.id}, userEmail=${user.userEmail}, Subscription=`,
+        user.Subscription ? user.Subscription.dataValues : null
+      );
+    } else {
+      context.log(`No user row found for userEmail="${email}"`);
+    }
     if (!user || !user.Subscription) {
-      context.log.info(`User with email ${email} not found or has no subscription.`);
+      context.log.info(`User with userEmail "${email}" not found or has no subscription.`);
       context.res = {
         status: 200,
         body: { subscribed: false },
@@ -32,7 +40,7 @@ module.exports = async function (context, req) {
       return;
     }
     const isActive = user.Subscription.status === 'active';
-    context.log.info(`User ${email} subscription is ${isActive ? 'active' : 'inactive'}.`);
+    context.log.info(`User "${email}" subscription is ${isActive ? 'active' : 'inactive'}.`);
     context.res = {
       status: 200,
       body: {
