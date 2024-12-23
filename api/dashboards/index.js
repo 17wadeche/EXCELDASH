@@ -1,7 +1,7 @@
 // dashboard/index.js
 const initializeModels = require('../models');
 const { v4: uuidv4 } = require('uuid');
-const authMiddleware = require('../middleware/authMiddleware');
+const authMiddleware = require('../authMiddleware')
 
 module.exports = async function (context, req) {
   try {
