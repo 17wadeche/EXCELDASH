@@ -52,7 +52,6 @@ async function initializeModels() {
     targetKey: 'userEmail',
     as: 'User' 
   });
-  await sequelize.sync();
   console.log('All models were synchronized successfully.');
   return { sequelize, User, Subscription, Dashboard, Template, RefreshToken };
 }
