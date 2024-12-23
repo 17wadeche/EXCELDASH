@@ -82,11 +82,9 @@ export const unsubscribeUser = async (email: string) => {
 };
 export const getDashboards = async (): Promise<DashboardItem[]> => {
   const storedToken = localStorage.getItem('token');
-  console.log('Stored token is:', storedToken);
   if (!storedToken) {
     throw new Error('No token found in localStorage');
   }
-
   const response = await axios.get(`${API_BASE_URL}/dashboards`, {
     headers: {
       Authorization: `Bearer ${storedToken}`

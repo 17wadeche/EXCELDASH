@@ -9,7 +9,7 @@ module.exports = function (context, req, next) {
       status: 401,
       body: { error: 'Authorization header missing.' },
     };
-    return;
+    return next();
   }
   const token = authHeader.split(' ')[1];
   if (!token) {
@@ -18,18 +18,19 @@ module.exports = function (context, req, next) {
       status: 401,
       body: { error: 'Bearer token missing.' },
     };
-    return;
+    return next();
   }
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.userEmail = decoded.email;
     context.log(`AuthMiddleware: userEmail from JWT -> ${req.userEmail}`);
-    next();
+    return next();
   } catch (error) {
     context.log.error('Invalid token:', error.message);
     context.res = {
       status: 401,
       body: { error: 'Invalid token.' },
     };
+    return next();
   }
 };

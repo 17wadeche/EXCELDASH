@@ -25,7 +25,6 @@ module.exports = async function (context, req) {
     if (method === 'post') {
       const { title, components, layouts, workbookId, borderSettings } = req.body;
       context.log('POST to /api/dashboards by userEmail:', userEmail);
-
       if (!title || !components || !layouts || !workbookId) {
         context.res = {
           status: 400,
@@ -42,7 +41,7 @@ module.exports = async function (context, req) {
         workbookId: normalizedWorkbookId,
         userEmail,
         versions: [],
-        borderSettings: borderSettings || undefined, 
+        borderSettings: borderSettings || undefined,
       });
       context.res = { status: 200, body: newDashboard };
     } else if (method === 'get') {
@@ -60,9 +59,7 @@ module.exports = async function (context, req) {
         context.res = { status: 200, body: dashboard };
       } else {
         context.log('GET all dashboards for user:', userEmail);
-        const dashboards = await Dashboard.findAll({
-          where: { userEmail },
-        });
+        const dashboards = await Dashboard.findAll({ where: { userEmail } });
         context.res = { status: 200, body: dashboards };
       }
     } else if (method === 'put') {
@@ -87,12 +84,8 @@ module.exports = async function (context, req) {
       if (title !== undefined) dashboard.title = title;
       if (components !== undefined) dashboard.components = components;
       if (layouts !== undefined) dashboard.layouts = layouts;
-      if (workbookId !== undefined) {
-        dashboard.workbookId = workbookId.toLowerCase();
-      }
-      if (borderSettings !== undefined) {
-        dashboard.borderSettings = borderSettings;
-      }
+      if (workbookId !== undefined) dashboard.workbookId = workbookId.toLowerCase();
+      if (borderSettings !== undefined) dashboard.borderSettings = borderSettings;
       await dashboard.save();
       context.res = { status: 200, body: dashboard };
     } else if (method === 'delete') {
