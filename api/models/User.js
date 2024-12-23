@@ -13,7 +13,7 @@ module.exports = (sequelize) => {
         defaultValue: () => uuidv4(),
       },
       email: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(255),
         allowNull: false,
         unique: {
           name: 'UQ_Users_email',
