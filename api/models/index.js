@@ -42,6 +42,16 @@ async function initializeModels() {
     targetKey: 'userEmail',
     as: 'User' 
   });
+  User.hasMany(RefreshToken, { 
+    foreignKey: 'userEmail', 
+    sourceKey: 'userEmail',
+    as: 'RefreshTokens' 
+    });
+  RefreshToken.belongsTo(User, { 
+    foreignKey: 'userEmail', 
+    targetKey: 'userEmail',
+    as: 'User' 
+  });
   await sequelize.sync();
   console.log('All models were synchronized successfully.');
   return { sequelize, User, Subscription, Dashboard, Template, RefreshToken };
