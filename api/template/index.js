@@ -1,26 +1,25 @@
-// template/index.js
-
+// templates/index.js
 const initializeModels = require('../models');
 const { v4: uuidv4 } = require('uuid');
 const authMiddleware = require('../middleware/authMiddleware');
 
 module.exports = async function (context, req) {
-  await new Promise((resolve) => authMiddleware(context, req, resolve));
-  const method = req.method.toLowerCase();
-  const id = req.params.id;
-  const userEmail = req.userEmail;
-  if (!userEmail) {
-    context.res = {
-      status: 401,
-      body: { error: 'Unauthorized access.' },
-    };
-    return;
-  }
   try {
+    await new Promise((resolve) => authMiddleware(context, req, resolve));
+    const method = req.method.toLowerCase();
+    const id = req.params.id;
+    const userEmail = req.userEmail;
+    if (!userEmail) {
+      context.res = {
+        status: 401,
+        body: { error: 'Unauthorized access.' },
+      };
+      return;
+    }
     const { Template } = await initializeModels();
     if (method === 'post') {
       const { name, widgets, layouts } = req.body;
-      console.log("Server: Received POST for template creation. userEmail:", userEmail);
+      context.log.info("Received POST request for template creation", { userEmail, name });
       if (!name || !widgets || !layouts) {
         context.res = {
           status: 400,
@@ -39,7 +38,6 @@ module.exports = async function (context, req) {
     } else if (method === 'get') {
       if (id) {
         const template = await Template.findByPk(id);
-        console.log("Server: Fetched template from DB:", template);
         if (!template) {
           context.res = { status: 404, body: { error: 'Template not found' } };
           return;
@@ -64,7 +62,6 @@ module.exports = async function (context, req) {
         return;
       }
       const { name, widgets, layouts } = req.body;
-      console.log("Server: Received PUT for template:", id);
       const template = await Template.findByPk(id);
       if (!template) {
         context.res = { status: 404, body: { error: 'Template not found' } };
@@ -102,7 +99,7 @@ module.exports = async function (context, req) {
       context.res = { status: 405, body: { error: 'Method not allowed.' } };
     }
   } catch (error) {
-    context.log.error('Error handling template request:', error);
-    context.res = { status: 500, body: { error: error.message } };
+    context.log.error('Error handling template request:', { error: error.message, stack: error.stack });
+    context.res = { status: 500, body: { error: 'Internal Server Error' } };
   }
 };

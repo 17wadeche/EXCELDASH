@@ -24,18 +24,22 @@ async function initializeModels() {
   });
   User.hasMany(Dashboard, { 
     foreignKey: 'userEmail', 
+    sourceKey: 'userEmail',
     as: 'Dashboards' 
   });
   Dashboard.belongsTo(User, { 
     foreignKey: 'userEmail', 
+    targetKey: 'userEmail',
     as: 'User' 
   });
   User.hasMany(Template, { 
     foreignKey: 'userEmail', 
+    sourceKey: 'userEmail',
     as: 'Templates' 
   });
   Template.belongsTo(User, { 
     foreignKey: 'userEmail', 
+    targetKey: 'userEmail',
     as: 'User' 
   });
   await sequelize.sync();
