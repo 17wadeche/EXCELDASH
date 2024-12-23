@@ -20,7 +20,9 @@ module.exports = function (context, req, next) {
     return;
   }
   try {
+    context.log('Auth middleware start');
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    context.log('Decoded userEmail:', req.userEmail);
     console.log('Decoded JWT:', decoded);
     req.userEmail = decoded.email;
     next();

@@ -1,31 +1,31 @@
 // dashboard/index.js
+
 const initializeModels = require('../models');
 const { v4: uuidv4 } = require('uuid');
-const authMiddleware = require('../authMiddleware')
+const authMiddleware = require('../authMiddleware');
 
 module.exports = async function (context, req) {
-  try {
-    await new Promise((resolve) => authMiddleware(context, req, resolve));
-    const method = req.method.toLowerCase();
-    const id = req.params.id;
-    const userEmail = req.userEmail;
-    if (!userEmail) {
+  await new Promise((resolve) => authMiddleware(context, req, resolve));
+  const method = req.method.toLowerCase();
+  const id = req.params.id;
+  const userEmail = req.userEmail;
+  if (!userEmail) {
+    context.res = {
+      status: 401,
+      body: { error: 'Unauthorized access.' },
+    };
+    return;
+  }
+  const { Dashboard } = await initializeModels();
+  if (method === 'post') {
+    const { title, components, layouts, workbookId, borderSettings } = req.body;
+    context.log.info("Received POST request for dashboard creation", { userEmail, title });
+    if (!title || !components || !layouts || !workbookId) {
       context.res = {
-        status: 401,
-        body: { error: 'Unauthorized access.' },
+        status: 400,
+        body: { error: 'title, components, layouts, and workbookId are required.' }
       };
       return;
-    }
-    const { Dashboard } = await initializeModels();
-    if (method === 'post') {
-      const { title, components, layouts, workbookId, borderSettings } = req.body;
-      context.log.info("Received POST request for dashboard creation", { userEmail, title });
-      if (!title || !components || !layouts || !workbookId) {
-        context.res = {
-          status: 400,
-          body: { error: 'title, components, layouts, and workbookId are required.' }
-        };
-        return;
       }
       const normalizedWorkbookId = workbookId.toLowerCase();
       const newDashboard = await Dashboard.create({
@@ -42,6 +42,7 @@ module.exports = async function (context, req) {
     } else if (method === 'get') {
       if (id) {
         const dashboard = await Dashboard.findByPk(id);
+        console.log("Server: Fetched dashboard from DB:", dashboard);
         if (!dashboard) {
           context.res = { status: 404, body: { error: 'Dashboard not found' } };
           return;
@@ -66,6 +67,8 @@ module.exports = async function (context, req) {
         return;
       }
       const { title, components, layouts, workbookId, borderSettings } = req.body;
+      console.log("Server: Received PUT for dashboard:", id);
+      console.log("Server: Request body workbookId:", workbookId);
       const dashboard = await Dashboard.findByPk(id);
       if (!dashboard) {
         context.res = { status: 404, body: { error: 'Dashboard not found' } };
@@ -75,6 +78,7 @@ module.exports = async function (context, req) {
         context.res = { status: 403, body: { error: 'Access denied.' } };
         return;
       }
+      console.log("Server: Existing dashboard workbookId (from DB):", dashboard.workbookId);
       if (title !== undefined) dashboard.title = title;
       if (components !== undefined) dashboard.components = components;
       if (layouts !== undefined) dashboard.layouts = layouts;
@@ -109,7 +113,7 @@ module.exports = async function (context, req) {
       context.res = { status: 405, body: { error: 'Method not allowed.' } };
     }
   } catch (error) {
-    context.log.error('Error handling dashboard request:', { error: error.message, stack: error.stack });
-    context.res = { status: 500, body: { error: 'Internal Server Error' } };
+    context.log.error('Error handling dashboard request:', error);
+    context.res = { status: 500, body: { error: error.message } };
   }
 };
