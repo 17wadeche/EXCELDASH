@@ -12,7 +12,7 @@ async function initializeModels() {
   const Dashboard = defineDashboard(sequelize, sequelize.Sequelize.DataTypes);
   const Template = defineTemplate(sequelize, sequelize.Sequelize.DataTypes);
   const RefreshToken = defineRefreshToken(sequelize, sequelize.Sequelize.DataTypes);
-  User.hasOne(Subscription, { foreignKey: 'userEmail' });
+  User.hasMany(Subscription, { foreignKey: 'userEmail' });
   Subscription.belongsTo(User, { foreignKey: 'userEmail' });
   User.hasMany(Dashboard, { foreignKey: 'userEmail' });
   Dashboard.belongsTo(User, { foreignKey: 'userEmail' });
