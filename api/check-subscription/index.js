@@ -19,9 +19,11 @@ module.exports = async function (context, req) {
       include: [
         {
           model: Subscription,
+          as: 'Subscriptions',
           required: false,
         },
       ],
+      logging: (msg) => context.log(msg),
     });
     if (!user) {
       context.log(`No user row found for userEmail="${email}"`);
@@ -40,9 +42,14 @@ module.exports = async function (context, req) {
       };
       return;
     }
-    const activeSubscription = user.Subscriptions.find(
-      (sub) => sub.status === 'active'
-    );
+    user.Subscriptions.forEach((sub, index) => {
+      context.log(`Subscription ${index + 1}: ${JSON.stringify(sub, null, 2)}`);
+    });
+    const activeSubscription = user.Subscriptions.find((sub) => {
+      if (typeof sub.status !== 'string') return false;
+      return sub.status.trim().toLowerCase() === 'active';
+    });
+
     if (!activeSubscription) {
       context.log.info(`User "${email}" has subscriptions, but none are active.`);
       context.res = {
