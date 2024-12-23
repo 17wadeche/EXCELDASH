@@ -23,29 +23,40 @@ module.exports = async function (context, req) {
         },
       ],
     });
-    if (user) {
-      context.log(
-        `Found user: id=${user.id}, userEmail=${user.userEmail}, Subscription=`,
-        user.Subscription ? user.Subscription.dataValues : null
-      );
-    } else {
+    if (!user) {
       context.log(`No user row found for userEmail="${email}"`);
-    }
-    if (!user || !user.Subscription) {
-      context.log.info(`User with userEmail "${email}" not found or has no subscription.`);
       context.res = {
         status: 200,
         body: { subscribed: false },
       };
       return;
     }
-    const isActive = user.Subscription.status === 'active';
-    context.log.info(`User "${email}" subscription is ${isActive ? 'active' : 'inactive'}.`);
+    context.log(`Found user: ${JSON.stringify(user, null, 2)}`);
+    if (!user.Subscriptions || user.Subscriptions.length === 0) {
+      context.log.info(`User with userEmail "${email}" has no subscription rows.`);
+      context.res = {
+        status: 200,
+        body: { subscribed: false },
+      };
+      return;
+    }
+    const activeSubscription = user.Subscriptions.find(
+      (sub) => sub.status === 'active'
+    );
+    if (!activeSubscription) {
+      context.log.info(`User "${email}" has subscriptions, but none are active.`);
+      context.res = {
+        status: 200,
+        body: { subscribed: false },
+      };
+      return;
+    }
+    context.log.info(`User "${email}" has an active subscription: ${activeSubscription.subscription_id}`);
     context.res = {
       status: 200,
       body: {
-        subscribed: isActive,
-        plan: isActive ? user.Subscription.subscription_plan : null,
+        subscribed: true,
+        plan: activeSubscription.subscription_plan,
       },
     };
   } catch (error) {
