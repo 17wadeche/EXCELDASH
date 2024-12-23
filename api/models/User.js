@@ -12,7 +12,7 @@ module.exports = (sequelize) => {
         allowNull: false,
         defaultValue: () => uuidv4(),
       },
-      email: {
+      userEmail: {
         type: DataTypes.STRING(255),
         allowNull: false,
         unique: {
@@ -22,6 +22,7 @@ module.exports = (sequelize) => {
         validate: {
           isEmail: true,
         },
+        field: 'userEmail',
       },
       password: {
         type: DataTypes.STRING,
