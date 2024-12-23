@@ -2,7 +2,7 @@
 
 const initializeModels = require('../models');
 const { v4: uuidv4 } = require('uuid');
-const authMiddleware = require('../authMiddleware');
+const authMiddleware = require('../authMiddleware'); // Adjust the path as needed
 
 module.exports = async function (context, req) {
   await new Promise((resolve) => authMiddleware(context, req, resolve));
@@ -16,16 +16,18 @@ module.exports = async function (context, req) {
     };
     return;
   }
-  const { Dashboard } = await initializeModels();
-  if (method === 'post') {
-    const { title, components, layouts, workbookId, borderSettings } = req.body;
-    context.log.info("Received POST request for dashboard creation", { userEmail, title });
-    if (!title || !components || !layouts || !workbookId) {
-      context.res = {
-        status: 400,
-        body: { error: 'title, components, layouts, and workbookId are required.' }
-      };
-      return;
+  try {
+    const { Dashboard } = await initializeModels();
+    if (method === 'post') {
+      const { title, components, layouts, workbookId, borderSettings } = req.body;
+      console.log("Server: Received POST for dashboard creation. userEmail:", userEmail);
+
+      if (!title || !components || !layouts || !workbookId) {
+        context.res = {
+          status: 400,
+          body: { error: 'title, components, layouts, and workbookId are required.' }
+        };
+        return;
       }
       const normalizedWorkbookId = workbookId.toLowerCase();
       const newDashboard = await Dashboard.create({
