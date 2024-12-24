@@ -4,10 +4,6 @@ import { DashboardItem, NewDashboard, TemplateItem } from '../components/types';
 
 const API_BASE_URL = 'https://happy-forest-059a9d710.4.azurestaticapps.net/api';
 
-/**
- * Helper to set or remove the default Authorization header for Axios.
- * Call this whenever the token changes (login, logout, refresh).
- */
 export function setAuthToken(token: string | null) {
   if (token) {
     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -16,8 +12,6 @@ export function setAuthToken(token: string | null) {
   }
 }
 
-// If a token is in localStorage on page load, set it.
-// (Remove this if you suspect the token is stale or invalid!)
 const existingToken = localStorage.getItem('token');
 if (existingToken) {
   setAuthToken(existingToken);
@@ -25,9 +19,6 @@ if (existingToken) {
   console.warn('No token found in localStorage on load.');
 }
 
-/**
- * Example: createCheckoutSession
- */
 export const createCheckoutSession = async (plan: 'monthly' | 'yearly', email: string) => {
   const response = await axios.post(`${API_BASE_URL}/create-checkout-session`, {
     plan,
@@ -36,9 +27,6 @@ export const createCheckoutSession = async (plan: 'monthly' | 'yearly', email: s
   return response.data.url;
 };
 
-/**
- * checkSubscription
- */
 export const checkSubscription = async (email: string) => {
   try {
     const response = await axios.get(`${API_BASE_URL}/check-subscription`, { params: { email } });
@@ -49,34 +37,19 @@ export const checkSubscription = async (email: string) => {
   }
 };
 
-/**
- * loginUser
- * - Logs in, receives token from server, saves token to localStorage, and sets default auth header.
- */
 export const loginUser = async (email: string, password: string): Promise<string> => {
   const response = await axios.post(`${API_BASE_URL}/login`, { email, password });
   const token = response.data.token;
-
-  // Store in localStorage
   localStorage.setItem('token', token);
   localStorage.setItem('userEmail', email);
-
-  // Update Axios default header
   setAuthToken(token);
-
   return token;
 };
 
-/**
- * registerUser
- */
 export const registerUser = async (email: string, password: string): Promise<void> => {
   await axios.post(`${API_BASE_URL}/register`, { email, password });
 };
 
-/**
- * verifySubscription
- */
 export const verifySubscription = async (sessionId: string) => {
   try {
     const response = await axios.get(`${API_BASE_URL}/verify-subscription`, {
@@ -89,9 +62,6 @@ export const verifySubscription = async (sessionId: string) => {
   }
 };
 
-/**
- * checkRegistration
- */
 export const checkRegistration = async (email: string) => {
   try {
     const response = await axios.get(`${API_BASE_URL}/check-registration`, {
@@ -104,11 +74,7 @@ export const checkRegistration = async (email: string) => {
   }
 };
 
-/**
- * unsubscribeUser
- */
 export const unsubscribeUser = async (email: string) => {
-  // Pull the current token from localStorage (or your state management)
   const token = localStorage.getItem('token');
   if (!token) throw new Error('No token found. Please log in again.');
 
@@ -125,17 +91,12 @@ export const unsubscribeUser = async (email: string) => {
   }
 };
 
-/**
- * getDashboards
- */
 export const getDashboards = async (): Promise<DashboardItem[]> => {
-  // Optionally re-check localStorage token right before the call:
   const token = localStorage.getItem('token');
   if (!token) {
     throw new Error('No token found in localStorage');
   }
 
-  // Make the request
   const response = await axios.get(`${API_BASE_URL}/dashboards`, {
     headers: {
       Authorization: `Bearer ${token}`

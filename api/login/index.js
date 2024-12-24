@@ -7,6 +7,7 @@ const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 
 module.exports = async function (context, req) {
+  context.log('JWT_SECRET:', process.env.JWT_SECRET);
   const schema = Joi.object({
     email: Joi.string().email().required(),
     password: Joi.string().required(),

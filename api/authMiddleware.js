@@ -22,6 +22,7 @@ module.exports = function (context, req, next) {
   }
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    context.log('Decoded token:', decoded);
     req.userEmail = decoded.email;
     context.log(`AuthMiddleware: userEmail from JWT -> ${req.userEmail}`);
     return next();
