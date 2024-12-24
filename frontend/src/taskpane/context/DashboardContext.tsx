@@ -145,23 +145,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
   useEffect(() => {
     fetchUserEmail();
   }, []);
-  useEffect(() => {
-    const fetchDashboards = async () => {
-      try {
-        const response = await axios.get('/api/dashboards');
-        const fetchedDashboards: DashboardItem[] = response.data;
-        setDashboards(fetchedDashboards);
-        if (fetchedDashboards.length > 0) {
-        } else {
-          console.log('No dashboards available.');
-        }
-      } catch (error) {
-        console.error('Error fetching dashboards:', error);
-        message.error('Failed to load dashboards from server.');
-      }
-    };
-    fetchDashboards();
-  }, []);
   const setWidgets: React.Dispatch<React.SetStateAction<Widget[]>> = (update) => {
     if (typeof update === 'function') {
       setWidgetsState((prevWidgets) => {

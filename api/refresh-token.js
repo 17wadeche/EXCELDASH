@@ -31,7 +31,7 @@ module.exports = async function (context, req) {
       return;
     }
     const userEmail = storedToken.userEmail;
-    const newAccessToken = jwt.sign({ email: userEmail }, process.env.JWT_SECRET, {
+    const newAccessToken = jwt.sign({ userEmail: userEmail }, process.env.JWT_SECRET, {
       expiresIn: '90d',
     });
     const newRefreshToken = uuidv4();

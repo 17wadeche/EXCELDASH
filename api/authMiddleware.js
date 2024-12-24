@@ -4,7 +4,6 @@ const jwt = require('jsonwebtoken');
 module.exports = function (context, req, next) {
   context.log('=== [authMiddleware] START ===');
 
-  // Log all request headers for debugging
   context.log('[authMiddleware] Incoming headers:', JSON.stringify(req.headers, null, 2));
   const authHeader = req.headers['authorization'];
   if (!authHeader) {
@@ -37,6 +36,9 @@ module.exports = function (context, req, next) {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     context.log('[authMiddleware] Decoded token:', decoded);
     req.userEmail = decoded.userEmail;
+    if (!req.userEmail) {
+      throw new Error('userEmail not found in token.');
+    }
     context.log(`[authMiddleware] userEmail from JWT -> ${req.userEmail}`);
     context.log('=== [authMiddleware] END (success) ===');
     return next();
