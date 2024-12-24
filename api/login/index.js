@@ -1,5 +1,3 @@
-// login/index.js
-
 const initializeModels = require('../models');
 const Joi = require('joi');
 const bcrypt = require('bcryptjs');
@@ -39,9 +37,11 @@ module.exports = async function (context, req) {
       };
       return;
     }
-    const accessToken = jwt.sign({ email: user.userEmail }, process.env.JWT_SECRET, {
-      expiresIn: '30d', // or shorter
-    });
+    const accessToken = jwt.sign(
+      { userEmail: user.userEmail },
+      process.env.JWT_SECRET,
+      { expiresIn: '30d' }
+    );
     const refreshTokenValue = uuidv4();
     const refreshTokenExpires = new Date();
     refreshTokenExpires.setDate(refreshTokenExpires.getDate() + 90);
@@ -49,13 +49,13 @@ module.exports = async function (context, req) {
     await RefreshToken.create({
       token: refreshTokenValue,
       userEmail: user.userEmail,
-      expiresAt: refreshTokenExpires
+      expiresAt: refreshTokenExpires,
     });
     context.res = {
       status: 200,
-      body: { 
-        token: accessToken, 
-        refreshToken: refreshTokenValue 
+      body: {
+        token: accessToken,
+        refreshToken: refreshTokenValue,
       },
     };
   } catch (error) {
