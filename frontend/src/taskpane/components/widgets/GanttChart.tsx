@@ -151,7 +151,7 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
             viewMode={viewMode}
             onDateChange={handleDateChange}
             onProgressChange={handleProgressChange}
-            arrowColor={arrowColor}
+            arrow_color={arrowColor}
           />
         </div>
       </div>

@@ -2452,7 +2452,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         const durationValue = newTask.duration ?? '';
         const rowData: (string | number | boolean)[] = [
           newTask.name,
-          newTask.type.charAt(0).toUpperCase() + newTask.type.slice(1),
+          newTask.type.charAt(0).toUpperCase() + newTask.type.slice(1) : 'Task',
           newTask.start,
           newTask.end,
           newTask.completed ?? '',
