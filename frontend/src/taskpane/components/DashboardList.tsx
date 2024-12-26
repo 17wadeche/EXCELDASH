@@ -12,7 +12,7 @@ const { Title } = Typography;
 const { Search } = Input;
 
 const DashboardList: React.FC = () => {
-  const { dashboards, deleteDashboard, setCurrentDashboardId} = useContext(DashboardContext)!;
+  const { dashboards, deleteDashboard, setCurrentDashboardId, updateDashboardTitle } = useContext(DashboardContext)!;
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredDashboards, setFilteredDashboards] = useState<DashboardItem[]>([]);
