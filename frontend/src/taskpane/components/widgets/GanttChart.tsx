@@ -5,9 +5,8 @@ import { FrappeGantt } from 'react-frappe-gantt';
 import { Task } from '../types';
 import { Select, Button, message } from 'antd';
 import { v4 as uuidv4 } from 'uuid';
-import '../Dashboard.css'; // Ensure no react-grid-layout classes affect this component
+import '../Dashboard.css';
 import AddTaskForm from './AddTaskForm';
-import Draggable from 'react-draggable';
 
 const { Option } = Select;
 
@@ -16,6 +15,7 @@ interface GanttChartComponentProps {
   onTasksChange?: (updatedTasks: Task[]) => void;
   titleAlignment?: 'left' | 'center';
   title?: string;
+  arrowColor?: string;
 }
 
 const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
@@ -23,6 +23,7 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
   onTasksChange,
   titleAlignment = 'left',
   title = 'Gantt Chart',
+  arrowColor = '#7d7d7d',
 }) => {
   const [viewMode, setViewMode] = useState<'Day' | 'Week' | 'Month'>('Week');
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
@@ -150,6 +151,7 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
             viewMode={viewMode}
             onDateChange={handleDateChange}
             onProgressChange={handleProgressChange}
+            arrowColor={arrowColor}
           />
         </div>
       </div>

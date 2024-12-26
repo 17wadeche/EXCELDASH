@@ -2123,17 +2123,12 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     }, 300)
   ).current;
   const readGanttDataFromExcel = async () => {
-    if (!currentDashboard || !currentDashboard.workbookId) {
-      message.error('No dashboard or workbook ID found.');
+    if (!currentWorkbookId) {
+      message.error('No workbook ID found. Please open or re-open the correct workbook.');
       return;
     }
-    if (isReadGanttDataInProgress.current) {
-      console.warn('readGanttDataFromExcel is already in progress.');
-      return;
-    }
-    isReadGanttDataInProgress.current = true;
-    if (currentWorkbookId !== currentDashboard.workbookId) {
-      message.warning('This dashboard is not associated with the currently open workbook.');
+    if (!currentDashboardId) {
+      message.error('No current dashboard ID found.');
       return;
     }
     try {
@@ -2389,7 +2384,15 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     return cellAddressRegex.test(address);
   };
   const addTaskToGantt = async (newTask: Task) => {
-    if (!newTask.name || !newTask.type || newTask.start === undefined || newTask.end === undefined) {
+    if (!currentWorkbookId) {
+      message.error('No workbook ID found. Please open or re-open the correct workbook.');
+      return;
+    }
+    if (!currentDashboardId) {
+      message.error('No current dashboard ID found.');
+      return;
+    }
+    if (!newTask.name || !newTask.type || !newTask.start || !newTask.end) {
       message.error('Task is missing required fields.');
       return;
     }
@@ -2426,7 +2429,13 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         return updatedWidgets;
       });
       await Excel.run(async (context) => {
-        const sheet = context.workbook.worksheets.getItem('Gantt');
+        const sheet = context.workbook.worksheets.getItemOrNullObject('Gantt');
+        sheet.load('name');
+        await context.sync();
+        if (sheet.isNullObject) {
+          message.error('Gantt sheet not found. Make sure you inserted the template first.');
+          return;
+        }
         const table = sheet.tables.getItemOrNullObject('GanttTable');
         table.load(['name']);
         await context.sync();
@@ -2434,22 +2443,24 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           message.error('GanttTable not found in the Gantt worksheet.');
           return;
         }
-        const dependenciesValue = Array.isArray(newTask.dependencies)
-          ? newTask.dependencies.join(', ')
-          : (newTask.dependencies ?? '');
+        let dependenciesValue = '';
+        if (Array.isArray(newTask.dependencies)) {
+          dependenciesValue = newTask.dependencies.join(', ');
+        } else if (typeof newTask.dependencies === 'string') {
+          dependenciesValue = newTask.dependencies;
+        }
         const durationValue = newTask.duration ?? '';
         const rowData: (string | number | boolean)[] = [
           newTask.name,
-          capitalizeFirstLetter(newTask.type ?? ''),
+          newTask.type.charAt(0).toUpperCase() + newTask.type.slice(1),
           newTask.start,
           newTask.end,
           newTask.completed ?? '',
           durationValue,
           '',
-          newTask.progress,
+          newTask.progress || 0,
           dependenciesValue,
         ];
-        console.log('Row data to add:', rowData);
         table.rows.add(undefined, [rowData]);
         await context.sync();
       });
