@@ -12,7 +12,7 @@ import axios from 'axios';
 import PromptWidgetDetailsModal from '../components/PromptWidgetDetailsModal';
 import { DashboardBorderSettings } from '../components/types';
 import { capitalizeFirstLetter } from '../utils/stringUtils'; 
-import { deleteDashboardById } from '../utils/api';
+import { deleteDashboardById, createTemplate, updateTemplate } from '../utils/api';
 import { getWorkbookIdFromProperties, isInDialog } from '../utils/excelUtils';
 import SelectTableModal from '../components/SelectTableModal';
 const { Option } = Select;
@@ -456,29 +456,27 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
   }, [currentDashboardId, currentDashboard, dashboardLoaded]);
   const saveAsTemplate = async () => {
     try {
+      if (!userEmail) {
+        message.error('No user email found. Cannot save as template.');
+        return;
+      }
       const templateToSave = {
         title: dashboardTitle,
         components: widgets,
         layouts: layouts,
         borderSettings: dashboardBorderSettings,
+      };
+      if (currentTemplateId) {
+        const updatedTemplate = await updateTemplate(currentTemplateId, templateToSave);
+        message.success('Template updated successfully!');
+      } else {
+        const newTemplate = await createTemplate(templateToSave);
+        message.success('Template created successfully!');
+        setCurrentTemplateId(newTemplate.id);
       }
-      setCurrentDashboard((prev) => (prev ? { ...prev, ...templateToSave } : null));
-      const response = await axios.put(`/api/templates/${currentDashboardId}`, templateToSave);
-      const updatedDashboard = response.data;
-      setCurrentDashboard(updatedDashboard);
-      setWidgets(updatedDashboard.components || []);
-      setLayouts(updatedDashboard.layouts || {});
-      setDashboards((prevDashboards) => {
-        const index = prevDashboards.findIndex((d) => d.id === currentDashboardId);
-        if (index === -1) return prevDashboards;
-        const newDashboards = [...prevDashboards];
-        newDashboards[index] = updatedDashboard;
-        return newDashboards;
-      });
-      message.success('Template saved successfully!');
     } catch (error) {
-      console.error('Error saving dashboard:', error);
-      message.error('Failed to save Template to the server.');
+      console.error('Error saving template:', error);
+      message.error('Failed to save template to the server.');
     }
   };
   const excelSerialToDateString = (serial: number): string => {
