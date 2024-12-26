@@ -144,6 +144,23 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
   useEffect(() => {
     fetchUserEmail();
   }, []);
+  
+  useEffect(() => {
+    if (currentDashboardId) {
+      console.log(`[DashboardProvider] currentDashboardId changed: ${currentDashboardId}`);
+    } else {
+      console.log('[DashboardProvider] currentDashboardId is null');
+    }
+  }, [currentDashboardId]);
+
+  useEffect(() => {
+    if (currentWorkbookId) {
+      console.log(`[DashboardProvider] currentWorkbookId changed: ${currentWorkbookId}`);
+    } else {
+      console.log('[DashboardProvider] currentWorkbookId is empty');
+    }
+  }, [currentWorkbookId]);
+
   const setWidgets: React.Dispatch<React.SetStateAction<Widget[]>> = (update) => {
     if (typeof update === 'function') {
       setWidgetsState((prevWidgets) => {
@@ -2064,9 +2081,11 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     }, 300)
   ).current;
   const readGanttDataFromExcel = async () => {
+    console.log(
+      `[DashboardProvider] readGanttDataFromExcel => currentDashboardId: ${currentDashboardId}, currentWorkbookId: ${currentWorkbookId}`
+    );
     if (!currentDashboardId) {
-      console.warn('No current dashboard ID found.');
-      return;
+      console.warn('No current dashboard ID found. Will not save changes to server, but will update local state.');
     }
     if (!currentWorkbookId) {
       console.warn('No workbook ID found. Proceeding without blocking...');
@@ -2323,6 +2342,8 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     return cellAddressRegex.test(address);
   };
   const addTaskToGantt = async (newTask: Task) => {
+    console.log(`[DashboardProvider] addTaskToGantt => ID: ${currentDashboardId}, workbookId: ${currentWorkbookId}`);
+
     if (!currentWorkbookId) {
       message.error('No workbook ID found. Please open or re-open the correct workbook.');
       return;
