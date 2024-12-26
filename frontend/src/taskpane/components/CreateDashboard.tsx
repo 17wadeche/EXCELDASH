@@ -44,6 +44,27 @@ const CreateDashboard: React.FC = () => {
     setDashboards,
   } = useContext(DashboardContext)!;
 
+  async function checkSubscriptionAndFetch(userEmail: string) {
+    const result = await checkSubscription(userEmail);
+    setIsSubscribed(result.subscribed);
+    if (result.subscribed) {
+      try {
+        setLoading(true);
+        const [fetchedTemplates, fetchedDashboards] = await Promise.all([
+          getTemplates(),
+          getDashboards(),
+        ]);
+        setTemplates(fetchedTemplates);
+        setDashboards(fetchedDashboards);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        message.error('Failed to fetch templates/dashboards.');
+      } finally {
+        setLoading(false);
+      }
+    }
+  }
+
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
     const savedEmail = localStorage.getItem('userEmail');
@@ -53,9 +74,7 @@ const CreateDashboard: React.FC = () => {
       checkRegistration(savedEmail).then(registrationResult => {
         setIsRegistered(registrationResult.registered);
       }).catch(console.error);
-      checkSubscription(savedEmail).then(result => {
-        setIsSubscribed(result.subscribed);
-      }).catch(console.error);
+      checkSubscriptionAndFetch(savedEmail).catch(console.error);
     }
   }, []);
 
@@ -66,12 +85,9 @@ const CreateDashboard: React.FC = () => {
     }
     setIsLoading(true);
     try {
-      const subscriptionResult = await checkSubscription(emailInput);
-      setIsSubscribed(subscriptionResult.subscribed);
-
+      await checkSubscriptionAndFetch(emailInput);
       const registrationResult = await checkRegistration(emailInput);
       setIsRegistered(registrationResult.registered);
-
       setEmail(emailInput);
       localStorage.setItem('userEmail', emailInput);
     } catch (error) {
@@ -98,17 +114,7 @@ const CreateDashboard: React.FC = () => {
         }
         const dialog = asyncResult.value;
         dialog.addEventHandler(Office.EventType.DialogEventReceived, () => {
-          checkSubscription(email).then(result => {
-            setIsSubscribed(result.subscribed);
-            if (result.subscribed) {
-              message.success('Subscription active!');
-            } else {
-              message.error('Subscription not completed.');
-            }
-          }).catch(error => {
-            console.error('Error re-checking subscription after dialog closed:', error);
-            message.error('Failed to update subscription status.');
-          });
+          checkSubscriptionAndFetch(email).catch(console.error);
         });
       });
     } catch (error: any) {
@@ -123,19 +129,7 @@ const CreateDashboard: React.FC = () => {
   useEffect(() => {
     function handleMessage(event: MessageEvent) {
       if (event.data && event.data.action === 'subscriptionSuccess') {
-        checkSubscription(email)
-          .then(result => {
-            setIsSubscribed(result.subscribed);
-            if (result.subscribed) {
-              message.success('Subscription successful!');
-            } else {
-              message.error('Subscription not completed.');
-            }
-          })
-          .catch(error => {
-            console.error('Error re-checking subscription:', error);
-            message.error('Failed to update subscription status.');
-          });
+        checkSubscriptionAndFetch(email).catch(console.error);
       }
     }
     window.addEventListener('message', handleMessage);
@@ -143,6 +137,7 @@ const CreateDashboard: React.FC = () => {
       window.removeEventListener('message', handleMessage);
     };
   }, [email]);
+
   const handleRegister = async () => {
     if (!email || !password) {
       message.error('Please enter your email and password.');
@@ -169,12 +164,7 @@ const CreateDashboard: React.FC = () => {
       setIsLoggedIn(true);
       localStorage.setItem('isLoggedIn', 'true');
       message.success('Login successful.');
-      const [fetchedTemplates, fetchedDashboards] = await Promise.all([
-        getTemplates(),
-        getDashboards(),
-      ]);
-      setTemplates(fetchedTemplates);
-      setDashboards(fetchedDashboards);
+      await checkSubscriptionAndFetch(email);
     } catch (error) {
       console.error('Error during login:', error);
       message.error('Failed to login.');
