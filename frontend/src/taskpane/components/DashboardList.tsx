@@ -1,8 +1,8 @@
 // src/taskpane/components/DashboardList.tsx
 
 import React, { useContext, useState, useEffect } from 'react';
-import { Layout, List, Button, Typography, Modal, message, Card, Tooltip, Row, Col, Input, Spin, Divider,Empty } from 'antd';
-import { DeleteOutlined, EyeOutlined, EditOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
+import { Layout, List, Button, Typography, Modal, message, Card, Tooltip, Row, Col, Input, Spin, Divider,Empty, Form } from 'antd';
+import { DeleteOutlined, EyeOutlined, EditOutlined, PlusOutlined, SearchOutlined, FolderViewOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { DashboardContext } from '../context/DashboardContext';
 import { DashboardItem } from './types';
@@ -12,12 +12,14 @@ const { Title } = Typography;
 const { Search } = Input;
 
 const DashboardList: React.FC = () => {
-  const { dashboards, deleteDashboard, setCurrentDashboardId } = useContext(DashboardContext)!;
+  const { dashboards, deleteDashboard, setCurrentDashboardId} = useContext(DashboardContext)!;
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredDashboards, setFilteredDashboards] = useState<DashboardItem[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [editTitle, setEditTitle] = useState('');
+  const [editDashboardId, setEditDashboardId] = useState<string | null>(null);
   useEffect(() => {
     setLoading(true);
     const timer = setTimeout(() => {
@@ -57,6 +59,20 @@ const DashboardList: React.FC = () => {
 
   const handleCreateNew = () => {
     navigate('/create');
+  };
+  const openEditModal = (dashboardId: string, currentTitle: string) => {
+    setEditDashboardId(dashboardId);
+    setEditTitle(currentTitle);
+    setIsEditModalVisible(true);
+  };
+  const handleSaveTitle = () => {
+    if (editDashboardId) {
+      updateDashboardTitle(editDashboardId, editTitle);
+      message.success('Title updated successfully!');
+    }
+    setIsEditModalVisible(false);
+    setEditDashboardId(null);
+    setEditTitle('');
   };
 
   return (
@@ -120,6 +136,13 @@ const DashboardList: React.FC = () => {
                 <Card
                   hoverable
                   actions={[
+                    <Tooltip title="Rename Dashboard" key="rename">
+                      <Button
+                        type="text"
+                        icon={<FolderViewOutlined />}
+                        onClick={() => openEditModal(dashboard.id, dashboard.title)}
+                      />
+                    </Tooltip>,
                     <Tooltip title="Edit Dashboard" key="edit">
                       <Button
                         type="text"
@@ -170,6 +193,22 @@ const DashboardList: React.FC = () => {
           />
         )}
       </Content>
+      <Modal
+        title="Edit Dashboard Title"
+        open={isEditModalVisible}
+        onOk={handleSaveTitle}
+        onCancel={() => {
+          setIsEditModalVisible(false);
+          setEditTitle('');
+          setEditDashboardId(null);
+        }}
+      >
+        <Input
+          value={editTitle}
+          onChange={(e) => setEditTitle(e.target.value)}
+          placeholder="New dashboard title"
+        />
+      </Modal>
     </Layout>
   );
 };

@@ -72,6 +72,7 @@ interface DashboardContextProps {
   setCurrentTemplateId: (id: string | null) => void;
   setDashboards: React.Dispatch<React.SetStateAction<DashboardItem[]>>;
   applyDataValidation: () => void;
+  updateDashboardTitle: (id: string, newTitle: string) => void;
   dashboardBorderSettings: DashboardBorderSettings;
   setDashboardBorderSettings: React.Dispatch<React.SetStateAction<DashboardBorderSettings>>;
   refreshAllCharts: () => void;
@@ -2440,6 +2441,13 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       }
     }
   };
+  const updateDashboardTitle = (id: string, newTitle: string) => {
+    setDashboards((prev) =>
+      prev.map((dash) =>
+        dash.id === id ? { ...dash, title: newTitle } : dash
+      )
+    );
+  };
 
   const updateMetricValue = async (widgetId: string) => {
     try {
@@ -2661,6 +2669,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         isFullscreenActive,
         setIsFullscreenActive,
         refreshTableWidgetData,
+        updateDashboardTitle,
         deleteDashboard,
         undo,
         redo,
