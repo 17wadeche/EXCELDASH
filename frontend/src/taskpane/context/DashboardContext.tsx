@@ -460,10 +460,11 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         message.error('No user email found. Cannot save as template.');
         return;
       }
-      const templateToSave = {
-        title: dashboardTitle,
-        components: widgets,
-        layouts: layouts,
+      const templateToSave: TemplateItem = {
+        id: currentTemplateId ?? '',
+        name: dashboardTitle,
+        widgets: widgets,
+        layouts,
         borderSettings: dashboardBorderSettings,
       };
       if (currentTemplateId) {
@@ -2282,14 +2283,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           console.log('[setupGanttEventHandlers] Found "Gantt" worksheet. Adding onChanged event...');
           const eventHandler = async (event: Excel.WorksheetChangedEventArgs) => {
             console.log('[setupGanttEventHandlers] Gantt onChanged event fired!', event.address);
-            if (currentWorkbookId === currentDashboard?.workbookId) {
-              console.log('[setupGanttEventHandlers] Calling readGanttDataFromExcel() ...');
-              await readGanttDataFromExcel();
-            } else {
-              console.warn(
-                '[setupGanttEventHandlers] Workbook ID mismatch. Not calling readGanttDataFromExcel.'
-              );
-            }
+            await readGanttDataFromExcel(); 
           };
           sheet.onChanged.add(eventHandler);
           ganttEventHandlersRef.current.push(eventHandler);
@@ -2330,7 +2324,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     currentDashboard?.id,
     currentDashboard?.workbookId,
     currentWorkbookId,
-    readGanttDataFromExcel,
   ]);
 
   const isValidCellAddress = (address: string) => {

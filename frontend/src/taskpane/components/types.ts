@@ -274,4 +274,6 @@ export interface TemplateItem {
   description?: string;
   widgets: Widget[];
   thumbnailUrl?: string;
+  layouts?: { [key: string]: Layout[] };
+  borderSettings?: DashboardBorderSettings;
 }
