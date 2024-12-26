@@ -14,7 +14,6 @@ import { DashboardBorderSettings } from '../components/types';
 import { capitalizeFirstLetter } from '../utils/stringUtils'; 
 import { deleteDashboardById } from '../utils/api';
 import { getWorkbookIdFromProperties, isInDialog } from '../utils/excelUtils';
-import debounce from 'lodash.debounce';
 import SelectTableModal from '../components/SelectTableModal';
 const { Option } = Select;
 interface DashboardContextProps {
@@ -2064,22 +2063,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       message.error('Failed to read data from Excel.');
     }
   };
-  const debouncedReadGanttData = useRef(
-    debounce(async () => {
-      if (isReadGanttDataInProgress.current) {
-        console.warn('readGanttDataFromExcel is already in progress.');
-        return;
-      }
-      isReadGanttDataInProgress.current = true;
-      try {
-        await readGanttDataFromExcel();
-      } catch (error) {
-        console.error('Error in debouncedReadGanttData:', error);
-      } finally {
-        isReadGanttDataInProgress.current = false;
-      }
-    }, 300)
-  ).current;
   const readGanttDataFromExcel = async () => {
     console.log(
       `[DashboardProvider] readGanttDataFromExcel => currentDashboardId: ${currentDashboardId}, currentWorkbookId: ${currentWorkbookId}`
@@ -2297,7 +2280,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           }
           const eventHandler = async (_event: Excel.WorksheetChangedEventArgs) => {
             if (currentWorkbookId === currentDashboard?.workbookId) {
-              await debouncedReadGanttData();
+              await readGanttDataFromExcel();
             }
           };
           sheet.onChanged.add(eventHandler);
@@ -2326,7 +2309,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
             });
             ganttEventHandlersRef.current = [];
             isGanttHandlerRegistered.current = false;
-            debouncedReadGanttData.cancel();
             console.log('Gantt event handlers removed successfully.');
             await context.sync();
           });
@@ -2336,7 +2318,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       };
       removeGanttEventHandlers();
     };
-  }, [currentDashboard?.id, currentDashboard?.workbookId, currentWorkbookId, debouncedReadGanttData]);
+  }, [currentDashboard?.id, currentDashboard?.workbookId, currentWorkbookId, readGanttDataFromExcel]);
   const isValidCellAddress = (address: string) => {
     const cellAddressRegex = /^[A-Za-z]{1,3}[1-9][0-9]{0,6}$/;
     return cellAddressRegex.test(address);
