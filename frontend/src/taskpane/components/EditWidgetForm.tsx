@@ -124,7 +124,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
               ? task.dependencies.toString()
               : '',
           })),
-          titleAlignment: widget.data.titleAlignment || 'left',
         };
       case 'metric':
         return {
@@ -281,6 +280,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
       case 'gantt':
         const existingData = widget.data as GanttWidgetData;
         const existingTasks = existingData.tasks || [];
+        const { arrowColor } = cleanedValues;
         const mergedTasks = existingTasks.map((oldTask) => {
           const updatedTask = cleanedValues.tasks.find(
             (t: any) => t.id === oldTask.id
@@ -316,8 +316,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           ...existingData,
           tasks: finalTasks,
           title: cleanedValues.title,
-          titleAlignment:
-            cleanedValues.titleAlignment || existingData.titleAlignment || 'left',
+          arrowColor,
         } as GanttWidgetData;
         onSubmit(updatedData);
         if (syncGanttDataToExcel) {
@@ -895,6 +894,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
       )}
       {widget.type === 'gantt' && (
         <>
+          {/* Gantt Title */}
           <Form.Item
             name="title"
             label="Gantt Chart Title"
@@ -904,8 +904,16 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           >
             <Input />
           </Form.Item>
+          <Form.Item
+            name="arrowColor"
+            label="Dependency Arrow Color"
+            initialValue="#7d7d7d"
+            rules={[{ required: true, message: 'Please select an arrow color' }]}
+          >
+            <Input type="color" />
+          </Form.Item>
           <Form.List name="tasks">
-            {(fields, { add, remove }) => (
+            {(fields) => (
               <>
                 {fields.map(({ key, name, ...restField }) => (
                   <div
@@ -916,143 +924,30 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                       paddingBottom: 16,
                     }}
                   >
-                    {/* Hidden ID Field */}
-                    {form.isFieldTouched(['tasks', name, 'id']) ? (
-                      <Form.Item
-                        {...restField}
-                        name={[name, 'id']}
-                        hidden
-                      >
-                        <Input />
-                      </Form.Item>
-                    ) : (
-                      <Form.Item
-                        {...restField}
-                        name={[name, 'id']}
-                        initialValue={uuidv4()}
-                        hidden
-                      >
-                        <Input />
-                      </Form.Item>
-                    )}
-                    {/* Task Name */}
+                    <Form.Item {...restField} name={[name, 'id']} hidden>
+                      <Input />
+                    </Form.Item>
                     <Form.Item
                       {...restField}
                       name={[name, 'name']}
                       label="Task Name"
-                      rules={[
-                        {
-                          required: true,
-                          message: 'Please enter task name',
-                        },
-                      ]}
+                      tooltip="Non-editable"
                     >
-                      <Input />
+                      <Input disabled />
                     </Form.Item>
-                    {/* Start Date */}
-                    <Form.Item
-                      {...restField}
-                      name={[name, 'start']}
-                      label="Start Date"
-                      rules={[
-                        {
-                          required: true,
-                          message: 'Please select start date',
-                        },
-                      ]}
-                    >
-                      <DatePicker />
-                    </Form.Item>
-                    {/* End Date */}
-                    <Form.Item
-                      {...restField}
-                      name={[name, 'end']}
-                      label="End Date"
-                      rules={[
-                        {
-                          required: true,
-                          message: 'Please select end date',
-                        },
-                      ]}
-                    >
-                      <DatePicker />
-                    </Form.Item>
-                    <Form.Item
-                      {...restField}
-                      name={[name, 'completed']}
-                      label="Completed Date"
-                    >
-                      <DatePicker />
-                    </Form.Item>
-                    {/* Progress */}
-                    <Form.Item
-                      {...restField}
-                      name={[name, 'progress']}
-                      label="Progress (%)"
-                    >
-                      <InputNumber min={0} max={100} />
-                    </Form.Item>
-                    {/* Dependencies */}
-                    <Form.Item
-                      {...restField}
-                      name={[name, 'dependencies']}
-                      label="Dependencies"
-                    >
-                      <Select mode="multiple" allowClear>
-                        {form.getFieldValue('tasks')?.map((t: any) => {
-                          const taskName = t.name;
-                          if (!taskName) return null;
-                          return (
-                            <Select.Option key={taskName} value={taskName}>
-                              {taskName}
-                            </Select.Option>
-                          );
-                        })}
-                      </Select>
-                    </Form.Item>
-                    {/* Task Color */}
                     <Form.Item
                       {...restField}
                       name={[name, 'color']}
                       label="Task Color"
-                      rules={[
-                        {
-                          required: true,
-                          message: 'Please select task color',
-                        },
-                      ]}
+                      rules={[{ required: true, message: 'Please pick a task color' }]}
                     >
                       <Input type="color" />
                     </Form.Item>
-                    {/* Remove Task Button */}
-                    <Button
-                      type="dashed"
-                      onClick={() => remove(name)}
-                      icon={<MinusCircleOutlined />}
-                    >
-                      Remove Task
-                    </Button>
                   </div>
                 ))}
-                <Form.Item>
-                  <Button
-                    type="dashed"
-                    onClick={() => add({ id: uuidv4() })}
-                    icon={<PlusOutlined />}
-                  >
-                    Add Task
-                  </Button>
-                </Form.Item>
               </>
             )}
           </Form.List>
-          {/* Title Alignment */}
-          <Form.Item name="titleAlignment" label="Title Alignment">
-            <Select>
-              <Option value="left">Left</Option>
-              <Option value="center">Center</Option>
-            </Select>
-          </Form.Item>
         </>
       )}
       {widget.type === 'metric' && (
@@ -1128,7 +1023,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
             Select Cell from Excel
           </Button>
           </Form.Item>
-          {/* Additional fields for Metric Widget */}
           <Form.Item
             name="format"
             label="Display Format"
@@ -1185,7 +1079,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           </Form.Item>
         </>
       )}
-      {/* Submit and Cancel Buttons */}
       <Form.Item>
         <Button
           type="primary"

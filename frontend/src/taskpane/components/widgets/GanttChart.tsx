@@ -114,8 +114,6 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
       >
         <strong>{title}</strong>
       </div>
-
-      {/* Control Panel */}
       <Row justify="space-between" align="middle" style={{ margin: '16px 0', padding: '0 8px' }}>
         <Col>
           <Select
@@ -134,15 +132,13 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
           </Button>
         </Col>
       </Row>
-
-      {/* Gantt Chart */}
       <div
         className="gantt-chart-wrapper"
         style={{
           overflowX: 'auto',
           overflowY: 'auto',
           padding: '0 8px',
-          height: 'calc(100% - 100px)', // Adjust based on header and control panel height
+          height: 'calc(100% - 100px)',
         }}
       >
         <div style={{ minWidth: '2000px', height: '600px' }}>
@@ -151,12 +147,10 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
             viewMode={viewMode}
             onDateChange={handleDateChange}
             onProgressChange={handleProgressChange}
-            arrow_color="#ff00ff"
+            arrow_color={arrowColor}
           />
         </div>
       </div>
-
-      {/* Add Task Modal */}
       <AddTaskForm
         visible={addTaskModalVisible}
         onCancel={() => setAddTaskModalVisible(false)}

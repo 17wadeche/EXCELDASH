@@ -150,6 +150,7 @@ export interface GanttWidgetData {
   tasks: Task[];
   title: string;
   titleAlignment?: 'left' | 'center' | 'right';
+  arrowColor?: string;
 }
 
 export interface ChartData {
