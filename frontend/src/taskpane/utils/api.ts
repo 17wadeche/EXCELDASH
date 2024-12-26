@@ -6,9 +6,9 @@ const API_BASE_URL = 'https://happy-forest-059a9d710.4.azurestaticapps.net/api';
 
 export function setAuthToken(token: string | null) {
   if (token) {
-    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    axios.defaults.headers.common['X-Custom-Auth'] = `Bearer ${token}`;
   } else {
-    delete axios.defaults.headers.common['Authorization'];
+    delete axios.defaults.headers.common['X-Custom-Auth'];
   }
 }
 
@@ -82,7 +82,7 @@ export const unsubscribeUser = async (email: string) => {
     const response = await axios.post(
       `${API_BASE_URL}/unsubscribe`,
       { email },
-      { headers: { Authorization: `Bearer ${token}` } }
+      { headers: { 'X-Custom-Auth': `Bearer ${token}` } }
     );
     return response.data;
   } catch (error: any) {
@@ -99,7 +99,7 @@ export const getDashboards = async (): Promise<DashboardItem[]> => {
 
   const response = await axios.get(`${API_BASE_URL}/dashboards`, {
     headers: {
-      Authorization: `Bearer ${token}`
+      'X-Custom-Auth': `Bearer ${token}`
     }
   });
   return response.data;

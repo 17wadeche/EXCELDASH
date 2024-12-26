@@ -3,21 +3,19 @@ const jwt = require('jsonwebtoken');
 
 module.exports = function (context, req, next) {
   context.log('=== [authMiddleware] START ===');
-
   context.log('[authMiddleware] Incoming headers:', JSON.stringify(req.headers, null, 2));
-  const authHeader = req.headers['authorization'];
+  const authHeader = req.headers['x-custom-auth'];
   if (!authHeader) {
-    context.log.error('[authMiddleware] Authorization header missing.');
+    context.log.error('[authMiddleware] X-Custom-Auth header missing.');
     context.res = {
       status: 401,
-      body: { error: 'Authorization header missing.' },
+      body: { error: 'X-Custom-Auth header missing.' },
     };
     return next();
   }
-  context.log('[authMiddleware] Authorization header value:', authHeader);
+  context.log('[authMiddleware] X-Custom-Auth header value:', authHeader);
   const token = authHeader.split(' ')[1];
   context.log('[authMiddleware] Extracted token:', token);
-
   if (!token) {
     context.log.error('[authMiddleware] Bearer token missing.');
     context.res = {
