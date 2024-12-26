@@ -223,7 +223,6 @@
   user-select: none;
 }
 
-/* Optional: Additional styling for the drag handle */
 .drag-handle {
   background-color: #f0f0f0;
   padding: 8px;

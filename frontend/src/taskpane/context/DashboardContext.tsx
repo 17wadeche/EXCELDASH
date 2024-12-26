@@ -439,19 +439,15 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     migrateWidgets();
   }, [currentDashboardId, currentDashboard, dashboardLoaded]);
   const saveAsTemplate = async () => {
-    if (!currentDashboardId) {
-      message.warning('No dashboard is currently active.');
-      return;
-    }
     try {
-      const dashboardToSave = {
+      const templateToSave = {
         title: dashboardTitle,
         components: widgets,
         layouts: layouts,
         borderSettings: dashboardBorderSettings,
       }
-      setCurrentDashboard((prev) => (prev ? { ...prev, ...dashboardToSave } : null));
-      const response = await axios.put(`/api/dashboards/${currentDashboardId}`, dashboardToSave);
+      setCurrentDashboard((prev) => (prev ? { ...prev, ...templateToSave } : null));
+      const response = await axios.put(`/api/templates/${currentDashboardId}`, templateToSave);
       const updatedDashboard = response.data;
       setCurrentDashboard(updatedDashboard);
       setWidgets(updatedDashboard.components || []);
@@ -463,10 +459,10 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         newDashboards[index] = updatedDashboard;
         return newDashboards;
       });
-      message.success('Dashboard saved successfully!');
+      message.success('Template saved successfully!');
     } catch (error) {
       console.error('Error saving dashboard:', error);
-      message.error('Failed to save dashboard to the server.');
+      message.error('Failed to save Template to the server.');
     }
   };
   const excelSerialToDateString = (serial: number): string => {
@@ -2069,7 +2065,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
   ).current;
   const readGanttDataFromExcel = async () => {
     if (!currentDashboardId) {
-      message.error('No current dashboard ID found.');
+      console.warn('No current dashboard ID found.');
       return;
     }
     if (!currentWorkbookId) {
@@ -2181,7 +2177,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           }
           return updatedWidgets;
         });
-        if (currentDashboard) {
+        if (currentDashboardId && currentDashboard) {
           const updatedDashboard = {
             ...currentDashboard,
             components: widgets,
@@ -2285,7 +2281,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
               await debouncedReadGanttData();
             }
           };
-  
           sheet.onChanged.add(eventHandler);
           ganttEventHandlersRef.current.push(eventHandler);
           isGanttHandlerRegistered.current = true;
@@ -2333,8 +2328,9 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       return;
     }
     if (!currentDashboardId) {
-      message.error('No current dashboard ID found.');
-      return;
+      console.warn(
+        'No current dashboard ID found. The task will be added locally and to Excel, but not saved to server yet.'
+      );
     }
     if (!newTask.name || !newTask.type || !newTask.start || !newTask.end) {
       message.error('Task is missing required fields.');
@@ -2411,7 +2407,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         table.rows.add(undefined, [rowData]);
         await context.sync();
       });
-      if (currentDashboard) {
+      if (currentDashboardId && currentDashboard) {
         const updatedDashboard = {
           ...currentDashboard,
           components: updatedWidgets,

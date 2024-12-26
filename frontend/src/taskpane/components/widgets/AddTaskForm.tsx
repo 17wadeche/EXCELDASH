@@ -60,7 +60,7 @@ const AddTaskForm: React.FC<AddTaskFormProps> = ({ visible, onCancel }) => {
 
   return (
     <Modal
-      visible={visible}
+      open={visible}
       title="Add New Task"
       onCancel={onCancel}
       footer={[
