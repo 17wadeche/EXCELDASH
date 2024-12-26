@@ -1,7 +1,7 @@
 /// <reference types="office-js" />
 // src/taskpane/context/DashboardContext.tsx
 import React, { createContext, useState, useEffect, useCallback, useRef} from 'react';
-import { Widget, TextData, ChartData, GanttWidgetData, ImageWidgetData, TitleWidgetData, TitleWidget, TableData, DashboardVersion, GridLayoutItem, DashboardItem, LineWidgetData, MetricData, Task, TableWidget} from '../components/types';
+import { Widget, TextData, ChartData, GanttWidgetData, ImageWidgetData, TitleWidgetData, TitleWidget, TableData, DashboardVersion, GridLayoutItem, DashboardItem, LineWidgetData, MetricData, Task, TableWidget, TemplateItem} from '../components/types';
 import { v4 as uuidv4 } from 'uuid';
 import { Breakpoint, GRID_COLS, WIDGET_SIZES } from '../components/layoutConstants';
 import { message, Select } from 'antd';

@@ -26,7 +26,7 @@ const DashboardList: React.FC = () => {
       );
       setFilteredDashboards(filtered);
       setLoading(false);
-    }, 300); // Debounce search by 300ms
+    }, 300);
 
     return () => clearTimeout(timer);
   }, [dashboards, searchTerm]);
@@ -81,8 +81,6 @@ const DashboardList: React.FC = () => {
             </Button>
           </Col>
         </Row>
-
-        {/* Search Bar */}
         <Row justify="center" style={{ marginBottom: '24px' }}>
           <Col xs={24} sm={16} md={12} lg={8}>
             <Search
