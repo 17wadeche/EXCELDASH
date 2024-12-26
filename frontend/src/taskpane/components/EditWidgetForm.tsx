@@ -144,7 +144,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
   useEffect(() => {
     form.setFieldsValue(initialValues());
   }, [widget]);
-  const { syncGanttDataToExcel } = useContext(DashboardContext)!;
   const handleFinish = (values: any) => {
     const cleanedValues: Record<string, any> = Object.entries(values).reduce(
       (acc: Record<string, any>, [key, value]) => {
@@ -277,52 +276,57 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           },
         } as ChartData;
         break;
-      case 'gantt':
-        const existingData = widget.data as GanttWidgetData;
-        const existingTasks = existingData.tasks || [];
-        const { arrowColor } = cleanedValues;
-        const mergedTasks = existingTasks.map((oldTask) => {
-          const updatedTask = cleanedValues.tasks.find(
-            (t: any) => t.id === oldTask.id
-          );
-          if (!updatedTask) {
-            return oldTask;
-          }
-          return {
-            ...oldTask,
-            name: updatedTask.name,
-            start: updatedTask.start.format('YYYY-MM-DD'),
-            end: updatedTask.end.format('YYYY-MM-DD'),
-            completed: updatedTask.completed ? updatedTask.completed.format('YYYY-MM-DD') : undefined,
-            progress: updatedTask.progress,
-            dependencies: Array.isArray(updatedTask.dependencies) ? updatedTask.dependencies : (updatedTask.dependencies || '').split(','),
-            color: updatedTask.color || oldTask.color,
-          };
-        });
-        const newTasks = cleanedValues.tasks.filter(
-          (t: any) => !existingTasks.some((old) => old.id === t.id)
-        ).map((t: any) => ({
-          id: t.id,
-          name: t.name,
-          start: t.start.format('YYYY-MM-DD'),
-          end: t.end.format('YYYY-MM-DD'),
-          completed: t.completed ? t.completed.format('YYYY-MM-DD') : undefined,
-          progress: t.progress,
-          dependencies: Array.isArray(t.dependencies) ? t.dependencies : (t.dependencies || '').split(','),
-          color: t.color || '#FF0000',
-        }));
-        const finalTasks = [...mergedTasks, ...newTasks];
-        updatedData = {
-          ...existingData,
-          tasks: finalTasks,
-          title: cleanedValues.title,
-          arrowColor,
-        } as GanttWidgetData;
-        onSubmit(updatedData);
-        if (syncGanttDataToExcel) {
-          syncGanttDataToExcel(finalTasks);
+        case 'gantt': {
+          const existingData = widget.data as GanttWidgetData;
+          const existingTasks = existingData.tasks || [];
+          const { arrowColor } = cleanedValues;
+          const mergedTasks = existingTasks.map((oldTask) => {
+            const updatedTask = cleanedValues.tasks.find(
+              (t: any) => t.id === oldTask.id
+            );
+            if (!updatedTask) {
+              return oldTask;
+            }
+            return {
+              ...oldTask,
+              name: updatedTask.name,
+              start: updatedTask.start.format('YYYY-MM-DD'),
+              end: updatedTask.end.format('YYYY-MM-DD'),
+              completed: updatedTask.completed
+                ? updatedTask.completed.format('YYYY-MM-DD')
+                : undefined,
+              progress: updatedTask.progress,
+              dependencies: Array.isArray(updatedTask.dependencies)
+                ? updatedTask.dependencies
+                : (updatedTask.dependencies || '').split(','),
+              color: updatedTask.color || oldTask.color
+            };
+          });
+          const newTasks = cleanedValues.tasks
+            .filter((t: any) => !existingTasks.some((old) => old.id === t.id))
+            .map((t: any) => ({
+              id: t.id,
+              name: t.name,
+              start: t.start.format('YYYY-MM-DD'),
+              end: t.end.format('YYYY-MM-DD'),
+              completed: t.completed
+                ? t.completed.format('YYYY-MM-DD')
+                : undefined,
+              progress: t.progress,
+              dependencies: Array.isArray(t.dependencies)
+                ? t.dependencies
+                : (t.dependencies || '').split(','),
+              color: t.color || '#FF0000'
+            }));
+          const finalTasks = [...mergedTasks, ...newTasks];
+          updatedData = {
+            ...existingData,
+            tasks: finalTasks,
+            title: cleanedValues.title,
+            arrowColor
+          } as GanttWidgetData;
+          break;
         }
-        break;
       case 'metric':
         updatedData = {
           ...cleanedValues,

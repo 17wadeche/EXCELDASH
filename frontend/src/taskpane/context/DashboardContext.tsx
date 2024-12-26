@@ -48,7 +48,6 @@ interface DashboardContextProps {
   updateLayoutsForNewWidgets: (widgets: Widget[]) => void;
   currentWorkbookId: string;
   exportDashboardAsPDF: () => Promise<void>;
-  syncGanttDataToExcel: (ganttTasks: Task[]) => Promise<void>;
   emailDashboard: () => void;
   dashboardTitle: string;
   setDashboardTitle: (title: string) => void;
@@ -1956,60 +1955,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       }
     }
   }
-
-  async function syncGanttDataToExcel(ganttTasks: Task[]) {
-    try {
-      await Excel.run(async (context) => {
-        const sheet = context.workbook.worksheets.getItemOrNullObject("Gantt");
-        sheet.load("name");
-        await context.sync();
-        if (sheet.isNullObject) {
-          console.warn("Gantt sheet does not exist.");
-          return;
-        }
-        const table = sheet.tables.getItemOrNullObject("GanttTable");
-        table.load(["name", "rows"]);
-        await context.sync();
-        if (table.isNullObject) {
-          message.error("GanttTable not found in the Gantt worksheet.");
-          return;
-        }
-        table.rows.load("items");
-        await context.sync();
-        const existingRows = table.rows.items.map((row) => row.values[0]);
-        for (const t of ganttTasks) {
-          const rowIndex = existingRows.findIndex((r) => r[0] === t.name);
-          const dependenciesValue = Array.isArray(t.dependencies) 
-            ? t.dependencies.join(", ") 
-            : t.dependencies ?? "";
-          const completedValue = t.completed ?? "";
-          const newRowValues = [
-            t.name,
-            capitalizeFirstLetter(t.type ?? "Task"),
-            t.start,
-            t.end,
-            completedValue,
-            t.duration || "",
-            "",
-            t.progress ?? 0,
-            dependenciesValue
-          ];
-          if (rowIndex >= 0) {
-            table.rows.getItemAt(rowIndex).values = [newRowValues];
-          } else {
-            table.rows.add(undefined, [newRowValues]);
-            existingRows.push(newRowValues);
-          }
-        }
-        await context.sync();
-        message.success("Gantt data synced to Excel without deleting other rows!");
-      });
-    } catch (error) {
-      console.error("Error syncing Gantt data to Excel:", error);
-      message.error("Failed to sync Gantt data to Excel.");
-    }
-  }
-
   async function readTableFromExcel( widgetId: string, sheetName: string, tableName: string ) {
     try {
       await Excel.run(async (context) => {
@@ -2123,13 +2068,12 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     }, 300)
   ).current;
   const readGanttDataFromExcel = async () => {
-    if (!currentWorkbookId) {
-      message.error('No workbook ID found. Please open or re-open the correct workbook.');
-      return;
-    }
     if (!currentDashboardId) {
       message.error('No current dashboard ID found.');
       return;
+    }
+    if (!currentWorkbookId) {
+      console.warn('No workbook ID found. Proceeding without blocking...');
     }
     try {
       await Excel.run(async (context: Excel.RequestContext) => {
@@ -2702,7 +2646,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         availableWorksheets,
         setAvailableWorksheets,
         setWidgets,
-        syncGanttDataToExcel,
         setDashboards,
         saveDashboardVersion,
         restoreDashboardVersion,
