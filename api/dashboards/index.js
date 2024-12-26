@@ -7,23 +7,16 @@ module.exports = async function (context, req) {
   context.log('=== [dashboard/index.js] START ===');
   context.log('[dashboard] Received method:', req.method, 'params:', req.params);
   context.log('[dashboard] Body:', JSON.stringify(req.body, null, 2));
-
-  // Run auth middleware first
   context.log('[dashboard] Invoking authMiddleware...');
   await new Promise((resolve) => authMiddleware(context, req, resolve));
-  
-  // If authMiddleware set an error response, exit
   if (context.res && context.res.body && context.res.body.error) {
     context.log('[dashboard] authMiddleware error found. Early return.');
     context.log('=== [dashboard/index.js] END (auth fail) ===');
     return;
   }
-
   const method = req.method.toLowerCase();
   const id = req.params.id;
   const userEmail = req.userEmail;
-
-  // Check if userEmail is present
   context.log(`[dashboard] userEmail from req: ${userEmail}`);
   if (!userEmail) {
     context.log.error('[dashboard] No userEmail found. Returning 401...');
@@ -34,7 +27,6 @@ module.exports = async function (context, req) {
     context.log('=== [dashboard/index.js] END (no userEmail) ===');
     return;
   }
-
   try {
     context.log('[dashboard] About to initialize models...');
     const { Dashboard } = await initializeModels();

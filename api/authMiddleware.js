@@ -24,11 +24,6 @@ module.exports = function (context, req, next) {
     };
     return next();
   }
-  if (!process.env.JWT_SECRET) {
-    context.log.error('[authMiddleware] JWT_SECRET is undefined or empty in Azure!');
-  } else {
-    context.log(`[authMiddleware] JWT_SECRET length: ${process.env.JWT_SECRET.length}`);
-  }
   try {
     context.log('[authMiddleware] Verifying token...');
     const decoded = jwt.verify(token, process.env.JWT_SECRET);

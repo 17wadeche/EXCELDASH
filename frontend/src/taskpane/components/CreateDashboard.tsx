@@ -8,7 +8,7 @@ import { DeleteOutlined, FolderAddOutlined, PlusOutlined } from '@ant-design/ico
 import { DashboardItem, NewDashboard, TemplateItem } from './types';
 const { Content } = Layout;
 const { Search } = Input;
-import { createCheckoutSession, checkSubscription, loginUser, registerUser, verifySubscription, checkRegistration, unsubscribeUser, createDashboard, getTemplates, deleteTemplateById } from './../utils/api';
+import { createCheckoutSession, checkSubscription, loginUser, registerUser, verifySubscription, checkRegistration, unsubscribeUser, createDashboard, getTemplates, deleteTemplateById, getDashboards } from './../utils/api';
 import axios from 'axios';
 
 interface Widget {
@@ -119,20 +119,6 @@ const CreateDashboard: React.FC = () => {
       setIsSubscriptionModalVisible(false);
     }
   };
-  useEffect(() => {
-    async function fetchTemplates() {
-      setLoading(true);
-      try {
-        const serverTemplates = await getTemplates();
-        setTemplates(serverTemplates);
-      } catch (err) {
-        console.error('Error loading templates:', err);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchTemplates();
-  }, []);
 
   useEffect(() => {
     function handleMessage(event: MessageEvent) {
@@ -157,13 +143,11 @@ const CreateDashboard: React.FC = () => {
       window.removeEventListener('message', handleMessage);
     };
   }, [email]);
-
   const handleRegister = async () => {
     if (!email || !password) {
       message.error('Please enter your email and password.');
       return;
     }
-
     try {
       await registerUser(email, password);
       message.success('Registration successful. Please log in.');
@@ -174,21 +158,28 @@ const CreateDashboard: React.FC = () => {
       message.error('Failed to register.');
     }
   };
-
   const handleLogin = async () => {
     if (!email || !password) {
       message.error('Please enter your email and password.');
       return;
     }
-
     try {
+      setLoading(true);
       await loginUser(email, password);
       setIsLoggedIn(true);
       localStorage.setItem('isLoggedIn', 'true');
       message.success('Login successful.');
+      const [fetchedTemplates, fetchedDashboards] = await Promise.all([
+        getTemplates(),
+        getDashboards(),
+      ]);
+      setTemplates(fetchedTemplates);
+      setDashboards(fetchedDashboards);
     } catch (error) {
       console.error('Error during login:', error);
       message.error('Failed to login.');
+    } finally {
+      setLoading(false);
     }
   };
 
