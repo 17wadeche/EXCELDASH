@@ -2258,38 +2258,48 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
   }, [widgets, currentDashboardId, currentWorkbookId]); 
   useEffect(() => {
     const setupGanttEventHandlers = async () => {
+      console.log('[setupGanttEventHandlers] Checking preconditions...');
       if (!currentDashboard || !currentDashboard.workbookId || !currentWorkbookId) {
+        console.log('[setupGanttEventHandlers] Missing currentDashboard or workbookId. Skipping...');
         return;
       }
       if (currentWorkbookId.toLowerCase() !== currentDashboard.workbookId.toLowerCase()) {
-        console.warn('Current workbook does not match the dashboard workbook. Skipping Gantt event handler setup.');
+        console.warn('[setupGanttEventHandlers] Workbook mismatch. Skipping...');
         return;
       }
       if (isGanttHandlerRegistered.current) {
-        console.log('Gantt event handler already registered.');
+        console.log('[setupGanttEventHandlers] Gantt handler already registered...');
         return;
       }
       try {
         await Excel.run(async (context: Excel.RequestContext) => {
+          console.log('[setupGanttEventHandlers] Starting Excel.run...');
           const sheet = context.workbook.worksheets.getItemOrNullObject('Gantt');
           sheet.load('name');
           await context.sync();
           if (sheet.isNullObject) {
-            console.warn('Gantt sheet does not exist.');
+            console.warn('[setupGanttEventHandlers] "Gantt" worksheet not found. Aborting...');
             return;
           }
-          const eventHandler = async (_event: Excel.WorksheetChangedEventArgs) => {
+          console.log('[setupGanttEventHandlers] Found "Gantt" worksheet. Adding onChanged event...');
+          const eventHandler = async (event: Excel.WorksheetChangedEventArgs) => {
+            console.log('[setupGanttEventHandlers] Gantt onChanged event fired!', event.address);
             if (currentWorkbookId === currentDashboard?.workbookId) {
+              console.log('[setupGanttEventHandlers] Calling readGanttDataFromExcel() ...');
               await readGanttDataFromExcel();
+            } else {
+              console.warn(
+                '[setupGanttEventHandlers] Workbook ID mismatch. Not calling readGanttDataFromExcel.'
+              );
             }
           };
           sheet.onChanged.add(eventHandler);
           ganttEventHandlersRef.current.push(eventHandler);
           isGanttHandlerRegistered.current = true;
-          console.log('Gantt event handler set up successfully.');
+          console.log('[setupGanttEventHandlers] Gantt event handler successfully set up.');
         });
       } catch (error) {
-        console.error('Error setting up Gantt event handlers:', error);
+        console.error('[setupGanttEventHandlers] Error setting up Gantt event handlers:', error);
       }
     };
     setupGanttEventHandlers();
@@ -2301,24 +2311,30 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
             sheet.load('name');
             await context.sync();
             if (sheet.isNullObject) {
-              console.warn('Gantt sheet does not exist.');
+              console.warn('[setupGanttEventHandlers] Cleanup: "Gantt" sheet not found.');
               return;
             }
-            ganttEventHandlersRef.current.forEach((handler) => {
+            console.log('[setupGanttEventHandlers] Cleanup: removing onChanged handlers...');
+            ganttEventHandlersRef.current.forEach(handler => {
               sheet.onChanged.remove(handler);
             });
             ganttEventHandlersRef.current = [];
             isGanttHandlerRegistered.current = false;
-            console.log('Gantt event handlers removed successfully.');
-            await context.sync();
+            console.log('[setupGanttEventHandlers] Cleanup: all Gantt event handlers removed.');
           });
         } catch (error) {
-          console.error('Error removing Gantt event handlers:', error);
+          console.error('[setupGanttEventHandlers] Cleanup: Error removing Gantt handlers:', error);
         }
       };
       removeGanttEventHandlers();
     };
-  }, [currentDashboard?.id, currentDashboard?.workbookId, currentWorkbookId, readGanttDataFromExcel]);
+  }, [
+    currentDashboard?.id,
+    currentDashboard?.workbookId,
+    currentWorkbookId,
+    readGanttDataFromExcel,
+  ]);
+
   const isValidCellAddress = (address: string) => {
     const cellAddressRegex = /^[A-Za-z]{1,3}[1-9][0-9]{0,6}$/;
     return cellAddressRegex.test(address);

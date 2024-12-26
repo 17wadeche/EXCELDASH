@@ -144,6 +144,7 @@ export interface Task {
   color?: string;
   duration?: number;
   completed?: string;
+  progressColor?: string;
 }
 
 export interface GanttWidgetData {

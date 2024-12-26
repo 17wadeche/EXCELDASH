@@ -947,6 +947,14 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                     >
                       <Input type="color" />
                     </Form.Item>
+                    <Form.Item
+                      {...restField}
+                      name={[name, 'progressColor']}
+                      label="Progress Fill Color"
+                      initialValue="#00AABB"
+                    >
+                      <Input type="color" />
+                    </Form.Item>
                   </div>
                 ))}
               </>

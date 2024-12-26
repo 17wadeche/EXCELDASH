@@ -253,3 +253,9 @@
 .color-purple .bar {
   fill: #722ED1; /* Ant Design purple-6 */
 }
+.gantt .arrow line {
+  stroke: #7d7d7d !important;
+}
+.gantt .arrow .arrow-head path {
+  fill: #7d7d7d !important;
+}

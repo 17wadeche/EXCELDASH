@@ -49,6 +49,7 @@ const AddTaskForm: React.FC<AddTaskFormProps> = ({ visible, onCancel }) => {
         dependencies: values.dependencies?.join(',') || '',
         color: values.color,
         duration,
+        progressColor: values.progressColor,
       };
       await addTaskToGantt(newTask);
       form.resetFields();
@@ -131,6 +132,13 @@ const AddTaskForm: React.FC<AddTaskFormProps> = ({ visible, onCancel }) => {
               </Option>
             ))}
           </Select>
+        </Form.Item>
+        <Form.Item
+          name="progressColor"
+          label="Progress Fill Color"
+          initialValue="#00AABB"
+        >
+          <Input type="color" />
         </Form.Item>
         <Form.Item
           name="color"

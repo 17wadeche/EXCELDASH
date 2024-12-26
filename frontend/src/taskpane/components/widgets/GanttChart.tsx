@@ -46,18 +46,29 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
         styleElement.sheet.deleteRule(0);
       }
     }
-    const updatedTasks = tasks.map(task => {
+    const updatedTasks = tasks.map((task) => {
+      if (!task.id) return task;
+      const className = `task-${task.id}`;
       if (task.color) {
-        const className = `task-${task.id}`;
-        const rule = `
+        const ruleBar = `
           .${className} .bar {
             fill: ${task.color} !important;
           }
         `;
-        styleElement.sheet?.insertRule(rule, styleElement.sheet.cssRules.length);
-        return { ...task, custom_class: className };
+        styleElement.sheet?.insertRule(ruleBar, styleElement.sheet.cssRules.length);
       }
-      return task;
+      if (task.progressColor) {
+        const ruleBarProgress = `
+          .${className} .bar-progress {
+            fill: ${task.progressColor} !important;
+          }
+        `;
+        styleElement.sheet?.insertRule(ruleBarProgress, styleElement.sheet.cssRules.length);
+      }
+      return {
+        ...task,
+        custom_class: className,
+      };
     });
     setTasks(updatedTasks);
   };

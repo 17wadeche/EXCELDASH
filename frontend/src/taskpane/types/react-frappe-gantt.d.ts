@@ -11,6 +11,8 @@ declare module 'react-frappe-gantt' {
     progress: number; // 0 to 100
     dependencies?: string;
     custom_class?: string;
+    color?: string;
+    progressColor?: string;
   }
 
   interface FrappeGanttProps {
