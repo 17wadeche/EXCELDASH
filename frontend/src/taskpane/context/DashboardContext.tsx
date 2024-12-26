@@ -2450,9 +2450,12 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           dependenciesValue = newTask.dependencies;
         }
         const durationValue = newTask.duration ?? '';
+        const capitalizedType = newTask.type
+          ? newTask.type.charAt(0).toUpperCase() + newTask.type.slice(1)
+          : 'Task';
         const rowData: (string | number | boolean)[] = [
           newTask.name,
-          newTask.type.charAt(0).toUpperCase() + newTask.type.slice(1) : 'Task',
+          capitalizedType,
           newTask.start,
           newTask.end,
           newTask.completed ?? '',

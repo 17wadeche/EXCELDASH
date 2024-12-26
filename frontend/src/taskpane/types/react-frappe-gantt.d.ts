@@ -20,6 +20,7 @@ declare module 'react-frappe-gantt' {
     onDateChange?: (task: Task, start: Date, end: Date) => void;
     onProgressChange?: (task: Task, progress: number) => void;
     onTasksChange?: (tasks: Task[]) => void;
+    arrow_color?: string;
   }
 
   export class FrappeGantt extends Component<FrappeGanttProps> {}
