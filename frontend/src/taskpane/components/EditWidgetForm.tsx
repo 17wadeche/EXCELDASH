@@ -443,6 +443,15 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
               <Option value="polarArea">Polar Area</Option>
               <Option value="bubble">Bubble</Option>
               <Option value="scatter">Scatter</Option>
+              <Option value="candlestick">Candlestick</Option>
+              <Option value="boxplot">Boxplot</Option>
+              <Option value="violin">Violin</Option>
+              <Option value="funnel">Funnel</Option>
+              <Option value="treemap">Treemap</Option>
+              <Option value="sankey">Sankey</Option>
+              <Option value="matrix">Matrix</Option>
+              <Option value="choropleth">Choropleth</Option>
+              <Option value="bubbleMap">Bubble Map</Option>
             </Select>
           </Form.Item>
           <Form.Item
