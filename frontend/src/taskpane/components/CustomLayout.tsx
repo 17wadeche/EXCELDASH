@@ -101,7 +101,6 @@ const CustomLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) =>
 
   return (
     <Layout className="custom-layout light-theme" style={{ minHeight: '100vh', width: '100%', height: '100%' }}>
-      {/* Sidebar */}
       <Sider
         collapsible
         width={250}

@@ -299,7 +299,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
               dependencies: Array.isArray(updatedTask.dependencies)
                 ? updatedTask.dependencies
                 : (updatedTask.dependencies || '').split(','),
-              color: updatedTask.color || oldTask.color
+              color: updatedTask.color || oldTask.color,
               progressColor: updatedTask.progressColor || oldTask.progressColor
             };
           });
@@ -317,7 +317,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
               dependencies: Array.isArray(t.dependencies)
                 ? t.dependencies
                 : (t.dependencies || '').split(','),
-              color: t.color || '#FF0000'
+              color: t.color || '#FF0000',
               progressColor: t.progressColor || '#00AABB'
             }));
           const finalTasks = [...mergedTasks, ...newTasks];

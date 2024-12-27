@@ -563,8 +563,8 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
           <GanttChartComponent
             tasks={(widget.data as GanttWidgetData).tasks}
             title={(widget.data as GanttWidgetData).title}
-            arrowColor={ganttData.arrowColor ?? '#7d7d7d'}
-            defaultProgressColor={ganttData.defaultProgressColor ?? '#1890ff'}
+            arrowColor={(widget.data as GanttWidgetData).arrowColor ?? '#7d7d7d'}
+            defaultProgressColor={(widget.data as GanttWidgetData).defaultProgressColor ?? '#1890ff'}
           />
         );
       } else if (widget.type === 'metric') {
