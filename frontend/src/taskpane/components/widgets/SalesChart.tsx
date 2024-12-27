@@ -25,7 +25,6 @@ import {
   PolarArea,
   // Add other chart types as needed
 } from 'react-chartjs-2';
-import { WaterfallController, Waterfall } from 'chartjs-chart-waterfall';
 import { FinancialController, CandlestickController, Candlestick } from 'chartjs-chart-financial';
 import { BoxPlotController, ViolinController, BoxPlot, Violin } from 'chartjs-chart-box-and-violin-plot';
 import { FunnelController, Funnel } from 'chartjs-chart-funnel';
