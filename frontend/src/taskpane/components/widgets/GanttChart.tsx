@@ -16,6 +16,7 @@ interface GanttChartComponentProps {
   titleAlignment?: 'left' | 'center';
   title?: string;
   arrowColor?: string;
+  defaultProgressColor?: string;
 }
 
 const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
@@ -24,6 +25,7 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
   titleAlignment = 'left',
   title = 'Gantt Chart',
   arrowColor = '#7d7d7d',
+  defaultProgressColor = '#1890ff',
 }) => {
   const [viewMode, setViewMode] = useState<'Day' | 'Week' | 'Month'>('Week');
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
@@ -57,10 +59,11 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
         `;
         styleElement.sheet?.insertRule(ruleBar, styleElement.sheet.cssRules.length);
       }
-      if (task.progressColor) {
+      const progressColor = task.progressColor || defaultProgressColor;
+      if (progressColor) {
         const ruleBarProgress = `
           .${className} .bar-progress {
-            fill: ${task.progressColor} !important;
+            fill: ${progressColor} !important;
           }
         `;
         styleElement.sheet?.insertRule(ruleBarProgress, styleElement.sheet.cssRules.length);
@@ -75,7 +78,7 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
 
   useEffect(() => {
     injectTaskColors(tasks);
-  }, [tasks]);
+  }, [tasks, defaultProgressColor]);
 
   const handleDateChange = (task: Task, start: Date, end: Date) => {
     const updatedTasks = tasks.map((t) =>

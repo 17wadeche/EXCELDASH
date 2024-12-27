@@ -1450,6 +1450,8 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
               data: {
                 ...widget.data,
                 ...updatedData,
+                arrowColor: updatedData.arrowColor ?? widget.data.arrowColor,
+                defaultProgressColor: updatedData.defaultProgressColor ?? widget.data.defaultProgressColor,
               } as GanttWidgetData,
             };
           case 'line':

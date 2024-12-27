@@ -152,6 +152,7 @@ export interface GanttWidgetData {
   title: string;
   titleAlignment?: 'left' | 'center' | 'right';
   arrowColor?: string;
+  defaultProgressColor?: string;
 }
 
 export interface ChartData {

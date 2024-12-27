@@ -300,6 +300,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                 ? updatedTask.dependencies
                 : (updatedTask.dependencies || '').split(','),
               color: updatedTask.color || oldTask.color
+              progressColor: updatedTask.progressColor || oldTask.progressColor
             };
           });
           const newTasks = cleanedValues.tasks
@@ -317,6 +318,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                 ? t.dependencies
                 : (t.dependencies || '').split(','),
               color: t.color || '#FF0000'
+              progressColor: t.progressColor || '#00AABB'
             }));
           const finalTasks = [...mergedTasks, ...newTasks];
           updatedData = {
