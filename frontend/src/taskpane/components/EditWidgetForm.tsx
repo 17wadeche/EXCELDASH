@@ -325,7 +325,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
             ...existingData,
             tasks: finalTasks,
             title: cleanedValues.title,
-            arrowColor
+            arrowColor: arrowColor,
           } as GanttWidgetData;
           break;
         }
