@@ -25,13 +25,6 @@ import {
   PolarArea,
   // Add other chart types as needed
 } from 'react-chartjs-2';
-import { FinancialController, CandlestickController, Candlestick } from 'chartjs-chart-financial';
-import { BoxPlotController, ViolinController, BoxPlot, Violin } from 'chartjs-chart-box-and-violin-plot';
-import { FunnelController, Funnel } from 'chartjs-chart-funnel';
-import { TreemapController, Treemap } from 'chartjs-chart-treemap';
-import { SankeyController, Sankey } from 'chartjs-chart-sankey';
-import { MatrixController, Matrix } from 'chartjs-chart-matrix';
-import { ChoroplethController, BubbleMapController, Choropleth, BubbleMap } from 'chartjs-chart-geo';
 import 'chartjs-adapter-moment';
 import zoomPlugin from 'chartjs-plugin-zoom';
 import isEqual from 'lodash/isEqual';
@@ -58,19 +51,6 @@ ChartJS.register(
   ChartDataLabels
 );
 
-ChartJS.register(
-  WaterfallController,
-  FinancialController,
-  CandlestickController,
-  BoxPlotController,
-  ViolinController,
-  FunnelController,
-  TreemapController,
-  SankeyController,
-  MatrixController,
-  ChoroplethController,
-  BubbleMapController
-);
 // Define a mapping from chart type to component
 const chartComponents: Record<string, React.FC<any>> = {
   bar: Bar,
@@ -81,15 +61,6 @@ const chartComponents: Record<string, React.FC<any>> = {
   scatter: Scatter,
   bubble: Bubble,
   polarArea: PolarArea,
-  candlestick: Candlestick,
-  boxplot: BoxPlot,
-  violin: Violin,
-  funnel: Funnel,
-  treemap: Treemap,
-  sankey: Sankey,
-  matrix: Matrix,
-  choropleth: Choropleth,
-  bubbleMap: BubbleMap,
 };
 
 interface ExtendedChartData<TType extends ChartType = ChartType, TData = unknown>
@@ -143,17 +114,7 @@ interface ExtendedChartData<TType extends ChartType = ChartType, TData = unknown
 
 interface SalesChartProps {
   data: ExtendedChartData;
-  type:
-  | ChartType
-  | 'candlestick'
-  | 'boxplot'
-  | 'violin'
-  | 'funnel'
-  | 'treemap'
-  | 'sankey'
-  | 'matrix'
-  | 'choropleth'
-  | 'bubbleMap';
+  type: ChartType;
   isPresenterMode?: boolean;
 }
 
