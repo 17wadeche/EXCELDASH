@@ -188,5 +188,5 @@ export const shareDashboard = async (dashboardId: string, otherEmail: string): P
 
 export async function searchUsers(query: string): Promise<User[]> {
   const res = await axios.get(`/api/users`, { params: { search: query } });
-  return res.data; // array of matched users
+  return res.data;
 }
