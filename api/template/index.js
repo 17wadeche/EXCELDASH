@@ -1,5 +1,4 @@
 // template/index.js
-
 const initializeModels = require('../models');
 const { v4: uuidv4 } = require('uuid');
 const authMiddleware = require('../authMiddleware');
@@ -36,27 +35,30 @@ module.exports = async function (context, req) {
         userEmail,
       });
       context.res = { status: 200, body: newTemplate };
-      if (method === 'get') {
-        if (id) {
-          const template = await Template.findByPk(id);
-          if (!template) {
-            context.res = { status: 404, body: { error: 'Template not found' } };
-            return;
-          }
-          if (template.userEmail !== userEmail && !template.sharedWith.includes(userEmail)) {
-            context.res = { status: 403, body: { error: 'Access denied.' } };
-            return;
-          }
-          context.res = { status: 200, body: template };
-        } else {
-          const allTemplates = await Template.findAll();
-          const filtered = allTemplates.filter(t => {
-            return t.userEmail === userEmail || (t.sharedWith && t.sharedWith.includes(userEmail));
-          });
-          context.res = { status: 200, body: filtered };
+    }
+    else if (method === 'get') {
+      if (id) {
+        const template = await Template.findByPk(id);
+        if (!template) {
+          context.res = { status: 404, body: { error: 'Template not found' } };
+          return;
         }
+        if (template.userEmail !== userEmail && !template.sharedWith.includes(userEmail)) {
+          context.res = { status: 403, body: { error: 'Access denied.' } };
+          return;
+        }
+        context.res = { status: 200, body: template };
+      } else {
+        const allTemplates = await Template.findAll();
+        const filtered = allTemplates.filter((t) => {
+          return (
+            t.userEmail === userEmail ||
+            (t.sharedWith && t.sharedWith.includes(userEmail))
+          );
+        });
+        context.res = { status: 200, body: filtered };
       }
-    } 
+    }
     else if (method === 'put') {
       if (!id) {
         context.res = {
@@ -80,11 +82,12 @@ module.exports = async function (context, req) {
       if (layouts !== undefined) template.layouts = layouts;
       await template.save();
       context.res = { status: 200, body: template };
-    } else if (method === 'delete') {
+    }
+    else if (method === 'delete') {
       if (!id) {
         context.res = {
           status: 400,
-          body: { error: 'Template ID is required for deleting.' }
+          body: { error: 'Template ID is required for deleting.' },
         };
         return;
       }
@@ -99,7 +102,8 @@ module.exports = async function (context, req) {
       }
       await template.destroy();
       context.res = { status: 200, body: { message: 'Template deleted successfully' } };
-    } else {
+    }
+    else {
       context.res = { status: 405, body: { error: 'Method not allowed.' } };
     }
   } catch (error) {
