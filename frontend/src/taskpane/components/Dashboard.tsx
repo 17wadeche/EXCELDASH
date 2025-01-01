@@ -345,14 +345,14 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
   }, [currentDashboardId, currentDashboard, currentWorkbookId, widgets, layouts, dashboardTitle, dashboardBorderSettings, setCurrentDashboard, setDashboards ]);
 
   useEffect(() => {
-    const onBeforeUnload = () => {
-      handleSave();
+    const saveDashboard = async () => {
+      await handleSave(); 
     };
-    window.addEventListener('beforeunload', onBeforeUnload);
-    return () => {
-      window.removeEventListener('beforeunload', onBeforeUnload);
-    };
-  }, [handleSave]);
+    const debounceTimer = setTimeout(() => {
+      saveDashboard();
+    }, 2000);
+    return () => clearTimeout(debounceTimer);
+  }, [widgets, layouts]);
 
   const handleLayoutChange = useCallback(
     (
