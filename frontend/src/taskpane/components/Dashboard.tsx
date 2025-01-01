@@ -345,11 +345,10 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
   }, [currentDashboardId, currentDashboard, currentWorkbookId, widgets, layouts, dashboardTitle, dashboardBorderSettings, setCurrentDashboard, setDashboards ]);
 
   useEffect(() => {
-    const onBeforeUnload = (event: BeforeUnloadEvent) => {
+    const onBeforeUnload = () => {
       handleSave();
     };
     window.addEventListener('beforeunload', onBeforeUnload);
-
     return () => {
       window.removeEventListener('beforeunload', onBeforeUnload);
     };
