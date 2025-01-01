@@ -1,5 +1,6 @@
 // authMiddleware.js
 const jwt = require('jsonwebtoken');
+const initializeModels = require('../models');
 
 module.exports = function (context, req, next) {
   context.log('=== [authMiddleware] START ===');
