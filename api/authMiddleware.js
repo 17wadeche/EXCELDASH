@@ -28,11 +28,33 @@ module.exports = function (context, req, next) {
     context.log('[authMiddleware] Verifying token...');
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     context.log('[authMiddleware] Decoded token:', decoded);
-    req.userEmail = decoded.userEmail;
-    if (!req.userEmail) {
-      throw new Error('userEmail not found in token.');
+    const { userEmail, sessionId } = decoded;
+    if (!userEmail || !sessionId) {
+      throw new Error('Token is missing userEmail or sessionId.');
     }
-    context.log(`[authMiddleware] userEmail from JWT -> ${req.userEmail}`);
+    const { User } = await initializeModels();
+    const user = await User.findOne({
+      where: { userEmail },
+      attributes: ['currentSessionId'], // or whatever field you’re using
+    });
+    if (!user) {
+      context.log.error('[authMiddleware] No user found with that email.');
+      context.res = {
+        status: 401,
+        body: { error: 'Invalid token: user not found.' },
+      };
+      return next();
+    }
+    if (user.currentSessionId !== sessionId) {
+      context.log.error('[authMiddleware] Session ID mismatch => This session is invalid.');
+      context.res = {
+        status: 401,
+        body: { error: 'Session is no longer valid. Please log in again.' },
+      };
+      return next();
+    }
+    req.userEmail = userEmail;
+    context.log(`[authMiddleware] userEmail => ${req.userEmail}, sessionId => ${sessionId}`);
     context.log('=== [authMiddleware] END (success) ===');
     return next();
   } catch (error) {

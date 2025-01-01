@@ -13,8 +13,6 @@ module.exports = async function (context, req) {
   }
 
   context.log('[login] Incoming body:', JSON.stringify(req.body, null, 2));
-
-  // Validate request body
   const schema = Joi.object({
     email: Joi.string().email().required(),
     password: Joi.string().required(),
@@ -65,9 +63,18 @@ module.exports = async function (context, req) {
       context.log('=== [login/index.js] END (pw mismatch) ===');
       return;
     }
+    context.log('[login] Removing existing refresh tokens for this user...');
+    await RefreshToken.destroy({
+      where: { userEmail: user.userEmail },
+    });
+    const sessionId = uuidv4();
+    await User.update(
+      { currentSessionId: sessionId },
+      { where: { userEmail: user.userEmail } }
+    );
     context.log('[login] Generating JWT token...');
-    const accessToken = jwt.sign({ userEmail: user.userEmail }, process.env.JWT_SECRET, {
-      expiresIn: '30d',
+    const accessToken = jwt.sign({ userEmail: user.userEmail, sessionId }, process.env.JWT_SECRET, {
+      expiresIn: '90d',
     });
     context.log('[login] Generating refresh token...');
     const refreshTokenValue = uuidv4();
