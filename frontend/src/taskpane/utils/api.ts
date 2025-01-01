@@ -23,13 +23,15 @@ export function setAuthToken(token: string | null) {
 
 const existingToken = localStorage.getItem('token');
 if (existingToken) {
+  console.log('[api.ts] Found existingToken in localStorage:', existingToken);
   setAuthToken(existingToken);
   const decoded = decodeToken(existingToken);
   if (decoded?.sessionId) {
+    console.log('[api.ts] Extracted sessionId from token:', decoded.sessionId);
     localStorage.setItem('sessionId', decoded.sessionId);
   }
 } else {
-  console.warn('No token found in localStorage on load.');
+  console.warn('[api.ts] No token found in localStorage on load.');
 }
 
 export const createCheckoutSession = async (plan: 'monthly' | 'yearly', email: string) => {
@@ -113,16 +115,24 @@ export const unsubscribeUser = async (email: string) => {
 
 export const getDashboards = async (): Promise<DashboardItem[]> => {
   const token = localStorage.getItem('token');
+  console.log('[api.ts] getDashboards => token from localStorage?', token ? 'Yes' : 'No');
   if (!token) {
-    console.warn('No token found in localStorage; skipping getDashboards.');
+    console.warn('[api.ts] No token found in localStorage; skipping getDashboards.');
     return [];
   }
-  const response = await axios.get(`${API_BASE_URL}/dashboards`, {
-    headers: {
-      'X-Custom-Auth': `Bearer ${token}`,
-    },
-  });
-  return response.data;
+  try {
+    console.log('[api.ts] Sending GET /dashboards...');
+    const response = await axios.get(`${API_BASE_URL}/dashboards`, {
+      headers: {
+        'X-Custom-Auth': `Bearer ${token}`,
+      },
+    });
+    console.log('[api.ts] GET /dashboards response:', response.data);
+    return response.data;
+  } catch (error: any) {
+    console.error('[api.ts] getDashboards => Error:', error);
+    throw error;
+  }
 };
 
 export const getDashboardById = async (id: string): Promise<DashboardItem> => {

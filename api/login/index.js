@@ -55,7 +55,7 @@ module.exports = async function (context, req) {
     context.log('[login] Password match result:', passwordMatch);
 
     if (!passwordMatch) {
-      context.log.error('[login] Password mismatch. Returning 401...');
+      context.log.error('[login] Password mismatch for userEmail:', email);
       context.res = {
         status: 401,
         body: { error: 'Invalid email or password.' },
@@ -63,33 +63,32 @@ module.exports = async function (context, req) {
       context.log('=== [login/index.js] END (pw mismatch) ===');
       return;
     }
-    context.log('[login] Removing existing refresh tokens for this user...');
+    context.log('[login] Removing existing refresh tokens for the user...');
     await RefreshToken.destroy({
       where: { userEmail: user.userEmail },
     });
     const sessionId = uuidv4();
+    context.log('[login] Setting currentSessionId on user:', sessionId);
     await User.update(
       { currentSessionId: sessionId },
       { where: { userEmail: user.userEmail } }
     );
-    context.log('[login] Generating JWT token...');
-    const accessToken = jwt.sign({ userEmail: user.userEmail, sessionId }, process.env.JWT_SECRET, {
-      expiresIn: '90d',
-    });
-    context.log('[login] Generating refresh token...');
+    context.log('[login] Generating JWT...');
+    const accessToken = jwt.sign(
+      { userEmail: user.userEmail, sessionId }, 
+      process.env.JWT_SECRET, 
+      { expiresIn: '90d' }
+    );
+    context.log('[login] Generating refresh token record...');
     const refreshTokenValue = uuidv4();
     const refreshTokenExpires = new Date();
     refreshTokenExpires.setDate(refreshTokenExpires.getDate() + 90);
-
-    // Store refresh token in DB
-    context.log('[login] Creating RefreshToken record in DB...');
     await RefreshToken.create({
       token: refreshTokenValue,
       userEmail: user.userEmail,
       expiresAt: refreshTokenExpires,
     });
-
-    context.log('[login] Login success. Responding with token + refreshToken...');
+    context.log('[login] Login success! Returning tokens...');
     context.res = {
       status: 200,
       body: {
@@ -98,8 +97,8 @@ module.exports = async function (context, req) {
       },
     };
     context.log('=== [login/index.js] END (success) ===');
-  } catch (error) {
-    context.log.error('[login] Error logging in:', error);
+  } catch (err) {
+    context.log.error('[login] Error logging in:', err);
     context.res = {
       status: 500,
       body: { error: 'Internal Server Error' },
