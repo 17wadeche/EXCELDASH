@@ -46,6 +46,22 @@ module.exports = (sequelize) => {
         this.setDataValue('layouts', JSON.stringify(value));
       }
     },
+    sharedWith: {
+      type: DataTypes.TEXT,
+      allowNull: false,
+      defaultValue: '[]',
+      get() {
+        try {
+          const rawValue = this.getDataValue('sharedWith');
+          return rawValue ? JSON.parse(rawValue) : [];
+        } catch {
+          return [];
+        }
+      },
+      set(value) {
+        this.setDataValue('sharedWith', JSON.stringify(value || []));
+      }
+    },
   }, {
     tableName: 'Templates',
     timestamps: true,

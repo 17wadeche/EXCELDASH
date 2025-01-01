@@ -80,6 +80,22 @@ module.exports = (sequelize, DataTypes) => {
         this.setDataValue('borderSettings', JSON.stringify(value));
       }
     },
+    sharedWith: {
+      type: DataTypes.TEXT,
+      allowNull: false,
+      defaultValue: '[]',
+      get() {
+        try {
+          const rawValue = this.getDataValue('sharedWith');
+          return rawValue ? JSON.parse(rawValue) : [];
+        } catch {
+          return [];
+        }
+      },
+      set(value) {
+        this.setDataValue('sharedWith', JSON.stringify(value || []));
+      }
+    },
   }, {
     tableName: 'Dashboards',
     timestamps: true,

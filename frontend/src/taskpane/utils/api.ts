@@ -177,3 +177,14 @@ export const deleteTemplateById = async (id: string): Promise<void> => {
 export const deleteDashboardById = async (id: string): Promise<void> => {
   await axios.delete(`${API_BASE_URL}/dashboards/${id}`);
 };
+
+export const shareDashboard = async (
+  dashboardId: string, 
+  otherEmail: string
+): Promise<void> => {
+  await axios.put(`${API_BASE_URL}/dashboards/${dashboardId}/share`, {
+    action: 'add',
+    email: otherEmail,
+  });
+  alert(`Dashboard ${dashboardId} has been shared with ${otherEmail}.`);
+};

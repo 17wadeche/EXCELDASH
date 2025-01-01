@@ -36,35 +36,36 @@ module.exports = async function (context, req) {
         userEmail,
       });
       context.res = { status: 200, body: newTemplate };
-    } else if (method === 'get') {
-      if (id) {
-        const template = await Template.findByPk(id);
-        console.log("Server: Fetched template from DB:", template);
-        if (!template) {
-          context.res = { status: 404, body: { error: 'Template not found' } };
-          return;
+      if (method === 'get') {
+        if (id) {
+          const template = await Template.findByPk(id);
+          if (!template) {
+            context.res = { status: 404, body: { error: 'Template not found' } };
+            return;
+          }
+          if (template.userEmail !== userEmail && !template.sharedWith.includes(userEmail)) {
+            context.res = { status: 403, body: { error: 'Access denied.' } };
+            return;
+          }
+          context.res = { status: 200, body: template };
+        } else {
+          const allTemplates = await Template.findAll();
+          const filtered = allTemplates.filter(t => {
+            return t.userEmail === userEmail || (t.sharedWith && t.sharedWith.includes(userEmail));
+          });
+          context.res = { status: 200, body: filtered };
         }
-        if (template.userEmail !== userEmail) {
-          context.res = { status: 403, body: { error: 'Access denied.' } };
-          return;
-        }
-        context.res = { status: 200, body: template };
-      } else {
-        const templates = await Template.findAll({
-          where: { userEmail },
-        });
-        context.res = { status: 200, body: templates };
       }
-    } else if (method === 'put') {
+    } 
+    else if (method === 'put') {
       if (!id) {
         context.res = {
           status: 400,
-          body: { error: 'Template ID is required for updating.' }
+          body: { error: 'Template ID is required for updating.' },
         };
         return;
       }
       const { name, widgets, layouts } = req.body;
-      console.log("Server: Received PUT for template:", id);
       const template = await Template.findByPk(id);
       if (!template) {
         context.res = { status: 404, body: { error: 'Template not found' } };

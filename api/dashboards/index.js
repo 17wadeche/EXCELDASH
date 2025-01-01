@@ -16,6 +16,7 @@ module.exports = async function (context, req) {
   }
   const method = req.method.toLowerCase();
   const id = req.params.id;
+  const actionParam = req.params.action;
   const userEmail = req.userEmail;
   context.log(`[dashboard] userEmail from req: ${userEmail}`);
   if (!userEmail) {
@@ -66,58 +67,84 @@ module.exports = async function (context, req) {
       if (id) {
         context.log('[dashboard] Getting dashboard by ID:', id);
         const dashboard = await Dashboard.findByPk(id);
-        context.log('[dashboard] Found dashboard? ', !!dashboard);
         if (!dashboard) {
-          context.log.error('[dashboard] Dashboard not found. Returning 404...');
           context.res = { status: 404, body: { error: 'Dashboard not found' } };
-        } else if (dashboard.userEmail !== userEmail) {
-          context.log.error('[dashboard] userEmail mismatch. Access denied.');
-          context.res = { status: 403, body: { error: 'Access denied.' } };
         } else {
-          context.res = { status: 200, body: dashboard };
-          context.log('[dashboard] Returning single dashboard data.');
+          const sharedWithArray = dashboard.sharedWith; 
+          if (dashboard.userEmail !== userEmail && !sharedWithArray.includes(userEmail)) {
+            context.res = { status: 403, body: { error: 'Access denied.' } };
+          } else {
+            context.res = { status: 200, body: dashboard };
+          }
         }
       } else {
-        context.log('[dashboard] Getting all dashboards for userEmail:', userEmail);
-        const dashboards = await Dashboard.findAll({ where: { userEmail } });
-        context.log('[dashboard] Found dashboards count:', dashboards.length);
-        context.res = { status: 200, body: dashboards };
+        const dashboards = await Dashboard.findAll();
+        const userDashboards = dashboards.filter((d) =>
+          d.userEmail === userEmail ||
+          (d.sharedWith && d.sharedWith.includes(userEmail))
+        );
+        context.res = { status: 200, body: userDashboards };
       }
-    } 
+    }
     else if (method === 'put') {
-      context.log('[dashboard] Handling PUT, ID:', id);
-      if (!id) {
-        context.log.error('[dashboard] No ID provided. Returning 400...');
-        context.res = {
-          status: 400,
-          body: { error: 'Dashboard ID is required for updating.' },
-        };
-        context.log('=== [dashboard/index.js] END (no ID) ===');
-        return;
-      }
-      const { title, components, layouts, workbookId, borderSettings } = req.body;
-      context.log('[dashboard] Fields to update:', { title, components, layouts, workbookId, borderSettings });
-      const dashboard = await Dashboard.findByPk(id);
-      context.log('[dashboard] Found dashboard? ', !!dashboard);
-      if (!dashboard) {
-        context.log.error('[dashboard] Dashboard not found. Returning 404...');
-        context.res = { status: 404, body: { error: 'Dashboard not found' } };
-      } else if (dashboard.userEmail !== userEmail) {
-        context.log.error('[dashboard] userEmail mismatch. Returning 403...');
-        context.res = { status: 403, body: { error: 'Access denied.' } };
-      } else {
-        if (title !== undefined) dashboard.title = title;
-        if (components !== undefined) dashboard.components = components;
-        if (layouts !== undefined) dashboard.layouts = layouts;
-        if (workbookId !== undefined) dashboard.workbookId = workbookId.toLowerCase();
-        if (borderSettings !== undefined) dashboard.borderSettings = borderSettings;
-
-        context.log('[dashboard] Saving updated dashboard...');
+      if (actionParam === 'share') {
+        context.log('[dashboard] Handling SHARE action...');
+        const { action, email } = req.body;
+        if (!['add', 'remove'].includes(action) || !email) {
+          context.res = {
+            status: 400,
+            body: { error: 'Invalid share action or missing email.' },
+          };
+          return;
+        }
+        const dashboard = await Dashboard.findByPk(id);
+        if (!dashboard) {
+          context.res = { status: 404, body: { error: 'Dashboard not found' } };
+          return;
+        }
+        if (dashboard.userEmail !== userEmail) {
+          context.res = { status: 403, body: { error: 'Only the owner can share/unshare.' } };
+          return;
+        }
+        let sharedWithArray = dashboard.sharedWith;
+        if (action === 'add') {
+          if (!sharedWithArray.includes(email)) {
+            sharedWithArray.push(email);
+          }
+        } else if (action === 'remove') {
+          sharedWithArray = sharedWithArray.filter((u) => u !== email);
+        }
+        dashboard.sharedWith = sharedWithArray;
         await dashboard.save();
         context.res = { status: 200, body: dashboard };
-        context.log('[dashboard] PUT success, returning updated dashboard.');
+      } 
+      else {
+        context.log('[dashboard] Handling PUT (update), ID:', id);
+        if (!id) {
+          context.res = {
+            status: 400,
+            body: { error: 'Dashboard ID is required for updating.' },
+          };
+          return;
+        }
+        const { title, components, layouts, workbookId, borderSettings } = req.body;
+        const dashboard = await Dashboard.findByPk(id);
+        if (!dashboard) {
+          context.res = { status: 404, body: { error: 'Dashboard not found' } };
+        } else if (dashboard.userEmail !== userEmail) {
+          context.res = { status: 403, body: { error: 'Access denied.' } };
+        } else {
+          if (title !== undefined) dashboard.title = title;
+          if (components !== undefined) dashboard.components = components;
+          if (layouts !== undefined) dashboard.layouts = layouts;
+          if (workbookId !== undefined) dashboard.workbookId = workbookId.toLowerCase();
+          if (borderSettings !== undefined) dashboard.borderSettings = borderSettings;
+          await dashboard.save();
+          context.res = { status: 200, body: dashboard };
+          context.log('[dashboard] PUT (update) success.');
+        }
       }
-    } 
+    }
     else if (method === 'delete') {
       context.log('[dashboard] Handling DELETE, ID:', id);
       if (!id) {
