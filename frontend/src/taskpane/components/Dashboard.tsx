@@ -313,7 +313,7 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
     }
   }, [currentDashboard, setLayouts]);
 
-  const handleSave = async () => {
+  const handleSave = useCallback(async () => {
     if (!currentDashboardId || !currentDashboard) return;
     const updatedDashboard: DashboardItem = {
       ...currentDashboard,
@@ -342,7 +342,18 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
       console.error('Error saving dashboard:', err);
       message.error('Failed to save changes to server.');
     }
-  };
+  }, [currentDashboardId, currentDashboard, currentWorkbookId, widgets, layouts, dashboardTitle, dashboardBorderSettings, setCurrentDashboard, setDashboards ]);
+
+  useEffect(() => {
+    const onBeforeUnload = (event: BeforeUnloadEvent) => {
+      handleSave();
+    };
+    window.addEventListener('beforeunload', onBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', onBeforeUnload);
+    };
+  }, [handleSave]);
 
   const handleLayoutChange = useCallback(
     (
