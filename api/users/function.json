@@ -1,18 +1,18 @@
 {
-    "bindings": [
-      {
-        "authLevel": "anonymous",
-        "type": "httpTrigger",
-        "direction": "in",
-        "name": "req",
-        "methods": [ "get" ],
-        "route": "users/{id?}"
-      },
-      {
-        "type": "http",
-        "direction": "out",
-        "name": "res"
-      }
-    ],
-    "scriptFile": "index.js"
-  }
+  "bindings": [
+    {
+      "authLevel": "anonymous",                // or 'function' if you prefer
+      "type": "httpTrigger",
+      "direction": "in",
+      "name": "req",
+      "methods": [ "get" ],                    // We only need GET for searching, or more if you want
+      "route": "users/{id?}"                  // <-- So GET /api/users?search=xxx hits this
+    },
+    {
+      "type": "http",
+      "direction": "out",
+      "name": "res"
+    }
+  ],
+  "scriptFile": "index.js"
+}
