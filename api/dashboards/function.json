@@ -6,7 +6,7 @@
       "direction": "in",
       "name": "req",
       "methods": ["get", "post", "put", "delete"],
-      "route": "dashboards/{id?}"
+      "route": "dashboards/{id?}/{action?}"
     },
     {
       "type": "http",
