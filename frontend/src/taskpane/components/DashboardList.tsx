@@ -5,7 +5,8 @@ import { Layout, List, Button, Typography, Modal, message, Card, Tooltip, Row, C
 import { DeleteOutlined, EyeOutlined, EditOutlined, PlusOutlined, SearchOutlined, FolderViewOutlined, UserAddOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { DashboardContext } from '../context/DashboardContext';
-import { DashboardItem } from './types';
+import { DashboardItem, User } from './types';
+import { shareDashboard, searchUsers } from '../utils/api';
 
 const { Content } = Layout;
 const { Title } = Typography;
@@ -34,13 +35,12 @@ const DashboardList: React.FC = () => {
       setFilteredDashboards(filtered);
       setLoading(false);
     }, 300);
-
     return () => clearTimeout(timer);
   }, [dashboards, searchTerm]);
   const openShareModal = (dashboardId: string) => {
     setShareDashboardId(dashboardId);
     setIsShareModalVisible(true);
-    setUserSearchTerm(''); // clear previous search
+    setUserSearchTerm('');
     setSearchedUsers([]);
   };
 

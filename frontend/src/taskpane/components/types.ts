@@ -123,7 +123,7 @@ export interface TableData<T = Record<string, any>> {
   sheetName: string;
   tableName: string;
 }
-interface User {
+export interface User {
   userEmail: string;
   fullName?: string;
 }
