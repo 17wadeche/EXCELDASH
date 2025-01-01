@@ -1,6 +1,6 @@
 // api.ts
 import axios from 'axios'; 
-import { DashboardItem, NewDashboard, TemplateItem } from '../components/types';
+import { DashboardItem, NewDashboard, TemplateItem, User } from '../components/types';
 
 const API_BASE_URL = 'https://happy-forest-059a9d710.4.azurestaticapps.net/api';
 
@@ -178,13 +178,15 @@ export const deleteDashboardById = async (id: string): Promise<void> => {
   await axios.delete(`${API_BASE_URL}/dashboards/${id}`);
 };
 
-export const shareDashboard = async (
-  dashboardId: string, 
-  otherEmail: string
-): Promise<void> => {
+export const shareDashboard = async (dashboardId: string, otherEmail: string): Promise<void> => {
   await axios.put(`${API_BASE_URL}/dashboards/${dashboardId}/share`, {
     action: 'add',
     email: otherEmail,
   });
   alert(`Dashboard ${dashboardId} has been shared with ${otherEmail}.`);
 };
+
+export async function searchUsers(query: string): Promise<User[]> {
+  const res = await axios.get(`/api/users`, { params: { search: query } });
+  return res.data; // array of matched users
+}

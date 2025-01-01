@@ -2,7 +2,7 @@
 
 import React, { useContext, useState, useEffect } from 'react';
 import { Layout, List, Button, Typography, Modal, message, Card, Tooltip, Row, Col, Input, Spin, Divider,Empty, Form } from 'antd';
-import { DeleteOutlined, EyeOutlined, EditOutlined, PlusOutlined, SearchOutlined, FolderViewOutlined } from '@ant-design/icons';
+import { DeleteOutlined, EyeOutlined, EditOutlined, PlusOutlined, SearchOutlined, FolderViewOutlined, UserAddOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { DashboardContext } from '../context/DashboardContext';
 import { DashboardItem } from './types';
@@ -20,6 +20,11 @@ const DashboardList: React.FC = () => {
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [editTitle, setEditTitle] = useState('');
   const [editDashboardId, setEditDashboardId] = useState<string | null>(null);
+  const [isShareModalVisible, setIsShareModalVisible] = useState(false);
+  const [shareDashboardId, setShareDashboardId] = useState<string | null>(null);
+  const [userSearchTerm, setUserSearchTerm] = useState('');
+  const [searchedUsers, setSearchedUsers] = useState<User[]>([]);
+  const [searchingUsers, setSearchingUsers] = useState(false);
   useEffect(() => {
     setLoading(true);
     const timer = setTimeout(() => {
@@ -32,6 +37,53 @@ const DashboardList: React.FC = () => {
 
     return () => clearTimeout(timer);
   }, [dashboards, searchTerm]);
+  const openShareModal = (dashboardId: string) => {
+    setShareDashboardId(dashboardId);
+    setIsShareModalVisible(true);
+    setUserSearchTerm(''); // clear previous search
+    setSearchedUsers([]);
+  };
+
+  const closeShareModal = () => {
+    setIsShareModalVisible(false);
+    setShareDashboardId(null);
+  };
+
+  const fetchUsers = async (query: string) => {
+    try {
+      setSearchingUsers(true);
+      const response = await searchUsers(query); 
+      setSearchedUsers(response);
+    } catch (error: any) {
+      console.error('Error searching users:', error);
+      message.error('Failed to search users.');
+    } finally {
+      setSearchingUsers(false);
+    }
+  };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (userSearchTerm.length > 1) {
+        fetchUsers(userSearchTerm);
+      } else {
+        setSearchedUsers([]);
+      }
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [userSearchTerm]);
+
+  const handleSelectUserToShare = async (email: string) => {
+    if (!shareDashboardId) return;
+    try {
+      await shareDashboard(shareDashboardId, email);
+      message.success(`Shared with ${email}`);
+    } catch (error: any) {
+      console.error('Error sharing dashboard:', error);
+      message.error(error?.response?.data?.error || 'Failed to share dashboard.');
+    }
+  };
 
   const handleDelete = (id: string) => {
     Modal.confirm({
@@ -143,6 +195,13 @@ const DashboardList: React.FC = () => {
                         onClick={() => openEditModal(dashboard.id, dashboard.title)}
                       />
                     </Tooltip>,
+                    <Tooltip title="Share Dashboard" key="share">
+                    <Button
+                      type="text"
+                      icon={<UserAddOutlined />}
+                      onClick={() => openShareModal(dashboard.id)}
+                    />
+                  </Tooltip>,
                     <Tooltip title="Edit Dashboard" key="edit">
                       <Button
                         type="text"
@@ -209,6 +268,43 @@ const DashboardList: React.FC = () => {
           placeholder="New dashboard title"
         />
       </Modal>
+      <Modal
+      title="Share Dashboard"
+      open={isShareModalVisible}
+      footer={null}
+      onCancel={closeShareModal}
+    >
+      <Input
+        placeholder="Search for a user by name or email..."
+        value={userSearchTerm}
+        onChange={(e) => setUserSearchTerm(e.target.value)}
+        allowClear
+      />
+
+      {searchingUsers ? (
+        <div style={{ textAlign: 'center', marginTop: 16 }}>
+          <Spin />
+        </div>
+      ) : (
+        <List
+          style={{ marginTop: 16 }}
+          bordered
+          dataSource={searchedUsers}
+          locale={{ emptyText: 'No users found' }}
+          renderItem={(user) => (
+            <List.Item
+              onClick={() => handleSelectUserToShare(user.userEmail)}
+              style={{ cursor: 'pointer' }}
+            >
+              <List.Item.Meta
+                title={user.userEmail}
+                description={user.fullName || user.userEmail}
+              />
+            </List.Item>
+          )}
+        />
+      )}
+    </Modal>
     </Layout>
   );
 };
