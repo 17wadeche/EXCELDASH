@@ -71,9 +71,9 @@ const CreateDashboard: React.FC = () => {
     if (storedToken && savedEmail) {
       setIsLoggedIn(true);
       setEmail(savedEmail);
-      checkRegistration(savedEmail).then(registrationResult => {
-        setIsRegistered(registrationResult.registered);
-      }).catch(console.error);
+      checkRegistration(savedEmail)
+        .then(res => setIsRegistered(res.registered))
+        .catch(console.error);
       checkSubscriptionAndFetch(savedEmail).catch(console.error);
     }
   }, []);

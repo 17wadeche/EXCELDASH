@@ -4,6 +4,15 @@ import { DashboardItem, NewDashboard, TemplateItem } from '../components/types';
 
 const API_BASE_URL = 'https://happy-forest-059a9d710.4.azurestaticapps.net/api';
 
+function decodeToken(token: string) {
+  try {
+    const [, payload] = token.split('.');
+    return JSON.parse(atob(payload));
+  } catch {
+    return null;
+  }
+}
+
 export function setAuthToken(token: string | null) {
   if (token) {
     axios.defaults.headers.common['X-Custom-Auth'] = `Bearer ${token}`;
@@ -15,6 +24,10 @@ export function setAuthToken(token: string | null) {
 const existingToken = localStorage.getItem('token');
 if (existingToken) {
   setAuthToken(existingToken);
+  const decoded = decodeToken(existingToken);
+  if (decoded?.sessionId) {
+    localStorage.setItem('sessionId', decoded.sessionId);
+  }
 } else {
   console.warn('No token found in localStorage on load.');
 }
@@ -40,9 +53,16 @@ export const checkSubscription = async (email: string) => {
 export const loginUser = async (email: string, password: string): Promise<string> => {
   const response = await axios.post(`${API_BASE_URL}/login`, { email, password });
   const token = response.data.token;
+  const refreshToken = response.data.refreshToken;
   localStorage.setItem('token', token);
+  localStorage.setItem('refreshToken', refreshToken);
   localStorage.setItem('userEmail', email);
   setAuthToken(token);
+  const decoded = decodeToken(token);
+  if (decoded?.sessionId) {
+    localStorage.setItem('sessionId', decoded.sessionId);
+  }
+
   return token;
 };
 
@@ -94,13 +114,13 @@ export const unsubscribeUser = async (email: string) => {
 export const getDashboards = async (): Promise<DashboardItem[]> => {
   const token = localStorage.getItem('token');
   if (!token) {
-    throw new Error('No token found in localStorage');
+    console.warn('No token found in localStorage; skipping getDashboards.');
+    return [];
   }
-
   const response = await axios.get(`${API_BASE_URL}/dashboards`, {
     headers: {
-      'X-Custom-Auth': `Bearer ${token}`
-    }
+      'X-Custom-Auth': `Bearer ${token}`,
+    },
   });
   return response.data;
 };
