@@ -183,7 +183,7 @@ export const shareDashboard = async (dashboardId: string, otherEmail: string): P
     action: 'add',
     email: otherEmail,
   });
-  alert(`Dashboard ${dashboardId} has been shared with ${otherEmail}.`);
+  console.log(`Dashboard ${dashboardId} has been shared with ${otherEmail}.`);
 };
 
 export async function searchUsers(query: string): Promise<User[]> {
