@@ -97,14 +97,10 @@ export const checkRegistration = async (email: string) => {
 };
 
 export const unsubscribeUser = async (email: string) => {
-  const token = localStorage.getItem('token');
-  if (!token) throw new Error('No token found. Please log in again.');
-
   try {
     const response = await axios.post(
       `${API_BASE_URL}/unsubscribe`,
-      { email },
-      { headers: { 'X-Custom-Auth': `Bearer ${token}` } }
+      { email } // No headers needed
     );
     return response.data;
   } catch (error: any) {
