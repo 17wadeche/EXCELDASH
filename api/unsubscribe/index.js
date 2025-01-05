@@ -16,6 +16,7 @@ module.exports = async function (context, req) {
   const transaction = await sequelize.transaction();
 
   try {
+    // Fetch the user using the correct field name
     const user = await User.findOne({ where: { UserEmail: email }, transaction });
     if (!user) {
       await transaction.rollback();
@@ -26,8 +27,9 @@ module.exports = async function (context, req) {
       return;
     }
 
+    // Use the correct property to access the email
     const subscription = await Subscription.findOne({
-      where: { userEmail: user.email, status: 'active' },
+      where: { userEmail: user.UserEmail, status: 'active' },
       transaction
     });
 
