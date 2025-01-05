@@ -17,7 +17,7 @@ module.exports = async function (context, req) {
 
   try {
     // Fetch the user using the correct field name
-    const user = await User.findOne({ where: { UserEmail: email }, transaction });
+    const user = await User.findOne({ where: { userEmail: email }, transaction });
     if (!user) {
       await transaction.rollback();
       context.res = {
@@ -29,7 +29,7 @@ module.exports = async function (context, req) {
 
     // Use the correct property to access the email
     const subscription = await Subscription.findOne({
-      where: { userEmail: user.UserEmail, status: 'active' },
+      where: { userEmail: user.userEmail, status: 'active' },
       transaction
     });
 
