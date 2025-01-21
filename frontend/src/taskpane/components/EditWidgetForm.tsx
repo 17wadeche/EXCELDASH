@@ -816,20 +816,22 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                           message: 'Please enter data points',
                         },
                         {
-                          validator: (_, val, callback) => {
+                          validator: (_, value) => {
                             const dsType = form.getFieldValue(['datasets', name, 'type']);
                             if (dsType === 'scatter' || dsType === 'bubble') {
                               return Promise.resolve();
                             }
-                            if (!val) return Promise.resolve();
-                            const isNumArray = val
+                            if (!value) return Promise.resolve(); 
+                            const isNumArray = value
                               .split(',')
                               .every((v: string) => !isNaN(Number(v.trim())));
                             return isNumArray
                               ? Promise.resolve()
-                              : Promise.reject('Data points must be comma-separated numbers');
+                              : Promise.reject(
+                                  new Error('Data points must be comma-separated numbers')
+                                );
                           },
-                        }
+                        },
                       ]}
                     >
                       <Input />
