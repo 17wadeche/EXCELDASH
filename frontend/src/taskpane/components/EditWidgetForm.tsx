@@ -216,16 +216,19 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
             : [],
           datasets: (cleanedValues.datasets || []).map((ds: any) => {
             if (ds.type === 'scatter' || ds.type === 'bubble') {
-              const segments = ds.data.split(';').map(s => s.trim()).filter(Boolean);
+              const segments = ds.data
+                .split(';')
+                .map((s: string) => s.trim())
+                .filter(Boolean);
               let points;
               if (ds.type === 'bubble') {
-                points = segments.map(seg => {
-                  const [x, y, r] = seg.split(',').map(v => parseFloat(v.trim()));
+                points = segments.map((seg: string) => {
+                  const [x, y, r] = seg.split(',').map((v: string) => parseFloat(v.trim()));
                   return { x, y, r };
                 });
               } else {
-                points = segments.map(seg => {
-                  const [x, y] = seg.split(',').map(v => parseFloat(v.trim()));
+                points = segments.map((seg: string) => {
+                  const [x, y] = seg.split(',').map((v: string) => parseFloat(v.trim()));
                   return { x, y };
                 });
               }
@@ -729,7 +732,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                           r: rVals[idx],
                         }));
                         const dataString = points
-                          .map(pt => `${pt.x},${pt.y},${pt.r}`)
+                          .map((pt: { x: number; y: number; r: number }) => `${pt.x},${pt.y},${pt.r}`)
                           .join(';');
                         form.setFieldsValue({
                           labels: '',
@@ -823,10 +826,12 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                             if (!value) return Promise.resolve();
                         
                             if (dsType === 'bubble') {
-                              // Expect semicolon separated segments: "x,y,r;x,y,r;..."
-                              const segments = value.split(';').map(s => s.trim()).filter(Boolean);
+                              const segments = value
+                                .split(';')
+                                .map((s: string) => s.trim())
+                                .filter(Boolean);
                               for (let seg of segments) {
-                                const parts = seg.split(',').map(v => v.trim());
+                                const parts = seg.split(',').map((v: string) => v.trim());
                                 if (parts.length !== 3 || parts.some(p => isNaN(Number(p)))) {
                                   return Promise.reject(
                                     new Error('Bubble data must be "x,y,r" triplets, separated by semicolons.')
