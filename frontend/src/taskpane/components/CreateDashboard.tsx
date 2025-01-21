@@ -345,9 +345,6 @@ const CreateDashboard: React.FC = () => {
           exampleSheet.getRange("A24:F24").values = [["Value", 11, 16, 9, 14, 5]];
   
           // ========== BUBBLE CHART DATA ==========
-          // Bubble data typically requires each point to have [x, y, r].
-          // Here we store them in rows for X, Y, and R so your chart loader
-          // can parse them appropriately in EditWidgetForm.tsx
           exampleSheet.getRange("A26").values = [["Bubble Chart Data"]];
           exampleSheet.getRange("A27:E27").values = [
             ["", "Point1", "Point2", "Point3", "Point4"]
@@ -357,10 +354,6 @@ const CreateDashboard: React.FC = () => {
           exampleSheet.getRange("A30:E30").values = [["R", 10, 20, 15, 25]];
   
           // ========== SCATTER CHART DATA ==========
-          // For a single scatter dataset with 4 points, we might do:
-          // Row 1: [ "", "Point1", "Point2", "Point3", "Point4" ]
-          // Row 2: [ "X", 1, 2, 3, 4 ]
-          // Row 3: [ "Y", 2, 5, 3, 7 ]
           exampleSheet.getRange("A32").values = [["Scatter Chart Data"]];
           exampleSheet.getRange("A33:E33").values = [
             ["", "Point1", "Point2", "Point3", "Point4"]

@@ -29,6 +29,7 @@ import {
   TitleWidgetData,
   Task,
 } from './types';
+import { fill } from 'lodash';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -155,12 +156,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
       const cData = widget.data as ChartData;
       setChartType(cData.type);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [widget]);
-
-  // ----- SYNC SLICE COLORS WITH LABELS FOR PIE/DOUGHNUT/POLAR -----
-  // We dynamically show a color picker for each slice. If the user changes the
-  // 'labels' field, we reset the sliceColors array to match.
   useEffect(() => {
     if (widget.type !== 'chart') return;
     if (!['pie', 'doughnut', 'polarArea'].includes(chartType)) return;
@@ -202,17 +198,14 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
         break;
       }
       case 'chart': {
-        // Determine final chart type
         const finalChartType =
           cleanedValues.chartType === 'area' ? 'line' : cleanedValues.chartType;
         const noAxisTypes = ['pie', 'doughnut', 'polarArea', 'radar'];
-        // If it's a slice-based chart, gather slice colors from the form:
         let sliceColorsArray: string[] = [];
         if (['pie', 'doughnut', 'polarArea'].includes(finalChartType)) {
           const sc: { color: string }[] = cleanedValues.sliceColors || [];
           sliceColorsArray = sc.map((obj) => obj.color);
         }
-
         updatedData = {
           title: cleanedValues.title,
           type: finalChartType,
@@ -221,21 +214,32 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           labels: cleanedValues.labels
             ? cleanedValues.labels.split(',').map((l: string) => l.trim())
             : [],
-          // Build each dataset
           datasets: (cleanedValues.datasets || []).map((ds: any) => {
             if (ds.type === 'scatter' || ds.type === 'bubble') {
-              // For scatter/bubble, keep data as objects (x,y) or (x,y,r)
+              const pointStrings = ds.data.split(')').filter(Boolean); // split on `)`
+              const points = pointStrings.map((ptStr: string) => {
+                const trimmed = ptStr.replace('(', '').replace(')', '').trim();
+                const [xStr, yStr, rStr] = trimmed.split(',').map(s => s.trim());
+                const xVal = parseFloat(xStr);
+                const yVal = parseFloat(yStr);
+                if (ds.type === 'bubble') {
+                  const rVal = parseFloat(rStr);
+                  return { x: xVal, y: yVal, r: rVal };
+                } else {
+                  return { x: xVal, y: yVal };
+                }
+              });
+
               return {
                 label: ds.label,
-                data: ds.data,
                 type: ds.type,
+                data: points,
                 fill: false,
                 backgroundColor: ds.backgroundColor || '#4caf50',
                 borderColor: ds.borderColor || '#4caf50',
                 borderWidth: ds.borderWidth || 1,
               };
             } else {
-              // For other chart types, parse numeric array
               let parsedValues: number[] = [];
               if (typeof ds.data === 'string') {
                 parsedValues = ds.data
@@ -246,10 +250,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
               } else {
                 parsedValues = [Number(ds.data)];
               }
-
-              // For "area" type
               const shouldFill = cleanedValues.chartType === 'area' || ds.type === 'area';
-              // If it's a slice-based chart, apply the sliceColors array as backgroundColor
               let finalBg = ds.backgroundColor || '#4caf50';
               if (['pie', 'doughnut', 'polarArea'].includes(finalChartType) && sliceColorsArray.length) {
                 finalBg = sliceColorsArray;
