@@ -145,6 +145,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
     form.setFieldsValue(initialValues());
   }, [widget]);
   const handleFinish = (values: any) => {
+    // Clean out empty strings or undefined
     const cleanedValues: Record<string, any> = Object.entries(values).reduce(
       (acc: Record<string, any>, [key, value]) => {
         if (value !== undefined && value !== '') {
@@ -156,186 +157,256 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
     );
 
     let updatedData: any;
+
     switch (widget.type) {
-      case 'text':
+      case 'text': {
         updatedData = cleanedValues;
         break;
-      case 'title':
+      }
+
+      case 'title': {
         updatedData = cleanedValues as TitleWidgetData;
         break;
-        case 'chart': {
-          updatedData = {
-            title: cleanedValues.title,
-            type: cleanedValues.chartType === 'area' ? 'line' : cleanedValues.chartType,
-            worksheetName: cleanedValues.worksheetName,
-            associatedRange: cleanedValues.associatedRange,
-            labels: cleanedValues.labels.split(',').map((label: string) => label.trim()),
-            datasets: cleanedValues.datasets.map((dataset: any) => {
-              if (dataset.type === 'scatter' || dataset.type === 'bubble') {
-                return {
-                  label: dataset.label,
-                  data: dataset.data, // Keep as-is
-                  type: dataset.type || undefined,
-                  fill: false, // Generally false for scatter/bubble
-                  backgroundColor: dataset.backgroundColor || '#4caf50',
-                  borderColor: dataset.borderColor || '#4caf50',
-                  borderWidth: dataset.borderWidth || 1,
-                };
-              } else {
-                const parsedData =
-                  typeof dataset.data === 'string'
-                    ? dataset.data
-                        .split(',')
-                        .map((num: string) => Number(num.trim()))
-                    : Array.isArray(dataset.data)
-                    ? dataset.data.map((num: any) => Number(num))
-                    : [Number(dataset.data)];
-        
-                const shouldFill =
-                  cleanedValues.chartType === 'area' || dataset.type === 'area';
-        
-                return {
-                  label: dataset.label,
-                  data: parsedData,
-                  type: dataset.type || undefined,
-                  fill: shouldFill,
-                  backgroundColor: dataset.backgroundColor || '#4caf50',
-                  borderColor: dataset.borderColor || '#4caf50',
-                  borderWidth: dataset.borderWidth || 1,
-                };
+      }
+
+      case 'chart': {
+        // If the user typed in a set of slice colors for Pie/Doughnut/PolarArea
+        // we parse them here:
+        let segmentColorsArray: string[] = [];
+        if (
+          ['pie', 'doughnut', 'polarArea'].includes(
+            cleanedValues.chartType || ''
+          ) &&
+          cleanedValues.segmentColors
+        ) {
+          segmentColorsArray = cleanedValues.segmentColors
+            .split(',')
+            .map((c: string) => c.trim())
+            .filter(Boolean);
+        }
+
+        // If the user typed in label-specific text colors (for data labels):
+        let labelTextColorsArray: string[] = [];
+        if (
+          ['pie', 'doughnut', 'polarArea'].includes(
+            cleanedValues.chartType || ''
+          ) &&
+          cleanedValues.labelTextColors
+        ) {
+          labelTextColorsArray = cleanedValues.labelTextColors
+            .split(',')
+            .map((c: string) => c.trim())
+            .filter(Boolean);
+        }
+
+        // Build updated chart data:
+        updatedData = {
+          title: cleanedValues.title,
+          type:
+            cleanedValues.chartType === 'area'
+              ? 'line'
+              : cleanedValues.chartType,
+          worksheetName: cleanedValues.worksheetName,
+          associatedRange: cleanedValues.associatedRange,
+          labels: cleanedValues.labels
+            ? cleanedValues.labels.split(',').map((label: string) => label.trim())
+            : [],
+          datasets: (cleanedValues.datasets || []).map((dataset: any) => {
+            // Scatter / Bubble: store data as array of points or (x,y,r) objects
+            if (dataset.type === 'scatter' || dataset.type === 'bubble') {
+              return {
+                label: dataset.label,
+                data: dataset.data, // user has array-of-objects if loaded from Excel, or a string
+                type: dataset.type || undefined,
+                fill: false,
+                backgroundColor: dataset.backgroundColor || '#4caf50',
+                borderColor: dataset.borderColor || '#4caf50',
+                borderWidth: dataset.borderWidth || 1,
+              };
+            } else {
+              // Bar / Line / Pie / Doughnut / etc.
+              const parsedData =
+                typeof dataset.data === 'string'
+                  ? dataset.data
+                      .split(',')
+                      .map((num: string) => Number(num.trim()))
+                  : Array.isArray(dataset.data)
+                  ? dataset.data.map((num: any) => Number(num))
+                  : [Number(dataset.data)];
+
+              const shouldFill =
+                cleanedValues.chartType === 'area' || dataset.type === 'area';
+
+              // If chart is pie/doughnut/polarArea, we can apply an array of colors if provided
+              let finalBackgroundColor = dataset.backgroundColor || '#4caf50';
+              if (
+                ['pie', 'doughnut', 'polarArea'].includes(
+                  cleanedValues.chartType
+                ) &&
+                segmentColorsArray.length > 0
+              ) {
+                finalBackgroundColor = segmentColorsArray;
               }
-            }),
-            titleAlignment: cleanedValues.titleAlignment || 'left',
-            scales: {
-              x: {
-                type: cleanedValues.xAxisType || 'category',
-                title: {
-                  display: !!cleanedValues.xAxisTitle,
-                  text: cleanedValues.xAxisTitle || '',
-                },
-              },
-              y: {
-                type: cleanedValues.yAxisType || 'linear',
-                title: {
-                  display: !!cleanedValues.yAxisTitle,
-                  text: cleanedValues.yAxisTitle || '',
-                },
+
+              return {
+                label: dataset.label,
+                data: parsedData,
+                type: dataset.type || undefined,
+                fill: shouldFill,
+                backgroundColor: finalBackgroundColor,
+                borderColor: dataset.borderColor || '#4caf50',
+                borderWidth: dataset.borderWidth || 1,
+              };
+            }
+          }),
+          titleAlignment: cleanedValues.titleAlignment || 'left',
+          scales: {
+            x: {
+              type: cleanedValues.xAxisType || 'category',
+              title: {
+                display: !!cleanedValues.xAxisTitle,
+                text: cleanedValues.xAxisTitle || '',
               },
             },
-            plugins: {
-              legend: {
-                display: cleanedValues.showLegend !== false,
-                position: cleanedValues.legendPosition || 'top',
+            y: {
+              type: cleanedValues.yAxisType || 'linear',
+              title: {
+                display: !!cleanedValues.yAxisTitle,
+                text: cleanedValues.yAxisTitle || '',
               },
-              annotation: {
-                annotations: cleanedValues.annotations || [],
+            },
+          },
+          plugins: {
+            legend: {
+              display: cleanedValues.showLegend !== false,
+              position: cleanedValues.legendPosition || 'top',
+            },
+            annotation: {
+              annotations: cleanedValues.annotations || [],
+            },
+            datalabels: {
+              display: cleanedValues.showDataLabels !== false,
+              // If label text colors array is provided, use a function-based approach
+              // to pick the color for each slice. Otherwise, just a single color:
+              color:
+                labelTextColorsArray.length > 0
+                  ? (ctx: any) =>
+                      labelTextColorsArray[ctx.dataIndex] || '#000'
+                  : cleanedValues.dataLabelColor || '#000',
+              font: {
+                size: cleanedValues.dataLabelFontSize || 12,
               },
-              datalabels: {
-                display: cleanedValues.showDataLabels !== false,
-                color: cleanedValues.dataLabelColor || '#000',
-                font: {
-                  size: cleanedValues.dataLabelFontSize || 12,
-                },
+            },
+            zoom: {
+              pan: {
+                enabled: cleanedValues.enablePan || false,
+                mode: 'xy',
               },
               zoom: {
-                pan: {
-                  enabled: cleanedValues.enablePan || false,
-                  mode: 'xy',
+                wheel: {
+                  enabled: cleanedValues.enableZoom || false,
                 },
-                zoom: {
-                  wheel: {
-                    enabled: cleanedValues.enableZoom || false,
-                  },
-                  pinch: {
-                    enabled: cleanedValues.enableZoom || false,
-                  },
-                  mode: cleanedValues.zoomMode || 'xy',
+                pinch: {
+                  enabled: cleanedValues.enableZoom || false,
                 },
+                mode: cleanedValues.zoomMode || 'xy',
               },
-              tooltip: {
-                enabled: cleanedValues.enableTooltips !== false,
-                callbacks: {
-                  label: function (context: any) {
-                    const label = context.dataset.label || '';
-                    const value = context.formattedValue;
-                    return cleanedValues.tooltipTemplate
-                      ? cleanedValues.tooltipTemplate
-                          .replace('{label}', label)
-                          .replace('{value}', value)
-                      : `${label}: ${value}`;
-                  },
+            },
+            tooltip: {
+              enabled: cleanedValues.enableTooltips !== false,
+              callbacks: {
+                label: function (context: any) {
+                  const label = context.dataset.label || '';
+                  const value = context.formattedValue;
+                  return cleanedValues.tooltipTemplate
+                    ? cleanedValues.tooltipTemplate
+                        .replace('{label}', label)
+                        .replace('{value}', value)
+                    : `${label}: ${value}`;
                 },
               },
             },
-            backgroundColor: cleanedValues.chartBackgroundColor || '#ffffff',
-            gridLineColor: cleanedValues.gridLineColor || 'rgba(0, 0, 0, 0.1)',
-            locale: cleanedValues.locale || 'en-US',
-            dynamicUpdate: {
-              enabled: cleanedValues.enableDynamicUpdates || false,
-              interval: cleanedValues.updateInterval || 5,
-            },
-            gradientFills: {
-              enabled: cleanedValues.useGradientFills || false,
-              startColor: cleanedValues.gradientStartColor || 'rgba(75,192,192,0)',
-              endColor: cleanedValues.gradientEndColor || 'rgba(75,192,192,0.4)',
-            },
-          } as ChartData;
-          break;
-        }
-        case 'gantt': {
-          const existingData = widget.data as GanttWidgetData;
-          const existingTasks = existingData.tasks || [];
-          const { arrowColor } = cleanedValues;
-          const mergedTasks = existingTasks.map((oldTask) => {
-            const updatedTask = cleanedValues.tasks.find(
-              (t: any) => t.id === oldTask.id
-            );
-            if (!updatedTask) {
-              return oldTask;
-            }
-            return {
-              ...oldTask,
-              name: updatedTask.name,
-              start: updatedTask.start.format('YYYY-MM-DD'),
-              end: updatedTask.end.format('YYYY-MM-DD'),
-              completed: updatedTask.completed
-                ? updatedTask.completed.format('YYYY-MM-DD')
-                : undefined,
-              progress: updatedTask.progress,
-              dependencies: Array.isArray(updatedTask.dependencies)
-                ? updatedTask.dependencies
-                : (updatedTask.dependencies || '').split(','),
-              color: updatedTask.color || oldTask.color,
-              progressColor: updatedTask.progressColor || oldTask.progressColor
-            };
-          });
-          const newTasks = cleanedValues.tasks
-            .filter((t: any) => !existingTasks.some((old) => old.id === t.id))
-            .map((t: any) => ({
-              id: t.id,
-              name: t.name,
-              start: t.start.format('YYYY-MM-DD'),
-              end: t.end.format('YYYY-MM-DD'),
-              completed: t.completed
-                ? t.completed.format('YYYY-MM-DD')
-                : undefined,
-              progress: t.progress,
-              dependencies: Array.isArray(t.dependencies)
-                ? t.dependencies
-                : (t.dependencies || '').split(','),
-              color: t.color || '#FF0000',
-              progressColor: t.progressColor || '#00AABB'
-            }));
-          const finalTasks = [...mergedTasks, ...newTasks];
-          updatedData = {
-            ...existingData,
-            tasks: finalTasks,
-            title: cleanedValues.title,
-            arrowColor: arrowColor,
-          } as GanttWidgetData;
-          break;
-        }
-      case 'metric':
+          },
+          backgroundColor: cleanedValues.chartBackgroundColor || '#ffffff',
+          gridLineColor: cleanedValues.gridLineColor || 'rgba(0, 0, 0, 0.1)',
+          locale: cleanedValues.locale || 'en-US',
+          dynamicUpdate: {
+            enabled: cleanedValues.enableDynamicUpdates || false,
+            interval: cleanedValues.updateInterval || 5,
+          },
+          gradientFills: {
+            enabled: cleanedValues.useGradientFills || false,
+            startColor:
+              cleanedValues.gradientStartColor || 'rgba(75,192,192,0)',
+            endColor:
+              cleanedValues.gradientEndColor || 'rgba(75,192,192,0.4)',
+          },
+        } as ChartData;
+
+        break;
+      }
+
+      case 'gantt': {
+        const existingData = widget.data as GanttWidgetData;
+        const existingTasks = existingData.tasks || [];
+        const { arrowColor } = cleanedValues;
+
+        const mergedTasks = existingTasks.map((oldTask) => {
+          const updatedTask = cleanedValues.tasks.find(
+            (t: any) => t.id === oldTask.id
+          );
+          if (!updatedTask) {
+            return oldTask;
+          }
+          return {
+            ...oldTask,
+            name: updatedTask.name,
+            start: updatedTask.start.format('YYYY-MM-DD'),
+            end: updatedTask.end.format('YYYY-MM-DD'),
+            completed: updatedTask.completed
+              ? updatedTask.completed.format('YYYY-MM-DD')
+              : undefined,
+            progress: updatedTask.progress,
+            dependencies: Array.isArray(updatedTask.dependencies)
+              ? updatedTask.dependencies
+              : (updatedTask.dependencies || '').split(','),
+            color: updatedTask.color || oldTask.color,
+            progressColor:
+              updatedTask.progressColor || oldTask.progressColor,
+          };
+        });
+
+        const newTasks = (cleanedValues.tasks || [])
+          .filter(
+            (t: any) => !existingTasks.some((old) => old.id === t.id)
+          )
+          .map((t: any) => ({
+            id: t.id,
+            name: t.name,
+            start: t.start.format('YYYY-MM-DD'),
+            end: t.end.format('YYYY-MM-DD'),
+            completed: t.completed
+              ? t.completed.format('YYYY-MM-DD')
+              : undefined,
+            progress: t.progress,
+            dependencies: Array.isArray(t.dependencies)
+              ? t.dependencies
+              : (t.dependencies || '').split(','),
+            color: t.color || '#FF0000',
+            progressColor: t.progressColor || '#00AABB',
+          }));
+
+        const finalTasks = [...mergedTasks, ...newTasks];
+        updatedData = {
+          ...existingData,
+          tasks: finalTasks,
+          title: cleanedValues.title,
+          arrowColor: arrowColor,
+        } as GanttWidgetData;
+        break;
+      }
+
+      case 'metric': {
         updatedData = {
           ...cleanedValues,
           displayName: cleanedValues.displayName || 'Metric',
@@ -344,9 +415,14 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           cellAddress: cleanedValues.cellAddress,
         };
         break;
-      default:
+      }
+
+      default: {
         updatedData = {};
+        break;
+      }
     }
+
     console.log('Updated Data:', updatedData);
     onSubmit(updatedData);
   };
@@ -470,6 +546,23 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           >
             <Input />
           </Form.Item>
+          {/* If Pie/Doughnut/PolarArea, let user define slice (segment) colors */}
+          {['pie', 'doughnut', 'polarArea'].includes(chartType) && (
+            <>
+              <Form.Item
+                name="segmentColors"
+                label="Slice Colors (comma-separated)"
+              >
+                <Input placeholder="#FF6384, #36A2EB, #FFCE56" />
+              </Form.Item>
+              <Form.Item
+                name="labelTextColors"
+                label="Slice Label Text Colors (comma-separated)"
+              >
+                <Input placeholder="#000, #111, #222" />
+              </Form.Item>
+            </>
+          )}
           {/* Worksheet Selection */}
           <Form.Item
             name="worksheetName"
@@ -528,16 +621,23 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                       await context.sync();
                       const data = dataRange.values;
                       console.log('Data from Excel:', data);
-                      const labels = data[0].slice(1);
                       const mainChartType = form.getFieldValue('chartType') || 'bar';
                       if (
-                        mainChartType === 'bar' ||
-                        mainChartType === 'line' ||
-                        mainChartType === 'pie' ||
-                        mainChartType === 'doughnut' ||
-                        mainChartType === 'radar' ||
-                        mainChartType === 'polarArea'
+                        [
+                          'bar',
+                          'line',
+                          'pie',
+                          'doughnut',
+                          'radar',
+                          'polarArea',
+                        ].includes(mainChartType)
                       ) {
+                        if (data.length < 2) {
+                          message.error(
+                            'Data range must contain at least a header row and one row of data.'
+                          );
+                          return;
+                        }
                         const labels = data[0].slice(1);
                         const datasets = data.slice(1).map((row) => ({
                           label: row[0],
@@ -552,61 +652,76 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                           datasets,
                         });
                       } else if (mainChartType === 'scatter') {
-                        // --- SCATTER PARSING ---
+                        // SCATTER
                         if (data.length < 3) {
-                          message.error('Scatter data requires at least 3 rows: header row, X row, and Y row.');
+                          message.error(
+                            'Scatter data requires at least 3 rows: header row, X row, and Y row.'
+                          );
                           return;
                         }
-                        const headerRow = data[0];
                         const xRow = data[1];
                         const yRow = data[2];
                         const xVals = xRow.slice(1).map((val: any) => Number(val));
                         const yVals = yRow.slice(1).map((val: any) => Number(val));
+
                         if (xVals.length !== yVals.length) {
-                          message.error('X row and Y row must have the same number of points.');
+                          message.error(
+                            'X row and Y row must have the same number of points.'
+                          );
                           return;
                         }
+
+                        // Build array of { x, y }
                         const dataPoints = xVals.map((xVal: number, idx: number) => ({
                           x: xVal,
                           y: yVals[idx],
                         }));
+
                         const scatterDataset = {
                           label: 'Scatter Series',
-                          data: dataPoints, // store as array of objects directly
+                          data: dataPoints,
                           type: 'scatter',
                           backgroundColor: getRandomColor(),
                           borderColor: getRandomColor(),
                           borderWidth: 1,
                         };
-                        const labels = headerRow.slice(1).join(', ');
+
                         form.setFieldsValue({
-                          labels,
+                          labels: '',
                           datasets: [scatterDataset],
                         });
                       } else if (mainChartType === 'bubble') {
-                        // --- BUBBLE PARSING ---
+                        // BUBBLE
                         if (data.length < 4) {
-                          message.error('Bubble data requires at least 4 rows: header row, X row, Y row, R row.');
+                          message.error(
+                            'Bubble data requires at least 4 rows: header row, X row, Y row, and R row.'
+                          );
                           return;
                         }
-                        const headerRow = data[0]; // e.g. [ "", "Point1", "Point2", ... ]
                         const xRow = data[1];
                         const yRow = data[2];
                         const rRow = data[3];
+
                         const xVals = xRow.slice(1).map((val: any) => Number(val));
                         const yVals = yRow.slice(1).map((val: any) => Number(val));
                         const rVals = rRow.slice(1).map((val: any) => Number(val));
-                        if (xVals.length !== yVals.length || yVals.length !== rVals.length) {
+
+                        if (
+                          xVals.length !== yVals.length ||
+                          yVals.length !== rVals.length
+                        ) {
                           message.error(
                             'X, Y, and R rows must each have the same number of points.'
                           );
                           return;
                         }
+
                         const dataPoints = xVals.map((xVal: number, idx: number) => ({
                           x: xVal,
                           y: yVals[idx],
                           r: rVals[idx],
-                        }));            
+                        }));
+
                         const bubbleDataset = {
                           label: 'Bubble Series',
                           data: dataPoints,
@@ -615,12 +730,12 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                           borderColor: getRandomColor(),
                           borderWidth: 1,
                         };
-                        const labels = headerRow.slice(1).join(', ');
+
                         form.setFieldsValue({
-                          labels,
+                          labels: '',
                           datasets: [bubbleDataset],
                         });
-                      }              
+                      }
                       message.success('Data loaded successfully from Excel.');
                     });
                   } catch (error) {
@@ -663,6 +778,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                       {...restField}
                       name={[name, 'type']}
                       label="Dataset Chart Type"
+                      initialValue="bar"
                       rules={[
                         {
                           required: true,
@@ -781,208 +897,205 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           </Form.List>
           {/* Collapse Panels for Advanced Settings */}
           <Collapse>
-            <Panel header="Axis Settings" key="1">
-              <Form.Item label="X-Axis Type" name="xAxisType">
-                <Select>
-                  <Option value="category">Category</Option>
-                  <Option value="linear">Linear</Option>
-                  <Option value="logarithmic">Logarithmic</Option>
-                </Select>
-              </Form.Item>
-              <Form.Item label="X-Axis Title" name="xAxisTitle">
-                <Input />
-              </Form.Item>
-              <Form.Item label="Y-Axis Type" name="yAxisType">
-                <Select>
-                  <Option value="linear">Linear</Option>
-                  <Option value="logarithmic">Logarithmic</Option>
-                </Select>
-              </Form.Item>
-              <Form.Item label="Y-Axis Title" name="yAxisTitle">
-                <Input />
-              </Form.Item>
-            </Panel>
-            <Panel header="Plugins" key="2">
-              <Form.Item
-                label="Enable Zoom"
-                name="enableZoom"
-                valuePropName="checked"
-              >
-                <Switch />
-              </Form.Item>
-              <Form.Item
-                label="Enable Pan"
-                name="enablePan"
-                valuePropName="checked"
-              >
-                <Switch />
-              </Form.Item>
-              <Form.Item label="Zoom Mode" name="zoomMode">
-                <Select>
-                  <Option value="x">X</Option>
-                  <Option value="y">Y</Option>
-                  <Option value="xy">XY</Option>
-                </Select>
-              </Form.Item>
-              <Form.Item
-                label="Show Data Labels"
-                name="showDataLabels"
-                valuePropName="checked"
-                initialValue={false}
-              >
-                <Switch />
-              </Form.Item>
-              <Form.Item label="Data Label Color" name="dataLabelColor">
-                <Input type="color" />
-              </Form.Item>
-              <Form.Item
-                label="Data Label Font Size"
-                name="dataLabelFontSize"
-              >
-                <InputNumber min={8} max={24} />
-              </Form.Item>
-              <Form.Item
-                label="Enable Tooltips"
-                name="enableTooltips"
-                valuePropName="checked"
-              >
-                <Switch />
-              </Form.Item>
-              <Form.Item
-                label="Tooltip Template"
-                name="tooltipTemplate"
-              >
-                <TextArea
-                  placeholder="Use {label} and {value} placeholders"
-                  rows={3}
-                />
-              </Form.Item>
-              <Form.Item label="Annotations">
-                <Form.List name="annotations">
-                  {(fields, { add, remove }) => (
-                    <>
-                      {fields.map(({ key, name, ...restField }) => (
-                        <div key={key} style={{ marginBottom: 16 }}>
-                          <Form.Item
-                            {...restField}
-                            name={[name, 'type']}
-                            label="Annotation Type"
-                            rules={[
-                              {
-                                required: true,
-                                message:
-                                  'Please select annotation type',
-                              },
-                            ]}
-                          >
-                            <Select>
-                              <Option value="line">Line</Option>
-                              <Option value="box">Box</Option>
-                            </Select>
+            {!['pie', 'doughnut', 'polarArea', 'radar'].includes(chartType) && (
+              <>
+                <Panel header="Axis Settings" key="1">
+                  <Form.Item label="X-Axis Type" name="xAxisType">
+                    <Select>
+                      <Option value="category">Category</Option>
+                      <Option value="linear">Linear</Option>
+                      <Option value="logarithmic">Logarithmic</Option>
+                    </Select>
+                  </Form.Item>
+                  <Form.Item label="X-Axis Title" name="xAxisTitle">
+                    <Input />
+                  </Form.Item>
+                  <Form.Item label="Y-Axis Type" name="yAxisType">
+                    <Select>
+                      <Option value="linear">Linear</Option>
+                      <Option value="logarithmic">Logarithmic</Option>
+                    </Select>
+                  </Form.Item>
+                  <Form.Item label="Y-Axis Title" name="yAxisTitle">
+                    <Input />
+                  </Form.Item>
+                </Panel>
+                <Panel header="Plugins" key="2">
+                  <Form.Item
+                    label="Enable Zoom"
+                    name="enableZoom"
+                    valuePropName="checked"
+                  >
+                    <Switch />
+                  </Form.Item>
+                  <Form.Item
+                    label="Enable Pan"
+                    name="enablePan"
+                    valuePropName="checked"
+                  >
+                    <Switch />
+                  </Form.Item>
+                  <Form.Item label="Zoom Mode" name="zoomMode">
+                    <Select>
+                      <Option value="x">X</Option>
+                      <Option value="y">Y</Option>
+                      <Option value="xy">XY</Option>
+                    </Select>
+                  </Form.Item>
+                  <Form.Item
+                    label="Show Data Labels"
+                    name="showDataLabels"
+                    valuePropName="checked"
+                    initialValue={false}
+                  >
+                    <Switch />
+                  </Form.Item>
+                  <Form.Item label="Data Label Color" name="dataLabelColor">
+                    <Input type="color" />
+                  </Form.Item>
+                  <Form.Item label="Data Label Font Size" name="dataLabelFontSize">
+                    <InputNumber min={8} max={24} />
+                  </Form.Item>
+                  <Form.Item
+                    label="Enable Tooltips"
+                    name="enableTooltips"
+                    valuePropName="checked"
+                  >
+                    <Switch />
+                  </Form.Item>
+                  <Form.Item label="Tooltip Template" name="tooltipTemplate">
+                    <TextArea
+                      placeholder="Use {label} and {value} placeholders"
+                      rows={3}
+                    />
+                  </Form.Item>
+                  <Form.Item label="Annotations">
+                    <Form.List name="annotations">
+                      {(annotationFields, { add, remove }) => (
+                        <>
+                          {annotationFields.map(({ key, name, ...restField }) => (
+                            <div key={key} style={{ marginBottom: 16 }}>
+                              <Form.Item
+                                {...restField}
+                                name={[name, 'type']}
+                                label="Annotation Type"
+                                rules={[
+                                  {
+                                    required: true,
+                                    message: 'Please select annotation type',
+                                  },
+                                ]}
+                              >
+                                <Select>
+                                  <Option value="line">Line</Option>
+                                  <Option value="box">Box</Option>
+                                </Select>
+                              </Form.Item>
+                              <Form.Item
+                                {...restField}
+                                name={[name, 'value']}
+                                label="Value"
+                                rules={[
+                                  {
+                                    required: true,
+                                    message: 'Please enter value',
+                                  },
+                                ]}
+                              >
+                                <InputNumber />
+                              </Form.Item>
+                              <Form.Item
+                                {...restField}
+                                name={[name, 'label']}
+                                label="Label"
+                              >
+                                <Input />
+                              </Form.Item>
+                              <Form.Item
+                                {...restField}
+                                name={[name, 'color']}
+                                label="Color"
+                                rules={[
+                                  {
+                                    required: true,
+                                    message: 'Please select color',
+                                  },
+                                ]}
+                              >
+                                <Input type="color" />
+                              </Form.Item>
+                              <Button
+                                type="dashed"
+                                onClick={() => remove(name)}
+                                icon={<MinusCircleOutlined />}
+                              >
+                                Remove Annotation
+                              </Button>
+                            </div>
+                          ))}
+                          <Form.Item>
+                            <Button
+                              type="dashed"
+                              onClick={() => add()}
+                              icon={<PlusOutlined />}
+                            >
+                              Add Annotation
+                            </Button>
                           </Form.Item>
-                          <Form.Item
-                            {...restField}
-                            name={[name, 'value']}
-                            label="Value"
-                            rules={[
-                              {
-                                required: true,
-                                message: 'Please enter value',
-                              },
-                            ]}
-                          >
-                            <InputNumber />
-                          </Form.Item>
-                          <Form.Item
-                            {...restField}
-                            name={[name, 'label']}
-                            label="Label"
-                          >
-                            <Input />
-                          </Form.Item>
-                          <Form.Item
-                            {...restField}
-                            name={[name, 'color']}
-                            label="Color"
-                            rules={[
-                              {
-                                required: true,
-                                message: 'Please select color',
-                              },
-                            ]}
-                          >
-                            <Input type="color" />
-                          </Form.Item>
-                          <Button
-                            type="dashed"
-                            onClick={() => remove(name)}
-                            icon={<MinusCircleOutlined />}
-                          >
-                            Remove Annotation
-                          </Button>
-                        </div>
-                      ))}
-                      <Form.Item>
-                        <Button
-                          type="dashed"
-                          onClick={() => add()}
-                          icon={<PlusOutlined />}
-                        >
-                          Add Annotation
-                        </Button>
-                      </Form.Item>
-                    </>
-                  )}
-                </Form.List>
-              </Form.Item>
-            </Panel>
-            <Panel header="Legend" key="3">
-              <Form.Item
-                label="Show Legend"
-                name="showLegend"
-                valuePropName="checked"
-              >
-                <Switch />
-              </Form.Item>
-              <Form.Item label="Legend Position" name="legendPosition">
-                <Select>
-                  <Option value="top">Top</Option>
-                  <Option value="bottom">Bottom</Option>
-                  <Option value="left">Left</Option>
-                  <Option value="right">Right</Option>
-                </Select>
-              </Form.Item>
-            </Panel>
-            <Panel header="Styling" key="4">
-              <Form.Item
-                label="Chart Background Color"
-                name="chartBackgroundColor"
-              >
-                <Input type="color" />
-              </Form.Item>
-              <Form.Item label="Grid Line Color" name="gridLineColor">
-                <Input type="color" />
-              </Form.Item>
-              <Form.Item
-                label="Use Gradient Fills"
-                name="useGradientFills"
-                valuePropName="checked"
-              >
-                <Switch />
-              </Form.Item>
-              <Form.Item
-                label="Gradient Start Color"
-                name="gradientStartColor"
-              >
-                <Input type="color" />
-              </Form.Item>
-              <Form.Item
-                label="Gradient End Color"
-                name="gradientEndColor"
-              >
-                <Input type="color" />
-              </Form.Item>
-            </Panel>
+                        </>
+                      )}
+                    </Form.List>
+                  </Form.Item>
+                </Panel>
+                <Panel header="Legend" key="3">
+                  <Form.Item
+                    label="Show Legend"
+                    name="showLegend"
+                    valuePropName="checked"
+                  >
+                    <Switch />
+                  </Form.Item>
+                  <Form.Item label="Legend Position" name="legendPosition">
+                    <Select>
+                      <Option value="top">Top</Option>
+                      <Option value="bottom">Bottom</Option>
+                      <Option value="left">Left</Option>
+                      <Option value="right">Right</Option>
+                    </Select>
+                  </Form.Item>
+                </Panel>
+                <Panel header="Styling" key="4">
+                  <Form.Item
+                    label="Chart Background Color"
+                    name="chartBackgroundColor"
+                  >
+                    <Input type="color" />
+                  </Form.Item>
+                  <Form.Item label="Grid Line Color" name="gridLineColor">
+                    <Input type="color" />
+                  </Form.Item>
+                  <Form.Item
+                    label="Use Gradient Fills"
+                    name="useGradientFills"
+                    valuePropName="checked"
+                  >
+                    <Switch />
+                  </Form.Item>
+                  <Form.Item
+                    label="Gradient Start Color"
+                    name="gradientStartColor"
+                  >
+                    <Input type="color" />
+                  </Form.Item>
+                  <Form.Item
+                    label="Gradient End Color"
+                    name="gradientEndColor"
+                  >
+                    <Input type="color" />
+                  </Form.Item>
+                </Panel>
+              </>
+            )}
           </Collapse>
 
           {/* Title Alignment */}
