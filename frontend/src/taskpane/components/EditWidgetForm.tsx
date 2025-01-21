@@ -786,7 +786,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                             'Please select chart type for this dataset',
                         },
                       ]}
-                      initialValue="line"
                     >
                       <Select>
                         <Option value="bar">Bar</Option>
