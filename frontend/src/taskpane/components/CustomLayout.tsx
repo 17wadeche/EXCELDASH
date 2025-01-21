@@ -164,15 +164,12 @@ const CustomLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) =>
               <Menu.Item key="save-template" icon={<SaveOutlined />} onClick={saveAsTemplate}>
                 Save as Template
               </Menu.Item>
-              {/* Save Version Menu Item */}
               <Menu.Item key="save-version" icon={<SaveOutlined />} onClick={saveDashboardVersion}>
                 Save Version
               </Menu.Item>
-              {/* Version History Menu Item */}
               <Menu.Item key="version-history" icon={<HistoryOutlined />} onClick={() => setIsVersionHistoryVisible(true)}>
                 Version History
               </Menu.Item>
-              {/* Feedback Menu Item */}
               <Menu.Item key="feedback" icon={<MailOutlined />} onClick={showFeedbackModal}>
                 Feedback
               </Menu.Item>

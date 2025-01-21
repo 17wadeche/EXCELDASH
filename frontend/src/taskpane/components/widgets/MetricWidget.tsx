@@ -173,8 +173,6 @@ const MetricWidget: React.FC<MetricWidgetProps> = ({ id, data }) => {
           {formatTargetValue(data.targetValue)}
         </span>
       </div>
-      
-      {/* Edit Controls */}
       {isEditing && (
         <div style={{ marginTop: '8px', textAlign: 'center' }}>
           <Tooltip title="Save">

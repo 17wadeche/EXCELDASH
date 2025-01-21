@@ -66,6 +66,7 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
   }, [dashboardBorderSettings]);
 
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const dashboardRef = useRef<HTMLDivElement>(null);
   const [isLineSettingsModalVisible, setIsLineSettingsModalVisible] = useState(false);
@@ -315,15 +316,16 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
 
   const handleSave = useCallback(async () => {
     if (!currentDashboardId || !currentDashboard) return;
-    const updatedDashboard: DashboardItem = {
-      ...currentDashboard,
-      workbookId: currentWorkbookId,
-      components: widgets,
-      layouts: layouts,
-      title: dashboardTitle,
-      borderSettings: dashboardBorderSettings,
-    };
+    setIsSaving(true);
     try {
+      const updatedDashboard: DashboardItem = {
+        ...currentDashboard,
+        workbookId: currentWorkbookId,
+        components: widgets,
+        layouts: layouts,
+        title: dashboardTitle,
+        borderSettings: dashboardBorderSettings,
+      };
       const res = await axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard);
       const savedDashboard = res.data;
       setCurrentDashboard(savedDashboard);
@@ -341,6 +343,8 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
     } catch (err) {
       console.error('Error saving dashboard:', err);
       message.error('Failed to save changes to server.');
+    } finally {
+      setIsSaving(false);
     }
   }, [currentDashboardId, currentDashboard, currentWorkbookId, widgets, layouts, dashboardTitle, dashboardBorderSettings, setCurrentDashboard, setDashboards ]);
 
@@ -692,6 +696,7 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
                   onClick={handleSave}
                   className="toolbar-button"
                   aria-label="Save"
+                  loading={isSaving}
                 />
               </Tooltip>
               <Tooltip title="Refresh All Charts" placement="left">
