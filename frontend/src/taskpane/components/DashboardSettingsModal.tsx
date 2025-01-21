@@ -49,6 +49,13 @@ const DashboardSettingsModal: React.FC<DashboardSettingsModalProps> = ({ visible
       backgroundColor: color.hex,
     });
   };
+  const handleWidthChange = (value: number | null) => {
+    const newWidth = value && value > 0 ? value : 730;
+    setDashboardBorderSettings({
+      ...dashboardBorderSettings,
+      width: newWidth,
+    });
+  };
 
   return (
     <Modal
@@ -98,6 +105,15 @@ const DashboardSettingsModal: React.FC<DashboardSettingsModalProps> = ({ visible
         <SketchPicker
           color={dashboardBorderSettings.backgroundColor || '#ffffff'}
           onChange={handleBackgroundColorChange}
+        />
+      </div>
+      <div style={{ marginTop: 16 }}>
+        <span>Dashboard Width (px): </span>
+        <InputNumber
+          min={300}
+          max={3000}
+          value={dashboardBorderSettings.width}
+          onChange={handleWidthChange}
         />
       </div>
     </Modal>
