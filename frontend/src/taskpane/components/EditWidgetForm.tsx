@@ -163,119 +163,125 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
       case 'title':
         updatedData = cleanedValues as TitleWidgetData;
         break;
-      case 'chart':
-        updatedData = {
-          title: cleanedValues.title,
-          type:
-            cleanedValues.chartType === 'area'
-              ? 'line'
-              : cleanedValues.chartType,
-          worksheetName: cleanedValues.worksheetName,
-          associatedRange: cleanedValues.associatedRange,
-          labels: cleanedValues.labels
-            .split(',')
-            .map((label: string) => label.trim()),
-          datasets: cleanedValues.datasets.map((dataset: any) => ({
-            label: dataset.label,
-            data:
-              typeof dataset.data === 'string'
-                ? dataset.data
-                    .split(',')
-                    .map((num: string) => Number(num.trim()))
-                : Array.isArray(dataset.data)
-                ? dataset.data.map((num: any) => Number(num))
-                : [Number(dataset.data)],
-            type: dataset.type || undefined, // Include dataset type for mixed charts
-            fill:
-              cleanedValues.chartType === 'area' ||
-              dataset.type === 'area'
-                ? true
-                : false, // Handle area charts
-            backgroundColor: dataset.backgroundColor || '#4caf50',
-            borderColor: dataset.borderColor || '#4caf50',
-            borderWidth: dataset.borderWidth || 1,
-          })),
-          titleAlignment: cleanedValues.titleAlignment || 'left',
-          scales: {
-            x: {
-              type: cleanedValues.xAxisType || 'category',
-              title: {
-                display: !!cleanedValues.xAxisTitle,
-                text: cleanedValues.xAxisTitle || '',
+        case 'chart': {
+          updatedData = {
+            title: cleanedValues.title,
+            type: cleanedValues.chartType === 'area' ? 'line' : cleanedValues.chartType,
+            worksheetName: cleanedValues.worksheetName,
+            associatedRange: cleanedValues.associatedRange,
+            labels: cleanedValues.labels.split(',').map((label: string) => label.trim()),
+            datasets: cleanedValues.datasets.map((dataset: any) => {
+              if (dataset.type === 'scatter' || dataset.type === 'bubble') {
+                return {
+                  label: dataset.label,
+                  data: dataset.data, // Keep as-is
+                  type: dataset.type || undefined,
+                  fill: false, // Generally false for scatter/bubble
+                  backgroundColor: dataset.backgroundColor || '#4caf50',
+                  borderColor: dataset.borderColor || '#4caf50',
+                  borderWidth: dataset.borderWidth || 1,
+                };
+              } else {
+                const parsedData =
+                  typeof dataset.data === 'string'
+                    ? dataset.data
+                        .split(',')
+                        .map((num: string) => Number(num.trim()))
+                    : Array.isArray(dataset.data)
+                    ? dataset.data.map((num: any) => Number(num))
+                    : [Number(dataset.data)];
+        
+                const shouldFill =
+                  cleanedValues.chartType === 'area' || dataset.type === 'area';
+        
+                return {
+                  label: dataset.label,
+                  data: parsedData,
+                  type: dataset.type || undefined,
+                  fill: shouldFill,
+                  backgroundColor: dataset.backgroundColor || '#4caf50',
+                  borderColor: dataset.borderColor || '#4caf50',
+                  borderWidth: dataset.borderWidth || 1,
+                };
+              }
+            }),
+            titleAlignment: cleanedValues.titleAlignment || 'left',
+            scales: {
+              x: {
+                type: cleanedValues.xAxisType || 'category',
+                title: {
+                  display: !!cleanedValues.xAxisTitle,
+                  text: cleanedValues.xAxisTitle || '',
+                },
+              },
+              y: {
+                type: cleanedValues.yAxisType || 'linear',
+                title: {
+                  display: !!cleanedValues.yAxisTitle,
+                  text: cleanedValues.yAxisTitle || '',
+                },
               },
             },
-            y: {
-              type: cleanedValues.yAxisType || 'linear',
-              title: {
-                display: !!cleanedValues.yAxisTitle,
-                text: cleanedValues.yAxisTitle || '',
+            plugins: {
+              legend: {
+                display: cleanedValues.showLegend !== false,
+                position: cleanedValues.legendPosition || 'top',
               },
-            },
-          },
-          plugins: {
-            legend: {
-              display: cleanedValues.showLegend !== false,
-              position: cleanedValues.legendPosition || 'top',
-            },
-            annotation: {
-              annotations: cleanedValues.annotations || [],
-            },
-            datalabels: {
-              display: cleanedValues.showDataLabels !== false,
-              color: cleanedValues.dataLabelColor || '#000',
-              font: {
-                size: cleanedValues.dataLabelFontSize || 12,
+              annotation: {
+                annotations: cleanedValues.annotations || [],
               },
-            },
-            zoom: {
-              pan: {
-                enabled: cleanedValues.enablePan || false,
-                mode: 'xy',
+              datalabels: {
+                display: cleanedValues.showDataLabels !== false,
+                color: cleanedValues.dataLabelColor || '#000',
+                font: {
+                  size: cleanedValues.dataLabelFontSize || 12,
+                },
               },
               zoom: {
-                wheel: {
-                  enabled: cleanedValues.enableZoom || false,
+                pan: {
+                  enabled: cleanedValues.enablePan || false,
+                  mode: 'xy',
                 },
-                pinch: {
-                  enabled: cleanedValues.enableZoom || false,
-                },
-                mode: cleanedValues.zoomMode || 'xy',
-              },
-            },
-            tooltip: {
-              enabled: cleanedValues.enableTooltips !== false,
-              callbacks: {
-                label: function (context: any) {
-                  const label = context.dataset.label || '';
-                  const value = context.formattedValue;
-                  return cleanedValues.tooltipTemplate
-                    ? cleanedValues.tooltipTemplate
-                        .replace('{label}', label)
-                        .replace('{value}', value)
-                    : `${label}: ${value}`;
+                zoom: {
+                  wheel: {
+                    enabled: cleanedValues.enableZoom || false,
+                  },
+                  pinch: {
+                    enabled: cleanedValues.enableZoom || false,
+                  },
+                  mode: cleanedValues.zoomMode || 'xy',
                 },
               },
+              tooltip: {
+                enabled: cleanedValues.enableTooltips !== false,
+                callbacks: {
+                  label: function (context: any) {
+                    const label = context.dataset.label || '';
+                    const value = context.formattedValue;
+                    return cleanedValues.tooltipTemplate
+                      ? cleanedValues.tooltipTemplate
+                          .replace('{label}', label)
+                          .replace('{value}', value)
+                      : `${label}: ${value}`;
+                  },
+                },
+              },
             },
-          },
-          backgroundColor: cleanedValues.chartBackgroundColor || '#ffffff',
-          gridLineColor:
-            cleanedValues.gridLineColor || 'rgba(0, 0, 0, 0.1)',
-          locale: cleanedValues.locale || 'en-US',
-          dynamicUpdate: {
-            enabled: cleanedValues.enableDynamicUpdates || false,
-            interval: cleanedValues.updateInterval || 5,
-          },
-          gradientFills: {
-            enabled: cleanedValues.useGradientFills || false,
-            startColor:
-              cleanedValues.gradientStartColor ||
-              'rgba(75,192,192,0)',
-            endColor:
-              cleanedValues.gradientEndColor ||
-              'rgba(75,192,192,0.4)',
-          },
-        } as ChartData;
-        break;
+            backgroundColor: cleanedValues.chartBackgroundColor || '#ffffff',
+            gridLineColor: cleanedValues.gridLineColor || 'rgba(0, 0, 0, 0.1)',
+            locale: cleanedValues.locale || 'en-US',
+            dynamicUpdate: {
+              enabled: cleanedValues.enableDynamicUpdates || false,
+              interval: cleanedValues.updateInterval || 5,
+            },
+            gradientFills: {
+              enabled: cleanedValues.useGradientFills || false,
+              startColor: cleanedValues.gradientStartColor || 'rgba(75,192,192,0)',
+              endColor: cleanedValues.gradientEndColor || 'rgba(75,192,192,0.4)',
+            },
+          } as ChartData;
+          break;
+        }
         case 'gantt': {
           const existingData = widget.data as GanttWidgetData;
           const existingTasks = existingData.tasks || [];
@@ -532,117 +538,89 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                         mainChartType === 'radar' ||
                         mainChartType === 'polarArea'
                       ) {
-                        // --- STANDARD PARSING ---
-                        // data[0] is the header row, ignoring the first cell
-                        // => The rest become your labels
                         const labels = data[0].slice(1);
-              
-                        // each subsequent row => one dataset
-                        // row[0] is the dataset label
-                        // row.slice(1) are the numeric points
                         const datasets = data.slice(1).map((row) => ({
                           label: row[0],
-                          data: row.slice(1).join(', '), // store them as comma string
+                          data: row.slice(1).join(', '),
                           type: mainChartType,
                           backgroundColor: getRandomColor(),
                           borderColor: getRandomColor(),
                           borderWidth: 1,
                         }));
-              
-                        // Set the form fields
                         form.setFieldsValue({
                           labels: labels.join(', '),
                           datasets,
                         });
                       } else if (mainChartType === 'scatter') {
                         // --- SCATTER PARSING ---
-                        // Expect row1: [ "", "Point1", "Point2", ... ]
-                        //        row2: [ "X", x1, x2, x3, ... ]
-                        //        row3: [ "Y", y1, y2, y3, ... ]
-                        // We parse column by column (excluding col 0).
                         if (data.length < 3) {
-                          message.error('Scatter data requires at least 3 rows: (empty row), X row, Y row.');
+                          message.error('Scatter data requires at least 3 rows: header row, X row, and Y row.');
                           return;
                         }
-                        const columns = data[0].length - 1; // minus the first cell
-                        const xRow = data[1].slice(1); // all but the first cell
-                        const yRow = data[2].slice(1); // all but the first cell
-              
-                        if (xRow.length !== yRow.length) {
-                          message.error('X row and Y row must have the same length.');
+                        const headerRow = data[0];
+                        const xRow = data[1];
+                        const yRow = data[2];
+                        const xVals = xRow.slice(1).map((val: any) => Number(val));
+                        const yVals = yRow.slice(1).map((val: any) => Number(val));
+                        if (xVals.length !== yVals.length) {
+                          message.error('X row and Y row must have the same number of points.');
                           return;
                         }
-              
-                        // Build an array of (x, y) objects
-                        const dataPoints = xRow.map((xVal: number, idx: number) => ({
-                          x: Number(xVal),
-                          y: Number(yRow[idx]),
+                        const dataPoints = xVals.map((xVal: number, idx: number) => ({
+                          x: xVal,
+                          y: yVals[idx],
                         }));
-              
-                        // For scatter, usually it's 1 dataset:
-                        const datasets = [
-                          {
-                            label: data[1][0] === 'X' ? 'Scatter' : String(data[1][0]),
-                            // We'll store "Point1,Point2..." in 'data' as a JSONish string or something
-                            data: dataPoints, // If you want to store as string, you'd convert to JSON or a short CSV
-                            type: 'scatter',
-                            backgroundColor: getRandomColor(),
-                            borderColor: getRandomColor(),
-                            borderWidth: 1,
-                          },
-                        ];
-              
-                        // “Labels” might not matter for scatter. But we can store the “Point1,Point2” if you want:
-                        const labels = data[0].slice(1).join(', ');
+                        const scatterDataset = {
+                          label: 'Scatter Series',
+                          data: dataPoints, // store as array of objects directly
+                          type: 'scatter',
+                          backgroundColor: getRandomColor(),
+                          borderColor: getRandomColor(),
+                          borderWidth: 1,
+                        };
+                        const labels = headerRow.slice(1).join(', ');
                         form.setFieldsValue({
-                          labels, // purely optional for scatter
-                          datasets,
+                          labels,
+                          datasets: [scatterDataset],
                         });
                       } else if (mainChartType === 'bubble') {
                         // --- BUBBLE PARSING ---
-                        // Expect row1: [ "", "Point1", "Point2", ... ]
-                        //        row2: [ "X", x1, x2, x3, ... ]
-                        //        row3: [ "Y", y1, y2, y3, ... ]
-                        //        row4: [ "R", r1, r2, r3, ... ]
                         if (data.length < 4) {
-                          message.error('Bubble data requires at least 4 rows: (empty row), X row, Y row, R row.');
+                          message.error('Bubble data requires at least 4 rows: header row, X row, Y row, R row.');
                           return;
                         }
-                        const xRow = data[1].slice(1); // ignoring first cell
-                        const yRow = data[2].slice(1); 
-                        const rRow = data[3].slice(1);
-              
-                        if (xRow.length !== yRow.length || yRow.length !== rRow.length) {
-                          message.error('X, Y, and R rows must have the same length.');
+                        const headerRow = data[0]; // e.g. [ "", "Point1", "Point2", ... ]
+                        const xRow = data[1];
+                        const yRow = data[2];
+                        const rRow = data[3];
+                        const xVals = xRow.slice(1).map((val: any) => Number(val));
+                        const yVals = yRow.slice(1).map((val: any) => Number(val));
+                        const rVals = rRow.slice(1).map((val: any) => Number(val));
+                        if (xVals.length !== yVals.length || yVals.length !== rVals.length) {
+                          message.error(
+                            'X, Y, and R rows must each have the same number of points.'
+                          );
                           return;
                         }
-              
-                        // Build an array of (x, y, r) objects
-                        const dataPoints = xRow.map((xVal: number, idx: number) => ({
-                          x: Number(xVal),
-                          y: Number(yRow[idx]),
-                          r: Number(rRow[idx]),
-                        }));
-              
-                        const datasets = [
-                          {
-                            label: 'Bubble Series',
-                            data: dataPoints, 
-                            type: 'bubble',
-                            backgroundColor: getRandomColor(),
-                            borderColor: getRandomColor(),
-                            borderWidth: 1,
-                          },
-                        ];
-              
-                        // Typically bubble doesn't need “labels,” but you can store the top row anyway:
-                        const labels = data[0].slice(1).join(', ');
+                        const dataPoints = xVals.map((xVal: number, idx: number) => ({
+                          x: xVal,
+                          y: yVals[idx],
+                          r: rVals[idx],
+                        }));            
+                        const bubbleDataset = {
+                          label: 'Bubble Series',
+                          data: dataPoints,
+                          type: 'bubble',
+                          backgroundColor: getRandomColor(),
+                          borderColor: getRandomColor(),
+                          borderWidth: 1,
+                        };
+                        const labels = headerRow.slice(1).join(', ');
                         form.setFieldsValue({
                           labels,
-                          datasets,
+                          datasets: [bubbleDataset],
                         });
-                      }
-              
+                      }              
                       message.success('Data loaded successfully from Excel.');
                     });
                   } catch (error) {
