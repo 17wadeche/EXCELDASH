@@ -443,7 +443,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                   type: value,
                 }));
                 form.setFieldsValue({ datasets: updatedDatasets });
-              }
+              }}
             >
               <Option value="bar">Bar</Option>
               <Option value="line">Line</Option>
