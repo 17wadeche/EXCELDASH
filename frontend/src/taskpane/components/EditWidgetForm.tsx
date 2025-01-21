@@ -434,7 +434,17 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
               { required: true, message: 'Please select chart type' },
             ]}
           >
-            <Select onChange={(value) => setChartType(value)}>
+            <Select 
+              onChange={(value)=> {
+                setChartType(value);
+                const currentDatasets = form.getFieldValue('datasets') || [];
+                const updatedDatasets = currentDatasets.map((ds: any) => ({
+                  ...ds,
+                  type: value,
+                }));
+                form.setFieldsValue({ datasets: updatedDatasets });
+              }
+            >
               <Option value="bar">Bar</Option>
               <Option value="line">Line</Option>
               <Option value="pie">Pie</Option>
@@ -513,10 +523,11 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                       const data = dataRange.values;
                       console.log('Data from Excel:', data);
                       const labels = data[0].slice(1);
+                      const mainChartType = form.getFieldValue('chartType') || 'bar';
                       const datasets = data.slice(1).map((row) => ({
                         label: row[0],
                         data: row.slice(1).join(', '),
-                        type: 'bar',
+                        type: mainChartType,
                         backgroundColor: getRandomColor(),
                         borderColor: getRandomColor(),
                         borderWidth: 1,
@@ -577,7 +588,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                       initialValue="line"
                     >
                       <Select>
-                        <Option value="line">Bar</Option>
+                        <Option value="bar">Bar</Option>
                         <Option value="line">Line</Option>
                         <Option value="pie">Pie</Option>
                         <Option value="doughnut">Doughnut</Option>

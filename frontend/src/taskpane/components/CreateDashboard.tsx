@@ -297,19 +297,14 @@ const CreateDashboard: React.FC = () => {
       message.error('Failed to unsubscribe.');
     }
   };
-  
+
   useEffect(() => {
     if (isLoggedIn) {
-      // Wrap in Office.js Excel.run context
       Excel.run(async (context) => {
         const sheets = context.workbook.worksheets;
-
-        // Check if "Example Chart Data" already exists
         let exampleSheet = sheets.getItemOrNullObject("Example Chart Data");
         exampleSheet.load("name");
         await context.sync();
-
-        // If not found, add and populate
         if (exampleSheet.isNullObject) {
           exampleSheet = sheets.add("Example Chart Data");
 
