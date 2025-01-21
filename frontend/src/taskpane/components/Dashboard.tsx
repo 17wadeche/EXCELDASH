@@ -750,6 +750,7 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
           backgroundColor: dashboardBorderSettings.backgroundColor || 'white',
           height: 'auto',
           overflow: 'auto',
+          margin: '0 auto',
           paddingBottom: '3px',
         }}
       >
