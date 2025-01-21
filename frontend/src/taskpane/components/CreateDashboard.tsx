@@ -144,6 +144,7 @@ const CreateDashboard: React.FC = () => {
       return;
     }
     try {
+      setIsLoading(true);
       await registerUser(email, password);
       message.success('Registration successful. Please log in.');
       setIsRegistered(true);
@@ -151,6 +152,8 @@ const CreateDashboard: React.FC = () => {
     } catch (error) {
       console.error('Error during registration:', error);
       message.error('Failed to register.');
+    } finally {
+      setLoading(false);
     }
   };
   const handleLogin = async () => {
@@ -281,7 +284,7 @@ const CreateDashboard: React.FC = () => {
     setIsRegistered(false);
     setEmail('');
     message.success('Logged out successfully!');
-    navigate('/'); // Redirect to the initial screen or another route
+    navigate('/');
   };
 
   const handleUnsubscribe = async () => {
@@ -340,7 +343,7 @@ const CreateDashboard: React.FC = () => {
                   onChange={(e) => setPassword(e.target.value)}
                 />
               </Form.Item>
-              <Button type="primary" onClick={handleRegister}>
+              <Button type="primary" onClick={handleRegister} loading={isLoading}>
                 Register
               </Button>
             </Form>
@@ -355,7 +358,7 @@ const CreateDashboard: React.FC = () => {
       <Layout style={{ padding: '24px', minHeight: '100vh' }}>
         <Content>
           <div style={{ textAlign: 'center', marginTop: '50px' }}>
-            <Button type="primary" onClick={handleSubscribe}>
+            <Button type="primary" onClick={handleSubscribe} loading={isLoading}>
               Subscribe Now
             </Button>
             <Modal
@@ -418,7 +421,7 @@ const CreateDashboard: React.FC = () => {
                   onChange={(e) => setPassword(e.target.value)}
                 />
               </Form.Item>
-              <Button type="primary" onClick={handleLogin}>
+              <Button type="primary" onClick={handleLogin} loading={isLoading}>
                 Login
               </Button>
             </Form>
