@@ -170,112 +170,80 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
       }
 
       case 'chart': {
-        // If the user typed in a set of slice colors for Pie/Doughnut/PolarArea
-        // we parse them here:
-        let segmentColorsArray: string[] = [];
-        if (
-          ['pie', 'doughnut', 'polarArea'].includes(
-            cleanedValues.chartType || ''
-          ) &&
-          cleanedValues.segmentColors
-        ) {
-          segmentColorsArray = cleanedValues.segmentColors
-            .split(',')
-            .map((c: string) => c.trim())
-            .filter(Boolean);
+        const finalChartType =
+          cleanedValues.chartType === 'area' ? 'line' : cleanedValues.chartType;
+        const noAxisTypes = ['pie', 'doughnut', 'polarArea', 'radar'];
+        let sliceColorsArray: string[] = [];
+        if (['pie', 'doughnut', 'polarArea'].includes(finalChartType)) {
+          const sc: { color: string }[] = cleanedValues.sliceColors || [];
+          sliceColorsArray = sc.map((obj) => obj.color);
         }
-
-        // If the user typed in label-specific text colors (for data labels):
-        let labelTextColorsArray: string[] = [];
-        if (
-          ['pie', 'doughnut', 'polarArea'].includes(
-            cleanedValues.chartType || ''
-          ) &&
-          cleanedValues.labelTextColors
-        ) {
-          labelTextColorsArray = cleanedValues.labelTextColors
-            .split(',')
-            .map((c: string) => c.trim())
-            .filter(Boolean);
-        }
-
-        // Build updated chart data:
         updatedData = {
           title: cleanedValues.title,
-          type:
-            cleanedValues.chartType === 'area'
-              ? 'line'
-              : cleanedValues.chartType,
+          type: finalChartType,
           worksheetName: cleanedValues.worksheetName,
           associatedRange: cleanedValues.associatedRange,
           labels: cleanedValues.labels
-            ? cleanedValues.labels.split(',').map((label: string) => label.trim())
+            ? cleanedValues.labels.split(',').map((l: string) => l.trim())
             : [],
-          datasets: (cleanedValues.datasets || []).map((dataset: any) => {
-            // Scatter / Bubble: store data as array of points or (x,y,r) objects
-            if (dataset.type === 'scatter' || dataset.type === 'bubble') {
+          datasets: (cleanedValues.datasets || []).map((ds: any) => {
+            if (ds.type === 'scatter' || ds.type === 'bubble') {
               return {
-                label: dataset.label,
-                data: dataset.data, // user has array-of-objects if loaded from Excel, or a string
-                type: dataset.type || undefined,
+                label: ds.label,
+                data: ds.data,
+                type: ds.type,
                 fill: false,
-                backgroundColor: dataset.backgroundColor || '#4caf50',
-                borderColor: dataset.borderColor || '#4caf50',
-                borderWidth: dataset.borderWidth || 1,
+                backgroundColor: ds.backgroundColor || '#4caf50',
+                borderColor: ds.borderColor || '#4caf50',
+                borderWidth: ds.borderWidth || 1,
               };
             } else {
-              // Bar / Line / Pie / Doughnut / etc.
-              const parsedData =
-                typeof dataset.data === 'string'
-                  ? dataset.data
-                      .split(',')
-                      .map((num: string) => Number(num.trim()))
-                  : Array.isArray(dataset.data)
-                  ? dataset.data.map((num: any) => Number(num))
-                  : [Number(dataset.data)];
-
-              const shouldFill =
-                cleanedValues.chartType === 'area' || dataset.type === 'area';
-
-              // If chart is pie/doughnut/polarArea, we can apply an array of colors if provided
-              let finalBackgroundColor = dataset.backgroundColor || '#4caf50';
-              if (
-                ['pie', 'doughnut', 'polarArea'].includes(
-                  cleanedValues.chartType
-                ) &&
-                segmentColorsArray.length > 0
-              ) {
-                finalBackgroundColor = segmentColorsArray;
+              let parsedValues: number[] = [];
+              if (typeof ds.data === 'string') {
+                parsedValues = ds.data
+                  .split(',')
+                  .map((num: string) => Number(num.trim()));
+              } else if (Array.isArray(ds.data)) {
+                parsedValues = ds.data.map((n: any) => Number(n));
+              } else {
+                parsedValues = [Number(ds.data)];
+              }
+              const shouldFill = cleanedValues.chartType === 'area' || ds.type === 'area';
+              let finalBg = ds.backgroundColor || '#4caf50';
+              if (['pie', 'doughnut', 'polarArea'].includes(finalChartType) && sliceColorsArray.length) {
+                finalBg = sliceColorsArray;
               }
 
               return {
-                label: dataset.label,
-                data: parsedData,
-                type: dataset.type || undefined,
+                label: ds.label,
+                data: parsedValues,
+                type: ds.type,
                 fill: shouldFill,
-                backgroundColor: finalBackgroundColor,
-                borderColor: dataset.borderColor || '#4caf50',
-                borderWidth: dataset.borderWidth || 1,
+                backgroundColor: finalBg,
+                borderColor: ds.borderColor || '#4caf50',
+                borderWidth: ds.borderWidth || 1,
               };
             }
           }),
           titleAlignment: cleanedValues.titleAlignment || 'left',
-          scales: {
-            x: {
-              type: cleanedValues.xAxisType || 'category',
-              title: {
-                display: !!cleanedValues.xAxisTitle,
-                text: cleanedValues.xAxisTitle || '',
+          scales: noAxisTypes.includes(finalChartType)
+            ? {}
+            : {
+                x: {
+                  type: cleanedValues.xAxisType || 'category',
+                  title: {
+                    display: !!cleanedValues.xAxisTitle,
+                    text: cleanedValues.xAxisTitle || '',
+                  },
+                },
+                y: {
+                  type: cleanedValues.yAxisType || 'linear',
+                  title: {
+                    display: !!cleanedValues.yAxisTitle,
+                    text: cleanedValues.yAxisTitle || '',
+                  },
+                },
               },
-            },
-            y: {
-              type: cleanedValues.yAxisType || 'linear',
-              title: {
-                display: !!cleanedValues.yAxisTitle,
-                text: cleanedValues.yAxisTitle || '',
-              },
-            },
-          },
           plugins: {
             legend: {
               display: cleanedValues.showLegend !== false,
@@ -286,13 +254,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
             },
             datalabels: {
               display: cleanedValues.showDataLabels !== false,
-              // If label text colors array is provided, use a function-based approach
-              // to pick the color for each slice. Otherwise, just a single color:
-              color:
-                labelTextColorsArray.length > 0
-                  ? (ctx: any) =>
-                      labelTextColorsArray[ctx.dataIndex] || '#000'
-                  : cleanedValues.dataLabelColor || '#000',
+              color: cleanedValues.dataLabelColor || '#000',
               font: {
                 size: cleanedValues.dataLabelFontSize || 12,
               },
@@ -336,10 +298,8 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           },
           gradientFills: {
             enabled: cleanedValues.useGradientFills || false,
-            startColor:
-              cleanedValues.gradientStartColor || 'rgba(75,192,192,0)',
-            endColor:
-              cleanedValues.gradientEndColor || 'rgba(75,192,192,0.4)',
+            startColor: cleanedValues.gradientStartColor || 'rgba(75,192,192,0)',
+            endColor: cleanedValues.gradientEndColor || 'rgba(75,192,192,0.4)',
           },
         } as ChartData;
 
@@ -509,16 +469,16 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           >
             <Input />
           </Form.Item>
+
           <Form.Item
             name="chartType"
             label="Chart Type"
-            rules={[
-              { required: true, message: 'Please select chart type' },
-            ]}
+            rules={[{ required: true, message: 'Please select chart type' }]}
           >
-            <Select 
-              onChange={(value)=> {
+            <Select
+              onChange={(value: string) => {
                 setChartType(value);
+                // Update each dataset's type to match the overall chart type:
                 const currentDatasets = form.getFieldValue('datasets') || [];
                 const updatedDatasets = currentDatasets.map((ds: any) => ({
                   ...ds,
@@ -537,49 +497,49 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
               <Option value="scatter">Scatter</Option>
             </Select>
           </Form.Item>
+
           <Form.Item
             name="labels"
             label="Labels (comma-separated)"
-            rules={[
-              { required: true, message: 'Please enter labels' },
-            ]}
+            rules={[{ required: true, message: 'Please enter labels' }]}
           >
             <Input />
           </Form.Item>
-          {/* If Pie/Doughnut/PolarArea, let user define slice (segment) colors */}
+
+          {/** If Pie/Doughnut/Polar, show slice color pickers **/}
           {['pie', 'doughnut', 'polarArea'].includes(chartType) && (
-            <>
-              <Form.Item
-                name="segmentColors"
-                label="Slice Colors (comma-separated)"
-              >
-                <Input placeholder="#FF6384, #36A2EB, #FFCE56" />
-              </Form.Item>
-              <Form.Item
-                name="labelTextColors"
-                label="Slice Label Text Colors (comma-separated)"
-              >
-                <Input placeholder="#000, #111, #222" />
-              </Form.Item>
-            </>
+            <Form.List name="sliceColors">
+              {(fields) => (
+                <>
+                  {fields.map(({ key, name, ...restField }) => (
+                    <Form.Item
+                      {...restField}
+                      key={key}
+                      label={`Color for Slice #${key + 1}`}
+                      name={[name, 'color']}
+                    >
+                      <Input type="color" />
+                    </Form.Item>
+                  ))}
+                </>
+              )}
+            </Form.List>
           )}
-          {/* Worksheet Selection */}
+
+          {/** Worksheet / Data Range **/}
           <Form.Item
             name="worksheetName"
             label="Worksheet"
-            rules={[
-              { required: true, message: 'Please select a worksheet' },
-            ]}
+            rules={[{ required: true, message: 'Please select a worksheet' }]}
           >
             <Select placeholder="Select worksheet">
-              {availableWorksheets.map(sheet => (
+              {availableWorksheets.map((sheet) => (
                 <Option key={sheet} value={sheet}>
                   {sheet}
                 </Option>
               ))}
             </Select>
           </Form.Item>
-          {/* Data Range Input */}
           <Form.Item
             name="associatedRange"
             label="Data Range"
@@ -593,7 +553,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           >
             <Input placeholder="e.g., A1:B10" />
           </Form.Item>
-          {/* Select Data Range from Excel Button */}
+
           {!isPresenterMode && (
             <Form.Item>
               <Button
@@ -601,27 +561,35 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                 icon={<SelectOutlined />}
                 onClick={async () => {
                   if (isPresenterMode) {
-                    message.warning('Loading data from Excel is not available in full-screen mode.');
+                    message.warning(
+                      'Loading data from Excel is not available in full-screen mode.'
+                    );
                     return;
-                    }
+                  }
                   try {
                     await Excel.run(async (context) => {
                       const range = context.workbook.getSelectedRange();
                       range.load(['address', 'worksheet']);
                       await context.sync();
+
                       const worksheetName = range.worksheet.name;
                       const associatedRange = range.address.replace(/^.*!/, '');
                       form.setFieldsValue({
                         worksheetName,
                         associatedRange,
                       });
-                      const worksheet = context.workbook.worksheets.getItem(worksheetName);
+
+                      const worksheet = context.workbook.worksheets.getItem(
+                        worksheetName
+                      );
                       const dataRange = worksheet.getRange(associatedRange);
                       dataRange.load('values');
                       await context.sync();
+
                       const data = dataRange.values;
-                      console.log('Data from Excel:', data);
-                      const mainChartType = form.getFieldValue('chartType') || 'bar';
+                      const mainType = form.getFieldValue('chartType');
+                      console.log('Loaded data:', data);
+
                       if (
                         [
                           'bar',
@@ -630,19 +598,19 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                           'doughnut',
                           'radar',
                           'polarArea',
-                        ].includes(mainChartType)
+                        ].includes(mainType)
                       ) {
                         if (data.length < 2) {
                           message.error(
-                            'Data range must contain at least a header row and one row of data.'
+                            'Your selected range must have at least 2 rows (header + data).'
                           );
                           return;
                         }
                         const labels = data[0].slice(1);
-                        const datasets = data.slice(1).map((row) => ({
+                        const datasets = data.slice(1).map((row: any[]) => ({
                           label: row[0],
                           data: row.slice(1).join(', '),
-                          type: mainChartType,
+                          type: mainType,
                           backgroundColor: getRandomColor(),
                           borderColor: getRandomColor(),
                           borderWidth: 1,
@@ -651,8 +619,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                           labels: labels.join(', '),
                           datasets,
                         });
-                      } else if (mainChartType === 'scatter') {
-                        // SCATTER
+                      } else if (mainType === 'scatter') {
                         if (data.length < 3) {
                           message.error(
                             'Scatter data requires at least 3 rows: header row, X row, and Y row.'
@@ -661,51 +628,44 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                         }
                         const xRow = data[1];
                         const yRow = data[2];
-                        const xVals = xRow.slice(1).map((val: any) => Number(val));
-                        const yVals = yRow.slice(1).map((val: any) => Number(val));
-
+                        const xVals = xRow.slice(1).map((v: any) => Number(v));
+                        const yVals = yRow.slice(1).map((v: any) => Number(v));
                         if (xVals.length !== yVals.length) {
                           message.error(
                             'X row and Y row must have the same number of points.'
                           );
                           return;
                         }
-
-                        // Build array of { x, y }
-                        const dataPoints = xVals.map((xVal: number, idx: number) => ({
-                          x: xVal,
+                        const points = xVals.map((x: number, idx: number) => ({
+                          x,
                           y: yVals[idx],
                         }));
-
-                        const scatterDataset = {
-                          label: 'Scatter Series',
-                          data: dataPoints,
-                          type: 'scatter',
-                          backgroundColor: getRandomColor(),
-                          borderColor: getRandomColor(),
-                          borderWidth: 1,
-                        };
-
                         form.setFieldsValue({
                           labels: '',
-                          datasets: [scatterDataset],
+                          datasets: [
+                            {
+                              label: 'Scatter Series',
+                              data: points,
+                              type: 'scatter',
+                              backgroundColor: getRandomColor(),
+                              borderColor: getRandomColor(),
+                              borderWidth: 1,
+                            },
+                          ],
                         });
-                      } else if (mainChartType === 'bubble') {
-                        // BUBBLE
+                      } else if (mainType === 'bubble') {
                         if (data.length < 4) {
                           message.error(
-                            'Bubble data requires at least 4 rows: header row, X row, Y row, and R row.'
+                            'Bubble data requires at least 4 rows: header row, X row, Y row, R row.'
                           );
                           return;
                         }
                         const xRow = data[1];
                         const yRow = data[2];
                         const rRow = data[3];
-
-                        const xVals = xRow.slice(1).map((val: any) => Number(val));
-                        const yVals = yRow.slice(1).map((val: any) => Number(val));
-                        const rVals = rRow.slice(1).map((val: any) => Number(val));
-
+                        const xVals = xRow.slice(1).map((v: any) => Number(v));
+                        const yVals = yRow.slice(1).map((v: any) => Number(v));
+                        const rVals = rRow.slice(1).map((v: any) => Number(v));
                         if (
                           xVals.length !== yVals.length ||
                           yVals.length !== rVals.length
@@ -715,31 +675,29 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                           );
                           return;
                         }
-
-                        const dataPoints = xVals.map((xVal: number, idx: number) => ({
-                          x: xVal,
+                        const points = xVals.map((x: number, idx: number) => ({
+                          x,
                           y: yVals[idx],
                           r: rVals[idx],
                         }));
-
-                        const bubbleDataset = {
-                          label: 'Bubble Series',
-                          data: dataPoints,
-                          type: 'bubble',
-                          backgroundColor: getRandomColor(),
-                          borderColor: getRandomColor(),
-                          borderWidth: 1,
-                        };
-
                         form.setFieldsValue({
                           labels: '',
-                          datasets: [bubbleDataset],
+                          datasets: [
+                            {
+                              label: 'Bubble Series',
+                              data: points,
+                              type: 'bubble',
+                              backgroundColor: getRandomColor(),
+                              borderColor: getRandomColor(),
+                              borderWidth: 1,
+                            },
+                          ],
                         });
                       }
                       message.success('Data loaded successfully from Excel.');
                     });
-                  } catch (error) {
-                    console.error('Error loading data from Excel:', error);
+                  } catch (err) {
+                    console.error('Error loading Excel data:', err);
                     message.error('Failed to load data from Excel.');
                   }
                 }}
@@ -748,7 +706,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
               </Button>
             </Form.Item>
           )}
-          {/* Datasets Configuration */}
+
           <Form.List name="datasets">
             {(fields, { add, remove }) => (
               <>
@@ -774,16 +732,16 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                     >
                       <Input />
                     </Form.Item>
+
                     <Form.Item
                       {...restField}
                       name={[name, 'type']}
                       label="Dataset Chart Type"
-                      initialValue="bar"
+                      initialValue="line"
                       rules={[
                         {
                           required: true,
-                          message:
-                            'Please select chart type for this dataset',
+                          message: 'Please select chart type for this dataset',
                         },
                       ]}
                     >
@@ -798,6 +756,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                         <Option value="scatter">Scatter</Option>
                       </Select>
                     </Form.Item>
+
                     <Form.Item
                       {...restField}
                       name={[name, 'data']}
@@ -808,12 +767,12 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                           message: 'Please enter data points',
                         },
                         {
-                          validator: (_, value) => {
-                            if (!value) return Promise.resolve();
-                            const isValid = value
+                          validator: (_, val) => {
+                            if (!val) return Promise.resolve();
+                            const isNumArray = val
                               .split(',')
-                              .every((v: string) => !isNaN(parseFloat(v.trim())));
-                            return isValid
+                              .every((v: string) => !isNaN(Number(v.trim())));
+                            return isNumArray
                               ? Promise.resolve()
                               : Promise.reject(
                                   'Data points must be comma-separated numbers'
@@ -824,6 +783,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                     >
                       <Input />
                     </Form.Item>
+
                     <Form.Item
                       {...restField}
                       name={[name, 'backgroundColor']}
@@ -831,12 +791,13 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                       rules={[
                         {
                           required: true,
-                          message: 'Please select background color',
+                          message: 'Please pick a background color',
                         },
                       ]}
                     >
                       <Input type="color" />
                     </Form.Item>
+
                     <Form.Item
                       {...restField}
                       name={[name, 'borderColor']}
@@ -844,12 +805,13 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                       rules={[
                         {
                           required: true,
-                          message: 'Please select border color',
+                          message: 'Please pick a border color',
                         },
                       ]}
                     >
                       <Input type="color" />
                     </Form.Item>
+
                     <Form.Item
                       {...restField}
                       name={[name, 'borderWidth']}
@@ -867,6 +829,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                       type="dashed"
                       onClick={() => remove(name)}
                       icon={<MinusCircleOutlined />}
+                      style={{ marginTop: 8 }}
                     >
                       Remove Dataset
                     </Button>
