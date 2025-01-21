@@ -225,6 +225,7 @@ export interface DashboardBorderSettings {
   color: string;
   thickness: number;
   style: 'solid' | 'dashed' | 'dotted';
+  backgroundColor?: string;
 }
 export interface ImageWidgetData {
   src: string;

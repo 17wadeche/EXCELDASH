@@ -125,6 +125,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     color: '#000000',
     thickness: 1,
     style: 'solid',
+    backgroundColor: '#ffffff',
   });
   const [dashboardLoaded, setDashboardLoaded] = useState(false);
   const fetchUserEmail = async () => {

@@ -15,38 +15,38 @@ interface DashboardSettingsModalProps {
 
 const DashboardSettingsModal: React.FC<DashboardSettingsModalProps> = ({ visible, onClose }) => {
   const dashboardContext = useContext(DashboardContext);
-
   if (!dashboardContext) {
     throw new Error('DashboardContext must be used within a DashboardProvider');
   }
-
   const { dashboardBorderSettings, setDashboardBorderSettings } = dashboardContext;
-
   const handleBorderToggle = (e: any) => {
     setDashboardBorderSettings({
       ...dashboardBorderSettings,
       showBorder: e.target.checked,
     });
   };
-
   const handleColorChange = (color: any) => {
     setDashboardBorderSettings({
       ...dashboardBorderSettings,
       color: color.hex,
     });
   };
-
   const handleThicknessChange = (value: number) => {
     setDashboardBorderSettings({
       ...dashboardBorderSettings,
       thickness: value,
     });
   };
-
   const handleStyleChange = (value: BorderStyleType) => {
     setDashboardBorderSettings({
       ...dashboardBorderSettings,
       style: value,
+    });
+  };
+  const handleBackgroundColorChange = (color: any) => {
+    setDashboardBorderSettings({
+      ...dashboardBorderSettings,
+      backgroundColor: color.hex,
     });
   };
 
@@ -93,6 +93,13 @@ const DashboardSettingsModal: React.FC<DashboardSettingsModalProps> = ({ visible
           </div>
         </div>
       )}
+      <div style={{ marginTop: 16 }}>
+        <span>Background Color:</span>
+        <SketchPicker
+          color={dashboardBorderSettings.backgroundColor || '#ffffff'}
+          onChange={handleBackgroundColorChange}
+        />
+      </div>
     </Modal>
   );
 };
