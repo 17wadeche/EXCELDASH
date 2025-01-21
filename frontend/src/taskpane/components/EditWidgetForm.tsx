@@ -128,7 +128,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
             start: moment(task.start),
             end: moment(task.end),
             dependencies: task.dependencies
-              ? task.dependencies.join(',')
+              ? task.dependencies.toString()
               : '',
           })),
         };
