@@ -216,20 +216,19 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
             : [],
           datasets: (cleanedValues.datasets || []).map((ds: any) => {
             if (ds.type === 'scatter' || ds.type === 'bubble') {
-              const pointStrings = ds.data.split(')').filter(Boolean); // split on `)`
-              const points = pointStrings.map((ptStr: string) => {
-                const trimmed = ptStr.replace('(', '').replace(')', '').trim();
-                const [xStr, yStr, rStr] = trimmed.split(',').map(s => s.trim());
-                const xVal = parseFloat(xStr);
-                const yVal = parseFloat(yStr);
-                if (ds.type === 'bubble') {
-                  const rVal = parseFloat(rStr);
-                  return { x: xVal, y: yVal, r: rVal };
-                } else {
-                  return { x: xVal, y: yVal };
-                }
-              });
-
+              const segments = ds.data.split(';').map(s => s.trim()).filter(Boolean);
+              let points;
+              if (ds.type === 'bubble') {
+                points = segments.map(seg => {
+                  const [x, y, r] = seg.split(',').map(v => parseFloat(v.trim()));
+                  return { x, y, r };
+                });
+              } else {
+                points = segments.map(seg => {
+                  const [x, y] = seg.split(',').map(v => parseFloat(v.trim()));
+                  return { x, y };
+                });
+              }
               return {
                 label: ds.label,
                 type: ds.type,
@@ -729,12 +728,15 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                           y: yVals[idx],
                           r: rVals[idx],
                         }));
+                        const dataString = points
+                          .map(pt => `${pt.x},${pt.y},${pt.r}`)
+                          .join(';');
                         form.setFieldsValue({
                           labels: '',
                           datasets: [
                             {
                               label: 'Bubble Series',
-                              data: points,
+                              data: dataString,
                               type: 'bubble',
                               backgroundColor: getRandomColor(),
                               borderColor: getRandomColor(),
@@ -818,18 +820,44 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                         {
                           validator: (_, value) => {
                             const dsType = form.getFieldValue(['datasets', name, 'type']);
-                            if (dsType === 'scatter' || dsType === 'bubble') {
-                              return Promise.resolve();
-                            }
-                            if (!value) return Promise.resolve(); 
-                            const isNumArray = value
-                              .split(',')
-                              .every((v: string) => !isNaN(Number(v.trim())));
-                            return isNumArray
-                              ? Promise.resolve()
-                              : Promise.reject(
-                                  new Error('Data points must be comma-separated numbers')
+                            if (!value) return Promise.resolve();
+                        
+                            if (dsType === 'bubble') {
+                              // Expect semicolon separated segments: "x,y,r;x,y,r;..."
+                              const segments = value.split(';').map(s => s.trim()).filter(Boolean);
+                              for (let seg of segments) {
+                                const parts = seg.split(',').map(v => v.trim());
+                                if (parts.length !== 3 || parts.some(p => isNaN(Number(p)))) {
+                                  return Promise.reject(
+                                    new Error('Bubble data must be "x,y,r" triplets, separated by semicolons.')
+                                  );
+                                }
+                              }
+                            } else if (dsType === 'scatter') {
+                              // Expect semicolon separated segments: "x,y;x,y;..."
+                              const segments = value.split(';').map(s => s.trim()).filter(Boolean);
+                              for (let seg of segments) {
+                                const parts = seg.split(',').map(v => v.trim());
+                                if (parts.length !== 2 || parts.some(p => isNaN(Number(p)))) {
+                                  return Promise.reject(
+                                    new Error('Scatter data must be "x,y" pairs, separated by semicolons.')
+                                  );
+                                }
+                              }
+                            } else {
+                              // For bar/line/pie/etc., just do your existing numeric-array check
+                              const isNumArray = value
+                                .split(',')
+                                .map(v => v.trim())
+                                .every((v: string) => !isNaN(Number(v)));
+                              if (!isNumArray) {
+                                return Promise.reject(
+                                  new Error('Data points must be comma-separated numbers.')
                                 );
+                              }
+                            }
+                        
+                            return Promise.resolve();
                           },
                         },
                       ]}
