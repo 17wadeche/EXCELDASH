@@ -307,111 +307,94 @@ const CreateDashboard: React.FC = () => {
         await context.sync();
         if (exampleSheet.isNullObject) {
           exampleSheet = sheets.add("Example Chart Data");
+          // ========== BAR CHART DATA ==========
 
-          //
-          // -- Bar Chart Data --
-          //
           exampleSheet.getRange("A1").values = [["Bar Chart Data"]];
-          exampleSheet.getRange("A2:B2").values = [["Category", "Value"]];
-          exampleSheet.getRange("A3:B5").values = [
-            ["Jan", 10],
-            ["Feb", 20],
-            ["Mar", 30],
-          ];
-
+          exampleSheet.getRange("A2:D2").values = [["", "Jan", "Feb", "Mar"]];
+          exampleSheet.getRange("A3:D3").values = [["Sales", 10, 20, 30]];
+  
           //
-          // -- Line Chart Data --
+          // ========== LINE CHART DATA ==========
           //
-          exampleSheet.getRange("A7").values = [["Line Chart Data"]];
-          exampleSheet.getRange("A8:B8").values = [["Month", "Sales"]];
-          exampleSheet.getRange("A9:B12").values = [
-            ["January", 5000],
-            ["February", 7000],
-            ["March", 4000],
-            ["April", 9000],
-          ];
-
+          // Layout:
+          // Row 1: [ "", "Jan", "Feb", "Mar", "Apr" ]
+          // Row 2: [ "Sales", 5000, 7000, 4000, 9000 ]
+          exampleSheet.getRange("A5").values = [["Line Chart Data"]];
+          exampleSheet.getRange("A6:E6").values = [["", "Jan", "Feb", "Mar", "Apr"]];
+          exampleSheet.getRange("A7:E7").values = [["Sales", 5000, 7000, 4000, 9000]];
+  
           //
-          // -- Pie Chart Data --
+          // ========== PIE CHART DATA ==========
           //
-          exampleSheet.getRange("D1").values = [["Pie Chart Data"]];
-          exampleSheet.getRange("D2:E2").values = [["Category", "Value"]];
-          exampleSheet.getRange("D3:E7").values = [
-            ["Red", 30],
-            ["Blue", 25],
-            ["Green", 20],
-            ["Yellow", 15],
-            ["Purple", 10],
-          ];
-
+          // Layout:
+          // Row 1: [ "", "Red", "Blue", "Green", "Yellow", "Purple" ]
+          // Row 2: [ "Value", 30, 25, 20, 15, 10 ]
+          exampleSheet.getRange("A9").values = [["Pie Chart Data"]];
+          exampleSheet.getRange("A10:F10").values = [["", "Red", "Blue", "Green", "Yellow", "Purple"]];
+          exampleSheet.getRange("A11:F11").values = [["Value", 30, 25, 20, 15, 10]];
+  
           //
-          // -- Doughnut Chart Data (can be the same structure as Pie) --
+          // ========== DOUGHNUT CHART DATA ==========
           //
-          exampleSheet.getRange("D9").values = [["Doughnut Chart Data"]];
-          exampleSheet.getRange("D10:E10").values = [["Category", "Value"]];
-          exampleSheet.getRange("D11:E15").values = [
-            ["Group A", 45],
-            ["Group B", 25],
-            ["Group C", 15],
-            ["Group D", 10],
-            ["Group E", 5],
-          ];
-
+          // Same structure as Pie
+          exampleSheet.getRange("A13").values = [["Doughnut Chart Data"]];
+          exampleSheet.getRange("A14:F14").values = [["", "Group A", "Group B", "Group C", "Group D", "Group E"]];
+          exampleSheet.getRange("A15:F15").values = [["Value", 45, 25, 15, 10, 5]];
+  
           //
-          // -- Radar Chart Data --
+          // ========== RADAR CHART DATA ==========
           //
-          exampleSheet.getRange("G1").values = [["Radar Chart Data"]];
-          exampleSheet.getRange("G2:I2").values = [["Category", "Series1", "Series2"]];
-          exampleSheet.getRange("G3:I7").values = [
-            ["Strength", 10, 5],
-            ["Speed", 8, 6],
-            ["Agility", 6, 9],
-            ["Intelligence", 7, 7],
-            ["Endurance", 9, 4],
-          ];
-
+          // Layout for multi-dataset example:
+          // Row 1: [ "", "Strength", "Speed", "Agility", "Intelligence", "Endurance" ]
+          // Row 2: [ "Series1", 10, 8, 6, 7, 9 ]
+          // Row 3: [ "Series2", 5, 6, 9, 7, 4 ]
+          exampleSheet.getRange("A17").values = [["Radar Chart Data"]];
+          exampleSheet.getRange("A18:F18").values = [["", "Strength", "Speed", "Agility", "Intelligence", "Endurance"]];
+          exampleSheet.getRange("A19:F19").values = [["Series1", 10, 8, 6, 7, 9]];
+          exampleSheet.getRange("A20:F20").values = [["Series2", 5, 6, 9, 7, 4]];
+  
           //
-          // -- Polar Area Chart Data --
+          // ========== POLAR AREA CHART DATA ==========
           //
-          exampleSheet.getRange("G9").values = [["Polar Area Chart Data"]];
-          exampleSheet.getRange("G10:H10").values = [["Category", "Value"]];
-          exampleSheet.getRange("G11:H15").values = [
-            ["North", 11],
-            ["East", 16],
-            ["South", 9],
-            ["West", 14],
-            ["Center", 5],
-          ];
-
+          // Row 1: [ "", "North", "East", "South", "West", "Center" ]
+          // Row 2: [ "Value", 11, 16, 9, 14, 5 ]
+          exampleSheet.getRange("A22").values = [["Polar Area Chart Data"]];
+          exampleSheet.getRange("A23:F23").values = [["", "North", "East", "South", "West", "Center"]];
+          exampleSheet.getRange("A24:F24").values = [["Value", 11, 16, 9, 14, 5]];
+  
           //
-          // -- Bubble Chart Data (X, Y, Size) --
+          // ========== BUBBLE CHART DATA ==========
           //
-          exampleSheet.getRange("J1").values = [["Bubble Chart Data"]];
-          exampleSheet.getRange("J2:L2").values = [["X", "Y", "Size"]];
-          exampleSheet.getRange("J3:L6").values = [
-            [5, 10, 10],
-            [10, 15, 20],
-            [15, 5, 15],
-            [20, 12, 25],
-          ];
-
+          // Bubble data typically requires each point to have [x, y, r].
+          // A single dataset with 4 points could be stored like this:
+          // Row 1: [ "", "Point1", "Point2", "Point3", "Point4" ]
+          // Row 2: [ "X", 5, 10, 15, 20 ]
+          // Row 3: [ "Y", 10, 15, 5, 12 ]
+          // Row 4: [ "R", 10, 20, 15, 25 ]
+          // Then you'd parse them in your code to build an array of objects:
+          //   [{x:5,y:10,r:10}, {x:10,y:15,r:20}, ...]
+          // For now, we just lay out the sample. You can adjust your loader logic as needed.
+          exampleSheet.getRange("A26").values = [["Bubble Chart Data"]];
+          exampleSheet.getRange("A27:E27").values = [["", "Point1", "Point2", "Point3", "Point4"]];
+          exampleSheet.getRange("A28:E28").values = [["X", 5, 10, 15, 20]];
+          exampleSheet.getRange("A29:E29").values = [["Y", 10, 15, 5, 12]];
+          exampleSheet.getRange("A30:E30").values = [["R", 10, 20, 15, 25]];
+  
           //
-          // -- Scatter Chart Data (X, Y) --
+          // ========== SCATTER CHART DATA ==========
           //
-          exampleSheet.getRange("J9").values = [["Scatter Chart Data"]];
-          exampleSheet.getRange("J10:K10").values = [["X", "Y"]];
-          exampleSheet.getRange("J11:K15").values = [
-            [1, 2],
-            [2, 5],
-            [3, 3],
-            [4, 7],
-            [5, 6],
-          ];
-
+          // For a single scatter dataset with 4 points, we might do:
+          // Row 1: [ "", "Point1", "Point2", "Point3", "Point4" ]
+          // Row 2: [ "X", 1, 2, 3, 4 ]
+          // Row 3: [ "Y", 2, 5, 3, 7 ]
+          exampleSheet.getRange("A32").values = [["Scatter Chart Data"]];
+          exampleSheet.getRange("A33:E33").values = [["", "Point1", "Point2", "Point3", "Point4"]];
+          exampleSheet.getRange("A34:E34").values = [["X", 1, 2, 3, 4]];
+          exampleSheet.getRange("A35:E35").values = [["Y", 2, 5, 3, 7]];
+  
           // Autofit columns for clarity
           exampleSheet.getUsedRange().format.autofitColumns();
         }
-
         await context.sync();
       }).catch((error) => {
         console.error("Error creating Example Chart Data sheet:", error);
