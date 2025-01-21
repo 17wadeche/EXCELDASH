@@ -524,18 +524,125 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                       console.log('Data from Excel:', data);
                       const labels = data[0].slice(1);
                       const mainChartType = form.getFieldValue('chartType') || 'bar';
-                      const datasets = data.slice(1).map((row) => ({
-                        label: row[0],
-                        data: row.slice(1).join(', '),
-                        type: mainChartType,
-                        backgroundColor: getRandomColor(),
-                        borderColor: getRandomColor(),
-                        borderWidth: 1,
-                      }));
-                      form.setFieldsValue({
-                        labels: labels.join(', '),
-                        datasets,
-                      });
+                      if (
+                        mainChartType === 'bar' ||
+                        mainChartType === 'line' ||
+                        mainChartType === 'pie' ||
+                        mainChartType === 'doughnut' ||
+                        mainChartType === 'radar' ||
+                        mainChartType === 'polarArea'
+                      ) {
+                        // --- STANDARD PARSING ---
+                        // data[0] is the header row, ignoring the first cell
+                        // => The rest become your labels
+                        const labels = data[0].slice(1);
+              
+                        // each subsequent row => one dataset
+                        // row[0] is the dataset label
+                        // row.slice(1) are the numeric points
+                        const datasets = data.slice(1).map((row) => ({
+                          label: row[0],
+                          data: row.slice(1).join(', '), // store them as comma string
+                          type: mainChartType,
+                          backgroundColor: getRandomColor(),
+                          borderColor: getRandomColor(),
+                          borderWidth: 1,
+                        }));
+              
+                        // Set the form fields
+                        form.setFieldsValue({
+                          labels: labels.join(', '),
+                          datasets,
+                        });
+                      } else if (mainChartType === 'scatter') {
+                        // --- SCATTER PARSING ---
+                        // Expect row1: [ "", "Point1", "Point2", ... ]
+                        //        row2: [ "X", x1, x2, x3, ... ]
+                        //        row3: [ "Y", y1, y2, y3, ... ]
+                        // We parse column by column (excluding col 0).
+                        if (data.length < 3) {
+                          message.error('Scatter data requires at least 3 rows: (empty row), X row, Y row.');
+                          return;
+                        }
+                        const columns = data[0].length - 1; // minus the first cell
+                        const xRow = data[1].slice(1); // all but the first cell
+                        const yRow = data[2].slice(1); // all but the first cell
+              
+                        if (xRow.length !== yRow.length) {
+                          message.error('X row and Y row must have the same length.');
+                          return;
+                        }
+              
+                        // Build an array of (x, y) objects
+                        const dataPoints = xRow.map((xVal: number, idx: number) => ({
+                          x: Number(xVal),
+                          y: Number(yRow[idx]),
+                        }));
+              
+                        // For scatter, usually it's 1 dataset:
+                        const datasets = [
+                          {
+                            label: data[1][0] === 'X' ? 'Scatter' : String(data[1][0]),
+                            // We'll store "Point1,Point2..." in 'data' as a JSONish string or something
+                            data: dataPoints, // If you want to store as string, you'd convert to JSON or a short CSV
+                            type: 'scatter',
+                            backgroundColor: getRandomColor(),
+                            borderColor: getRandomColor(),
+                            borderWidth: 1,
+                          },
+                        ];
+              
+                        // “Labels” might not matter for scatter. But we can store the “Point1,Point2” if you want:
+                        const labels = data[0].slice(1).join(', ');
+                        form.setFieldsValue({
+                          labels, // purely optional for scatter
+                          datasets,
+                        });
+                      } else if (mainChartType === 'bubble') {
+                        // --- BUBBLE PARSING ---
+                        // Expect row1: [ "", "Point1", "Point2", ... ]
+                        //        row2: [ "X", x1, x2, x3, ... ]
+                        //        row3: [ "Y", y1, y2, y3, ... ]
+                        //        row4: [ "R", r1, r2, r3, ... ]
+                        if (data.length < 4) {
+                          message.error('Bubble data requires at least 4 rows: (empty row), X row, Y row, R row.');
+                          return;
+                        }
+                        const xRow = data[1].slice(1); // ignoring first cell
+                        const yRow = data[2].slice(1); 
+                        const rRow = data[3].slice(1);
+              
+                        if (xRow.length !== yRow.length || yRow.length !== rRow.length) {
+                          message.error('X, Y, and R rows must have the same length.');
+                          return;
+                        }
+              
+                        // Build an array of (x, y, r) objects
+                        const dataPoints = xRow.map((xVal: number, idx: number) => ({
+                          x: Number(xVal),
+                          y: Number(yRow[idx]),
+                          r: Number(rRow[idx]),
+                        }));
+              
+                        const datasets = [
+                          {
+                            label: 'Bubble Series',
+                            data: dataPoints, 
+                            type: 'bubble',
+                            backgroundColor: getRandomColor(),
+                            borderColor: getRandomColor(),
+                            borderWidth: 1,
+                          },
+                        ];
+              
+                        // Typically bubble doesn't need “labels,” but you can store the top row anyway:
+                        const labels = data[0].slice(1).join(', ');
+                        form.setFieldsValue({
+                          labels,
+                          datasets,
+                        });
+                      }
+              
                       message.success('Data loaded successfully from Excel.');
                     });
                   } catch (error) {
