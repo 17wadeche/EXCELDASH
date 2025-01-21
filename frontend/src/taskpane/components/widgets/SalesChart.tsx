@@ -236,8 +236,12 @@ const SalesChart = ({ data, type }: SalesChartProps) => {
     }
   };
 
-  // Select the appropriate chart component based on the 'type' prop
-  const SelectedChart = chartComponents[type] || Bar; // Default to Bar if type is unknown
+  const noAxisTypes = ['pie', 'doughnut', 'radar', 'polarArea'];
+  if (noAxisTypes.includes(type)) {
+    chartOptions.scales = {};
+  }
+
+  const SelectedChart = chartComponents[type] || Bar;
 
   return (
     <Draggable handle=".drag-handle">

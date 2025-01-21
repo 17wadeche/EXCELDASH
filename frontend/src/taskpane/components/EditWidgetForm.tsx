@@ -546,20 +546,31 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           {/** If Pie/Doughnut/Polar, show slice color pickers **/}
           {['pie', 'doughnut', 'polarArea'].includes(chartType) && (
             <Form.List name="sliceColors">
-              {(fields) => (
-                <>
-                  {fields.map(({ key, name, ...restField }) => (
-                    <Form.Item
-                      {...restField}
-                      key={key}
-                      label={`Color for Slice #${key + 1}`}
-                      name={[name, 'color']}
-                    >
-                      <Input type="color" />
-                    </Form.Item>
-                  ))}
-                </>
-              )}
+              {(fields) => {
+                const rawLabels = form.getFieldValue('labels') || '';
+                const labelArr = rawLabels
+                  .split(',')
+                  .map((l: string) => l.trim())
+                  .filter(Boolean);
+
+                return (
+                  <>
+                    {fields.map(({ key, name, ...restField }) => {
+                      const sliceLabel = labelArr[key] || `Slice #${key + 1}`;
+                      return (
+                        <Form.Item
+                          {...restField}
+                          key={key}
+                          label={`Color for ${sliceLabel}`}
+                          name={[name, 'color']}
+                        >
+                          <Input type="color" />
+                        </Form.Item>
+                      );
+                    })}
+                  </>
+                );
+              }}
             </Form.List>
           )}
 
