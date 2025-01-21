@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { Modal, Checkbox, Slider, Select, Button } from 'antd';
+import { Modal, Checkbox, Slider, Select, Button, InputNumber } from 'antd';
 import { SketchPicker } from 'react-color';
 import { DashboardContext } from '../context/DashboardContext';
 import { DashboardBorderSettings } from '../components/types';

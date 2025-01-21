@@ -659,7 +659,7 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
     });
   }, [widgets, isEditingEnabled, handleRemoveWidget, handleEditWidget, copyWidgetCallback]);
   return (
-    <div className="dashboard-wrapper" style={{ position: 'relative', width: '100%', height: '100vh' }}>
+    <div className="dashboard-wrapper" style={{ position: 'relative', width: '100%', height: '100vh', backgroundColor: dashboardBorderSettings.backgroundColor || 'white',  }}>
       <Draggable handle=".drag-handle">
         <div className={`fixed-vertical-toolbar ${isCollapsed ? 'collapsed' : ''}`}>
           <div className="drag-handle">
