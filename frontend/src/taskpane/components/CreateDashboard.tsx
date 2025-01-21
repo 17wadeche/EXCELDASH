@@ -309,7 +309,7 @@ const CreateDashboard: React.FC = () => {
                   onChange={(e) => setEmailInput(e.target.value)}
                 />
               </Form.Item>
-              <Button type="primary" htmlType="submit">
+              <Button type="primary" htmlType="submit" loading={isLoading}>
                 Continue
               </Button>
             </Form>
