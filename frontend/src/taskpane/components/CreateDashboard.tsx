@@ -297,6 +297,132 @@ const CreateDashboard: React.FC = () => {
       message.error('Failed to unsubscribe.');
     }
   };
+  
+  useEffect(() => {
+    if (isLoggedIn) {
+      // Wrap in Office.js Excel.run context
+      Excel.run(async (context) => {
+        const sheets = context.workbook.worksheets;
+
+        // Check if "Example Chart Data" already exists
+        let exampleSheet = sheets.getItemOrNullObject("Example Chart Data");
+        exampleSheet.load("name");
+        await context.sync();
+
+        // If not found, add and populate
+        if (exampleSheet.isNullObject) {
+          exampleSheet = sheets.add("Example Chart Data");
+
+          //
+          // -- Bar Chart Data --
+          //
+          exampleSheet.getRange("A1").values = [["Bar Chart Data"]];
+          exampleSheet.getRange("A2:B2").values = [["Category", "Value"]];
+          exampleSheet.getRange("A3:B5").values = [
+            ["Jan", 10],
+            ["Feb", 20],
+            ["Mar", 30],
+          ];
+
+          //
+          // -- Line Chart Data --
+          //
+          exampleSheet.getRange("A7").values = [["Line Chart Data"]];
+          exampleSheet.getRange("A8:B8").values = [["Month", "Sales"]];
+          exampleSheet.getRange("A9:B12").values = [
+            ["January", 5000],
+            ["February", 7000],
+            ["March", 4000],
+            ["April", 9000],
+          ];
+
+          //
+          // -- Pie Chart Data --
+          //
+          exampleSheet.getRange("D1").values = [["Pie Chart Data"]];
+          exampleSheet.getRange("D2:E2").values = [["Category", "Value"]];
+          exampleSheet.getRange("D3:E7").values = [
+            ["Red", 30],
+            ["Blue", 25],
+            ["Green", 20],
+            ["Yellow", 15],
+            ["Purple", 10],
+          ];
+
+          //
+          // -- Doughnut Chart Data (can be the same structure as Pie) --
+          //
+          exampleSheet.getRange("D9").values = [["Doughnut Chart Data"]];
+          exampleSheet.getRange("D10:E10").values = [["Category", "Value"]];
+          exampleSheet.getRange("D11:E15").values = [
+            ["Group A", 45],
+            ["Group B", 25],
+            ["Group C", 15],
+            ["Group D", 10],
+            ["Group E", 5],
+          ];
+
+          //
+          // -- Radar Chart Data --
+          //
+          exampleSheet.getRange("G1").values = [["Radar Chart Data"]];
+          exampleSheet.getRange("G2:I2").values = [["Category", "Series1", "Series2"]];
+          exampleSheet.getRange("G3:I7").values = [
+            ["Strength", 10, 5],
+            ["Speed", 8, 6],
+            ["Agility", 6, 9],
+            ["Intelligence", 7, 7],
+            ["Endurance", 9, 4],
+          ];
+
+          //
+          // -- Polar Area Chart Data --
+          //
+          exampleSheet.getRange("G9").values = [["Polar Area Chart Data"]];
+          exampleSheet.getRange("G10:H10").values = [["Category", "Value"]];
+          exampleSheet.getRange("G11:H15").values = [
+            ["North", 11],
+            ["East", 16],
+            ["South", 9],
+            ["West", 14],
+            ["Center", 5],
+          ];
+
+          //
+          // -- Bubble Chart Data (X, Y, Size) --
+          //
+          exampleSheet.getRange("J1").values = [["Bubble Chart Data"]];
+          exampleSheet.getRange("J2:L2").values = [["X", "Y", "Size"]];
+          exampleSheet.getRange("J3:L6").values = [
+            [5, 10, 10],
+            [10, 15, 20],
+            [15, 5, 15],
+            [20, 12, 25],
+          ];
+
+          //
+          // -- Scatter Chart Data (X, Y) --
+          //
+          exampleSheet.getRange("J9").values = [["Scatter Chart Data"]];
+          exampleSheet.getRange("J10:K10").values = [["X", "Y"]];
+          exampleSheet.getRange("J11:K15").values = [
+            [1, 2],
+            [2, 5],
+            [3, 3],
+            [4, 7],
+            [5, 6],
+          ];
+
+          // Autofit columns for clarity
+          exampleSheet.getUsedRange().format.autofitColumns();
+        }
+
+        await context.sync();
+      }).catch((error) => {
+        console.error("Error creating Example Chart Data sheet:", error);
+      });
+    }
+  }, [isLoggedIn]);
 
   if (!email) {
     return (
