@@ -2,12 +2,33 @@
 // src/taskpane/components/EditWidgetForm.tsx
 
 import React, { useEffect, useState, useContext } from 'react';
-import { Form, Input, Button, InputNumber, message, Select, Switch, Collapse, DatePicker } from 'antd';
-import { MinusCircleOutlined, PlusOutlined, SelectOutlined } from '@ant-design/icons';
-import { v4 as uuidv4 } from 'uuid';
+import {
+  Form,
+  Input,
+  Button,
+  InputNumber,
+  message,
+  Select,
+  Switch,
+  Collapse,
+  DatePicker,
+} from 'antd';
+import {
+  MinusCircleOutlined,
+  PlusOutlined,
+  SelectOutlined,
+} from '@ant-design/icons';
 import moment from 'moment';
 import { DashboardContext } from '../context/DashboardContext';
-import { Widget, TextData, ChartData, GanttWidgetData, MetricData, TitleWidgetData, Task } from './types';
+import {
+  Widget,
+  TextData,
+  ChartData,
+  GanttWidgetData,
+  MetricData,
+  TitleWidgetData,
+  Task,
+} from './types';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -16,7 +37,12 @@ const { Panel } = Collapse;
 interface EditWidgetFormProps {
   widget: Widget;
   onSubmit: (
-    updatedData: TextData | ChartData | GanttWidgetData | MetricData | TitleWidgetData
+    updatedData:
+      | TextData
+      | ChartData
+      | GanttWidgetData
+      | MetricData
+      | TitleWidgetData
   ) => void;
   onCancel: () => void;
   isPresenterMode?: boolean;
@@ -32,129 +58,137 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
   const widgetId = widget.id;
   const { availableWorksheets } = useContext(DashboardContext)!;
   const [sheets, setSheets] = useState<string[]>([]);
-  const [selectedRange, setSelectedRange] = useState<string>('');
-  const initialChartType =
-    widget.type === 'chart'
-      ? (widget.data as ChartData).type
-      : 'bar';
-  const [chartType, setChartType] = useState(initialChartType);
+  const [chartType, setChartType] = useState<string>(
+    widget.type === 'chart' ? (widget.data as ChartData).type : 'bar'
+  );
 
   useEffect(() => {
     setSheets(availableWorksheets);
   }, [availableWorksheets]);
 
-  const initialValues = () => {
+  // ----- INITIAL VALUES FOR FORM -----
+  const getInitialValues = () => {
     switch (widget.type) {
-      case 'text':
+      case 'text': {
         return widget.data as TextData;
-      case 'chart':
-        const chartData = widget.data as ChartData;
+      }
+      case 'title': {
+        return widget.data as TitleWidgetData;
+      }
+      case 'chart': {
+        const data = widget.data as ChartData;
+        const useArea = data.type === 'line' && data.datasets.some((ds) => ds.fill);
         return {
-          title: chartData.title || 'Chart',
-          chartType:
-            chartData.type === 'line' && chartData.datasets.some(ds => ds.fill)
-              ? 'area'
-              : chartData.type,
-          showDataLabels: false,
-          labels: chartData.labels.join(', '),
-          worksheetName:
-            (widget.data as ChartData).worksheetName || sheets[0] || '',
-          associatedRange:
-            (widget.data as ChartData).associatedRange || '',
-          datasets: chartData.datasets.map((dataset) => ({
-            label: dataset.label,
-            data: Array.isArray(dataset.data)
-              ? dataset.data.join(', ')
-              : dataset.data,
-            type: dataset.type || 'bar',
-            backgroundColor: dataset.backgroundColor,
-            borderColor: dataset.borderColor,
-            borderWidth: dataset.borderWidth,
-          })),
-          titleAlignment: chartData.titleAlignment || 'left',
-          xAxisType: chartData.scales?.x?.type || 'category',
-          xAxisTitle: chartData.scales?.x?.title?.text || '',
-          yAxisType: chartData.scales?.y?.type || 'linear',
-          yAxisTitle: chartData.scales?.y?.title?.text || '',
-          enableZoom:
-            chartData.plugins?.zoom?.zoom?.wheel?.enabled || false,
-          enablePan:
-            chartData.plugins?.zoom?.pan?.enabled || false,
-          zoomMode: chartData.plugins?.zoom?.zoom?.mode || 'xy',
-          dataLabelColor:
-            chartData.plugins?.datalabels?.color || '#36A2EB',
-          dataLabelFontSize:
-            chartData.plugins?.datalabels?.font?.size || 12,
-          showLegend:
-            chartData.plugins?.legend?.display !== false,
-          legendPosition:
-            chartData.plugins?.legend?.position || 'bottom',
-          annotations:
-            chartData.plugins?.annotation?.annotations || [],
-          enableTooltips:
-            chartData.plugins?.tooltip?.enabled !== false,
+          title: data.title || 'Chart',
+          chartType: useArea ? 'area' : data.type,
+          labels: (data.labels || []).join(', '),
+          worksheetName: data.worksheetName || sheets[0] || '',
+          associatedRange: data.associatedRange || '',
+          titleAlignment: data.titleAlignment || 'left',
+          xAxisType: data.scales?.x?.type || 'category',
+          xAxisTitle: data.scales?.x?.title?.text || '',
+          yAxisType: data.scales?.y?.type || 'linear',
+          yAxisTitle: data.scales?.y?.title?.text || '',
+          showLegend: data.plugins?.legend?.display !== false,
+          legendPosition: data.plugins?.legend?.position || 'bottom',
+          annotations: data.plugins?.annotation?.annotations || [],
+          showDataLabels: data.plugins?.datalabels?.display !== false,
+          dataLabelColor: data.plugins?.datalabels?.color || '#36A2EB',
+          dataLabelFontSize: data.plugins?.datalabels?.font?.size || 12,
+          enableTooltips: data.plugins?.tooltip?.enabled !== false,
           tooltipTemplate: '',
-          chartBackgroundColor:
-            chartData.backgroundColor || '#ffffff',
-          gridLineColor:
-            chartData.gridLineColor || 'rgba(0, 0, 0, 0.1)',
-          locale: chartData.locale || 'en-US',
-          enableDynamicUpdates:
-            chartData.dynamicUpdate?.enabled || false,
-          updateInterval:
-            chartData.dynamicUpdate?.interval || 5,
-          useGradientFills:
-            chartData.gradientFills?.enabled || false,
-          gradientStartColor:
-            chartData.gradientFills?.startColor ||
-            'rgba(75,192,192,0)',
-          gradientEndColor:
-            chartData.gradientFills?.endColor ||
-            'rgba(75,192,192,0.4)',
+          enableZoom: data.plugins?.zoom?.zoom?.wheel?.enabled || false,
+          enablePan: data.plugins?.zoom?.pan?.enabled || false,
+          zoomMode: data.plugins?.zoom?.zoom?.mode || 'xy',
+          chartBackgroundColor: data.backgroundColor || '#ffffff',
+          gridLineColor: data.gridLineColor || 'rgba(0,0,0,0.1)',
+          locale: data.locale || 'en-US',
+          enableDynamicUpdates: data.dynamicUpdate?.enabled || false,
+          updateInterval: data.dynamicUpdate?.interval || 5,
+          useGradientFills: data.gradientFills?.enabled || false,
+          gradientStartColor: data.gradientFills?.startColor || 'rgba(75,192,192,0)',
+          gradientEndColor: data.gradientFills?.endColor || 'rgba(75,192,192,0.4)',
+          // Datasets:
+          datasets: (data.datasets || []).map((ds) => ({
+            label: ds.label,
+            data: Array.isArray(ds.data) ? ds.data.join(', ') : ds.data,
+            type: ds.type || 'bar',
+            backgroundColor: ds.backgroundColor,
+            borderColor: ds.borderColor,
+            borderWidth: ds.borderWidth,
+          })),
         };
-      case 'gantt':
-        const ganttData = widget.data as GanttWidgetData;
+      }
+      case 'gantt': {
+        const data = widget.data as GanttWidgetData;
         return {
-          title: ganttData.title || 'Gantt Chart',
-          tasks: ganttData.tasks.map((task) => ({
+          title: data.title || 'Gantt Chart',
+          tasks: (data.tasks || []).map((task) => ({
             ...task,
             start: moment(task.start),
             end: moment(task.end),
             dependencies: task.dependencies
-              ? task.dependencies.toString()
+              ? task.dependencies.join(',')
               : '',
           })),
         };
-      case 'metric':
+      }
+      case 'metric': {
+        const data = widget.data as MetricData;
         return {
-          ...widget.data,
-          titleAlignment: widget.data.titleAlignment || 'left',
-          worksheetName:
-            (widget.data as MetricData).worksheetName || sheets[0] || '',
-          cellAddress: (widget.data as MetricData).cellAddress || '',
-        } as MetricData;
-
-      case 'title':
-        return widget.data as TitleWidgetData;
+          ...data,
+          titleAlignment: data.titleAlignment || 'left',
+          worksheetName: data.worksheetName || sheets[0] || '',
+          cellAddress: data.cellAddress || '',
+        };
+      }
       default:
         return {};
     }
   };
 
+  // ----- SET INITIAL FORM VALUES -----
   useEffect(() => {
-    form.setFieldsValue(initialValues());
+    form.setFieldsValue(getInitialValues());
+    // We also set the local state chartType if widget is chart
+    if (widget.type === 'chart') {
+      const cData = widget.data as ChartData;
+      setChartType(cData.type);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [widget]);
+
+  // ----- SYNC SLICE COLORS WITH LABELS FOR PIE/DOUGHNUT/POLAR -----
+  // We dynamically show a color picker for each slice. If the user changes the
+  // 'labels' field, we reset the sliceColors array to match.
+  useEffect(() => {
+    if (widget.type !== 'chart') return;
+    if (!['pie', 'doughnut', 'polarArea'].includes(chartType)) return;
+
+    // parse labels to see how many slices we have
+    const labelsStr = form.getFieldValue('labels') || '';
+    const labelArr = labelsStr
+      .split(',')
+      .map((l: string) => l.trim())
+      .filter(Boolean);
+
+    // current sliceColors in the form, if any
+    let currentColors = form.getFieldValue('sliceColors');
+    if (!Array.isArray(currentColors) || currentColors.length !== labelArr.length) {
+      // re-init an array of color objects, e.g. [{color:'#FF0000'},...]
+      currentColors = labelArr.map(() => ({ color: '#36A2EB' }));
+      form.setFieldsValue({ sliceColors: currentColors });
+    }
+  }, [chartType, form, widget.type]);
+
+  // ----- SUBMIT HANDLER -----
   const handleFinish = (values: any) => {
-    // Clean out empty strings or undefined
-    const cleanedValues: Record<string, any> = Object.entries(values).reduce(
-      (acc: Record<string, any>, [key, value]) => {
-        if (value !== undefined && value !== '') {
-          acc[key] = value;
-        }
-        return acc;
-      },
-      {}
-    );
+    const cleanedValues: Record<string, any> = {};
+    Object.entries(values).forEach(([k, v]) => {
+      if (v !== undefined && v !== '') {
+        cleanedValues[k] = v;
+      }
+    });
 
     let updatedData: any;
 
@@ -163,21 +197,22 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
         updatedData = cleanedValues;
         break;
       }
-
       case 'title': {
-        updatedData = cleanedValues as TitleWidgetData;
+        updatedData = cleanedValues;
         break;
       }
-
       case 'chart': {
+        // Determine final chart type
         const finalChartType =
           cleanedValues.chartType === 'area' ? 'line' : cleanedValues.chartType;
         const noAxisTypes = ['pie', 'doughnut', 'polarArea', 'radar'];
+        // If it's a slice-based chart, gather slice colors from the form:
         let sliceColorsArray: string[] = [];
         if (['pie', 'doughnut', 'polarArea'].includes(finalChartType)) {
           const sc: { color: string }[] = cleanedValues.sliceColors || [];
           sliceColorsArray = sc.map((obj) => obj.color);
         }
+
         updatedData = {
           title: cleanedValues.title,
           type: finalChartType,
@@ -186,8 +221,10 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           labels: cleanedValues.labels
             ? cleanedValues.labels.split(',').map((l: string) => l.trim())
             : [],
+          // Build each dataset
           datasets: (cleanedValues.datasets || []).map((ds: any) => {
             if (ds.type === 'scatter' || ds.type === 'bubble') {
+              // For scatter/bubble, keep data as objects (x,y) or (x,y,r)
               return {
                 label: ds.label,
                 data: ds.data,
@@ -198,6 +235,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                 borderWidth: ds.borderWidth || 1,
               };
             } else {
+              // For other chart types, parse numeric array
               let parsedValues: number[] = [];
               if (typeof ds.data === 'string') {
                 parsedValues = ds.data
@@ -208,7 +246,10 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
               } else {
                 parsedValues = [Number(ds.data)];
               }
+
+              // For "area" type
               const shouldFill = cleanedValues.chartType === 'area' || ds.type === 'area';
+              // If it's a slice-based chart, apply the sliceColors array as backgroundColor
               let finalBg = ds.backgroundColor || '#4caf50';
               if (['pie', 'doughnut', 'polarArea'].includes(finalChartType) && sliceColorsArray.length) {
                 finalBg = sliceColorsArray;
@@ -226,6 +267,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
             }
           }),
           titleAlignment: cleanedValues.titleAlignment || 'left',
+          // Remove scales for no-axis chart types:
           scales: noAxisTypes.includes(finalChartType)
             ? {}
             : {
@@ -305,41 +347,37 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
 
         break;
       }
-
       case 'gantt': {
-        const existingData = widget.data as GanttWidgetData;
-        const existingTasks = existingData.tasks || [];
+        const existing = widget.data as GanttWidgetData;
+        const existingTasks = existing.tasks || [];
         const { arrowColor } = cleanedValues;
 
+        // Merge tasks:
         const mergedTasks = existingTasks.map((oldTask) => {
-          const updatedTask = cleanedValues.tasks.find(
+          const updated = (cleanedValues.tasks || []).find(
             (t: any) => t.id === oldTask.id
           );
-          if (!updatedTask) {
-            return oldTask;
-          }
+          if (!updated) return oldTask;
           return {
             ...oldTask,
-            name: updatedTask.name,
-            start: updatedTask.start.format('YYYY-MM-DD'),
-            end: updatedTask.end.format('YYYY-MM-DD'),
-            completed: updatedTask.completed
-              ? updatedTask.completed.format('YYYY-MM-DD')
+            name: updated.name,
+            start: updated.start.format('YYYY-MM-DD'),
+            end: updated.end.format('YYYY-MM-DD'),
+            completed: updated.completed
+              ? updated.completed.format('YYYY-MM-DD')
               : undefined,
-            progress: updatedTask.progress,
-            dependencies: Array.isArray(updatedTask.dependencies)
-              ? updatedTask.dependencies
-              : (updatedTask.dependencies || '').split(','),
-            color: updatedTask.color || oldTask.color,
-            progressColor:
-              updatedTask.progressColor || oldTask.progressColor,
+            progress: updated.progress,
+            dependencies: Array.isArray(updated.dependencies)
+              ? updated.dependencies
+              : (updated.dependencies || '').split(','),
+            color: updated.color || oldTask.color,
+            progressColor: updated.progressColor || oldTask.progressColor,
           };
         });
 
+        // Add new tasks:
         const newTasks = (cleanedValues.tasks || [])
-          .filter(
-            (t: any) => !existingTasks.some((old) => old.id === t.id)
-          )
+          .filter((t: any) => !existingTasks.some((old) => old.id === t.id))
           .map((t: any) => ({
             id: t.id,
             name: t.name,
@@ -356,16 +394,14 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
             progressColor: t.progressColor || '#00AABB',
           }));
 
-        const finalTasks = [...mergedTasks, ...newTasks];
         updatedData = {
-          ...existingData,
-          tasks: finalTasks,
+          ...existing,
+          tasks: [...mergedTasks, ...newTasks],
           title: cleanedValues.title,
-          arrowColor: arrowColor,
-        } as GanttWidgetData;
+          arrowColor,
+        };
         break;
       }
-
       case 'metric': {
         updatedData = {
           ...cleanedValues,
@@ -376,14 +412,10 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
         };
         break;
       }
-
-      default: {
+      default:
         updatedData = {};
-        break;
-      }
     }
 
-    console.log('Updated Data:', updatedData);
     onSubmit(updatedData);
   };
 
@@ -399,18 +431,17 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
   return (
     <Form
       form={form}
-      initialValues={initialValues()}
-      onFinish={handleFinish}
       layout="vertical"
+      initialValues={getInitialValues()}
+      onFinish={handleFinish}
     >
+      {/** TEXT WIDGET FORM **/}
       {widget.type === 'text' && (
         <>
           <Form.Item
             name="content"
             label="Content"
-            rules={[
-              { required: true, message: 'Please enter content' },
-            ]}
+            rules={[{ required: true, message: 'Please enter content' }]}
           >
             <TextArea rows={4} />
           </Form.Item>
@@ -431,12 +462,16 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           </Form.Item>
         </>
       )}
+
+      {/** TITLE WIDGET FORM **/}
       {widget.type === 'title' && (
         <>
           <Form.Item
             name="content"
             label="Title Text"
-            rules={[{ required: true, message: 'Please enter the title text' }]}
+            rules={[
+              { required: true, message: 'Please enter the title text' },
+            ]}
           >
             <Input />
           </Form.Item>
@@ -458,6 +493,8 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           </Form.Item>
         </>
       )}
+
+      {/** CHART WIDGET FORM **/}
       {widget.type === 'chart' && (
         <>
           <Form.Item
@@ -857,11 +894,12 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
               </>
             )}
           </Form.List>
-          {/* Collapse Panels for Advanced Settings */}
+
           <Collapse>
+            {/* Only show Axis/Plugin/Legend/Styling if chart isn't Pie/Doughnut/Polar/Radar */}
             {!['pie', 'doughnut', 'polarArea', 'radar'].includes(chartType) && (
               <>
-                <Panel header="Axis Settings" key="1">
+                <Panel header="Axis Settings" key="axis">
                   <Form.Item label="X-Axis Type" name="xAxisType">
                     <Select>
                       <Option value="category">Category</Option>
@@ -882,7 +920,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                     <Input />
                   </Form.Item>
                 </Panel>
-                <Panel header="Plugins" key="2">
+                <Panel header="Plugins" key="plugins">
                   <Form.Item
                     label="Enable Zoom"
                     name="enableZoom"
@@ -908,7 +946,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                     label="Show Data Labels"
                     name="showDataLabels"
                     valuePropName="checked"
-                    initialValue={false}
                   >
                     <Switch />
                   </Form.Item>
@@ -928,24 +965,21 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                   <Form.Item label="Tooltip Template" name="tooltipTemplate">
                     <TextArea
                       placeholder="Use {label} and {value} placeholders"
-                      rows={3}
+                      rows={2}
                     />
                   </Form.Item>
                   <Form.Item label="Annotations">
                     <Form.List name="annotations">
-                      {(annotationFields, { add, remove }) => (
+                      {(annFields, { add, remove }) => (
                         <>
-                          {annotationFields.map(({ key, name, ...restField }) => (
+                          {annFields.map(({ key, name, ...restField }) => (
                             <div key={key} style={{ marginBottom: 16 }}>
                               <Form.Item
                                 {...restField}
                                 name={[name, 'type']}
                                 label="Annotation Type"
                                 rules={[
-                                  {
-                                    required: true,
-                                    message: 'Please select annotation type',
-                                  },
+                                  { required: true, message: 'Select type' },
                                 ]}
                               >
                                 <Select>
@@ -958,10 +992,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                                 name={[name, 'value']}
                                 label="Value"
                                 rules={[
-                                  {
-                                    required: true,
-                                    message: 'Please enter value',
-                                  },
+                                  { required: true, message: 'Enter value' },
                                 ]}
                               >
                                 <InputNumber />
@@ -978,10 +1009,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                                 name={[name, 'color']}
                                 label="Color"
                                 rules={[
-                                  {
-                                    required: true,
-                                    message: 'Please select color',
-                                  },
+                                  { required: true, message: 'Pick a color' },
                                 ]}
                               >
                                 <Input type="color" />
@@ -991,7 +1019,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                                 onClick={() => remove(name)}
                                 icon={<MinusCircleOutlined />}
                               >
-                                Remove Annotation
+                                Remove
                               </Button>
                             </div>
                           ))}
@@ -1009,7 +1037,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                     </Form.List>
                   </Form.Item>
                 </Panel>
-                <Panel header="Legend" key="3">
+                <Panel header="Legend" key="legend">
                   <Form.Item
                     label="Show Legend"
                     name="showLegend"
@@ -1026,7 +1054,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                     </Select>
                   </Form.Item>
                 </Panel>
-                <Panel header="Styling" key="4">
+                <Panel header="Styling" key="styling">
                   <Form.Item
                     label="Chart Background Color"
                     name="chartBackgroundColor"
@@ -1049,10 +1077,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                   >
                     <Input type="color" />
                   </Form.Item>
-                  <Form.Item
-                    label="Gradient End Color"
-                    name="gradientEndColor"
-                  >
+                  <Form.Item label="Gradient End Color" name="gradientEndColor">
                     <Input type="color" />
                   </Form.Item>
                 </Panel>
@@ -1060,7 +1085,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
             )}
           </Collapse>
 
-          {/* Title Alignment */}
           <Form.Item name="titleAlignment" label="Title Alignment">
             <Select>
               <Option value="left">Left</Option>
@@ -1069,9 +1093,10 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           </Form.Item>
         </>
       )}
+
+      {/** GANTT WIDGET FORM **/}
       {widget.type === 'gantt' && (
         <>
-          {/* Gantt Title */}
           <Form.Item
             name="title"
             label="Gantt Chart Title"
@@ -1108,7 +1133,9 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                       {...restField}
                       name={[name, 'color']}
                       label="Task Color"
-                      rules={[{ required: true, message: 'Please pick a task color' }]}
+                      rules={[
+                        { required: true, message: 'Please pick a task color' },
+                      ]}
                     >
                       <Input type="color" />
                     </Form.Item>
@@ -1127,17 +1154,17 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           </Form.List>
         </>
       )}
+
+      {/** METRIC WIDGET FORM **/}
       {widget.type === 'metric' && (
         <>
           <Form.Item
             name="worksheetName"
             label="Worksheet"
-            rules={[
-              { required: true, message: 'Please select a worksheet' },
-            ]}
+            rules={[{ required: true, message: 'Please select a worksheet' }]}
           >
             <Select placeholder="Select worksheet">
-              {availableWorksheets.map(sheet => (
+              {availableWorksheets.map((sheet) => (
                 <Option key={sheet} value={sheet}>
                   {sheet}
                 </Option>
@@ -1148,57 +1175,53 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
             name="cellAddress"
             label="Linked Cell"
             rules={[
-              {
-                required: true,
-                message: 'Please select a cell',
-              },
+              { required: true, message: 'Please select a cell' },
               {
                 pattern: /^[A-Za-z]{1,3}[1-9][0-9]{0,6}$/,
                 message: 'Please enter a valid cell address (e.g., E8)',
               },
             ]}
           >
-            <Input placeholder="Enter cell address (e.g., E8)" />
+            <Input placeholder="e.g., E8" />
           </Form.Item>
           <Form.Item>
-          <Button
-            icon={<SelectOutlined />}
-            onClick={async () => {
-              if (Office.context.ui.messageParent) {
-                Office.context.ui.messageParent(
-                  JSON.stringify({ type: 'selectCell', widgetId })
-                );
-              } else {
-                try {
-                  await Excel.run(async (context) => {
-                    const range = context.workbook.getSelectedRange();
-                    range.load(['address', 'worksheet']);
-                    await context.sync();
+            <Button
+              icon={<SelectOutlined />}
+              onClick={async () => {
+                if (Office.context.ui?.messageParent) {
+                  Office.context.ui.messageParent(
+                    JSON.stringify({ type: 'selectCell', widgetId })
+                  );
+                } else {
+                  try {
+                    await Excel.run(async (context) => {
+                      const rng = context.workbook.getSelectedRange();
+                      rng.load(['address', 'worksheet']);
+                      await context.sync();
 
-                    const selectedWorksheet = range.worksheet;
-                    selectedWorksheet.load('name');
-                    await context.sync();
+                      const selectedSheet = rng.worksheet;
+                      selectedSheet.load('name');
+                      await context.sync();
 
-                    const sheetName = selectedWorksheet.name;
-                    const address = range.address;
-                    const cellAddress = address.includes('!')
-                      ? address.split('!')[1]
-                      : address;
+                      const sheetName = selectedSheet.name;
+                      const address = rng.address.includes('!')
+                        ? rng.address.split('!')[1]
+                        : rng.address;
 
-                    form.setFieldsValue({
-                      cellAddress: cellAddress,
-                      worksheetName: sheetName,
+                      form.setFieldsValue({
+                        cellAddress: address,
+                        worksheetName: sheetName,
+                      });
                     });
-                  });
-                } catch (error) {
-                  console.error('Error selecting cell:', error);
-                  message.error('Failed to select cell from Excel.');
+                  } catch (err) {
+                    console.error('Error selecting cell:', err);
+                    message.error('Failed to select cell from Excel.');
+                  }
                 }
-              }
-            }}
-          >
-            Select Cell from Excel
-          </Button>
+              }}
+            >
+              Select Cell from Excel
+            </Button>
           </Form.Item>
           <Form.Item
             name="format"
@@ -1214,7 +1237,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
             </Select>
           </Form.Item>
           <Form.Item name="displayName" label="Display Name">
-            <Input placeholder="Enter a name to display (optional)" />
+            <Input placeholder="Optional name to display" />
           </Form.Item>
           <Form.Item
             name="targetValue"
@@ -1223,7 +1246,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
               { required: true, message: 'Please enter a target value' },
             ]}
           >
-            <InputNumber placeholder="Enter target value" />
+            <InputNumber placeholder="Enter target" />
           </Form.Item>
           <Form.Item
             name="comparison"
@@ -1233,10 +1256,8 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
             ]}
           >
             <Select placeholder="Select comparison type">
-              <Option value="greater">
-                Greater Than or Equal To
-              </Option>
-              <Option value="less">Less Than or Equal To</Option>
+              <Option value="greater">Greater or Equal</Option>
+              <Option value="less">Less or Equal</Option>
             </Select>
           </Form.Item>
           <Form.Item
@@ -1246,7 +1267,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
               { required: true, message: 'Please enter a font size' },
             ]}
           >
-            <InputNumber min={12} max={100} placeholder="Enter font size" />
+            <InputNumber min={12} max={100} placeholder="Font size" />
           </Form.Item>
           <Form.Item name="titleAlignment" label="Title Alignment">
             <Select>
@@ -1256,12 +1277,9 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           </Form.Item>
         </>
       )}
-      <Form.Item>
-        <Button
-          type="primary"
-          htmlType="submit"
-          style={{ marginRight: '8px' }}
-        >
+
+      <Form.Item style={{ marginTop: 16 }}>
+        <Button type="primary" htmlType="submit" style={{ marginRight: 8 }}>
           Save
         </Button>
         <Button onClick={onCancel}>Cancel</Button>
