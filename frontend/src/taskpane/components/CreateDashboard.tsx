@@ -1,47 +1,14 @@
 // src/taskpane/components/CreateDashboard.tsx
 
 import React, { useState, useContext, useEffect } from 'react';
-import {
-  Layout,
-  Form,
-  Input,
-  Button,
-  message,
-  Modal,
-  Tooltip,
-  Row,
-  Col,
-  Card,
-  List,
-  Spin,
-  Divider,
-  Empty,
-  Dropdown,
-  Menu,
-} from 'antd';
+import {Layout, Form, Input, Button, message, Modal, Tooltip, Row, Col, Card, List, Spin, Divider, Empty, Dropdown, Menu} from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { DashboardContext } from '../context/DashboardContext';
-import {
-  DeleteOutlined,
-  FolderAddOutlined,
-  PlusOutlined,
-  SettingOutlined,
-} from '@ant-design/icons';
+import { DeleteOutlined, FolderAddOutlined, PlusOutlined, SettingOutlined} from '@ant-design/icons';
 import { DashboardItem, NewDashboard, TemplateItem } from './types';
-import {
-  createCheckoutSession,
-  checkSubscription,
-  loginUser,
-  registerUser,
-  verifySubscription,
-  checkRegistration,
-  unsubscribeUser,
-  createDashboard,
-  getTemplates,
-  deleteTemplateById,
-  getDashboards,
-} from './../utils/api';
+import { createCheckoutSession, checkSubscription, loginUser, registerUser, verifySubscription, checkRegistration,  unsubscribeUser, createDashboard, getTemplates, deleteTemplateById, getDashboards} from './../utils/api';
 import axios from 'axios';
+import { AuthContext } from '../context/AuthContext';
 
 const { Header, Content } = Layout;
 const { Search } = Input;
@@ -65,9 +32,12 @@ const CreateDashboard: React.FC = () => {
   const [templates, setTemplates] = useState<TemplateItem[]>([]);
   const [previewTemplate, setPreviewTemplate] = useState<TemplateItem | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-  const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-  
-  // Gear menu actions
+  const authContext = useContext(AuthContext);
+  if (!authContext) {
+    throw new Error('AuthContext must be used within an AuthProvider');
+  }
+  const { isLoggedIn, isVerified, setAuthState } = authContext;
+
   const handleLogout = () => {
     Modal.confirm({
       title: 'Are you sure you want to logout?',
@@ -101,7 +71,6 @@ const CreateDashboard: React.FC = () => {
             return;
           }
           await unsubscribeUser(email);
-          // Update subscription status in localStorage
           localStorage.setItem('isSubscribed', 'false');
           message.success('You have successfully unsubscribed.');
           navigate('/subscribe');
@@ -141,7 +110,6 @@ const CreateDashboard: React.FC = () => {
         setLoading(false);
       }
     };
-
     fetchData();
   }, [setDashboards]);
 
@@ -236,76 +204,74 @@ const CreateDashboard: React.FC = () => {
   );
 
   useEffect(() => {
-    if (isLoggedIn) {
-      Excel.run(async (context) => {
-        const sheets = context.workbook.worksheets;
-        let exampleSheet = sheets.getItemOrNullObject("Example Chart Data");
-        exampleSheet.load("name");
-        await context.sync();
-  
-        if (exampleSheet.isNullObject) {
-          exampleSheet = sheets.add("Example Chart Data");
-  
-          // ========== BAR CHART DATA ==========
-          exampleSheet.getRange("A1").values = [["Bar Chart Data"]];
-          exampleSheet.getRange("A2:D2").values = [["", "Jan", "Feb", "Mar"]];
-          exampleSheet.getRange("A3:D3").values = [["Sales", 10, 20, 30]];
-  
-          // ========== LINE CHART DATA ==========
-          exampleSheet.getRange("A5").values = [["Line Chart Data"]];
-          exampleSheet.getRange("A6:E6").values = [["", "Jan", "Feb", "Mar", "Apr"]];
-          exampleSheet.getRange("A7:E7").values = [["Sales", 5000, 7000, 4000, 9000]];
-  
-          // ========== PIE CHART DATA ==========
-          exampleSheet.getRange("A9").values = [["Pie Chart Data"]];
-          exampleSheet.getRange("A10:F10").values = [["", "Red", "Blue", "Green", "Yellow", "Purple"]];
-          exampleSheet.getRange("A11:F11").values = [["Value", 30, 25, 20, 15, 10]];
-  
-          // ========== DOUGHNUT CHART DATA ==========
-          exampleSheet.getRange("A13").values = [["Doughnut Chart Data"]];
-          exampleSheet.getRange("A14:F14").values = [["", "Group A", "Group B", "Group C", "Group D", "Group E"]];
-          exampleSheet.getRange("A15:F15").values = [["Value", 45, 25, 15, 10, 5]];
-  
-          // ========== RADAR CHART DATA ==========
-          exampleSheet.getRange("A17").values = [["Radar Chart Data"]];
-          exampleSheet.getRange("A18:F18").values = [
-            ["", "Strength", "Speed", "Agility", "Intelligence", "Endurance"]
-          ];
-          exampleSheet.getRange("A19:F19").values = [["Series1", 10, 8, 6, 7, 9]];
-          exampleSheet.getRange("A20:F20").values = [["Series2", 5, 6, 9, 7, 4]];
-  
-          // ========== POLAR AREA CHART DATA ==========
-          exampleSheet.getRange("A22").values = [["Polar Area Chart Data"]];
-          exampleSheet.getRange("A23:F23").values = [
-            ["", "North", "East", "South", "West", "Center"]
-          ];
-          exampleSheet.getRange("A24:F24").values = [["Value", 11, 16, 9, 14, 5]];
-  
-          // ========== BUBBLE CHART DATA ==========
-          exampleSheet.getRange("A26").values = [["Bubble Chart Data"]];
-          exampleSheet.getRange("A27:E27").values = [
-            ["", "Point1", "Point2", "Point3", "Point4"]
-          ];
-          exampleSheet.getRange("A28:E28").values = [["X", 5, 10, 15, 20]];
-          exampleSheet.getRange("A29:E29").values = [["Y", 10, 15, 5, 12]];
-          exampleSheet.getRange("A30:E30").values = [["R", 10, 20, 15, 25]];
-  
-          // ========== SCATTER CHART DATA ==========
-          exampleSheet.getRange("A32").values = [["Scatter Chart Data"]];
-          exampleSheet.getRange("A33:E33").values = [
-            ["", "Point1", "Point2", "Point3", "Point4"]
-          ];
-          exampleSheet.getRange("A34:E34").values = [["X", 1, 2, 3, 4]];
-          exampleSheet.getRange("A35:E35").values = [["Y", 2, 5, 3, 7]];
-          exampleSheet.getUsedRange().format.autofitColumns();
+    const initializeExcel = async () => {
+      if (isLoggedIn && isVerified) {
+        try {
+          await Office.onReady();
+          await Excel.run(async (context) => {
+            const sheets = context.workbook.worksheets;
+            let exampleSheet = sheets.getItemOrNullObject("Example Chart Data");
+            exampleSheet.load("name");
+            await context.sync();
+            if (exampleSheet.isNullObject) {
+              exampleSheet = sheets.add("Example Chart Data");
+              // ========== BAR CHART DATA ==========
+              exampleSheet.getRange("A1").values = [["Bar Chart Data"]];
+              exampleSheet.getRange("A2:D2").values = [["", "Jan", "Feb", "Mar"]];
+              exampleSheet.getRange("A3:D3").values = [["Sales", 10, 20, 30]];
+              // ========== LINE CHART DATA ==========
+              exampleSheet.getRange("A5").values = [["Line Chart Data"]];
+              exampleSheet.getRange("A6:E6").values = [["", "Jan", "Feb", "Mar", "Apr"]];
+              exampleSheet.getRange("A7:E7").values = [["Sales", 5000, 7000, 4000, 9000]];
+              // ========== PIE CHART DATA ==========
+              exampleSheet.getRange("A9").values = [["Pie Chart Data"]];
+              exampleSheet.getRange("A10:F10").values = [["", "Red", "Blue", "Green", "Yellow", "Purple"]];
+              exampleSheet.getRange("A11:F11").values = [["Value", 30, 25, 20, 15, 10]];
+              // ========== DOUGHNUT CHART DATA ==========
+              exampleSheet.getRange("A13").values = [["Doughnut Chart Data"]];
+              exampleSheet.getRange("A14:F14").values = [["", "Group A", "Group B", "Group C", "Group D", "Group E"]];
+              exampleSheet.getRange("A15:F15").values = [["Value", 45, 25, 15, 10, 5]];
+              // ========== RADAR CHART DATA ==========
+              exampleSheet.getRange("A17").values = [["Radar Chart Data"]];
+              exampleSheet.getRange("A18:F18").values = [
+                ["", "Strength", "Speed", "Agility", "Intelligence", "Endurance"]
+              ];
+              exampleSheet.getRange("A19:F19").values = [["Series1", 10, 8, 6, 7, 9]];
+              exampleSheet.getRange("A20:F20").values = [["Series2", 5, 6, 9, 7, 4]];
+              // ========== POLAR AREA CHART DATA ==========
+              exampleSheet.getRange("A22").values = [["Polar Area Chart Data"]];
+              exampleSheet.getRange("A23:F23").values = [
+                ["", "North", "East", "South", "West", "Center"]
+              ];
+              exampleSheet.getRange("A24:F24").values = [["Value", 11, 16, 9, 14, 5]];
+              // ========== BUBBLE CHART DATA ==========
+              exampleSheet.getRange("A26").values = [["Bubble Chart Data"]];
+              exampleSheet.getRange("A27:E27").values = [
+                ["", "Point1", "Point2", "Point3", "Point4"]
+              ];
+              exampleSheet.getRange("A28:E28").values = [["X", 5, 10, 15, 20]];
+              exampleSheet.getRange("A29:E29").values = [["Y", 10, 15, 5, 12]];
+              exampleSheet.getRange("A30:E30").values = [["R", 10, 20, 15, 25]];
+              // ========== SCATTER CHART DATA ==========
+              exampleSheet.getRange("A32").values = [["Scatter Chart Data"]];
+              exampleSheet.getRange("A33:E33").values = [
+                ["", "Point1", "Point2", "Point3", "Point4"]
+              ];
+              exampleSheet.getRange("A34:E34").values = [["X", 1, 2, 3, 4]];
+              exampleSheet.getRange("A35:E35").values = [["Y", 2, 5, 3, 7]];
+              exampleSheet.getUsedRange().format.autofitColumns();
+            }
+            await context.sync();
+            message.success('"Example Chart Data" sheet is ready.');
+          });
+        } catch (error) {
+          console.error("Error creating Example Chart Data sheet:", error);
+          message.error('Failed to initialize Excel sheet. Check console for details.');
         }
-        await context.sync();
-      }).catch((error) => {
-        console.error("Error creating Example Chart Data sheet:", error);
-      });
-    }
-  }, [isLoggedIn]);
-
+      }
+    };
+    initializeExcel();
+  }, [isLoggedIn, isVerified]);
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Header
@@ -317,12 +283,10 @@ const CreateDashboard: React.FC = () => {
           alignItems: 'center',
         }}
       >
-        <div style={{ fontSize: '20px', fontWeight: 'bold' }}>Create Dashboard</div>
         <Dropdown overlay={menu} placement="bottomRight">
           <SettingOutlined style={{ fontSize: '24px', cursor: 'pointer' }} />
         </Dropdown>
       </Header>
-
       <Content style={{ padding: '24px', background: '#f0f2f5' }}>
         <Row justify="center" gutter={[100, 24]}>
           <Col xs={24} sm={20} md={16} lg={12}>

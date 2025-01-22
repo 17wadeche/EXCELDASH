@@ -1,9 +1,10 @@
 // src/taskpane/components/LoginPage.tsx
 
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Layout, Form, Input, Button, message, Typography } from 'antd';
 import { useNavigate, Link } from 'react-router-dom';
-import { loginUser, checkSubscription, checkRegistration } from './../utils/api';
+import { loginUser } from './../utils/api';
+import { AuthContext } from '../context/AuthContext';
 
 const { Content } = Layout;
 const { Text } = Typography;
@@ -13,6 +14,13 @@ const LoginPage: React.FC = () => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const navigate = useNavigate();
+  const authContext = useContext(AuthContext);
+
+  if (!authContext) {
+    throw new Error('AuthContext must be used within an AuthProvider');
+  }
+
+  const { setAuthState } = authContext;
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -21,25 +29,32 @@ const LoginPage: React.FC = () => {
     }
     setIsLoading(true);
     try {
-      await loginUser(email, password);
-      message.success('Login successful.');
-      // After login, check registration and subscription
-      const isRegistered = await checkRegistration(email);
-      if (!isRegistered.registered) {
-        navigate('/register');
-        return;
+      const response = await loginUser(email, password);
+      if (response.success) {
+        // Set authentication state in AuthContext
+        setAuthState({
+          isLoggedIn: true,
+          isVerified: false, // Will be set after verification
+          isLoading: true,   // Indicates verification in progress
+        });
+        message.success('Login successful.');
+        // Proceed to verification inside AuthContext
+      } else {
+        message.error(response.message || 'Login failed.');
+        setAuthState({
+          isLoggedIn: false,
+          isVerified: false,
+          isLoading: false,
+        });
       }
-      const subscriptionStatus = await checkSubscription(email);
-      if (!subscriptionStatus.subscribed) {
-        navigate('/subscribe');
-        return;
-      }
-      navigate('/create');
     } catch (error) {
       console.error('Error during login:', error);
       message.error('Failed to login.');
-    } finally {
-      setIsLoading(false);
+      setAuthState({
+        isLoggedIn: false,
+        isVerified: false,
+        isLoading: false,
+      });
     }
   };
 
