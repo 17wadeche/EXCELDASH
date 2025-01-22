@@ -230,15 +230,12 @@ const CustomLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) =>
             </Form>
           </Modal>
         )}
-
-        {/* Version History Modal */}
         {isInDashboard && (
           <VersionHistoryModal
             visible={isVersionHistoryVisible}
             onClose={() => setIsVersionHistoryVisible(false)}
           />
         )}
-        {/* Dashboard Settings Modal */}
         <DashboardSettingsModal
           visible={isSettingsModalVisible}
           onClose={() => setIsSettingsModalVisible(false)}
