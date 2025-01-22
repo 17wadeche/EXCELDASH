@@ -284,3 +284,10 @@ export interface TemplateItem {
   layouts?: { [key: string]: Layout[] };
   borderSettings?: DashboardBorderSettings;
 }
+
+export interface LoginResponse {
+  success: boolean;
+  message?: string;
+  token?: string;
+  refreshToken?: string;
+}

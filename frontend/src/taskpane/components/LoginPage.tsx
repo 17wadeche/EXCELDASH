@@ -31,14 +31,12 @@ const LoginPage: React.FC = () => {
     try {
       const response = await loginUser(email, password);
       if (response.success) {
-        // Set authentication state in AuthContext
         setAuthState({
           isLoggedIn: true,
-          isVerified: false, // Will be set after verification
-          isLoading: true,   // Indicates verification in progress
+          isVerified: false,
+          isLoading: true,
         });
         message.success('Login successful.');
-        // Proceed to verification inside AuthContext
       } else {
         message.error(response.message || 'Login failed.');
         setAuthState({

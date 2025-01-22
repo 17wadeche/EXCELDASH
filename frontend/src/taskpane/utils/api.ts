@@ -1,6 +1,6 @@
 // api.ts
 import axios from 'axios'; 
-import { DashboardItem, NewDashboard, TemplateItem, User } from '../components/types';
+import { DashboardItem, NewDashboard, TemplateItem, User, LoginResponse } from '../components/types';
 
 const API_BASE_URL = 'https://happy-forest-059a9d710.4.azurestaticapps.net/api';
 
@@ -52,20 +52,28 @@ export const checkSubscription = async (email: string) => {
   }
 };
 
-export const loginUser = async (email: string, password: string): Promise<string> => {
-  const response = await axios.post(`${API_BASE_URL}/login`, { email, password });
-  const token = response.data.token;
-  const refreshToken = response.data.refreshToken;
-  localStorage.setItem('token', token);
-  localStorage.setItem('refreshToken', refreshToken);
-  localStorage.setItem('userEmail', email);
-  setAuthToken(token);
-  const decoded = decodeToken(token);
-  if (decoded?.sessionId) {
-    localStorage.setItem('sessionId', decoded.sessionId);
+export const loginUser = async (email: string, password: string): Promise<LoginResponse> => {
+  try {
+    const response = await axios.post<LoginResponse>(`${API_BASE_URL}/login`, { email, password });
+    const loginData = response.data;
+    if (loginData.token) {
+      localStorage.setItem('token', loginData.token);
+      localStorage.setItem('refreshToken', loginData.refreshToken || '');
+      localStorage.setItem('userEmail', email);
+      setAuthToken(loginData.token);
+      const decoded = decodeToken(loginData.token);
+      if (decoded?.sessionId) {
+        localStorage.setItem('sessionId', decoded.sessionId);
+      }
+    }
+    return loginData;
+  } catch (error: any) {
+    console.error('Error in loginUser:', error);
+    return {
+      success: false,
+      message: error?.response?.data?.error || 'Login failed.',
+    };
   }
-
-  return token;
 };
 
 export const registerUser = async (email: string, password: string): Promise<void> => {
