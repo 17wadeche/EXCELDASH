@@ -275,11 +275,12 @@ const CreateDashboard: React.FC = () => {
     <Layout style={{ minHeight: '100vh' }}>
       <Header
         style={{
-          background: '#fff',
+          background: '#f0f2f5',
           padding: '0 24px',
           display: 'flex',
-          justifyContent: 'space-between',
+          justifyContent: 'flex-end',
           alignItems: 'center',
+          boxShadow: 'none',
         }}
       >
         <Dropdown overlay={menu} placement="bottomRight">
