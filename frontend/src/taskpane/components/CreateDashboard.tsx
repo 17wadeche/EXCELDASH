@@ -258,6 +258,63 @@ const CreateDashboard: React.FC = () => {
               ];
               exampleSheet.getRange("A34:E34").values = [["X", 1, 2, 3, 4]];
               exampleSheet.getRange("A35:E35").values = [["Y", 2, 5, 3, 7]];
+              // ========== BOX PLOT DATA ==========
+              exampleSheet.getRange("A37").values = [["Box Plot Data"]];
+              exampleSheet.getRange("A38:F38").values = [["", "Q1", "Median", "Q3", "Min", "Max"]];
+              exampleSheet.getRange("A39:F39").values = [["Sample1", 10, 20, 30, 5, 35]];
+              exampleSheet.getRange("A40:F40").values = [["Sample2", 15, 25, 40, 10, 45]];
+              // ========== VIOLIN CHART DATA ==========
+              exampleSheet.getRange("A42").values = [["Violin Chart Data"]];
+              exampleSheet.getRange("A43:B43").values = [["Sample", "Value"]];
+              exampleSheet.getRange("A44:B50").values = [
+                ["GroupA", 5],
+                ["GroupA", 8],
+                ["GroupA", 10],
+                ["GroupA", 12],
+                ["GroupA", 9],
+                ["GroupB", 14],
+                ["GroupB", 16],
+              ];
+              // ========== CANDLESTICK CHART DATA ==========
+              exampleSheet.getRange("A52").values = [["Candlestick Chart Data"]];
+              exampleSheet.getRange("A53:E53").values = [["Label", "Open", "High", "Low", "Close"]];
+              exampleSheet.getRange("A54:E54").values = [["Day1", 100, 110, 95, 105]];
+              exampleSheet.getRange("A55:E55").values = [["Day2", 105, 115, 100, 110]];
+              // ========== OHLC CHART DATA ==========
+              exampleSheet.getRange("A57").values = [["OHLC Chart Data"]];
+              exampleSheet.getRange("A58:E58").values = [["Label", "Open", "High", "Low", "Close"]];
+              exampleSheet.getRange("A59:E59").values = [["Day1", 50, 60, 45, 55]];
+              exampleSheet.getRange("A60:E60").values = [["Day2", 55, 65, 50, 60]];
+              // ========== TREEMAP CHART DATA ==========
+              exampleSheet.getRange("A62").values = [["Treemap Chart Data"]];
+              exampleSheet.getRange("A63:B63").values = [["Label", "Value"]];
+              exampleSheet.getRange("A64:B68").values = [
+                ["Category A", 10],
+                ["Category B", 20],
+                ["Category C", 15],
+                ["Category D", 5],
+                ["Category E", 25],
+              ];
+              // ========== WORD CLOUD CHART DATA ==========
+              exampleSheet.getRange("A70").values = [["Word Cloud Chart Data"]];
+              exampleSheet.getRange("A71:B71").values = [["Word", "Frequency"]];
+              exampleSheet.getRange("A72:B76").values = [
+                ["Hello", 10],
+                ["World", 15],
+                ["Excel", 8],
+                ["Charts", 12],
+                ["Add-in", 6],
+              ];
+              // ========== FUNNEL CHART DATA ==========
+              exampleSheet.getRange("A78").values = [["Funnel Chart Data"]];
+              exampleSheet.getRange("A79:B79").values = [["Stage", "Value"]];
+              exampleSheet.getRange("A80:B84").values = [
+                ["Prospects", 200],
+                ["Qualified", 100],
+                ["Proposal", 60],
+                ["Negotiation", 30],
+                ["Closed", 15],
+              ];
               exampleSheet.getUsedRange().format.autofitColumns();
             }
             await context.sync();
