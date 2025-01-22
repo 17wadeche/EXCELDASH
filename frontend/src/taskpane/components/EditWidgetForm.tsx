@@ -164,7 +164,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
     const datasets = form.getFieldValue('datasets') || [];
     if (!datasets.length || datasets[0].type !== 'bubble') return;
     const bubbleDataStr = datasets[0].data || '';
-    const segments = bubbleDataStr.split(';').map((s) => s.trim()).filter(Boolean);
+    const segments = bubbleDataStr.split(';').map((s: string) => s.trim()).filter(Boolean);
     let currentBubbleColors = form.getFieldValue('bubbleColors');
     if (!Array.isArray(currentBubbleColors) || currentBubbleColors.length !== segments.length) {
       currentBubbleColors = segments.map(() => ({ color: '#36A2EB' }));
@@ -648,18 +648,15 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                         worksheetName,
                         associatedRange,
                       });
-
                       const worksheet = context.workbook.worksheets.getItem(
                         worksheetName
                       );
                       const dataRange = worksheet.getRange(associatedRange);
                       dataRange.load('values');
                       await context.sync();
-
                       const data = dataRange.values;
                       const mainType = form.getFieldValue('chartType');
                       console.log('Loaded data:', data);
-
                       if (
                         [
                           'bar',
@@ -736,7 +733,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                         const xVals = xRow.slice(1).map((v: any) => Number(v));
                         const yVals = yRow.slice(1).map((v: any) => Number(v));
                         const rVals = rRow.slice(1).map((v: any) => Number(v));
-
                         const headerRow = data[0].slice(1);
                         const labelsStr = headerRow.join(', ');
                         if (
@@ -843,7 +839,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                           validator: (_, value) => {
                             const dsType = form.getFieldValue(['datasets', name, 'type']);
                             if (!value) return Promise.resolve();
-                        
                             if (dsType === 'bubble') {
                               const segments = value
                                 .split(';')
@@ -896,7 +891,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                     >
                       <Input type="color" />
                     </Form.Item>
-
                     <Form.Item
                       {...restField}
                       name={[name, 'borderColor']}
@@ -910,7 +904,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                     >
                       <Input type="color" />
                     </Form.Item>
-
                     <Form.Item
                       {...restField}
                       name={[name, 'borderWidth']}
@@ -978,7 +971,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
               </Collapse.Panel>
             </Collapse>
           )}
-
           <Collapse>
             {!['pie', 'doughnut', 'polarArea', 'radar', 'bubble'].includes(chartType) && (
               <>
@@ -1167,7 +1159,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
               </>
             )}
           </Collapse>
-
           <Form.Item name="titleAlignment" label="Title Alignment">
             <Select>
               <Option value="left">Left</Option>
@@ -1176,8 +1167,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           </Form.Item>
         </>
       )}
-
-      {/** GANTT WIDGET FORM **/}
       {widget.type === 'gantt' && (
         <>
           <Form.Item
@@ -1237,8 +1226,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           </Form.List>
         </>
       )}
-
-      {/** METRIC WIDGET FORM **/}
       {widget.type === 'metric' && (
         <>
           <Form.Item
@@ -1281,16 +1268,13 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                       const rng = context.workbook.getSelectedRange();
                       rng.load(['address', 'worksheet']);
                       await context.sync();
-
                       const selectedSheet = rng.worksheet;
                       selectedSheet.load('name');
                       await context.sync();
-
                       const sheetName = selectedSheet.name;
                       const address = rng.address.includes('!')
                         ? rng.address.split('!')[1]
                         : rng.address;
-
                       form.setFieldsValue({
                         cellAddress: address,
                         worksheetName: sheetName,
@@ -1360,7 +1344,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           </Form.Item>
         </>
       )}
-
       <Form.Item style={{ marginTop: 16 }}>
         <Button type="primary" htmlType="submit" style={{ marginRight: 8 }}>
           Save
