@@ -67,7 +67,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
     setSheets(availableWorksheets);
   }, [availableWorksheets]);
 
-  // ----- INITIAL VALUES FOR FORM -----
   const getInitialValues = () => {
     switch (widget.type) {
       case 'text': {
@@ -109,7 +108,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           useGradientFills: data.gradientFills?.enabled || false,
           gradientStartColor: data.gradientFills?.startColor || 'rgba(75,192,192,0)',
           gradientEndColor: data.gradientFills?.endColor || 'rgba(75,192,192,0.4)',
-          // Datasets:
           datasets: (data.datasets || []).map((ds) => ({
             label: ds.label,
             data: Array.isArray(ds.data) ? ds.data.join(', ') : ds.data,
@@ -148,10 +146,8 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
     }
   };
 
-  // ----- SET INITIAL FORM VALUES -----
   useEffect(() => {
     form.setFieldsValue(getInitialValues());
-    // We also set the local state chartType if widget is chart
     if (widget.type === 'chart') {
       const cData = widget.data as ChartData;
       setChartType(cData.type);
@@ -172,7 +168,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
     }
   }, [chartType, form, widget.type]);
 
-  // ----- SUBMIT HANDLER -----
   const handleFinish = (values: any) => {
     const cleanedValues: Record<string, any> = {};
     Object.entries(values).forEach(([k, v]) => {
@@ -180,9 +175,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
         cleanedValues[k] = v;
       }
     });
-
     let updatedData: any;
-
     switch (widget.type) {
       case 'text': {
         updatedData = cleanedValues;
@@ -201,28 +194,20 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           const sc: { color: string }[] = cleanedValues.sliceColors || [];
           sliceColorsArray = sc.map((obj) => obj.color);
         }
-      
         updatedData = {
           title: cleanedValues.title,
           type: finalChartType,
           worksheetName: cleanedValues.worksheetName,
           associatedRange: cleanedValues.associatedRange,
-      
-          // Split label string on commas
           labels: cleanedValues.labels
             ? cleanedValues.labels.split(',').map((l: string) => l.trim())
             : [],
-      
-          // Build datasets
           datasets: (cleanedValues.datasets || []).map((ds: any) => {
-            // Handle scatter / bubble datasets
             if (ds.type === 'scatter' || ds.type === 'bubble') {
               const segments = ds.data
                 .split(';')
                 .map((s: string) => s.trim())
                 .filter(Boolean);
-      
-              // Bubble
               if (ds.type === 'bubble') {
                 const points = segments.map((seg: string) => {
                   const [x, y, r] = seg.split(',').map((v: string) => parseFloat(v.trim()));
@@ -230,7 +215,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                 });
                 const bubbleColors = cleanedValues.bubbleColors || [];
                 const backgroundColors = bubbleColors.map((c: any) => c.color);
-      
                 return {
                   label: ds.label,
                   type: ds.type,
@@ -240,8 +224,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                   borderColor: ds.borderColor || '#4caf50',
                   borderWidth: ds.borderWidth || 1,
                 };
-              } 
-              // Scatter
+              }
               else {
                 const points = segments.map((seg: string) => {
                   const [x, y] = seg.split(',').map((v: string) => parseFloat(v.trim()));
@@ -257,8 +240,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                   borderWidth: ds.borderWidth || 1,
                 };
               }
-            } 
-            // Handle bar, line, pie, doughnut, etc.
+            }
             else {
               let parsedValues: number[] = [];
               if (typeof ds.data === 'string') {
@@ -270,12 +252,8 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
               } else {
                 parsedValues = [Number(ds.data)];
               }
-      
-              // "Area" fill logic
               const shouldFill =
                 cleanedValues.chartType === 'area' || ds.type === 'area';
-      
-              // If it’s a pie/doughnut/polarArea chart, override background with sliceColors
               let finalBg = ds.backgroundColor || '#4caf50';
               if (
                 ['pie', 'doughnut', 'polarArea'].includes(finalChartType) &&
@@ -283,7 +261,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
               ) {
                 finalBg = sliceColorsArray;
               }
-      
               return {
                 label: ds.label,
                 data: parsedValues,
@@ -295,10 +272,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
               };
             }
           }),
-      
           titleAlignment: cleanedValues.titleAlignment || 'left',
-      
-          // Hide axes if it's a chart type that doesn't use them
           scales: noAxisTypes.includes(finalChartType)
             ? {}
             : {
@@ -317,7 +291,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                   },
                 },
               },
-      
           plugins: {
             legend: {
               display: cleanedValues.showLegend !== false,
@@ -363,8 +336,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
               },
             },
           },
-      
-          // General chart styling/settings
           backgroundColor: cleanedValues.chartBackgroundColor || '#ffffff',
           gridLineColor: cleanedValues.gridLineColor || 'rgba(0, 0, 0, 0.1)',
           locale: cleanedValues.locale || 'en-US',
@@ -385,8 +356,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
         const existing = widget.data as GanttWidgetData;
         const existingTasks = existing.tasks || [];
         const { arrowColor } = cleanedValues;
-
-        // Merge tasks:
         const mergedTasks = existingTasks.map((oldTask) => {
           const updated = (cleanedValues.tasks || []).find(
             (t: any) => t.id === oldTask.id
@@ -408,8 +377,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
             progressColor: updated.progressColor || oldTask.progressColor,
           };
         });
-
-        // Add new tasks:
         const newTasks = (cleanedValues.tasks || [])
           .filter((t: any) => !existingTasks.some((old) => old.id === t.id))
           .map((t: any) => ({
@@ -427,7 +394,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
             color: t.color || '#FF0000',
             progressColor: t.progressColor || '#00AABB',
           }));
-
         updatedData = {
           ...existing,
           tasks: [...mergedTasks, ...newTasks],
@@ -449,7 +415,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
       default:
         updatedData = {};
     }
-
     onSubmit(updatedData);
   };
 
@@ -535,7 +500,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           >
             <Input />
           </Form.Item>
-
           <Form.Item
             name="chartType"
             label="Chart Type"
@@ -623,7 +587,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           >
             <Input placeholder="e.g., A1:B10" />
           </Form.Item>
-
           {!isPresenterMode && (
             <Form.Item>
               <Button
@@ -641,7 +604,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                       const range = context.workbook.getSelectedRange();
                       range.load(['address', 'worksheet']);
                       await context.sync();
-
                       const worksheetName = range.worksheet.name;
                       const associatedRange = range.address.replace(/^.*!/, '');
                       form.setFieldsValue({
