@@ -3,7 +3,7 @@
 const initializeModels = require('../models');
 const Joi = require('joi');
 const { v4: uuidv4 } = require('uuid');
-const { sendPasswordResetEmail } = require('../../frontend/src/taskpane/utils/email');
+const { sendPasswordResetEmail } = require('../email');
 
 module.exports = async function (context, req) {
   context.log('=== [passwordrequest/index.js] START ===');
