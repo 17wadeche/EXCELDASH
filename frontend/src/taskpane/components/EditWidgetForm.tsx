@@ -188,6 +188,9 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
       case 'chart': {
         const finalChartType =
           cleanedValues.chartType === 'area' ? 'line' : cleanedValues.chartType;
+        if (finalChartType === 'scatter' || finalChartType === 'bubble') {
+          cleanedValues.xAxisType = 'linear';
+        }
         const noAxisTypes = ['pie', 'doughnut', 'polarArea', 'radar', 'bubble'];
         let sliceColorsArray: string[] = [];
         if (['pie', 'doughnut', 'polarArea'].includes(finalChartType)) {
