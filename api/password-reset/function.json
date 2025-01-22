@@ -8,7 +8,7 @@
       "direction": "in",
       "name": "req",
       "methods": ["post"],
-      "route": "password-reset/confirm"
+      "route": "password-reset"
     },
     {
       "type": "http",

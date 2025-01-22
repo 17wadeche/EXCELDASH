@@ -1,4 +1,4 @@
-// src/utils/email.js
+// src/taskpane/utils/email.js
 
 const sgMail = require('@sendgrid/mail');
 
