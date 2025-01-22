@@ -832,18 +832,17 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                                 .filter(Boolean);
                               for (let seg of segments) {
                                 const parts = seg.split(',').map((v: string) => v.trim());
-                                if (parts.length !== 3 || parts.some(p => isNaN(Number(p)))) {
+                                if (parts.length !== 3 || parts.some((p: string) => isNaN(Number(p)))) {
                                   return Promise.reject(
                                     new Error('Bubble data must be "x,y,r" triplets, separated by semicolons.')
                                   );
                                 }
                               }
                             } else if (dsType === 'scatter') {
-                              // Expect semicolon separated segments: "x,y;x,y;..."
-                              const segments = value.split(';').map(s => s.trim()).filter(Boolean);
+                              const segments = value.split(';').map((s: string) => s.trim()).filter(Boolean);
                               for (let seg of segments) {
                                 const parts = seg.split(',').map(v => v.trim());
-                                if (parts.length !== 2 || parts.some(p => isNaN(Number(p)))) {
+                                if (parts.length !== 2 || parts.some((p: string) => isNaN(Number(p)))) {
                                   return Promise.reject(
                                     new Error('Scatter data must be "x,y" pairs, separated by semicolons.')
                                   );
@@ -853,7 +852,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                               // For bar/line/pie/etc., just do your existing numeric-array check
                               const isNumArray = value
                                 .split(',')
-                                .map(v => v.trim())
+                                .map((v:string) => v.trim())
                                 .every((v: string) => !isNaN(Number(v)));
                               if (!isNumArray) {
                                 return Promise.reject(
