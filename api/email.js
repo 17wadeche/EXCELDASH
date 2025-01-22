@@ -4,15 +4,10 @@ const sgMail = require('@sendgrid/mail');
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-/**
- * Sends a password reset email to the specified email address.
- * @param {string} to - Recipient's email address.
- * @param {string} resetLink - Password reset URL.
- */
 const sendPasswordResetEmail = async (to, resetLink) => {
   const msg = {
     to,
-    from: process.env.EMAIL_FROM, // Verified sender
+    from: process.env.EMAIL_FROM,
     subject: 'Password Reset Request',
     text: `You requested a password reset. Click the link below to reset your password:\n\n${resetLink}\n\nIf you did not request this, please ignore this email.`,
     html: `
@@ -22,7 +17,13 @@ const sendPasswordResetEmail = async (to, resetLink) => {
     `,
   };
 
-  await sgMail.send(msg);
+  try {
+    await sgMail.send(msg);
+    console.log('Email sent');
+  } catch (error) {
+    console.error('SendGrid error:', error);
+    throw error;
+  }
 };
 
 module.exports = {
