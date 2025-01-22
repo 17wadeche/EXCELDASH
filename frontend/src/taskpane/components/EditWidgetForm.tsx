@@ -209,6 +209,10 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                 .map((s: string) => s.trim())
                 .filter(Boolean);
               if (ds.type === 'bubble') {
+                const segments = ds.data
+                  .split(';')
+                  .map((s: string) => s.trim())
+                  .filter(Boolean);
                 const points = segments.map((seg: string) => {
                   const [x, y, r] = seg.split(',').map((v: string) => parseFloat(v.trim()));
                   return { x, y, r };
