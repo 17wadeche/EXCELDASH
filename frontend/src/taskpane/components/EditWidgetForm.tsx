@@ -215,6 +215,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                 .split(';')
                 .map((s: string) => s.trim())
                 .filter(Boolean);
+              let backgroundColor: string | string[] = ds.backgroundColor || '#4caf50';
               let points;
               if (ds.type === 'bubble') {
                 points = segments.map((seg: string) => {
@@ -222,7 +223,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                   return { x, y, r };
                 });
                 const bubbleColors = cleanedValues.bubbleColors || [];
-                const backgroundColors = bubbleColors.map((c: any) => c.color);
+                backgroundColor = bubbleColors.map((c: any) => c.color);
               } else {
                 points = segments.map((seg: string) => {
                   const [x, y] = seg.split(',').map((v: string) => parseFloat(v.trim()));
@@ -234,7 +235,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                 type: ds.type,
                 data: points,
                 fill: false,
-                backgroundColor: backgroundColors,
+                backgroundColor: backgroundColor,
                 borderColor: ds.borderColor || '#4caf50',
                 borderWidth: ds.borderWidth || 1,
               };
