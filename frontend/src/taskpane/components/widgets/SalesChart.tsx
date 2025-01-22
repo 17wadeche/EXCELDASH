@@ -27,11 +27,10 @@ import {
 } from 'react-chartjs-2';
 import 'chartjs-adapter-moment';
 import {
-  BoxPlotChart,
-  HorizontalBoxPlotChart,
-  ViolinChart,
-  HorizontalViolinChart,
-  BoxAndWhiskers
+  BoxPlotController,
+  ViolinController,
+  BoxAndWhiskers, // correct spelling
+  Violin,
 } from 'chartjs-chart-box-and-violin-plot';
 import zoomPlugin from 'chartjs-plugin-zoom';
 import { TreemapController, TreemapElement } from 'chartjs-chart-treemap';
