@@ -5,6 +5,7 @@ const defineSubscription = require('./Subscription');
 const defineDashboard = require('./Dashboard');
 const defineTemplate = require('./Template');
 const defineRefreshToken = require('./RefreshToken');
+const definePasswordResetToken = require('./passwordResetToken');
 async function initializeModels() {
   const sequelize = await initializeSequelize();
   const User = defineUser(sequelize, sequelize.Sequelize.DataTypes);
@@ -12,6 +13,7 @@ async function initializeModels() {
   const Dashboard = defineDashboard(sequelize, sequelize.Sequelize.DataTypes);
   const Template = defineTemplate(sequelize, sequelize.Sequelize.DataTypes);
   const RefreshToken = defineRefreshToken(sequelize, sequelize.Sequelize.DataTypes);
+  const PasswordResetToken = definePasswordResetToken(sequelize, sequelize.Sequelize.DataTypes);
   User.hasMany(Subscription, { 
     foreignKey: 'userEmail', 
     sourceKey: 'userEmail',
@@ -52,8 +54,18 @@ async function initializeModels() {
     targetKey: 'userEmail',
     as: 'User' 
   });
+  User.hasMany(PasswordResetToken, { 
+    foreignKey: 'userEmail', 
+    sourceKey: 'userEmail',
+    as: 'PasswordResetTokens' 
+  });
+  PasswordResetToken.belongsTo(User, { 
+    foreignKey: 'userEmail', 
+    targetKey: 'userEmail',
+    as: 'User' 
+  });
   console.log('All models were synchronized successfully.');
-  return { sequelize, User, Subscription, Dashboard, Template, RefreshToken };
+  return { sequelize, User, Subscription, Dashboard, Template, RefreshToken, PasswordResetToken };
 }
 
 module.exports = initializeModels;

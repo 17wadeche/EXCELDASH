@@ -28,6 +28,7 @@
     "@azure/identity": "^4.5.0",
     "@fluentui/react-components": "^9.46.8",
     "@fluentui/react-icons": "^2.0.232",
+    "@sendgrid/mail": "^8.1.4",
     "antd": "^5.22.1",
     "axios": "^1.7.8",
     "chart.js": "^4.4.7",
