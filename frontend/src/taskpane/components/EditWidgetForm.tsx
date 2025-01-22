@@ -532,7 +532,20 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           <Form.Item
             name="labels"
             label="Labels (comma-separated)"
-            rules={[{ required: true, message: 'Please enter labels' }]}
+            rules={[
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  const chartType = getFieldValue('chartType');
+                  if (chartType === 'scatter' || chartType === 'bubble') {
+                    return Promise.resolve();
+                  }
+                  if (!value || !value.trim()) {
+                    return Promise.reject(new Error('Please enter labels'));
+                  }
+                  return Promise.resolve();
+                },
+              }),
+            ]}
           >
             <Input />
           </Form.Item>
