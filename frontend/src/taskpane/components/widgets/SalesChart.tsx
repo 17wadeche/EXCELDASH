@@ -28,7 +28,7 @@ import {
 import 'chartjs-adapter-moment';
 import {
   BoxPlotController,
-  BoxAndWhiskers,
+  BoxAndWiskers,
   ViolinController,
   Violin,
 } from '@sgratzl/chartjs-chart-boxplot';
@@ -76,7 +76,7 @@ ChartJS.register(
   BoxPlotController,
   ViolinController,
   Violin,
-  BoxAndWhiskers
+  BoxAndWiskers
 );
 
 const TreemapChart: React.FC<any> = (props) => {
