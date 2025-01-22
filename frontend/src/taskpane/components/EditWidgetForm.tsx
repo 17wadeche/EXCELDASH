@@ -841,7 +841,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                             } else if (dsType === 'scatter') {
                               const segments = value.split(';').map((s: string) => s.trim()).filter(Boolean);
                               for (let seg of segments) {
-                                const parts = seg.split(',').map(v => v.trim());
+                                const parts = seg.split(',').map((v: string) => v.trim());
                                 if (parts.length !== 2 || parts.some((p: string) => isNaN(Number(p)))) {
                                   return Promise.reject(
                                     new Error('Scatter data must be "x,y" pairs, separated by semicolons.')
@@ -849,18 +849,14 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                                 }
                               }
                             } else {
-                              // For bar/line/pie/etc., just do your existing numeric-array check
                               const isNumArray = value
                                 .split(',')
                                 .map((v:string) => v.trim())
                                 .every((v: string) => !isNaN(Number(v)));
                               if (!isNumArray) {
-                                return Promise.reject(
-                                  new Error('Data points must be comma-separated numbers.')
-                                );
+                                return Promise.reject(new Error('Data points must be comma-separated numbers.'));
                               }
                             }
-                        
                             return Promise.resolve();
                           },
                         },
@@ -868,7 +864,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                     >
                       <Input />
                     </Form.Item>
-
                     <Form.Item
                       {...restField}
                       name={[name, 'backgroundColor']}
