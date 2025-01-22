@@ -44,7 +44,6 @@ const CreateDashboard: React.FC = () => {
       okText: 'Yes',
       cancelText: 'No',
       onOk: () => {
-        // Clear user data from localStorage
         localStorage.removeItem('token');
         localStorage.removeItem('userEmail');
         localStorage.removeItem('isLoggedIn');
@@ -284,7 +283,9 @@ const CreateDashboard: React.FC = () => {
         }}
       >
         <Dropdown overlay={menu} placement="bottomRight">
-          <SettingOutlined style={{ fontSize: '24px', cursor: 'pointer' }} />
+          <Tooltip title="Settings">
+            <SettingOutlined style={{ fontSize: '24px', cursor: 'pointer' }} />
+          </Tooltip>
         </Dropdown>
       </Header>
       <Content style={{ padding: '24px', background: '#f0f2f5' }}>
