@@ -191,7 +191,24 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
         if (finalChartType === 'scatter' || finalChartType === 'bubble') {
           cleanedValues.xAxisType = 'linear';
         }
-        const noAxisTypes = ['pie', 'doughnut', 'polarArea', 'radar', 'bubble'];
+        const noAxisTypes = [
+          'pie',
+          'doughnut',
+          'polarArea',
+          'radar',
+          'bubble',
+          'funnel',
+          'treemap',
+          'wordCloud',
+          'candlestick',
+          'ohlc',
+          'boxplot',
+          'violin',
+          'forceDirectedGraph',
+          'choropleth',
+          'parallelCoordinates',
+          'barWithErrorBars',
+        ];
         let sliceColorsArray: string[] = [];
         if (['pie', 'doughnut', 'polarArea'].includes(finalChartType)) {
           const sc: { color: string }[] = cleanedValues.sliceColors || [];
@@ -530,13 +547,17 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
               <Option value="polarArea">Polar Area</Option>
               <Option value="bubble">Bubble</Option>
               <Option value="scatter">Scatter</Option>
-              <Option value="funnel">Funnel</Option>
-              <Option value="treemap">Treemap</Option>
-              <Option value="wordCloud">Word Cloud</Option>
+              <Option value="boxplot">Box Plot</Option>
               <Option value="candlestick">Candlestick</Option>
               <Option value="ohlc">OHLC</Option>
-              <Option value="boxplot">Box Plot</Option>
               <Option value="violin">Violin</Option>
+              <Option value="treemap">Treemap</Option>
+              <Option value="wordCloud">Word Cloud</Option>
+              <Option value="funnel">Funnel</Option>
+              <Option value="forceDirectedGraph">Force-Directed Graph</Option>
+              <Option value="choropleth">Choropleth</Option>
+              <Option value="parallelCoordinates">Parallel Coordinates</Option>
+              <Option value="barWithErrorBars">Bar With Error Bars</Option>
             </Select>
           </Form.Item>
           <Form.Item
@@ -811,6 +832,17 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                         <Option value="polarArea">Polar Area</Option>
                         <Option value="bubble">Bubble</Option>
                         <Option value="scatter">Scatter</Option>
+                        <Option value="boxplot">Box Plot</Option>
+                        <Option value="candlestick">Candlestick</Option>
+                        <Option value="ohlc">OHLC</Option>
+                        <Option value="violin">Violin</Option>
+                        <Option value="treemap">Treemap</Option>
+                        <Option value="wordCloud">Word Cloud</Option>
+                        <Option value="funnel">Funnel</Option>
+                        <Option value="forceDirectedGraph">Force-Directed Graph</Option>
+                        <Option value="choropleth">Choropleth</Option>
+                        <Option value="parallelCoordinates">Parallel Coordinates</Option>
+                        <Option value="barWithErrorBars">Bar With Error Bars</Option>
                       </Select>
                     </Form.Item>
                     <Form.Item
@@ -959,7 +991,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
             </Collapse>
           )}
           <Collapse>
-            {!['pie', 'doughnut', 'polarArea', 'radar', 'bubble'].includes(chartType) && (
+            {!['pie', 'doughnut', 'polarArea', 'radar', 'bubble', 'funnel', 'treemap', 'wordCloud', 'candlestick', 'ohlc', 'boxplot', 'violin', 'forceDirectedGraph', 'choropleth', 'parallelCoordinates', 'barWithErrorBars',].includes(chartType) && (
               <>
                 <Panel header="Axis Settings" key="axis">
                   <Form.Item label="X-Axis Type" name="xAxisType">

@@ -42,7 +42,7 @@ import {
   OhlcController,
   OhlcElement,
 } from 'chartjs-chart-financial';
-
+import { HierarchicalScale } from 'chartjs-plugin-hierarchical';
 import type {
   ChartData,
   ChartOptions,
@@ -50,6 +50,10 @@ import type {
   ChartDataset,
 } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
+import { ParallelCoordinatesController, LinearAxis, LineSegment, PCPScale } from 'chartjs-chart-pcp';
+import { ForceDirectedGraphController, EdgeLine } from 'chartjs-chart-graph';
+import { ChoroplethController, GeoFeature, ColorScale, ProjectionScale } from 'chartjs-chart-geo';
+import { BarWithErrorBarsController, BarWithErrorBar } from 'chartjs-chart-error-bars';
 
 // Register chart components
 ChartJS.register(
@@ -76,8 +80,39 @@ ChartJS.register(
   BoxPlotController,
   ViolinController,
   Violin,
-  BoxAndWiskers
+  BoxAndWiskers,
+  HierarchicalScale,
+  ParallelCoordinatesController,
+  PCPScale,
+  LineSegment,
+  ForceDirectedGraphController,
+  EdgeLine,
+  LinearScale,
+  PointElement,
+  ChoroplethController,
+  GeoFeature,
+  ColorScale,
+  ProjectionScale,
+  BarWithErrorBarsController,
+  BarWithErrorBar,
+  LinearScale,
+  CategoryScale
 );
+const ForceDirectedGraphChart: React.FC<any> = (props) => {
+  return <BaseChart type="forceDirectedGraph" {...props} />;
+};
+
+const ChoroplethChart: React.FC<any> = (props) => {
+  return <BaseChart type="choropleth" {...props} />;
+};
+
+const ParallelCoordinatesChart: React.FC<any> = (props) => {
+  return <BaseChart type="pcp" {...props} />;
+};
+
+const BarWithErrorBarsChart: React.FC<any> = (props) => {
+  return <BaseChart type="barWithErrorBars" {...props} />;
+};
 
 const TreemapChart: React.FC<any> = (props) => {
   return <BaseChart type="treemap" {...props} />;
@@ -124,6 +159,10 @@ const chartComponents: Record<string, React.FC<any>> = {
   ohlc: OhlcChart,
   boxplot: BoxPlotChart,
   violin: ViolinChart,
+  forceDirectedGraph: ForceDirectedGraphChart,
+  choropleth: ChoroplethChart,
+  parallelCoordinates: ParallelCoordinatesChart,
+  barWithErrorBars: BarWithErrorBarsChart,
 };
 
 interface ExtendedChartData<TType extends ChartType = ChartType, TData = unknown>

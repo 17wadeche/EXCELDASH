@@ -315,6 +315,50 @@ const CreateDashboard: React.FC = () => {
                 ["Negotiation", 30],
                 ["Closed", 15],
               ];
+              // ========== FORCE-DIRECTED GRAPH DATA ==========
+              exampleSheet.getRange("A86").values = [["Force-Directed Graph Data"]];
+              exampleSheet.getRange("A87:C87").values = [["NodeId", "Group", "Value"]];
+              exampleSheet.getRange("A88:C91").values = [
+                ["A", "Group1", 12],
+                ["B", "Group1", 8],
+                ["C", "Group2", 15],
+                ["D", "Group2", 10],
+              ];
+              exampleSheet.getRange("E86").values = [["Edges"]];
+              exampleSheet.getRange("E87:F87").values = [["Source", "Target", "Value", "Label"]];
+              exampleSheet.getRange("E88:F91").values = [
+                ["A", "B", 1, "AB"],
+                ["B", "C", 1, "BC"],
+                ["C", "D", 1, "CD"],
+                ["A", "D", 2, "AD"],
+              ];
+              // ========== CHOROPLETH CHART DATA ==========
+              exampleSheet.getRange("A96").values = [["Choropleth Chart Data"]];
+              exampleSheet.getRange("A97:B97").values = [["Region", "Value"]];
+              exampleSheet.getRange("A98:B101").values = [
+                ["US-CA", 25],
+                ["US-TX", 15],
+                ["US-NY", 30],
+                ["US-FL", 10],
+              ];
+              // ========== PARALLEL COORDINATES (PCP) DATA ==========
+              exampleSheet.getRange("A106").values = [["Parallel Coordinates Chart Data"]];
+              exampleSheet.getRange("A107:D107").values = [["Dim1", "Dim2", "Dim3", "Dim4"]];
+              exampleSheet.getRange("A108:D110").values = [
+                [10, 30, 50, 20],
+                [5, 40, 20, 10],
+                [9, 25, 55, 22],
+              ];
+              // ========== BAR WITH ERROR BARS DATA ==========
+              exampleSheet.getRange("A116").values = [["Bar with Error Bars Data"]];
+              exampleSheet.getRange("A117:D117").values = [
+                ["Label", "Value", "ErrorMinus", "ErrorPlus"],
+              ];
+              exampleSheet.getRange("A118:D120").values = [
+                ["A", 10, 2, 3],
+                ["B", 15, 1, 2],
+                ["C", 8, 1.5, 1.5],
+              ];
               exampleSheet.getUsedRange().format.autofitColumns();
             }
             await context.sync();
