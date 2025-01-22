@@ -1,15 +1,49 @@
 // src/taskpane/components/CreateDashboard.tsx
 
 import React, { useState, useContext, useEffect } from 'react';
-import { Layout, Form, Input, Button, message, Modal, Tooltip, Row, Col, Card, List, Spin, Divider, Empty } from 'antd';
+import {
+  Layout,
+  Form,
+  Input,
+  Button,
+  message,
+  Modal,
+  Tooltip,
+  Row,
+  Col,
+  Card,
+  List,
+  Spin,
+  Divider,
+  Empty,
+  Dropdown,
+  Menu,
+} from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { DashboardContext } from '../context/DashboardContext';
-import { DeleteOutlined, FolderAddOutlined, PlusOutlined } from '@ant-design/icons';
+import {
+  DeleteOutlined,
+  FolderAddOutlined,
+  PlusOutlined,
+  SettingOutlined,
+} from '@ant-design/icons';
 import { DashboardItem, NewDashboard, TemplateItem } from './types';
-import { createCheckoutSession, checkSubscription, loginUser, registerUser, verifySubscription, checkRegistration, unsubscribeUser, createDashboard, getTemplates, deleteTemplateById, getDashboards } from './../utils/api';
+import {
+  createCheckoutSession,
+  checkSubscription,
+  loginUser,
+  registerUser,
+  verifySubscription,
+  checkRegistration,
+  unsubscribeUser,
+  createDashboard,
+  getTemplates,
+  deleteTemplateById,
+  getDashboards,
+} from './../utils/api';
 import axios from 'axios';
 
-const { Content } = Layout;
+const { Header, Content } = Layout;
 const { Search } = Input;
 
 const CreateDashboard: React.FC = () => {
@@ -31,6 +65,63 @@ const CreateDashboard: React.FC = () => {
   const [templates, setTemplates] = useState<TemplateItem[]>([]);
   const [previewTemplate, setPreviewTemplate] = useState<TemplateItem | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+
+  // Gear menu actions
+  const handleLogout = () => {
+    Modal.confirm({
+      title: 'Are you sure you want to logout?',
+      okText: 'Yes',
+      cancelText: 'No',
+      onOk: () => {
+        // Clear user data from localStorage
+        localStorage.removeItem('token');
+        localStorage.removeItem('userEmail');
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('isSubscribed');
+        localStorage.removeItem('isRegistered');
+        delete axios.defaults.headers.common['Authorization'];
+        message.success('Logged out successfully!');
+        navigate('/login');
+      },
+    });
+  };
+
+  const handleUnsubscribe = () => {
+    Modal.confirm({
+      title: 'Are you sure you want to unsubscribe?',
+      content: 'This will cancel your subscription.',
+      okText: 'Yes',
+      cancelText: 'No',
+      onOk: async () => {
+        try {
+          const email = localStorage.getItem('userEmail');
+          if (!email) {
+            message.error('User email not found.');
+            return;
+          }
+          await unsubscribeUser(email);
+          // Update subscription status in localStorage
+          localStorage.setItem('isSubscribed', 'false');
+          message.success('You have successfully unsubscribed.');
+          navigate('/subscribe');
+        } catch (error: any) {
+          console.error('Error unsubscribing:', error);
+          message.error('Failed to unsubscribe.');
+        }
+      },
+    });
+  };
+
+  const menu = (
+    <Menu>
+      <Menu.Item key="unsubscribe" onClick={handleUnsubscribe}>
+        Unsubscribe
+      </Menu.Item>
+      <Menu.Item key="logout" onClick={handleLogout}>
+        Logout
+      </Menu.Item>
+    </Menu>
+  );
 
   useEffect(() => {
     const fetchData = async () => {
@@ -62,13 +153,13 @@ const CreateDashboard: React.FC = () => {
     try {
       let workbookId = currentWorkbookId;
       if (!workbookId) {
-        message.info("Waiting for Workbook ID to be initialized...");
+        message.info('Waiting for Workbook ID to be initialized...');
         return;
       }
       workbookId = workbookId.toLowerCase();
       setCurrentWorkbookId(workbookId);
-      console.log("Front-End: Using Workbook ID to create dashboard:", workbookId);
-      console.log("Front-End: Current Workbook ID from state:", currentWorkbookId);
+      console.log('Front-End: Using Workbook ID to create dashboard:', workbookId);
+      console.log('Front-End: Current Workbook ID from state:', currentWorkbookId);
       const newDashboard: NewDashboard = {
         title: dashboardTitle,
         components: [],
@@ -144,8 +235,25 @@ const CreateDashboard: React.FC = () => {
   );
 
   return (
-    <Layout style={{ padding: '24px', background: '#f0f2f5', minHeight: '100vh' }}>
-      <Content>
+    <Layout style={{ minHeight: '100vh' }}>
+      {/* Header with Gear Icon */}
+      <Header
+        style={{
+          background: '#fff',
+          padding: '0 24px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          boxShadow: '0 2px 8px #f0f1f2',
+        }}
+      >
+        <div style={{ fontSize: '20px', fontWeight: 'bold' }}>Create Dashboard</div>
+        <Dropdown overlay={menu} placement="bottomRight">
+          <SettingOutlined style={{ fontSize: '24px', cursor: 'pointer' }} />
+        </Dropdown>
+      </Header>
+
+      <Content style={{ padding: '24px', background: '#f0f2f5' }}>
         <Row justify="center" gutter={[100, 24]}>
           <Col xs={24} sm={20} md={16} lg={12}>
             <Card

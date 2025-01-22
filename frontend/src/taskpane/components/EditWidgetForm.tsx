@@ -228,8 +228,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                   borderColor: ds.borderColor || '#4caf50',
                   borderWidth: ds.borderWidth || 1,
                 };
-              }
-              else {
+              } else {
                 const points = segments.map((seg: string) => {
                   const [x, y] = seg.split(',').map((v: string) => parseFloat(v.trim()));
                   return { x, y };
