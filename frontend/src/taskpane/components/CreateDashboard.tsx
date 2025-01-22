@@ -65,7 +65,8 @@ const CreateDashboard: React.FC = () => {
   const [templates, setTemplates] = useState<TemplateItem[]>([]);
   const [previewTemplate, setPreviewTemplate] = useState<TemplateItem | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-
+  const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+  
   // Gear menu actions
   const handleLogout = () => {
     Modal.confirm({
