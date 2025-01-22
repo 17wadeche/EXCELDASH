@@ -28,10 +28,10 @@ import {
 import 'chartjs-adapter-moment';
 import {
   BoxPlotController,
+  BoxPlot,
   ViolinController,
-  BoxAndWhiskers, // correct spelling
   Violin,
-} from 'chartjs-chart-box-and-violin-plot';
+} from '@sgratzl/chartjs-chart-boxplot';
 import zoomPlugin from 'chartjs-plugin-zoom';
 import { TreemapController, TreemapElement } from 'chartjs-chart-treemap';
 import { FunnelController } from 'chartjs-chart-funnel';
