@@ -74,7 +74,6 @@ ChartJS.register(
   OhlcController,
   OhlcElement,
   BoxPlotController,
-  BoxAndWhiskers,
   ViolinController,
   Violin
 );
