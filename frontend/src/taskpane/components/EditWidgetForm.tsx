@@ -1,6 +1,6 @@
 /// <reference types="office-js" />
-// src/taskpane/components/EditWidgetForm.tsx
 
+// src/taskpane/components/EditWidgetForm.tsx
 import React, { useEffect, useState, useContext } from 'react';
 import {
   Form,
@@ -67,7 +67,9 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
     setSheets(availableWorksheets);
   }, [availableWorksheets]);
 
-  // ----- INITIAL VALUES FOR FORM -----
+  // --------------------------
+  // INITIAL VALUES FOR THE FORM
+  // --------------------------
   const getInitialValues = () => {
     switch (widget.type) {
       case 'text': {
@@ -79,9 +81,25 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
       case 'chart': {
         const data = widget.data as ChartData;
         const useArea = data.type === 'line' && data.datasets.some((ds) => ds.fill);
+        const initialChartType = useArea ? 'area' : data.type;
+        let bubbleColors: { color: string }[] = [];
+        if (initialChartType === 'bubble' && data.datasets.length) {
+          const bubbleDs = data.datasets[0];
+          if (bubbleDs.type === 'bubble' && Array.isArray(bubbleDs.data)) {
+            bubbleColors = (bubbleDs.data as any[]).map(() => ({
+              color: '#36A2EB',
+            }));
+            if (Array.isArray(bubbleDs.backgroundColor)) {
+              bubbleColors = (bubbleDs.backgroundColor as string[]).map((clr) => ({
+                color: clr,
+              }));
+            }
+          }
+        }
+
         return {
           title: data.title || 'Chart',
-          chartType: useArea ? 'area' : data.type,
+          chartType: initialChartType,
           labels: (data.labels || []).join(', '),
           worksheetName: data.worksheetName || sheets[0] || '',
           associatedRange: data.associatedRange || '',
@@ -109,15 +127,24 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           useGradientFills: data.gradientFills?.enabled || false,
           gradientStartColor: data.gradientFills?.startColor || 'rgba(75,192,192,0)',
           gradientEndColor: data.gradientFills?.endColor || 'rgba(75,192,192,0.4)',
-          // Datasets:
           datasets: (data.datasets || []).map((ds) => ({
             label: ds.label,
-            data: Array.isArray(ds.data) ? ds.data.join(', ') : ds.data,
+            data: Array.isArray(ds.data)
+              ? // For bubble/scatter, let's transform back to "x,y[,r]" strings separated by semicolons
+                ds.type === 'bubble'
+                  ? ds.data
+                      .map((pt: any) => `${pt.x},${pt.y},${pt.r}`)
+                      .join(';')
+                  : ds.type === 'scatter'
+                  ? ds.data.map((pt: any) => `${pt.x},${pt.y}`).join(';')
+                  : ds.data.join(', ')
+              : ds.data,
             type: ds.type || 'bar',
             backgroundColor: ds.backgroundColor,
             borderColor: ds.borderColor,
             borderWidth: ds.borderWidth,
           })),
+          bubbleColors,
         };
       }
       case 'gantt': {
@@ -128,9 +155,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
             ...task,
             start: moment(task.start),
             end: moment(task.end),
-            dependencies: task.dependencies
-              ? task.dependencies.toString()
-              : '',
+            dependencies: task.dependencies ? task.dependencies.toString() : '',
           })),
         };
       }
@@ -148,31 +173,20 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
     }
   };
 
-  // ----- SET INITIAL FORM VALUES -----
   useEffect(() => {
     form.setFieldsValue(getInitialValues());
-    // We also set the local state chartType if widget is chart
     if (widget.type === 'chart') {
       const cData = widget.data as ChartData;
       setChartType(cData.type);
     }
   }, [widget]);
 
-  useEffect(() => {
-    if (widget.type !== 'chart') return;
-    if (chartType !== 'bubble') return;
-    const datasets = form.getFieldValue('datasets') || [];
-    if (!datasets.length || datasets[0].type !== 'bubble') return;
-    const bubbleDataStr = datasets[0].data || '';
-    const segments = bubbleDataStr.split(';').map((s: string) => s.trim()).filter(Boolean);
-    let currentBubbleColors = form.getFieldValue('bubbleColors');
-    if (!Array.isArray(currentBubbleColors) || currentBubbleColors.length !== segments.length) {
-      currentBubbleColors = segments.map(() => ({ color: '#36A2EB' }));
-      form.setFieldsValue({ bubbleColors: currentBubbleColors });
-    }
-  }, [chartType, form, widget.type]);
+  // Keep no-axis chart types in one place
+  const noAxisTypes = ['pie', 'doughnut', 'polarArea', 'radar', 'bubble'];
 
-  // ----- SUBMIT HANDLER -----
+  // -------------
+  // FORM SUBMIT
+  // -------------
   const handleFinish = (values: any) => {
     const cleanedValues: Record<string, any> = {};
     Object.entries(values).forEach(([k, v]) => {
@@ -195,12 +209,16 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
       case 'chart': {
         const finalChartType =
           cleanedValues.chartType === 'area' ? 'line' : cleanedValues.chartType;
-        const noAxisTypes = ['pie', 'doughnut', 'polarArea', 'radar', 'bubble'];
-        let sliceColorsArray: string[] = [];
-        if (['pie', 'doughnut', 'polarArea'].includes(finalChartType)) {
-          const sc: { color: string }[] = cleanedValues.sliceColors || [];
-          sliceColorsArray = sc.map((obj) => obj.color);
+        const sliceColorsArray: string[] = [];
+        if (
+          ['pie', 'doughnut', 'polarArea'].includes(finalChartType) &&
+          cleanedValues.sliceColors
+        ) {
+          sliceColorsArray.push(
+            ...cleanedValues.sliceColors.map((obj: any) => obj.color)
+          );
         }
+
         updatedData = {
           title: cleanedValues.title,
           type: finalChartType,
@@ -210,36 +228,61 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
             ? cleanedValues.labels.split(',').map((l: string) => l.trim())
             : [],
           datasets: (cleanedValues.datasets || []).map((ds: any) => {
+            // Handle Bubble or Scatter
             if (ds.type === 'scatter' || ds.type === 'bubble') {
               const segments = ds.data
                 .split(';')
                 .map((s: string) => s.trim())
                 .filter(Boolean);
-              let backgroundColor: string | string[] = ds.backgroundColor || '#4caf50';
-              let points;
-              if (ds.type === 'bubble') {
-                points = segments.map((seg: string) => {
-                  const [x, y, r] = seg.split(',').map((v: string) => parseFloat(v.trim()));
-                  return { x, y, r };
-                });
-                const bubbleColors = cleanedValues.bubbleColors || [];
-                backgroundColor = bubbleColors.map((c: any) => c.color);
-              } else {
-                points = segments.map((seg: string) => {
-                  const [x, y] = seg.split(',').map((v: string) => parseFloat(v.trim()));
+
+              let backgroundColor: string | string[] =
+                ds.backgroundColor || '#4caf50';
+
+              // Scatter
+              if (ds.type === 'scatter') {
+                const points = segments.map((seg: string) => {
+                  const [x, y] = seg.split(',').map((v: string) => parseFloat(v));
                   return { x, y };
                 });
+                return {
+                  label: ds.label,
+                  type: ds.type,
+                  data: points,
+                  fill: false,
+                  backgroundColor,
+                  borderColor: ds.borderColor || '#4caf50',
+                  borderWidth: ds.borderWidth || 1,
+                };
               }
-              return {
-                label: ds.label,
-                type: ds.type,
-                data: points,
-                fill: false,
-                backgroundColor: backgroundColor,
-                borderColor: ds.borderColor || '#4caf50',
-                borderWidth: ds.borderWidth || 1,
-              };
+
+              // Bubble
+              // We'll use bubbleColors from the form to color each point individually
+              if (ds.type === 'bubble') {
+                const points = segments.map((seg: string) => {
+                  const [x, y, r] = seg.split(',').map((v: string) =>
+                    parseFloat(v.trim())
+                  );
+                  return { x, y, r };
+                });
+
+                // If user provided bubbleColors in the form, map them
+                if (Array.isArray(cleanedValues.bubbleColors)) {
+                  backgroundColor = cleanedValues.bubbleColors.map(
+                    (c: any) => c.color
+                  );
+                }
+                return {
+                  label: ds.label,
+                  type: ds.type,
+                  data: points,
+                  fill: false,
+                  backgroundColor: backgroundColor,
+                  borderColor: ds.borderColor || '#4caf50',
+                  borderWidth: ds.borderWidth || 1,
+                };
+              }
             } else {
+              // Regular chart dataset (bar/line/pie/etc.)
               let parsedValues: number[] = [];
               if (typeof ds.data === 'string') {
                 parsedValues = ds.data
@@ -250,9 +293,17 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
               } else {
                 parsedValues = [Number(ds.data)];
               }
-              const shouldFill = cleanedValues.chartType === 'area' || ds.type === 'area';
+
+              // If it's "area", we fill
+              const shouldFill =
+                cleanedValues.chartType === 'area' || ds.type === 'area';
+
+              // For pie/doughnut/polarArea, apply sliceColors if any
               let finalBg = ds.backgroundColor || '#4caf50';
-              if (['pie', 'doughnut', 'polarArea'].includes(finalChartType) && sliceColorsArray.length) {
+              if (
+                ['pie', 'doughnut', 'polarArea'].includes(finalChartType) &&
+                sliceColorsArray.length
+              ) {
                 finalBg = sliceColorsArray;
               }
 
@@ -340,8 +391,10 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           },
           gradientFills: {
             enabled: cleanedValues.useGradientFills || false,
-            startColor: cleanedValues.gradientStartColor || 'rgba(75,192,192,0)',
-            endColor: cleanedValues.gradientEndColor || 'rgba(75,192,192,0.4)',
+            startColor:
+              cleanedValues.gradientStartColor || 'rgba(75,192,192,0)',
+            endColor:
+              cleanedValues.gradientEndColor || 'rgba(75,192,192,0.4)',
           },
         } as ChartData;
 
@@ -428,6 +481,9 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
     return color;
   };
 
+  // -----------------
+  // RENDER THE FORM
+  // -----------------
   return (
     <Form
       form={form}
@@ -435,6 +491,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
       initialValues={getInitialValues()}
       onFinish={handleFinish}
     >
+      {/** TEXT WIDGET FORM **/}
       {widget.type === 'text' && (
         <>
           <Form.Item
@@ -461,14 +518,14 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           </Form.Item>
         </>
       )}
+
+      {/** TITLE WIDGET FORM **/}
       {widget.type === 'title' && (
         <>
           <Form.Item
             name="content"
             label="Title Text"
-            rules={[
-              { required: true, message: 'Please enter the title text' },
-            ]}
+            rules={[{ required: true, message: 'Please enter the title text' }]}
           >
             <Input />
           </Form.Item>
@@ -490,14 +547,14 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           </Form.Item>
         </>
       )}
+
+      {/** CHART WIDGET FORM **/}
       {widget.type === 'chart' && (
         <>
           <Form.Item
             name="title"
             label="Chart Title"
-            rules={[
-              { required: true, message: 'Please enter chart title' },
-            ]}
+            rules={[{ required: true, message: 'Please enter chart title' }]}
           >
             <Input />
           </Form.Item>
@@ -509,6 +566,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
             <Select
               onChange={(value: string) => {
                 setChartType(value);
+                // Also set each dataset's type to match the chosen chartType
                 const currentDatasets = form.getFieldValue('datasets') || [];
                 const updatedDatasets = currentDatasets.map((ds: any) => ({
                   ...ds,
@@ -534,7 +592,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           >
             <Input />
           </Form.Item>
-          {['pie', 'doughnut', 'polarArea', 'bubble'].includes(chartType) && (
+          {['pie', 'doughnut', 'polarArea'].includes(chartType) && (
             <Form.List name="sliceColors">
               {(fields) => {
                 const rawLabels = form.getFieldValue('labels') || '';
@@ -542,6 +600,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                   .split(',')
                   .map((l: string) => l.trim())
                   .filter(Boolean);
+
                 return (
                   <>
                     {fields.map(({ key, name, ...restField }) => {
@@ -562,6 +621,46 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
               }}
             </Form.List>
           )}
+          {chartType === 'bubble' && (
+            <Form.List name="bubbleColors">
+              {(fields) => {
+                const datasets = form.getFieldValue('datasets') || [];
+                const bubbleDs = datasets.find((d: any) => d.type === 'bubble');
+                if (!bubbleDs) return null;
+
+                const bubbleSegments = bubbleDs.data
+                  ?.split(';')
+                  .map((s: string) => s.trim())
+                  .filter(Boolean) || [];
+                while (fields.length < bubbleSegments.length) {
+                  fields.push({
+                    key: fields.length,
+                    name: fields.length,
+                    isListField: true,
+                  });
+                }
+                while (fields.length > bubbleSegments.length) {
+                  fields.pop();
+                }
+
+                return (
+                  <>
+                    {fields.map(({ key, name, ...restField }) => (
+                      <Form.Item
+                        {...restField}
+                        key={key}
+                        label={`Color for Bubble #${key + 1}`}
+                        name={[name, 'color']}
+                      >
+                        <Input type="color" />
+                      </Form.Item>
+                    ))}
+                  </>
+                );
+              }}
+            </Form.List>
+          )}
+
           <Form.Item
             name="worksheetName"
             label="Worksheet"
@@ -588,6 +687,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           >
             <Input placeholder="e.g., A1:B10" />
           </Form.Item>
+
           {!isPresenterMode && (
             <Form.Item>
               <Button
@@ -611,6 +711,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                         worksheetName,
                         associatedRange,
                       });
+
                       const worksheet = context.workbook.worksheets.getItem(
                         worksheetName
                       );
@@ -622,19 +723,15 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                       const mainType = form.getFieldValue('chartType');
                       console.log('Loaded data:', data);
 
+                      // Basic logic to parse data and populate datasets:
                       if (
-                        [
-                          'bar',
-                          'line',
-                          'pie',
-                          'doughnut',
-                          'radar',
-                          'polarArea',
-                        ].includes(mainType)
+                        ['bar', 'line', 'pie', 'doughnut', 'radar', 'polarArea'].includes(
+                          mainType
+                        )
                       ) {
                         if (data.length < 2) {
                           message.error(
-                            'Your selected range must have at least 2 rows (header + data).'
+                            'Selected range must have at least 2 rows (header + data).'
                           );
                           return;
                         }
@@ -654,7 +751,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                       } else if (mainType === 'scatter') {
                         if (data.length < 3) {
                           message.error(
-                            'Scatter data requires at least 3 rows: header row, X row, and Y row.'
+                            'Scatter requires at least 3 rows: header row, X row, Y row.'
                           );
                           return;
                         }
@@ -688,7 +785,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                       } else if (mainType === 'bubble') {
                         if (data.length < 4) {
                           message.error(
-                            'Bubble data requires at least 4 rows: header row, X row, Y row, R row.'
+                            'Bubble requires at least 4 rows: header row, X row, Y row, R row.'
                           );
                           return;
                         }
@@ -701,6 +798,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
 
                         const headerRow = data[0].slice(1);
                         const labelsStr = headerRow.join(', ');
+
                         if (
                           xVals.length !== yVals.length ||
                           yVals.length !== rVals.length
@@ -744,6 +842,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
               </Button>
             </Form.Item>
           )}
+
           <Form.List name="datasets">
             {(fields, { add, remove }) => (
               <>
@@ -769,6 +868,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                     >
                       <Input />
                     </Form.Item>
+
                     <Form.Item
                       {...restField}
                       name={[name, 'type']}
@@ -792,10 +892,11 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                         <Option value="scatter">Scatter</Option>
                       </Select>
                     </Form.Item>
+
                     <Form.Item
                       {...restField}
                       name={[name, 'data']}
-                      label="Data Points (comma-separated)"
+                      label="Data Points"
                       rules={[
                         {
                           required: true,
@@ -803,39 +904,68 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                         },
                         {
                           validator: (_, value) => {
-                            const dsType = form.getFieldValue(['datasets', name, 'type']);
+                            const dsType = form.getFieldValue([
+                              'datasets',
+                              name,
+                              'type',
+                            ]);
                             if (!value) return Promise.resolve();
-                        
+
                             if (dsType === 'bubble') {
+                              // "x,y,r" triplets separated by semicolons
                               const segments = value
                                 .split(';')
                                 .map((s: string) => s.trim())
                                 .filter(Boolean);
-                              for (let seg of segments) {
-                                const parts = seg.split(',').map((v: string) => v.trim());
-                                if (parts.length !== 3 || parts.some((p: string) => isNaN(Number(p)))) {
+                              for (const seg of segments) {
+                                const parts = seg
+                                  .split(',')
+                                  .map((v: string) => v.trim());
+                                if (
+                                  parts.length !== 3 ||
+                                  parts.some((p: string) => isNaN(Number(p)))
+                                ) {
                                   return Promise.reject(
-                                    new Error('Bubble data must be "x,y,r" triplets, separated by semicolons.')
+                                    new Error(
+                                      'Bubble data must be "x,y,r" triplets, separated by semicolons.'
+                                    )
                                   );
                                 }
                               }
                             } else if (dsType === 'scatter') {
-                              const segments = value.split(';').map((s: string) => s.trim()).filter(Boolean);
-                              for (let seg of segments) {
-                                const parts = seg.split(',').map((v: string) => v.trim());
-                                if (parts.length !== 2 || parts.some((p: string) => isNaN(Number(p)))) {
+                              // "x,y" pairs separated by semicolons
+                              const segments = value
+                                .split(';')
+                                .map((s: string) => s.trim())
+                                .filter(Boolean);
+                              for (const seg of segments) {
+                                const parts = seg
+                                  .split(',')
+                                  .map((v: string) => v.trim());
+                                if (
+                                  parts.length !== 2 ||
+                                  parts.some((p: string) => isNaN(Number(p)))
+                                ) {
                                   return Promise.reject(
-                                    new Error('Scatter data must be "x,y" pairs, separated by semicolons.')
+                                    new Error(
+                                      'Scatter data must be "x,y" pairs, separated by semicolons.'
+                                    )
                                   );
                                 }
                               }
                             } else {
                               const isNumArray = value
                                 .split(',')
-                                .map((v:string) => v.trim())
-                                .every((v: string) => !isNaN(Number(v)));
+                                .map((v: string) => v.trim())
+                                .every(
+                                  (v: string) => !isNaN(Number(v)) && v !== ''
+                                );
                               if (!isNumArray) {
-                                return Promise.reject(new Error('Data points must be comma-separated numbers.'));
+                                return Promise.reject(
+                                  new Error(
+                                    'Data points must be comma-separated numbers.'
+                                  )
+                                );
                               }
                             }
                             return Promise.resolve();
@@ -845,6 +975,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                     >
                       <Input />
                     </Form.Item>
+
                     <Form.Item
                       {...restField}
                       name={[name, 'backgroundColor']}
@@ -886,6 +1017,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                     >
                       <InputNumber min={0} />
                     </Form.Item>
+
                     <Button
                       type="dashed"
                       onClick={() => remove(name)}
@@ -918,195 +1050,187 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
               </>
             )}
           </Form.List>
+          {!noAxisTypes.includes(chartType) && (
+            <Collapse>
+              <Panel header="Axis Settings" key="axis">
+                <Form.Item label="X-Axis Type" name="xAxisType">
+                  <Select>
+                    <Option value="category">Category</Option>
+                    <Option value="linear">Linear</Option>
+                    <Option value="logarithmic">Logarithmic</Option>
+                  </Select>
+                </Form.Item>
+                <Form.Item label="X-Axis Title" name="xAxisTitle">
+                  <Input />
+                </Form.Item>
+                <Form.Item label="Y-Axis Type" name="yAxisType">
+                  <Select>
+                    <Option value="linear">Linear</Option>
+                    <Option value="logarithmic">Logarithmic</Option>
+                  </Select>
+                </Form.Item>
+                <Form.Item label="Y-Axis Title" name="yAxisTitle">
+                  <Input />
+                </Form.Item>
+              </Panel>
 
-          <Collapse>
-            {!['pie', 'doughnut', 'polarArea', 'radar', 'bubble'].includes(chartType) && (
-              <>
-                <Panel header="Axis Settings" key="axis">
-                  <Form.Item label="X-Axis Type" name="xAxisType">
-                    <Select>
-                      <Option value="category">Category</Option>
-                      <Option value="linear">Linear</Option>
-                      <Option value="logarithmic">Logarithmic</Option>
-                    </Select>
-                  </Form.Item>
-                  <Form.Item label="X-Axis Title" name="xAxisTitle">
-                    <Input />
-                  </Form.Item>
-                  <Form.Item label="Y-Axis Type" name="yAxisType">
-                    <Select>
-                      <Option value="linear">Linear</Option>
-                      <Option value="logarithmic">Logarithmic</Option>
-                    </Select>
-                  </Form.Item>
-                  <Form.Item label="Y-Axis Title" name="yAxisTitle">
-                    <Input />
-                  </Form.Item>
-                </Panel>
-                <Panel header="Plugins" key="plugins">
-                  <Form.Item
-                    label="Enable Zoom"
-                    name="enableZoom"
-                    valuePropName="checked"
-                  >
-                    <Switch />
-                  </Form.Item>
-                  <Form.Item
-                    label="Enable Pan"
-                    name="enablePan"
-                    valuePropName="checked"
-                  >
-                    <Switch />
-                  </Form.Item>
-                  <Form.Item label="Zoom Mode" name="zoomMode">
-                    <Select>
-                      <Option value="x">X</Option>
-                      <Option value="y">Y</Option>
-                      <Option value="xy">XY</Option>
-                    </Select>
-                  </Form.Item>
-                  <Form.Item
-                    label="Show Data Labels"
-                    name="showDataLabels"
-                    valuePropName="checked"
-                  >
-                    <Switch />
-                  </Form.Item>
-                  <Form.Item label="Data Label Color" name="dataLabelColor">
-                    <Input type="color" />
-                  </Form.Item>
-                  <Form.Item label="Data Label Font Size" name="dataLabelFontSize">
-                    <InputNumber min={8} max={24} />
-                  </Form.Item>
-                  <Form.Item
-                    label="Enable Tooltips"
-                    name="enableTooltips"
-                    valuePropName="checked"
-                  >
-                    <Switch />
-                  </Form.Item>
-                  <Form.Item label="Tooltip Template" name="tooltipTemplate">
-                    <TextArea
-                      placeholder="Use {label} and {value} placeholders"
-                      rows={2}
-                    />
-                  </Form.Item>
-                  <Form.Item label="Annotations">
-                    <Form.List name="annotations">
-                      {(annFields, { add, remove }) => (
-                        <>
-                          {annFields.map(({ key, name, ...restField }) => (
-                            <div key={key} style={{ marginBottom: 16 }}>
-                              <Form.Item
-                                {...restField}
-                                name={[name, 'type']}
-                                label="Annotation Type"
-                                rules={[
-                                  { required: true, message: 'Select type' },
-                                ]}
-                              >
-                                <Select>
-                                  <Option value="line">Line</Option>
-                                  <Option value="box">Box</Option>
-                                </Select>
-                              </Form.Item>
-                              <Form.Item
-                                {...restField}
-                                name={[name, 'value']}
-                                label="Value"
-                                rules={[
-                                  { required: true, message: 'Enter value' },
-                                ]}
-                              >
-                                <InputNumber />
-                              </Form.Item>
-                              <Form.Item
-                                {...restField}
-                                name={[name, 'label']}
-                                label="Label"
-                              >
-                                <Input />
-                              </Form.Item>
-                              <Form.Item
-                                {...restField}
-                                name={[name, 'color']}
-                                label="Color"
-                                rules={[
-                                  { required: true, message: 'Pick a color' },
-                                ]}
-                              >
-                                <Input type="color" />
-                              </Form.Item>
-                              <Button
-                                type="dashed"
-                                onClick={() => remove(name)}
-                                icon={<MinusCircleOutlined />}
-                              >
-                                Remove
-                              </Button>
-                            </div>
-                          ))}
-                          <Form.Item>
+              <Panel header="Plugins" key="plugins">
+                <Form.Item label="Enable Zoom" name="enableZoom" valuePropName="checked">
+                  <Switch />
+                </Form.Item>
+                <Form.Item label="Enable Pan" name="enablePan" valuePropName="checked">
+                  <Switch />
+                </Form.Item>
+                <Form.Item label="Zoom Mode" name="zoomMode">
+                  <Select>
+                    <Option value="x">X</Option>
+                    <Option value="y">Y</Option>
+                    <Option value="xy">XY</Option>
+                  </Select>
+                </Form.Item>
+                <Form.Item
+                  label="Show Data Labels"
+                  name="showDataLabels"
+                  valuePropName="checked"
+                >
+                  <Switch />
+                </Form.Item>
+                <Form.Item label="Data Label Color" name="dataLabelColor">
+                  <Input type="color" />
+                </Form.Item>
+                <Form.Item label="Data Label Font Size" name="dataLabelFontSize">
+                  <InputNumber min={8} max={24} />
+                </Form.Item>
+                <Form.Item
+                  label="Enable Tooltips"
+                  name="enableTooltips"
+                  valuePropName="checked"
+                >
+                  <Switch />
+                </Form.Item>
+                <Form.Item label="Tooltip Template" name="tooltipTemplate">
+                  <TextArea
+                    placeholder="Use {label} and {value} placeholders"
+                    rows={2}
+                  />
+                </Form.Item>
+                <Form.Item label="Annotations">
+                  <Form.List name="annotations">
+                    {(annFields, { add, remove }) => (
+                      <>
+                        {annFields.map(({ key, name, ...restField }) => (
+                          <div key={key} style={{ marginBottom: 16 }}>
+                            <Form.Item
+                              {...restField}
+                              name={[name, 'type']}
+                              label="Annotation Type"
+                              rules={[
+                                { required: true, message: 'Select type' },
+                              ]}
+                            >
+                              <Select>
+                                <Option value="line">Line</Option>
+                                <Option value="box">Box</Option>
+                              </Select>
+                            </Form.Item>
+                            <Form.Item
+                              {...restField}
+                              name={[name, 'value']}
+                              label="Value"
+                              rules={[
+                                { required: true, message: 'Enter value' },
+                              ]}
+                            >
+                              <InputNumber />
+                            </Form.Item>
+                            <Form.Item
+                              {...restField}
+                              name={[name, 'label']}
+                              label="Label"
+                            >
+                              <Input />
+                            </Form.Item>
+                            <Form.Item
+                              {...restField}
+                              name={[name, 'color']}
+                              label="Color"
+                              rules={[
+                                { required: true, message: 'Pick a color' },
+                              ]}
+                            >
+                              <Input type="color" />
+                            </Form.Item>
                             <Button
                               type="dashed"
-                              onClick={() => add()}
-                              icon={<PlusOutlined />}
+                              onClick={() => remove(name)}
+                              icon={<MinusCircleOutlined />}
                             >
-                              Add Annotation
+                              Remove
                             </Button>
-                          </Form.Item>
-                        </>
-                      )}
-                    </Form.List>
-                  </Form.Item>
-                </Panel>
-                <Panel header="Legend" key="legend">
-                  <Form.Item
-                    label="Show Legend"
-                    name="showLegend"
-                    valuePropName="checked"
-                  >
-                    <Switch />
-                  </Form.Item>
-                  <Form.Item label="Legend Position" name="legendPosition">
-                    <Select>
-                      <Option value="top">Top</Option>
-                      <Option value="bottom">Bottom</Option>
-                      <Option value="left">Left</Option>
-                      <Option value="right">Right</Option>
-                    </Select>
-                  </Form.Item>
-                </Panel>
-                <Panel header="Styling" key="styling">
-                  <Form.Item
-                    label="Chart Background Color"
-                    name="chartBackgroundColor"
-                  >
-                    <Input type="color" />
-                  </Form.Item>
-                  <Form.Item label="Grid Line Color" name="gridLineColor">
-                    <Input type="color" />
-                  </Form.Item>
-                  <Form.Item
-                    label="Use Gradient Fills"
-                    name="useGradientFills"
-                    valuePropName="checked"
-                  >
-                    <Switch />
-                  </Form.Item>
-                  <Form.Item
-                    label="Gradient Start Color"
-                    name="gradientStartColor"
-                  >
-                    <Input type="color" />
-                  </Form.Item>
-                  <Form.Item label="Gradient End Color" name="gradientEndColor">
-                    <Input type="color" />
-                  </Form.Item>
-                </Panel>
-              </>
-            )}
-          </Collapse>
+                          </div>
+                        ))}
+                        <Form.Item>
+                          <Button
+                            type="dashed"
+                            onClick={() => add()}
+                            icon={<PlusOutlined />}
+                          >
+                            Add Annotation
+                          </Button>
+                        </Form.Item>
+                      </>
+                    )}
+                  </Form.List>
+                </Form.Item>
+              </Panel>
+
+              <Panel header="Legend" key="legend">
+                <Form.Item
+                  label="Show Legend"
+                  name="showLegend"
+                  valuePropName="checked"
+                >
+                  <Switch />
+                </Form.Item>
+                <Form.Item label="Legend Position" name="legendPosition">
+                  <Select>
+                    <Option value="top">Top</Option>
+                    <Option value="bottom">Bottom</Option>
+                    <Option value="left">Left</Option>
+                    <Option value="right">Right</Option>
+                  </Select>
+                </Form.Item>
+              </Panel>
+
+              <Panel header="Styling" key="styling">
+                <Form.Item
+                  label="Chart Background Color"
+                  name="chartBackgroundColor"
+                >
+                  <Input type="color" />
+                </Form.Item>
+                <Form.Item label="Grid Line Color" name="gridLineColor">
+                  <Input type="color" />
+                </Form.Item>
+                <Form.Item
+                  label="Use Gradient Fills"
+                  name="useGradientFills"
+                  valuePropName="checked"
+                >
+                  <Switch />
+                </Form.Item>
+                <Form.Item
+                  label="Gradient Start Color"
+                  name="gradientStartColor"
+                >
+                  <Input type="color" />
+                </Form.Item>
+                <Form.Item label="Gradient End Color" name="gradientEndColor">
+                  <Input type="color" />
+                </Form.Item>
+              </Panel>
+            </Collapse>
+          )}
 
           <Form.Item name="titleAlignment" label="Title Alignment">
             <Select>
@@ -1123,9 +1247,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           <Form.Item
             name="title"
             label="Gantt Chart Title"
-            rules={[
-              { required: true, message: 'Please enter Gantt chart title' },
-            ]}
+            rules={[{ required: true, message: 'Please enter Gantt chart title' }]}
           >
             <Input />
           </Form.Item>
@@ -1249,9 +1371,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           <Form.Item
             name="format"
             label="Display Format"
-            rules={[
-              { required: true, message: 'Please select a display format' },
-            ]}
+            rules={[{ required: true, message: 'Please select a display format' }]}
           >
             <Select placeholder="Select format">
               <Option value="percentage">Percentage (%)</Option>
@@ -1265,18 +1385,14 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           <Form.Item
             name="targetValue"
             label="Target Value"
-            rules={[
-              { required: true, message: 'Please enter a target value' },
-            ]}
+            rules={[{ required: true, message: 'Please enter a target value' }]}
           >
             <InputNumber placeholder="Enter target" />
           </Form.Item>
           <Form.Item
             name="comparison"
             label="Comparison Type"
-            rules={[
-              { required: true, message: 'Please select a comparison type' },
-            ]}
+            rules={[{ required: true, message: 'Please select a comparison type' }]}
           >
             <Select placeholder="Select comparison type">
               <Option value="greater">Greater or Equal</Option>
@@ -1286,9 +1402,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           <Form.Item
             name="fontSize"
             label="Font Size"
-            rules={[
-              { required: true, message: 'Please enter a font size' },
-            ]}
+            rules={[{ required: true, message: 'Please enter a font size' }]}
           >
             <InputNumber min={12} max={100} placeholder="Font size" />
           </Form.Item>
