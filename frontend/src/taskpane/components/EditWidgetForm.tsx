@@ -915,7 +915,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
             <Collapse>
               <Collapse.Panel header="Bubble Colors" key="bubbleColors">
                 <Form.List name="bubbleColors">
-                  {(fields, { add, remove }) => (
+                  {(fields) => (
                     <>
                       {fields.map(({ key, name, ...restField }) => (
                         <Form.Item
