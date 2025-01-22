@@ -492,6 +492,282 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
     form: any
   ) => {
     switch (mainType) {
+      case 'boxplot': {
+        /**
+         * Based on your sample data:
+         * Row1: ["Box Plot Data"]
+         * Row2: ["", "Q1", "Median", "Q3", "Min", "Max"]
+         * Row3..: e.g. ["Sample1", 10, 20, 30, 5, 35]
+         *
+         * We want an array of arrays => [ [min, q1, median, q3, max], ... ]
+         * or objects. We'll do array form: [min, q1, median, q3, max].
+         */
+        if (data.length < 3) {
+          message.error('Boxplot data requires at least 3 rows: title row + header row + data.');
+          return;
+        }
+        // skip the top line ("Box Plot Data"), parse from row2 as header
+        const headerRow = data[1]; // e.g. ["", "Q1", "Median", "Q3", "Min", "Max"]
+        const rawDataRows = data.slice(2);
+
+        // For each row, reorder to [min, q1, median, q3, max]
+        const boxData = rawDataRows.map((row: any[]) => {
+          // row = ["Sample1", Q1, Median, Q3, Min, Max]
+          const q1 = Number(row[1]);
+          const median = Number(row[2]);
+          const q3 = Number(row[3]);
+          const min = Number(row[4]);
+          const max = Number(row[5]);
+          return [min, q1, median, q3, max];
+        });
+
+        form.setFieldsValue({
+          labels: '',
+          datasets: [
+            {
+              label: 'BoxPlot Series',
+              type: 'boxplot',
+              data: JSON.stringify(boxData),
+              backgroundColor: getRandomColor(),
+              borderColor: getRandomColor(),
+              borderWidth: 1,
+            },
+          ],
+        });
+        message.success('Boxplot data loaded from Excel.');
+        break;
+      }
+
+      // ========== VIOLIN ==========
+      case 'violin': {
+        /**
+         * Sample data:
+         * Row1: ["Violin Chart Data"]
+         * Row2: ["Sample", "Value"]
+         * Row3..: ["GroupA", 5], ["GroupA", 8], ...
+         *
+         * We want multiple groups => e.g. { label: 'GroupA', data: [5,8,10...] }, etc.
+         */
+        if (data.length < 3) {
+          message.error('Violin data needs at least 3 rows: title row + header + data.');
+          return;
+        }
+        // skip row0 ("Violin Chart Data"), row1 is ["Sample","Value"]
+        const bodyRows = data.slice(2);
+        // group them by the first column
+        const groupMap: Record<string, number[]> = {};
+        bodyRows.forEach((row: any[]) => {
+          const groupName = row[0];
+          const val = Number(row[1]);
+          if (!groupMap[groupName]) {
+            groupMap[groupName] = [];
+          }
+          groupMap[groupName].push(val);
+        });
+
+        // Build one dataset per group
+        const violinDatasets = Object.keys(groupMap).map((group) => ({
+          label: group,
+          type: 'violin',
+          data: groupMap[group],
+          backgroundColor: getRandomColor(),
+          borderColor: getRandomColor(),
+          borderWidth: 1,
+        }));
+
+        form.setFieldsValue({
+          labels: '',
+          datasets: violinDatasets,
+        });
+        message.success('Violin data loaded from Excel.');
+        break;
+      }
+
+      // ========== CANDLESTICK ==========
+      case 'candlestick': {
+        /**
+         * Sample data:
+         * Row1: ["Candlestick Chart Data"]
+         * Row2: ["Label","Open","High","Low","Close"]
+         * Row3..: ["Day1",100,110,95,105], ...
+         *
+         * We'll store e.g. data: [{ x:'Day1', o:100, h:110, l:95, c:105 }, ...]
+         */
+        if (data.length < 3) {
+          message.error('Candlestick data needs 3+ rows: title row + header + data rows.');
+          return;
+        }
+        // row2 = e.g. ["Label","Open","High","Low","Close"]
+        const rawRows = data.slice(2); // data rows
+        const candleData = rawRows.map((row: any[]) => ({
+          x: row[0],
+          o: Number(row[1]),
+          h: Number(row[2]),
+          l: Number(row[3]),
+          c: Number(row[4]),
+        }));
+
+        form.setFieldsValue({
+          labels: '',
+          datasets: [
+            {
+              label: 'Candlestick Series',
+              type: 'candlestick',
+              data: JSON.stringify(candleData),
+              backgroundColor: getRandomColor(),
+              borderColor: getRandomColor(),
+              borderWidth: 1,
+            },
+          ],
+        });
+        message.success('Candlestick data loaded from Excel.');
+        break;
+      }
+
+      // ========== OHLC ==========
+      case 'ohlc': {
+        /**
+         * Similar to candlestick:
+         * Row1: ["OHLC Chart Data"]
+         * Row2: ["Label","Open","High","Low","Close"]
+         * Row3..: ["Day1",50,60,45,55], ...
+         */
+        if (data.length < 3) {
+          message.error('OHLC data needs 3+ rows: title row + header + data rows.');
+          return;
+        }
+        const rawRows = data.slice(2);
+        const ohlcData = rawRows.map((row: any[]) => ({
+          x: row[0],
+          o: Number(row[1]),
+          h: Number(row[2]),
+          l: Number(row[3]),
+          c: Number(row[4]),
+        }));
+
+        form.setFieldsValue({
+          labels: '',
+          datasets: [
+            {
+              label: 'OHLC Series',
+              type: 'ohlc',
+              data: JSON.stringify(ohlcData),
+              backgroundColor: getRandomColor(),
+              borderColor: getRandomColor(),
+              borderWidth: 1,
+            },
+          ],
+        });
+        message.success('OHLC data loaded from Excel.');
+        break;
+      }
+
+      // ========== TREEMAP ==========
+      case 'treemap': {
+        /**
+         * Row1: ["Treemap Chart Data"]
+         * Row2: ["Label","Value"]
+         * Row3..: ["Category A", 10], ...
+         *
+         * We'll store data as array of { label, value }
+         */
+        if (data.length < 3) {
+          message.error('Treemap data requires 3+ rows: title row + header + data.');
+          return;
+        }
+        const rawRows = data.slice(2);
+        const treemapData = rawRows.map((row: any[]) => ({
+          label: row[0],
+          value: Number(row[1]),
+        }));
+
+        form.setFieldsValue({
+          labels: '',
+          datasets: [
+            {
+              label: 'Treemap Series',
+              type: 'treemap',
+              data: JSON.stringify(treemapData),
+              backgroundColor: getRandomColor(),
+              borderColor: getRandomColor(),
+              borderWidth: 1,
+            },
+          ],
+        });
+        message.success('Treemap data loaded from Excel.');
+        break;
+      }
+
+      // ========== WORD CLOUD ==========
+      case 'wordCloud': {
+        /**
+         * Row1: ["Word Cloud Chart Data"]
+         * Row2: ["Word","Frequency"]
+         * Row3..: e.g. ["Hello", 10], ...
+         *
+         * We'll do data: [{ word, freq }, ...]
+         */
+        if (data.length < 3) {
+          message.error('Word Cloud needs at least 3 rows: title + header + data.');
+          return;
+        }
+        const rawRows = data.slice(2);
+        const wcData = rawRows.map((row: any[]) => ({
+          word: row[0],
+          freq: Number(row[1]),
+        }));
+
+        form.setFieldsValue({
+          labels: '',
+          datasets: [
+            {
+              label: 'Word Cloud',
+              type: 'wordCloud',
+              data: JSON.stringify(wcData),
+              backgroundColor: getRandomColor(),
+              borderColor: getRandomColor(),
+              borderWidth: 1,
+            },
+          ],
+        });
+        message.success('Word Cloud data loaded from Excel.');
+        break;
+      }
+
+      // ========== FUNNEL ==========
+      case 'funnel': {
+        /**
+         * Row1: ["Funnel Chart Data"]
+         * Row2: ["Stage","Value"]
+         * Row3..: ["Prospects", 200], ["Qualified",100], ...
+         *
+         * We'll store a single dataset with numeric data, plus
+         * form.setFieldsValue({ labels: [ "Prospects","Qualified", ... ] }).
+         */
+        if (data.length < 3) {
+          message.error('Funnel requires 3+ rows: title + header + data.');
+          return;
+        }
+        const rawRows = data.slice(2);
+        const labels = rawRows.map((row) => row[0]);
+        const values = rawRows.map((row) => Number(row[1]));
+
+        form.setFieldsValue({
+          labels: labels.join(', '),
+          datasets: [
+            {
+              label: 'Funnel Series',
+              type: 'funnel',
+              data: values.join(', '),
+              backgroundColor: getRandomColor(),
+              borderColor: getRandomColor(),
+              borderWidth: 1,
+            },
+          ],
+        });
+        message.success('Funnel data loaded from Excel.');
+        break;
+      }
       // ===== Force-Directed Graph =====
       case 'forceDirectedGraph': {
         /**

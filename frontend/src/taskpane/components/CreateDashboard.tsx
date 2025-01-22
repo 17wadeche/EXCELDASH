@@ -325,8 +325,8 @@ const CreateDashboard: React.FC = () => {
                 ["D", "Group2", 10],
               ];
               exampleSheet.getRange("E86").values = [["Edges"]];
-              exampleSheet.getRange("E87:F87").values = [["Source", "Target", "Value", "Label"]];
-              exampleSheet.getRange("E88:F91").values = [
+              exampleSheet.getRange("E87:H87").values = [["Source", "Target", "Value", "Label"]];
+              exampleSheet.getRange("E88:H91").values = [
                 ["A", "B", 1, "AB"],
                 ["B", "C", 1, "BC"],
                 ["C", "D", 1, "CD"],
