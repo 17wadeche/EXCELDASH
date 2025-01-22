@@ -668,16 +668,15 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                           );
                           return;
                         }
-                        const points = xVals.map((x: number, idx: number) => ({
-                          x,
-                          y: yVals[idx],
-                        }));
+                        const dataString = xVals
+                          .map((x: number, idx: number) => `${x},${yVals[idx]}`)
+                          .join(';');
                         form.setFieldsValue({
                           labels: '',
                           datasets: [
                             {
                               label: 'Scatter Series',
-                              data: points,
+                              data: dataString,
                               type: 'scatter',
                               backgroundColor: getRandomColor(),
                               borderColor: getRandomColor(),
