@@ -201,49 +201,72 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
         const finalChartType =
           cleanedValues.chartType === 'area' ? 'line' : cleanedValues.chartType;
         const noAxisTypes = ['pie', 'doughnut', 'polarArea', 'radar', 'bubble'];
+      
+        // If it's a pie/doughnut/polarArea chart, collect slice colors
         let sliceColorsArray: string[] = [];
         if (['pie', 'doughnut', 'polarArea'].includes(finalChartType)) {
           const sc: { color: string }[] = cleanedValues.sliceColors || [];
           sliceColorsArray = sc.map((obj) => obj.color);
         }
+      
         updatedData = {
           title: cleanedValues.title,
           type: finalChartType,
           worksheetName: cleanedValues.worksheetName,
           associatedRange: cleanedValues.associatedRange,
+      
+          // Split label string on commas
           labels: cleanedValues.labels
             ? cleanedValues.labels.split(',').map((l: string) => l.trim())
             : [],
+      
+          // Build datasets
           datasets: (cleanedValues.datasets || []).map((ds: any) => {
+            // Handle scatter / bubble datasets
             if (ds.type === 'scatter' || ds.type === 'bubble') {
               const segments = ds.data
                 .split(';')
                 .map((s: string) => s.trim())
                 .filter(Boolean);
-              let points;
+      
+              // Bubble
               if (ds.type === 'bubble') {
-                points = segments.map((seg: string) => {
+                const points = segments.map((seg: string) => {
                   const [x, y, r] = seg.split(',').map((v: string) => parseFloat(v.trim()));
                   return { x, y, r };
                 });
                 const bubbleColors = cleanedValues.bubbleColors || [];
                 const backgroundColors = bubbleColors.map((c: any) => c.color);
-              } else {
-                points = segments.map((seg: string) => {
+      
+                return {
+                  label: ds.label,
+                  type: ds.type,
+                  data: points,
+                  fill: false,
+                  backgroundColor: backgroundColors,
+                  borderColor: ds.borderColor || '#4caf50',
+                  borderWidth: ds.borderWidth || 1,
+                };
+              } 
+              // Scatter
+              else {
+                const points = segments.map((seg: string) => {
                   const [x, y] = seg.split(',').map((v: string) => parseFloat(v.trim()));
                   return { x, y };
                 });
+                return {
+                  label: ds.label,
+                  type: ds.type,
+                  data: points,
+                  fill: false,
+                  backgroundColor: ds.backgroundColor || '#4caf50',
+                  borderColor: ds.borderColor || '#4caf50',
+                  borderWidth: ds.borderWidth || 1,
+                };
               }
-              return {
-                label: ds.label,
-                type: ds.type,
-                data: points,
-                fill: false,
-                backgroundColor: backgroundColors,
-                borderColor: ds.borderColor || '#4caf50',
-                borderWidth: ds.borderWidth || 1,
-              };
-            } else {
+            } 
+            // Handle bar, line, pie, doughnut, etc.
+            else {
               let parsedValues: number[] = [];
               if (typeof ds.data === 'string') {
                 parsedValues = ds.data
@@ -254,12 +277,20 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
               } else {
                 parsedValues = [Number(ds.data)];
               }
-              const shouldFill = cleanedValues.chartType === 'area' || ds.type === 'area';
+      
+              // "Area" fill logic
+              const shouldFill =
+                cleanedValues.chartType === 'area' || ds.type === 'area';
+      
+              // If it’s a pie/doughnut/polarArea chart, override background with sliceColors
               let finalBg = ds.backgroundColor || '#4caf50';
-              if (['pie', 'doughnut', 'polarArea'].includes(finalChartType) && sliceColorsArray.length) {
+              if (
+                ['pie', 'doughnut', 'polarArea'].includes(finalChartType) &&
+                sliceColorsArray.length
+              ) {
                 finalBg = sliceColorsArray;
               }
-
+      
               return {
                 label: ds.label,
                 data: parsedValues,
@@ -271,7 +302,10 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
               };
             }
           }),
+      
           titleAlignment: cleanedValues.titleAlignment || 'left',
+      
+          // Hide axes if it's a chart type that doesn't use them
           scales: noAxisTypes.includes(finalChartType)
             ? {}
             : {
@@ -290,6 +324,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                   },
                 },
               },
+      
           plugins: {
             legend: {
               display: cleanedValues.showLegend !== false,
@@ -335,6 +370,8 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
               },
             },
           },
+      
+          // General chart styling/settings
           backgroundColor: cleanedValues.chartBackgroundColor || '#ffffff',
           gridLineColor: cleanedValues.gridLineColor || 'rgba(0, 0, 0, 0.1)',
           locale: cleanedValues.locale || 'en-US',
@@ -348,7 +385,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
             endColor: cleanedValues.gradientEndColor || 'rgba(75,192,192,0.4)',
           },
         } as ChartData;
-
+      
         break;
       }
       case 'gantt': {
