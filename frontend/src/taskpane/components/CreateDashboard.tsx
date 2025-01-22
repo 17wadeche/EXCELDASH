@@ -236,7 +236,6 @@ const CreateDashboard: React.FC = () => {
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      {/* Header with Gear Icon */}
       <Header
         style={{
           background: '#fff',
@@ -244,7 +243,6 @@ const CreateDashboard: React.FC = () => {
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          boxShadow: '0 2px 8px #f0f1f2',
         }}
       >
         <div style={{ fontSize: '20px', fontWeight: 'bold' }}>Create Dashboard</div>

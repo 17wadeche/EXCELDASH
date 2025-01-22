@@ -186,3 +186,11 @@ export async function searchUsers(query: string): Promise<User[]> {
   const res = await axios.get(`/api/users`, { params: { search: query } });
   return res.data;
 }
+
+export const requestPasswordReset = async (email: string): Promise<void> => {
+  await axios.post(`${API_BASE_URL}/password-reset/request`, { email });
+};
+
+export const resetPassword = async (token: string, newPassword: string): Promise<void> => {
+  await axios.post(`${API_BASE_URL}/password-reset/confirm`, { token, newPassword });
+};

@@ -11,6 +11,8 @@ import RegisterPage from './RegisterPage';
 import LoginPage from './LoginPage';
 import SubscribePage from './SubscribePage';
 import EditTemplate from './EditTemplate';
+import ForgotPasswordPage from './ForgotPasswordPage';
+import ResetPasswordPage from './ResetPasswordPage';
 import { DashboardProvider } from '../context/DashboardContext';
 import PrivateRoute from './PrivateRoute'; // We'll create this next
 
@@ -37,6 +39,8 @@ const App: React.FC = () => {
           <Route path="register" element={<RegisterPage />} />
           <Route path="login" element={<LoginPage />} />
           <Route path="subscribe" element={<SubscribePage />} />
+          <Route path="forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="reset-password" element={<ResetPasswordPage />} />
           <Route path="*" element={<Navigate to="/dashboard-list" replace />} />
         </Route>
       </Routes>

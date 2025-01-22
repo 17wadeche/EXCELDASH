@@ -1,11 +1,12 @@
 // src/taskpane/components/LoginPage.tsx
 
 import React, { useState } from 'react';
-import { Layout, Form, Input, Button, message } from 'antd';
-import { useNavigate } from 'react-router-dom';
+import { Layout, Form, Input, Button, message, Typography } from 'antd';
+import { useNavigate, Link } from 'react-router-dom';
 import { loginUser, checkSubscription, checkRegistration } from './../utils/api';
 
 const { Content } = Layout;
+const { Text } = Typography;
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -45,11 +46,14 @@ const LoginPage: React.FC = () => {
   return (
     <Layout style={{ padding: '24px', minHeight: '100vh' }}>
       <Content>
-        <div style={{ maxWidth: '400px', margin: '0 auto' }}>
-          <h2>Login</h2>
-          <Form>
+        <div style={{ maxWidth: '400px', margin: '0 auto', textAlign: 'center' }}>
+          <Typography.Title level={2}>Login</Typography.Title>
+          <Form style={{ marginTop: '24px' }}>
             <Form.Item
-              rules={[{ required: true, message: 'Please enter your email' }]}
+              rules={[
+                { required: true, message: 'Please enter your email' },
+                { type: 'email', message: 'Please enter a valid email' },
+              ]}
             >
               <Input
                 placeholder="Enter your email"
@@ -58,7 +62,9 @@ const LoginPage: React.FC = () => {
               />
             </Form.Item>
             <Form.Item
-              rules={[{ required: true, message: 'Please enter your password' }]}
+              rules={[
+                { required: true, message: 'Please enter your password' },
+              ]}
             >
               <Input.Password
                 placeholder="Enter your password"
@@ -66,9 +72,21 @@ const LoginPage: React.FC = () => {
                 onChange={(e) => setPassword(e.target.value)}
               />
             </Form.Item>
-            <Button type="primary" onClick={handleLogin} loading={isLoading}>
-              Login
-            </Button>
+            <Form.Item>
+              <Button
+                type="primary"
+                onClick={handleLogin}
+                loading={isLoading}
+                block
+              >
+                Login
+              </Button>
+            </Form.Item>
+            <Form.Item>
+              <Text>
+                Forgot your password? <Link to="/forgot-password">Reset Password</Link>
+              </Text>
+            </Form.Item>
           </Form>
         </div>
       </Content>
