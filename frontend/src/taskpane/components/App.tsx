@@ -13,6 +13,7 @@ import SubscribePage from './SubscribePage';
 import EditTemplate from './EditTemplate';
 import ForgotPasswordPage from './ForgotPasswordPage';
 import ResetPasswordPage from './ResetPasswordPage';
+import EnterResetCodePage from './EnterResetCodePage';
 import { DashboardProvider } from '../context/DashboardContext';
 import PrivateRoute from './PrivateRoute'; // We'll create this next
 
@@ -40,6 +41,7 @@ const App: React.FC = () => {
           <Route path="login" element={<LoginPage />} />
           <Route path="subscribe" element={<SubscribePage />} />
           <Route path="forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="enter-code" element={<EnterResetCodePage />} />
           <Route path="reset-password" element={<ResetPasswordPage />} />
           <Route path="*" element={<Navigate to="/dashboard-list" replace />} />
         </Route>

@@ -1,15 +1,14 @@
 // password-reset/confirm/index.js
-
 const initializeModels = require('../models');
 const Joi = require('joi');
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 
 module.exports = async function (context, req) {
-  context.log('=== [password-reset/index.js] START ===');
+  context.log('=== [password-reset/confirm/index.js] START ===');
 
   const schema = Joi.object({
-    token: Joi.string().uuid().required(),
+    // Instead of requiring a UUID, just require a string of length 6
+    token: Joi.string().length(6).required(),
     newPassword: Joi.string().min(6).required(),
   });
 
@@ -20,64 +19,71 @@ module.exports = async function (context, req) {
       status: 400,
       body: { error: error.details[0].message },
     };
-    context.log('=== [password-reset/index.js] END (validation fail) ===');
     return;
   }
+
   const { token, newPassword } = value;
+
   try {
     const { User, PasswordResetToken, RefreshToken } = await initializeModels();
-    context.log('[password-reset/] Models loaded.');
+    context.log('[password-reset/confirm] Models loaded.');
 
+    // Look up the 6-digit code
     const resetTokenRecord = await PasswordResetToken.findOne({ where: { token } });
     if (!resetTokenRecord) {
-      context.log.error('[password-reset/] Invalid token:', token);
+      context.log.error('[password-reset/confirm] Invalid token:', token);
       context.res = {
         status: 400,
-        body: { error: 'Invalid or expired token.' },
+        body: { error: 'Invalid or expired code.' },
       };
-      context.log('=== [password-reset/index.js] END (invalid token) ===');
       return;
     }
+
+    // Check if token is expired
     if (resetTokenRecord.expiresAt < new Date()) {
-      context.log.error('[password-reset/] Token expired:', token);
-      await resetTokenRecord.destroy();
+      context.log.error('[password-reset/confirm] Token expired:', token);
+      await resetTokenRecord.destroy(); // cleanup
       context.res = {
         status: 400,
-        body: { error: 'Invalid or expired token.' },
+        body: { error: 'Invalid or expired code.' },
       };
-      context.log('=== [password-reset/index.js] END (expired token) ===');
       return;
     }
+
+    // Find user
     const userEmail = resetTokenRecord.userEmail;
     const user = await User.findOne({ where: { userEmail } });
     if (!user) {
-      context.log.error('[password-reset/] User not found for token:', token);
+      context.log.error('[password-reset/confirm] User not found for token:', token);
       context.res = {
         status: 400,
-        body: { error: 'Invalid token.' },
+        body: { error: 'Invalid code.' },
       };
-      context.log('=== [password-reset/index.js] END (user not found) ===');
       return;
     }
+
+    // Update password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    await User.update(
-      { password: hashedPassword },
-      { where: { userEmail } }
-    );
+    await User.update({ password: hashedPassword }, { where: { userEmail } });
+
+    // Invalidate old refresh tokens (best practice)
     await RefreshToken.destroy({ where: { userEmail } });
+
+    // Destroy the reset code record so it can't be reused
     await resetTokenRecord.destroy();
-    context.log('[password-reset/] Password updated successfully for:', userEmail);
+
+    context.log('[password-reset/confirm] Password updated successfully for:', userEmail);
     context.res = {
       status: 200,
       body: { message: 'Password has been reset successfully.' },
     };
-    context.log('=== [password-reset/index.js] END (success) ===');
   } catch (err) {
-    context.log.error('[password-reset/] Error:', err);
+    context.log.error('[password-reset/confirm] Error:', err);
     context.res = {
       status: 500,
       body: { error: 'Internal Server Error' },
     };
-    context.log('=== [password-reset/index.js] END (error) ===');
   }
+
+  context.log('=== [password-reset/confirm/index.js] END ===');
 };

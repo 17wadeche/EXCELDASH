@@ -1,5 +1,4 @@
 // src/taskpane/components/ForgotPasswordPage.tsx
-
 import React, { useState } from 'react';
 import { Layout, Form, Input, Button, message, Typography } from 'antd';
 import { useNavigate } from 'react-router-dom';
@@ -21,11 +20,11 @@ const ForgotPasswordPage: React.FC = () => {
     setIsLoading(true);
     try {
       await requestPasswordReset(email);
-      message.success('Password reset link has been sent to your email.');
-      navigate('/login');
+      message.success('If that email is in our system, we have sent a password reset code.');
+      navigate('/enter-code');
     } catch (error: any) {
       console.error('Error requesting password reset:', error);
-      message.error('Failed to send password reset link. Please try again.');
+      message.error('Failed to send password reset code. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -36,7 +35,7 @@ const ForgotPasswordPage: React.FC = () => {
       <Content>
         <div style={{ maxWidth: '400px', margin: '0 auto', textAlign: 'center' }}>
           <Title level={2}>Forgot Password</Title>
-          <Text>Enter your email address to receive a password reset link.</Text>
+          <Text>Enter your email address to receive a 6-digit password reset code.</Text>
           <Form style={{ marginTop: '24px' }}>
             <Form.Item
               rules={[
@@ -57,7 +56,7 @@ const ForgotPasswordPage: React.FC = () => {
                 loading={isLoading}
                 block
               >
-                Send Reset Link
+                Send Reset Code
               </Button>
             </Form.Item>
             <Form.Item>

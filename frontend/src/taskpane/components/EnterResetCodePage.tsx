@@ -1,30 +1,23 @@
-// src/taskpane/components/ResetPasswordPage.tsx
+// src/taskpane/components/EnterResetCodePage.tsx
 
 import React, { useState } from 'react';
 import { Layout, Form, Input, Button, message, Typography } from 'antd';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { resetPassword } from './../utils/api';
+import { useNavigate } from 'react-router-dom';
+import { resetPassword } from '../utils/api'; // same function you already have
 
 const { Content } = Layout;
 const { Title, Text } = Typography;
 
-const ResetPasswordPage: React.FC = () => {
+const EnterResetCodePage: React.FC = () => {
+  const [code, setCode] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const navigate = useNavigate();
-  const location = useLocation();
-  const query = new URLSearchParams(location.search);
-  const token = query.get('token');
 
-  if (!token) {
-    message.error('Invalid or missing token.');
-    navigate('/login');
-    return null;
-  }
+  const navigate = useNavigate();
 
   const handleResetPassword = async () => {
-    if (!newPassword || !confirmPassword) {
+    if (!code || !newPassword || !confirmPassword) {
       message.error('Please fill in all fields.');
       return;
     }
@@ -32,9 +25,11 @@ const ResetPasswordPage: React.FC = () => {
       message.error('Passwords do not match.');
       return;
     }
+
     setIsLoading(true);
     try {
-      await resetPassword(token, newPassword);
+      // Make the reset call: "token" is your 6-digit code
+      await resetPassword(code, newPassword);
       message.success('Password has been reset successfully.');
       navigate('/login');
     } catch (error: any) {
@@ -49,40 +44,33 @@ const ResetPasswordPage: React.FC = () => {
     <Layout style={{ padding: '24px', minHeight: '100vh' }}>
       <Content>
         <div style={{ maxWidth: '400px', margin: '0 auto', textAlign: 'center' }}>
-          <Title level={2}>Reset Password</Title>
-          <Text>Enter your new password below.</Text>
+          <Title level={2}>Enter Your Reset Code</Title>
+          <Text>Please check your email for a 6-digit code.</Text>
           <Form style={{ marginTop: '24px' }}>
-            <Form.Item
-              label="New Password"
-              rules={[
-                { required: true, message: 'Please enter your new password' },
-                { min: 6, message: 'Password must be at least 6 characters' },
-              ]}
-            >
+            <Form.Item label="Reset Code" required>
+              <Input
+                placeholder="6-digit code"
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+              />
+            </Form.Item>
+
+            <Form.Item label="New Password" required>
               <Input.Password
                 placeholder="Enter new password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
               />
             </Form.Item>
-            <Form.Item
-              label="Confirm New Password"
-              rules={[
-                { required: true, message: 'Please confirm your new password' },
-                {
-                  validator: (_, value) =>
-                    value === newPassword
-                      ? Promise.resolve()
-                      : Promise.reject(new Error('Passwords do not match')),
-                },
-              ]}
-            >
+
+            <Form.Item label="Confirm Password" required>
               <Input.Password
                 placeholder="Confirm new password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
               />
             </Form.Item>
+
             <Form.Item>
               <Button
                 type="primary"
@@ -105,4 +93,4 @@ const ResetPasswordPage: React.FC = () => {
   );
 };
 
-export default ResetPasswordPage;
+export default EnterResetCodePage;
