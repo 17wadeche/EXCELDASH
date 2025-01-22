@@ -41,7 +41,7 @@ module.exports = async function (context, req) {
       token,
       expiresAt,
     });
-    const resetLink = `${process.env.FRONTEND_BASE_URL}/reset-password?token=${token}`;
+    const resetLink = `https://happy-forest-059a9d710.4.azurestaticapps.net/reset-password?token=${token}`;
     await sendPasswordResetEmail(email, resetLink);
     context.log('[passwordrequest] Password reset email sent to:', email);
     context.res = {
