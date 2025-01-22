@@ -26,8 +26,14 @@ import {
   Chart as BaseChart,
 } from 'react-chartjs-2';
 import 'chartjs-adapter-moment';
+import {
+  BoxPlotChart,
+  HorizontalBoxPlotChart,
+  ViolinChart,
+  HorizontalViolinChart,
+  BoxAndWhiskers
+} from 'chartjs-chart-box-and-violin-plot';
 import zoomPlugin from 'chartjs-plugin-zoom';
-import isEqual from 'lodash/isEqual';
 import { TreemapController, TreemapElement } from 'chartjs-chart-treemap';
 import { FunnelController } from 'chartjs-chart-funnel';
 import { WordCloudController, WordElement } from 'chartjs-chart-wordcloud';
@@ -37,12 +43,6 @@ import {
   OhlcController,
   OhlcElement,
 } from 'chartjs-chart-financial';
-import {
-  BoxPlotController,
-  BoxAndWiskers,
-  ViolinController,
-  Violin,
-} from 'chartjs-chart-box-and-violin-plot';
 
 import type {
   ChartData,
