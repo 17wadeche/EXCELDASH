@@ -493,41 +493,30 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
   ) => {
     switch (mainType) {
       case 'boxplot': {
-        /**
-         * Based on your sample data:
-         * Row1: ["Box Plot Data"]
-         * Row2: ["", "Q1", "Median", "Q3", "Min", "Max"]
-         * Row3..: e.g. ["Sample1", 10, 20, 30, 5, 35]
-         *
-         * We want an array of arrays => [ [min, q1, median, q3, max], ... ]
-         * or objects. We'll do array form: [min, q1, median, q3, max].
-         */
         if (data.length < 3) {
           message.error('Boxplot data requires at least 3 rows: title row + header row + data.');
           return;
         }
-        // skip the top line ("Box Plot Data"), parse from row2 as header
-        const headerRow = data[1]; // e.g. ["", "Q1", "Median", "Q3", "Min", "Max"]
+        const headerRow = data[1];
+        const labelsArr = headerRow.slice(1);
+        const labelsStr = labelsArr.join(', ');
         const rawDataRows = data.slice(2);
-
-        // For each row, reorder to [min, q1, median, q3, max]
-        const boxData = rawDataRows.map((row: any[]) => {
-          // row = ["Sample1", Q1, Median, Q3, Min, Max]
+        const boxplotStrings = rawDataRows.map((row) => {
           const q1 = Number(row[1]);
           const median = Number(row[2]);
           const q3 = Number(row[3]);
           const min = Number(row[4]);
           const max = Number(row[5]);
-          return [min, q1, median, q3, max];
+          return [min, q1, median, q3, max].join(',');
         });
-
+        const finalString = boxplotStrings.join(';');
         form.setFieldsValue({
-          labels: '',
+          labels: labelsStr,   // e.g. "Q1, Median, Q3, Min, Max"
           datasets: [
             {
               label: 'BoxPlot Series',
               type: 'boxplot',
-              data: JSON.stringify(boxData),
+              data: finalString, // e.g. "5,10,20,30,35;10,15,25,40,45"
               backgroundColor: getRandomColor(),
               borderColor: getRandomColor(),
               borderWidth: 1,
@@ -537,7 +526,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
         message.success('Boxplot data loaded from Excel.');
         break;
       }
-
       // ========== VIOLIN ==========
       case 'violin': {
         /**
