@@ -157,23 +157,18 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
       setChartType(cData.type);
     }
   }, [widget]);
+
   useEffect(() => {
     if (widget.type !== 'chart') return;
-    if (!['pie', 'doughnut', 'polarArea'].includes(chartType)) return;
-
-    // parse labels to see how many slices we have
-    const labelsStr = form.getFieldValue('labels') || '';
-    const labelArr = labelsStr
-      .split(',')
-      .map((l: string) => l.trim())
-      .filter(Boolean);
-
-    // current sliceColors in the form, if any
-    let currentColors = form.getFieldValue('sliceColors');
-    if (!Array.isArray(currentColors) || currentColors.length !== labelArr.length) {
-      // re-init an array of color objects, e.g. [{color:'#FF0000'},...]
-      currentColors = labelArr.map(() => ({ color: '#36A2EB' }));
-      form.setFieldsValue({ sliceColors: currentColors });
+    if (chartType !== 'bubble') return;
+    const datasets = form.getFieldValue('datasets') || [];
+    if (!datasets.length || datasets[0].type !== 'bubble') return;
+    const bubbleDataStr = datasets[0].data || '';
+    const segments = bubbleDataStr.split(';').map((s: string) => s.trim()).filter(Boolean);
+    let currentBubbleColors = form.getFieldValue('bubbleColors');
+    if (!Array.isArray(currentBubbleColors) || currentBubbleColors.length !== segments.length) {
+      currentBubbleColors = segments.map(() => ({ color: '#36A2EB' }));
+      form.setFieldsValue({ bubbleColors: currentBubbleColors });
     }
   }, [chartType, form, widget.type]);
 
@@ -200,7 +195,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
       case 'chart': {
         const finalChartType =
           cleanedValues.chartType === 'area' ? 'line' : cleanedValues.chartType;
-        const noAxisTypes = ['pie', 'doughnut', 'polarArea', 'radar'];
+        const noAxisTypes = ['pie', 'doughnut', 'polarArea', 'radar', 'bubble'];
         let sliceColorsArray: string[] = [];
         if (['pie', 'doughnut', 'polarArea'].includes(finalChartType)) {
           const sc: { color: string }[] = cleanedValues.sliceColors || [];
@@ -226,6 +221,8 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                   const [x, y, r] = seg.split(',').map((v: string) => parseFloat(v.trim()));
                   return { x, y, r };
                 });
+                const bubbleColors = cleanedValues.bubbleColors || [];
+                const backgroundColors = bubbleColors.map((c: any) => c.color);
               } else {
                 points = segments.map((seg: string) => {
                   const [x, y] = seg.split(',').map((v: string) => parseFloat(v.trim()));
@@ -237,7 +234,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                 type: ds.type,
                 data: points,
                 fill: false,
-                backgroundColor: ds.backgroundColor || '#4caf50',
+                backgroundColor: backgroundColors,
                 borderColor: ds.borderColor || '#4caf50',
                 borderWidth: ds.borderWidth || 1,
               };
@@ -270,7 +267,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
             }
           }),
           titleAlignment: cleanedValues.titleAlignment || 'left',
-          // Remove scales for no-axis chart types:
           scales: noAxisTypes.includes(finalChartType)
             ? {}
             : {
@@ -438,7 +434,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
       initialValues={getInitialValues()}
       onFinish={handleFinish}
     >
-      {/** TEXT WIDGET FORM **/}
       {widget.type === 'text' && (
         <>
           <Form.Item
@@ -465,8 +460,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           </Form.Item>
         </>
       )}
-
-      {/** TITLE WIDGET FORM **/}
       {widget.type === 'title' && (
         <>
           <Form.Item
@@ -496,8 +489,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           </Form.Item>
         </>
       )}
-
-      {/** CHART WIDGET FORM **/}
       {widget.type === 'chart' && (
         <>
           <Form.Item
@@ -509,7 +500,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           >
             <Input />
           </Form.Item>
-
           <Form.Item
             name="chartType"
             label="Chart Type"
@@ -518,7 +508,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
             <Select
               onChange={(value: string) => {
                 setChartType(value);
-                // Update each dataset's type to match the overall chart type:
                 const currentDatasets = form.getFieldValue('datasets') || [];
                 const updatedDatasets = currentDatasets.map((ds: any) => ({
                   ...ds,
@@ -537,7 +526,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
               <Option value="scatter">Scatter</Option>
             </Select>
           </Form.Item>
-
           <Form.Item
             name="labels"
             label="Labels (comma-separated)"
@@ -545,9 +533,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           >
             <Input />
           </Form.Item>
-
-          {/** If Pie/Doughnut/Polar, show slice color pickers **/}
-          {['pie', 'doughnut', 'polarArea'].includes(chartType) && (
+          {['pie', 'doughnut', 'polarArea', 'bubble'].includes(chartType) && (
             <Form.List name="sliceColors">
               {(fields) => {
                 const rawLabels = form.getFieldValue('labels') || '';
@@ -555,7 +541,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                   .split(',')
                   .map((l: string) => l.trim())
                   .filter(Boolean);
-
                 return (
                   <>
                     {fields.map(({ key, name, ...restField }) => {
@@ -576,8 +561,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
               }}
             </Form.List>
           )}
-
-          {/** Worksheet / Data Range **/}
           <Form.Item
             name="worksheetName"
             label="Worksheet"
@@ -604,7 +587,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           >
             <Input placeholder="e.g., A1:B10" />
           </Form.Item>
-
           {!isPresenterMode && (
             <Form.Item>
               <Button
@@ -622,14 +604,12 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                       const range = context.workbook.getSelectedRange();
                       range.load(['address', 'worksheet']);
                       await context.sync();
-
                       const worksheetName = range.worksheet.name;
                       const associatedRange = range.address.replace(/^.*!/, '');
                       form.setFieldsValue({
                         worksheetName,
                         associatedRange,
                       });
-
                       const worksheet = context.workbook.worksheets.getItem(
                         worksheetName
                       );
@@ -717,6 +697,9 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                         const xVals = xRow.slice(1).map((v: any) => Number(v));
                         const yVals = yRow.slice(1).map((v: any) => Number(v));
                         const rVals = rRow.slice(1).map((v: any) => Number(v));
+
+                        const headerRow = data[0].slice(1);
+                        const labelsStr = headerRow.join(', ');
                         if (
                           xVals.length !== yVals.length ||
                           yVals.length !== rVals.length
@@ -735,7 +718,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                           .map((pt: { x: number; y: number; r: number }) => `${pt.x},${pt.y},${pt.r}`)
                           .join(';');
                         form.setFieldsValue({
-                          labels: '',
+                          labels: labelsStr,
                           datasets: [
                             {
                               label: 'Bubble Series',
@@ -760,7 +743,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
               </Button>
             </Form.Item>
           )}
-
           <Form.List name="datasets">
             {(fields, { add, remove }) => (
               <>
@@ -786,7 +768,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                     >
                       <Input />
                     </Form.Item>
-
                     <Form.Item
                       {...restField}
                       name={[name, 'type']}
@@ -810,7 +791,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                         <Option value="scatter">Scatter</Option>
                       </Select>
                     </Form.Item>
-
                     <Form.Item
                       {...restField}
                       name={[name, 'data']}
@@ -939,8 +919,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           </Form.List>
 
           <Collapse>
-            {/* Only show Axis/Plugin/Legend/Styling if chart isn't Pie/Doughnut/Polar/Radar */}
-            {!['pie', 'doughnut', 'polarArea', 'radar'].includes(chartType) && (
+            {!['pie', 'doughnut', 'polarArea', 'radar', 'bubble'].includes(chartType) && (
               <>
                 <Panel header="Axis Settings" key="axis">
                   <Form.Item label="X-Axis Type" name="xAxisType">
