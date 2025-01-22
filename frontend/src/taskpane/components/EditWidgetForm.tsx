@@ -161,17 +161,12 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
   useEffect(() => {
     if (widget.type !== 'chart') return;
     if (chartType !== 'bubble') return;
-  
     const datasets = form.getFieldValue('datasets') || [];
     if (!datasets.length || datasets[0].type !== 'bubble') return;
-  
-    // Count how many points in the bubble data
     const bubbleDataStr = datasets[0].data || '';
-    const segments = bubbleDataStr.split(';').map((s: string) => s.trim()).filter(Boolean);
-  
+    const segments = bubbleDataStr.split(';').map((s) => s.trim()).filter(Boolean);
     let currentBubbleColors = form.getFieldValue('bubbleColors');
     if (!Array.isArray(currentBubbleColors) || currentBubbleColors.length !== segments.length) {
-      // re-init with default color
       currentBubbleColors = segments.map(() => ({ color: '#36A2EB' }));
       form.setFieldsValue({ bubbleColors: currentBubbleColors });
     }
@@ -201,8 +196,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
         const finalChartType =
           cleanedValues.chartType === 'area' ? 'line' : cleanedValues.chartType;
         const noAxisTypes = ['pie', 'doughnut', 'polarArea', 'radar', 'bubble'];
-      
-        // If it's a pie/doughnut/polarArea chart, collect slice colors
         let sliceColorsArray: string[] = [];
         if (['pie', 'doughnut', 'polarArea'].includes(finalChartType)) {
           const sc: { color: string }[] = cleanedValues.sliceColors || [];
@@ -963,6 +956,28 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
               </>
             )}
           </Form.List>
+          {chartType === 'bubble' && (
+            <Collapse>
+              <Collapse.Panel header="Bubble Colors" key="bubbleColors">
+                <Form.List name="bubbleColors">
+                  {(fields, { add, remove }) => (
+                    <>
+                      {fields.map(({ key, name, ...restField }) => (
+                        <Form.Item
+                          {...restField}
+                          key={key}
+                          name={[name, 'color']}
+                          label={`Color for Bubble #${key + 1}`}
+                        >
+                          <Input type="color" />
+                        </Form.Item>
+                      ))}
+                    </>
+                  )}
+                </Form.List>
+              </Collapse.Panel>
+            </Collapse>
+          )}
 
           <Collapse>
             {!['pie', 'doughnut', 'polarArea', 'radar', 'bubble'].includes(chartType) && (
