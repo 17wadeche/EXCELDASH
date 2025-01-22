@@ -23,11 +23,27 @@ import {
   Scatter,
   Bubble,
   PolarArea,
-  // Add other chart types as needed
+  Chart as BaseChart,
 } from 'react-chartjs-2';
 import 'chartjs-adapter-moment';
 import zoomPlugin from 'chartjs-plugin-zoom';
 import isEqual from 'lodash/isEqual';
+import { TreemapController, TreemapElement } from 'chartjs-chart-treemap';
+import { FunnelController } from 'chartjs-chart-funnel';
+import { WordCloudController, WordElement } from 'chartjs-chart-wordcloud';
+import {
+  CandlestickController,
+  CandlestickElement,
+  OhlcController,
+  OhlcElement,
+} from 'chartjs-chart-financial';
+import {
+  BoxPlotController,
+  BoxAndWiskers,
+  ViolinController,
+  Violin,
+} from 'chartjs-chart-box-and-violin-plot';
+
 import type {
   ChartData,
   ChartOptions,
@@ -48,8 +64,49 @@ ChartJS.register(
   Legend,
   TimeScale,
   zoomPlugin,
-  ChartDataLabels
+  ChartDataLabels,
+  TreemapController,
+  TreemapElement,
+  FunnelController,
+  WordCloudController,
+  WordElement,
+  CandlestickController,
+  CandlestickElement,
+  OhlcController,
+  OhlcElement,
+  BoxPlotController,
+  BoxAndWiskers,
+  ViolinController,
+  Violin
 );
+
+const TreemapChart: React.FC<any> = (props) => {
+  return <BaseChart type="treemap" {...props} />;
+};
+
+const FunnelChart: React.FC<any> = (props) => {
+  return <BaseChart type="funnel" {...props} />;
+};
+
+const WordCloudChart: React.FC<any> = (props) => {
+  return <BaseChart type="wordCloud" {...props} />;
+};
+
+const CandlestickChart: React.FC<any> = (props) => {
+  return <BaseChart type="candlestick" {...props} />;
+};
+
+const OhlcChart: React.FC<any> = (props) => {
+  return <BaseChart type="ohlc" {...props} />;
+};
+
+const BoxPlotChart: React.FC<any> = (props) => {
+  return <BaseChart type="boxplot" {...props} />;
+};
+
+const ViolinChart: React.FC<any> = (props) => {
+  return <BaseChart type="violin" {...props} />;
+};
 
 // Define a mapping from chart type to component
 const chartComponents: Record<string, React.FC<any>> = {
@@ -61,6 +118,13 @@ const chartComponents: Record<string, React.FC<any>> = {
   scatter: Scatter,
   bubble: Bubble,
   polarArea: PolarArea,
+  treemap: TreemapChart,
+  funnel: FunnelChart,
+  wordCloud: WordCloudChart,
+  candlestick: CandlestickChart,
+  ohlc: OhlcChart,
+  boxplot: BoxPlotChart,
+  violin: ViolinChart,
 };
 
 interface ExtendedChartData<TType extends ChartType = ChartType, TData = unknown>
@@ -114,7 +178,7 @@ interface ExtendedChartData<TType extends ChartType = ChartType, TData = unknown
 
 interface SalesChartProps {
   data: ExtendedChartData;
-  type: ChartType;
+  type: ChartType | string;
   isPresenterMode?: boolean;
 }
 
@@ -236,7 +300,7 @@ const SalesChart = ({ data, type }: SalesChartProps) => {
     }
   };
 
-  const noAxisTypes = ['pie', 'doughnut', 'radar', 'polarArea'];
+  const noAxisTypes = ['pie', 'doughnut', 'radar', 'polarArea', 'wordCloud', 'funnel'];
   if (noAxisTypes.includes(type)) {
     chartOptions.scales = {};
   }

@@ -530,6 +530,13 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
               <Option value="polarArea">Polar Area</Option>
               <Option value="bubble">Bubble</Option>
               <Option value="scatter">Scatter</Option>
+              <Option value="funnel">Funnel</Option>
+              <Option value="treemap">Treemap</Option>
+              <Option value="wordCloud">Word Cloud</Option>
+              <Option value="candlestick">Candlestick</Option>
+              <Option value="ohlc">OHLC</Option>
+              <Option value="boxplot">Box Plot</Option>
+              <Option value="violin">Violin</Option>
             </Select>
           </Form.Item>
           <Form.Item
