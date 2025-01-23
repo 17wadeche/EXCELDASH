@@ -498,30 +498,29 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           return;
         }
         const headerRow = data[1];
-        const labelsArr = headerRow.slice(1);
+        const labelsArr = headerRow.slice(1); // e.g. ["Q1","Median","Q3","Min","Max"]
         const labelsStr = labelsArr.join(', ');
         const rawDataRows = data.slice(2);
-        const boxplotStrings = rawDataRows.map((row) => {
-          const q1 = Number(row[1]);
+        const boxplotDatasets = rawDataRows.map((row) => {
+          const sampleName = row[0]; // e.g. "Sample1"
+          const q1     = Number(row[1]);
           const median = Number(row[2]);
-          const q3 = Number(row[3]);
-          const min = Number(row[4]);
-          const max = Number(row[5]);
-          return [min, q1, median, q3, max].join(',');
+          const q3     = Number(row[3]);
+          const min    = Number(row[4]);
+          const max    = Number(row[5]);
+          const dataStr = [min, q1, median, q3, max].join(',');
+          return {
+            label: sampleName,        // e.g. "Sample1"
+            type: 'boxplot',
+            data: dataStr,            // e.g. "5,10,20,30,35"
+            backgroundColor: getRandomColor(),
+            borderColor: getRandomColor(),
+            borderWidth: 1,
+          };
         });
-        const finalString = boxplotStrings.join(';');
         form.setFieldsValue({
-          labels: labelsStr,   // e.g. "Q1, Median, Q3, Min, Max"
-          datasets: [
-            {
-              label: 'BoxPlot Series',
-              type: 'boxplot',
-              data: finalString, // e.g. "5,10,20,30,35;10,15,25,40,45"
-              backgroundColor: getRandomColor(),
-              borderColor: getRandomColor(),
-              borderWidth: 1,
-            },
-          ],
+          labels: labelsStr,    // e.g. "Q1, Median, Q3, Min, Max"
+          datasets: boxplotDatasets,
         });
         message.success('Boxplot data loaded from Excel.');
         break;
@@ -563,24 +562,27 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
       // ========== CANDLESTICK ==========
       case 'candlestick': {
         if (data.length < 3) {
-          message.error('Candlestick data needs 3+ rows: title row + header + data rows.');
+          message.error('Candlestick data requires at least 3 rows: title + header + data.');
           return;
         }
-        const rawRows = data.slice(2); // data rows
-        const candleData = rawRows.map((row: any[]) => ({
-          x: row[0],
-          o: Number(row[1]),
-          h: Number(row[2]),
-          l: Number(row[3]),
-          c: Number(row[4]),
-        }));
+        const headerRow = data[1];
+        const labelStr = headerRow.join(',');
+    
+        // The actual data rows are from index=2 onward
+        const rawRows = data.slice(2);
+    
+        // Build a semicolon‐joined string of each row => "Day1,100,110,95,105;Day2,105,115,100,110"
+        const candlestickStr = rawRows
+          .map((row) => row.join(',')) // e.g. ["Day1",100,110,95,105] => "Day1,100,110,95,105"
+          .join(';');
+    
         form.setFieldsValue({
-          labels: '',
+          labels: labelStr,
           datasets: [
             {
               label: 'Candlestick Series',
               type: 'candlestick',
-              data: JSON.stringify(candleData),
+              data: candlestickStr,
               backgroundColor: getRandomColor(),
               borderColor: getRandomColor(),
               borderWidth: 1,
@@ -590,35 +592,33 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
         message.success('Candlestick data loaded from Excel.');
         break;
       }
-
-      // ========== OHLC ==========
+    
+      // ========== OHLC ==========  
       case 'ohlc': {
         /**
-         * Similar to candlestick:
          * Row1: ["OHLC Chart Data"]
          * Row2: ["Label","Open","High","Low","Close"]
-         * Row3..: ["Day1",50,60,45,55], ...
+         * Row3..: ["Day1",50,60,45,55], ["Day2",55,65,50,60], ...
          */
         if (data.length < 3) {
-          message.error('OHLC data needs 3+ rows: title row + header + data rows.');
+          message.error('OHLC data needs at least 3 rows: title + header + data rows.');
           return;
         }
+        const headerRow = data[1]; // e.g. ["Label","Open","High","Low","Close"]
+        const labelStr = headerRow.join(',');
+    
         const rawRows = data.slice(2);
-        const ohlcData = rawRows.map((row: any[]) => ({
-          x: row[0],
-          o: Number(row[1]),
-          h: Number(row[2]),
-          l: Number(row[3]),
-          c: Number(row[4]),
-        }));
-
+        const ohlcStr = rawRows
+          .map((row) => row.join(',')) // e.g. "Day1,50,60,45,55"
+          .join(';');
+    
         form.setFieldsValue({
-          labels: '',
+          labels: labelStr,
           datasets: [
             {
               label: 'OHLC Series',
               type: 'ohlc',
-              data: JSON.stringify(ohlcData),
+              data: ohlcStr,
               backgroundColor: getRandomColor(),
               borderColor: getRandomColor(),
               borderWidth: 1,
@@ -628,33 +628,33 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
         message.success('OHLC data loaded from Excel.');
         break;
       }
-
-      // ========== TREEMAP ==========
+    
+      // ========== TREEMAP ==========  
       case 'treemap': {
         /**
          * Row1: ["Treemap Chart Data"]
          * Row2: ["Label","Value"]
          * Row3..: ["Category A", 10], ...
-         *
-         * We'll store data as array of { label, value }
          */
         if (data.length < 3) {
           message.error('Treemap data requires 3+ rows: title row + header + data.');
           return;
         }
+        const headerRow = data[1]; // e.g. ["Label","Value"]
+        const labelStr = headerRow.join(',');
+    
         const rawRows = data.slice(2);
-        const treemapData = rawRows.map((row: any[]) => ({
-          label: row[0],
-          value: Number(row[1]),
-        }));
-
+        const treemapStr = rawRows
+          .map((row) => row.join(',')) // "Category A,10"
+          .join(';');
+    
         form.setFieldsValue({
-          labels: '',
+          labels: labelStr,
           datasets: [
             {
               label: 'Treemap Series',
               type: 'treemap',
-              data: JSON.stringify(treemapData),
+              data: treemapStr,
               backgroundColor: getRandomColor(),
               borderColor: getRandomColor(),
               borderWidth: 1,
@@ -664,33 +664,33 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
         message.success('Treemap data loaded from Excel.');
         break;
       }
-
-      // ========== WORD CLOUD ==========
+    
+      // ========== WORD CLOUD ==========  
       case 'wordCloud': {
         /**
          * Row1: ["Word Cloud Chart Data"]
          * Row2: ["Word","Frequency"]
-         * Row3..: e.g. ["Hello", 10], ...
-         *
-         * We'll do data: [{ word, freq }, ...]
+         * Row3..: ["Hello", 10], ...
          */
         if (data.length < 3) {
           message.error('Word Cloud needs at least 3 rows: title + header + data.');
           return;
         }
+        const headerRow = data[1]; // e.g. ["Word","Frequency"]
+        const labelStr = headerRow.join(',');
+    
         const rawRows = data.slice(2);
-        const wcData = rawRows.map((row: any[]) => ({
-          word: row[0],
-          freq: Number(row[1]),
-        }));
-
+        const wordCloudStr = rawRows
+          .map((row) => row.join(',')) // e.g. "Hello,10"
+          .join(';');
+    
         form.setFieldsValue({
-          labels: '',
+          labels: labelStr,
           datasets: [
             {
               label: 'Word Cloud',
               type: 'wordCloud',
-              data: JSON.stringify(wcData),
+              data: wordCloudStr,
               backgroundColor: getRandomColor(),
               borderColor: getRandomColor(),
               borderWidth: 1,
@@ -700,25 +700,28 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
         message.success('Word Cloud data loaded from Excel.');
         break;
       }
-
-      // ========== FUNNEL ==========
+    
+      // ========== FUNNEL ==========  
       case 'funnel': {
         /**
          * Row1: ["Funnel Chart Data"]
          * Row2: ["Stage","Value"]
          * Row3..: ["Prospects", 200], ["Qualified",100], ...
-         *
-         * We'll store a single dataset with numeric data, plus
-         * form.setFieldsValue({ labels: [ "Prospects","Qualified", ... ] }).
          */
         if (data.length < 3) {
           message.error('Funnel requires 3+ rows: title + header + data.');
           return;
         }
+        const headerRow = data[1]; // e.g. ["Stage","Value"]
+        const labelStr = headerRow.join(',');
+    
         const rawRows = data.slice(2);
+    
+        // labels => e.g. "Prospects,Qualified,Proposal,..."
+        // data => "200,100,60,..." if you want just numeric
         const labels = rawRows.map((row) => row[0]);
         const values = rawRows.map((row) => Number(row[1]));
-
+    
         form.setFieldsValue({
           labels: labels.join(', '),
           datasets: [
@@ -735,27 +738,21 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
         message.success('Funnel data loaded from Excel.');
         break;
       }
-      // ===== Force-Directed Graph =====
+    
+      // ========== FORCE-DIRECTED GRAPH ==========  
       case 'forceDirectedGraph': {
         /**
-         * We'll assume the user selected a range that includes:
-         *   - A header row for "NodeId, Group, Value"
-         *   - Several rows for nodes
-         *   - A blank row
-         *   - A header row for "Source, Target, Value, Label"
-         *   - Several rows for edges
-         *
-         * Example (matching your "Example Chart Data"):
-         *  Row1: ["NodeId", "Group", "Value"]
-         *  Row2..N: [ "A", "Group1", 12 ] ...
-         *  Row( N+2 ): [ "Source", "Target", "Value", "Label"]
-         *  Row( N+3 )..: ["A", "B", 1, "AB"]
+         * The user range might be:
+         *   Row1: ["NodeId","Group","Value"]
+         *   Row2..: node data
+         *   (empty row)
+         *   Another header: ["Source","Target","Value","Label"]
+         *   Edge data
          */
-        // 1) Find the blank row that separates node data from edge data
+        // 1) Locate blank row
         let blankRowIndex = -1;
         for (let i = 0; i < data.length; i++) {
           const row = data[i];
-          // If row is entirely empty or undefined, treat as separator
           const isEmpty = row.every((cell: any) => cell === '' || cell == null);
           if (isEmpty) {
             blankRowIndex = i;
@@ -763,49 +760,35 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           }
         }
         if (blankRowIndex < 0) {
-          message.error(
-            'No blank row found to separate Force-Directed Graph nodes vs. edges.'
-          );
+          message.error('No blank row found to separate Force-Directed Graph nodes from edges.');
           return;
         }
-
-        // 2) Node data
-        const nodeHeader = data[0]; // e.g. ["NodeId", "Group", "Value"]
+    
+        // node data
+        const nodeHeader = data[0]; // e.g. ["NodeId","Group","Value"]
+        const labelStr = nodeHeader.join(',');
+    
         const nodeRows = data.slice(1, blankRowIndex);
-        // 3) Edge data
-        const edgeHeader = data[blankRowIndex + 1]; // e.g. ["Source", "Target", "Value", "Label"]
+        // edge data
+        const edgeHeader = data[blankRowIndex + 1]; // e.g. ["Source","Target","Value","Label"]
+        // optional: combine these into a separate label if you like
+        //           but we only need to avoid "Please enter labels" error
         const edgeRows = data.slice(blankRowIndex + 2);
-
-        // Construct a single dataset with "nodes" and "edges"
-        // chartjs-chart-graph expects something like:
-        // datasets: [{
-        //   label: 'Force Graph',
-        //   data: { nodes: [...], edges: [...] },
-        //   type: 'forceDirectedGraph'
-        // }]
-
-        // parse nodeRows into {id, group, value}
-        const nodes = nodeRows.map((row: any[]) => ({
-          id: row[0],
-          group: row[1],
-          value: Number(row[2]),
-        }));
-
-        // parse edgeRows into {source, target, value, label}
-        const edges = edgeRows.map((row: any[]) => ({
-          source: row[0],
-          target: row[1],
-          value: Number(row[2]),
-          label: row[3] || '',
-        }));
-
+    
+        // Instead of JSON, build semicolon string
+        // e.g. "NODES: A,Group1,12;B,Group1,8 ... | EDGES: A,B,1,AB;B,C,1,BC"
+        const nodeStr = nodeRows.map((row) => row.join(',')).join(';');
+        const edgeStr = edgeRows.map((row) => row.join(',')).join(';');
+        const combinedStr = `NODES:${nodeStr}|EDGES:${edgeStr}`;
+    
         form.setFieldsValue({
-          labels: '', // not used
+          // “NodeId,Group,Value” so it won't fail validation
+          labels: labelStr,
           datasets: [
             {
               label: 'Force Graph',
               type: 'forceDirectedGraph',
-              data: JSON.stringify({ nodes, edges }),
+              data: combinedStr,
               backgroundColor: getRandomColor(),
               borderColor: getRandomColor(),
               borderWidth: 1,
@@ -815,36 +798,34 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
         message.success('Force-Directed Graph data loaded!');
         break;
       }
-
-      // ===== Choropleth =====
+    
+      // ========== CHOROPLETH ==========  
       case 'choropleth': {
         /**
-         * We'll assume the user selected a range with:
-         *  Row1: ["Region", "Value"]
-         *  Row2..: ["US-CA", 25] etc.
+         * Row1: ["Region", "Value"]
+         * Row2..: ["US-CA", 25], etc.
          */
         if (data.length < 2) {
           message.error('Need at least 2 rows for choropleth: header + data.');
           return;
         }
-        const header = data[0];
+        const header = data[0]; // e.g. ["Region","Value"]
         if (header.length < 2) {
           message.error('Choropleth: expected at least 2 columns: [Region, Value].');
           return;
         }
-        const regionRows = data.slice(1).map((row: any[]) => ({
-          region: row[0],
-          value: row[1],
-        }));
-
-        // This plugin typically expects a single dataset with feature data
+        const labelStr = header.join(',');
+    
+        const regionRows = data.slice(1);
+        const regionStr = regionRows.map((row) => row.join(',')).join(';');
+    
         form.setFieldsValue({
-          labels: '',
+          labels: labelStr,
           datasets: [
             {
               label: 'Choropleth',
               type: 'choropleth',
-              data: JSON.stringify(regionRows),
+              data: regionStr,
               backgroundColor: getRandomColor(),
               borderColor: getRandomColor(),
               borderWidth: 1,
@@ -854,46 +835,30 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
         message.success('Choropleth data loaded!');
         break;
       }
-
-      // ===== Parallel Coordinates (PCP) =====
+    
+      // ========== PARALLEL COORDINATES ==========  
       case 'parallelCoordinates': {
         /**
-         * We'll assume:
-         *   Row1: dimension headers, e.g. ["Dim1", "Dim2", "Dim3", ...]
-         *   Row2..: numeric values
-         *
-         * For example:
-         *   A1:D1 => ["Dim1", "Dim2", "Dim3", "Dim4"]
-         *   A2:D2 => [10, 30, 50, 20]
-         *   A3:D3 => [ 5, 40, 20, 10]
-         *   etc.
+         * Row1: e.g. ["Dim1","Dim2","Dim3","Dim4"]
+         * Row2..: numeric rows
          */
         if (data.length < 2) {
           message.error('Need at least 2 rows for parallel coordinates: header + data.');
           return;
         }
-        const headers = data[0];
+        const headers = data[0]; // e.g. ["Dim1","Dim2","Dim3","Dim4"]
+        const labelStr = headers.join(',');
+    
         const bodyRows = data.slice(1);
-        // e.g. headers = ["Dim1", "Dim2", "Dim3", "Dim4"]
-        // bodyRows = [ [10,30,50,20], [5,40,20,10], ...]
-
-        // We'll store them as an array of arrays, or an object form
-        // The chart might expect data in the form: each row is a "point" with {Dim1: val, Dim2: val...}
-        const pcpData = bodyRows.map((row: any[]) => {
-          const obj: any = {};
-          headers.forEach((dim: string, idx: number) => {
-            obj[dim] = Number(row[idx]);
-          });
-          return obj;
-        });
-
+        const pcpStr = bodyRows.map((row) => row.join(',')).join(';');
+    
         form.setFieldsValue({
-          labels: '',
+          labels: labelStr,
           datasets: [
             {
               label: 'PCP Series',
               type: 'parallelCoordinates',
-              data: JSON.stringify(pcpData),
+              data: pcpStr,
               backgroundColor: getRandomColor(),
               borderColor: getRandomColor(),
               borderWidth: 1,
@@ -903,42 +868,34 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
         message.success('Parallel Coordinates data loaded!');
         break;
       }
-
-      // ===== Bar with Error Bars =====
+    
+      // ========== BAR WITH ERROR BARS ==========  
       case 'barWithErrorBars': {
         /**
-         * We'll assume:
-         *   Row1: ["Label", "Value", "ErrorMinus", "ErrorPlus"]
-         *   Row2..: e.g. ["A", 10, 2, 3]
+         * Row1: ["Label","Value","ErrorMinus","ErrorPlus"]
+         * Row2..: e.g. ["A",10,2,3], ...
          */
         if (data.length < 2) {
           message.error('Need at least 2 rows for barWithErrorBars: header + data.');
           return;
         }
-        const header = data[0];
+        const header = data[0]; // e.g. ["Label","Value","ErrorMinus","ErrorPlus"]
         if (header.length < 4) {
-          message.error(
-            'Expected 4 columns: [Label, Value, ErrorMinus, ErrorPlus].'
-          );
+          message.error('Expected 4 columns: [Label, Value, ErrorMinus, ErrorPlus].');
           return;
         }
-        // parse each data row
-        const barData = data.slice(1).map((row: any[]) => ({
-          label: row[0],
-          value: Number(row[1]),
-          errorMinus: Number(row[2]),
-          errorPlus: Number(row[3]),
-        }));
-
-        // Typically you have a single dataset with .data = array of { label, y, yMin, yMax }
-        // but the plugin might want something else. We'll store it in JSON
+        const labelStr = header.join(',');
+    
+        const rows = data.slice(1);
+        const barStr = rows.map((row) => row.join(',')).join(';');
+    
         form.setFieldsValue({
-          labels: '', // We'll ignore "labels" for error bars
+          labels: labelStr,
           datasets: [
             {
               label: 'Bar w/ Error',
               type: 'barWithErrorBars',
-              data: JSON.stringify(barData),
+              data: barStr,
               backgroundColor: getRandomColor(),
               borderColor: getRandomColor(),
               borderWidth: 1,
