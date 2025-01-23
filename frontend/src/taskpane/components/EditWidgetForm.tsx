@@ -217,7 +217,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           'bubble',
           'funnel',
           'treemap',
-          'wordCloud',
           'candlestick',
           'ohlc',
           'boxplot',
@@ -300,7 +299,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
               };
             }
             // ========= For the specialized new chart types, keep data as-is ========
-            // e.g. violin, candlestick, ohlc, treemap, wordCloud, forceDirectedGraph,
+            // e.g. violin, candlestick, ohlc, treemap, forceDirectedGraph,
             // choropleth, parallelCoordinates, barWithErrorBars, etc.
             else if (
               [
@@ -308,7 +307,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                 'candlestick',
                 'ohlc',
                 'treemap',
-                'wordCloud',
                 'forceDirectedGraph',
                 'choropleth',
                 'parallelCoordinates',
@@ -697,33 +695,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           ],
         });
         message.success('Treemap data loaded from Excel.');
-        break;
-      }
-
-      // ========== WORD CLOUD ==========
-      case 'wordCloud': {
-        if (data.length < 3) {
-          message.error('Word Cloud needs at least 3 rows: title + header + data.');
-          return;
-        }
-        const headerRow = data[1]; // e.g. ["Word","Frequency"]
-        const labelStr = headerRow.join(',');
-        const rawRows = data.slice(2);
-        const wordCloudStr = rawRows.map((row) => row.join(',')).join(';');
-        form.setFieldsValue({
-          labels: labelStr,
-          datasets: [
-            {
-              label: 'Word Cloud',
-              type: 'wordCloud',
-              data: wordCloudStr,
-              backgroundColor: getRandomColor(),
-              borderColor: getRandomColor(),
-              borderWidth: 1,
-            },
-          ],
-        });
-        message.success('Word Cloud data loaded from Excel.');
         break;
       }
 
@@ -1136,7 +1107,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
               <Option value="candlestick">Candlestick</Option>
               <Option value="ohlc">OHLC</Option>
               <Option value="treemap">Treemap</Option>
-              <Option value="wordCloud">Word Cloud</Option>
               <Option value="funnel">Funnel</Option>
               <Option value="forceDirectedGraph">Force-Directed Graph</Option>
               <Option value="choropleth">Choropleth</Option>
@@ -1301,7 +1271,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                         <Option value="candlestick">Candlestick</Option>
                         <Option value="ohlc">OHLC</Option>
                         <Option value="treemap">Treemap</Option>
-                        <Option value="wordCloud">Word Cloud</Option>
                         <Option value="funnel">Funnel</Option>
                         <Option value="forceDirectedGraph">Force-Directed Graph</Option>
                         <Option value="choropleth">Choropleth</Option>
@@ -1368,8 +1337,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                                 }
                               }
                             }
-                            // Otherwise, normal check for numeric array
-                            // (Skip for the "keep-as-is" chart types if needed)
                             return Promise.resolve();
                           },
                         },
@@ -1483,7 +1450,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
               'bubble',
               'funnel',
               'treemap',
-              'wordCloud',
               'candlestick',
               'ohlc',
               'boxplot',
