@@ -645,13 +645,13 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
       }
       // ========== CANDLESTICK ==========
       case 'candlestick': {
-        if (data.length < 3) {
-          message.error('Candlestick requires at least 3 rows: title + header + data.');
+        if (data.length < 2) {
+          message.error('Candlestick requires at least 2 rows: header + data.');
           return;
         }
-        const headerRow = data[1];
+        const headerRow = data[0];
         const labelStr = headerRow.join(',');
-        const rawRows = data.slice(2);
+        const rawRows = data.slice(1);
         const candlestickStr = rawRows
           .map((row) => row.join(','))
           .join(';');
@@ -681,7 +681,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
         const labelStr = headerRow.join(',');
         const rawRows = data.slice(2);
         const treemapData = rawRows.map((row) => {
-          const [label, valueStr] = row.map((x: string) => x.trim());
+          const [label, valueStr] = row.map((x: any) => String(x).trim());
           return { label, value: parseFloat(valueStr) };
         });
         const backgroundColors = treemapData.map(() => getRandomColor())
@@ -697,6 +697,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
               borderWidth: 1,
             },
           ],
+          treemapColors: backgroundColors.map((color: string) => ({ color })),
         });
         message.success('Treemap data loaded from Excel.');
         break;
