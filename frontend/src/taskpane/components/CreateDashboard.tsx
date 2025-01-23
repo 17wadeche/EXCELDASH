@@ -264,14 +264,14 @@ const CreateDashboard: React.FC = () => {
               exampleSheet.getRange("A39:F39").values = [["Sample1", 10, 20, 30, 5, 35]];
               exampleSheet.getRange("A40:F40").values = [["Sample2", 15, 25, 40, 10, 45]];
               // ========== CANDLESTICK CHART DATA ==========
-              exampleSheet.getRange("A41").values = [["Candlestick Chart Data"]];
-              exampleSheet.getRange("A42:E42").values = [["Label", "Open", "High", "Low", "Close"]];
-              exampleSheet.getRange("A43:E43").values = [["Day1", 100, 110, 95, 105]];
-              exampleSheet.getRange("A44:E44").values = [["Day2", 105, 115, 100, 110]];
+              exampleSheet.getRange("A42").values = [["Candlestick Chart Data"]];
+              exampleSheet.getRange("A43:E43").values = [["Label", "Open", "High", "Low", "Close"]];
+              exampleSheet.getRange("A44:E44").values = [["Day1", 100, 110, 95, 105]];
+              exampleSheet.getRange("A45:E45").values = [["Day2", 105, 115, 100, 110]];
               // ========== TREEMAP CHART DATA ==========
-              exampleSheet.getRange("A62").values = [["Treemap Chart Data"]];
-              exampleSheet.getRange("A63:B63").values = [["Label", "Value"]];
-              exampleSheet.getRange("A64:B68").values = [
+              exampleSheet.getRange("A47").values = [["Treemap Chart Data"]];
+              exampleSheet.getRange("A48:B48").values = [["Label", "Value"]];
+              exampleSheet.getRange("A49:B49").values = [
                 ["Category A", 10],
                 ["Category B", 20],
                 ["Category C", 15],
