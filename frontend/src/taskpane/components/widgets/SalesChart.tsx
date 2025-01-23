@@ -34,7 +34,7 @@ import { ViolinController, ViolinElement } from 'chartjs-chart-box-and-violin-pl
 
 import zoomPlugin from 'chartjs-plugin-zoom';
 import { TreemapController, TreemapElement } from 'chartjs-chart-treemap';
-import { FunnelController } from 'chartjs-chart-funnel';
+import { FunnelController, TrapezoidElement } from 'chartjs-chart-funnel';
 import { WordCloudController, WordElement } from 'chartjs-chart-wordcloud';
 import {
   CandlestickController,
@@ -75,6 +75,7 @@ ChartJS.register(
   WordElement,
   CandlestickController,
   CandlestickElement,
+  TrapezoidElement,
   OhlcController,
   OhlcElement,
   BoxPlotController,
