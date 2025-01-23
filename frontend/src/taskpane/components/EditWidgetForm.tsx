@@ -176,7 +176,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
     const treemapData = form.getFieldValue('datasets')?.[0]?.data || [];
     const currentColors = form.getFieldValue('treemapColors') || [];
     if (currentColors.length !== treemapData.length) {
-      const newColors = treemapData.map((item: any, idx: number) => ({
+      const newColors = treemapData.map((_, idx: number) => ({
         color: currentColors[idx]?.color || getRandomColor(),
       }));
       form.setFieldsValue({ treemapColors: newColors });
@@ -1440,7 +1440,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           )}
           {chartType === 'treemap' && (
             <Form.List name="treemapColors">
-              {(fields, { add, remove }) => {
+              {() => {
                 const treemapData = form.getFieldValue('datasets')?.[0]?.data || [];
                 return (
                   <>
