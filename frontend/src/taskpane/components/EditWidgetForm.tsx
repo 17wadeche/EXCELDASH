@@ -303,25 +303,32 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                 borderWidth: ds.borderWidth || 1,
               };
             } else if (ds.type === 'violin') {
-              let parsed = [];
+              let parsed: { x: string; y: number[] }[] = [];
               try {
                 parsed = JSON.parse(ds.data);
               } catch {
-                console.warn('BoxPlot data is not valid JSON:', ds.data);
+                console.warn('Violin data is not valid JSON:', ds.data);
               }
               return {
                 label: ds.label,
                 type: 'violin',
-                data: parsed,
-                datalabels: { display: false },
+                data: parsed, // now an actual array
+                datalabels: { display: false }, // optional: turn off numeric labels
                 backgroundColor: ds.backgroundColor || '#4caf50',
                 borderColor: ds.borderColor || '#4caf50',
                 borderWidth: ds.borderWidth || 1,
               };
             } else if (ds.type === 'candlestick') {
-              const segments = ds.data.split(';').map(s => s.trim()).filter(Boolean);
-              const parsed = segments.map(seg => {
-                const [label, open, high, low, close] = seg.split(',').map(x => x.trim());
+              const segments = ds.data
+                .split(';')
+                .map((s: string) => s.trim())
+                .filter(Boolean);
+
+              const parsed = segments.map((seg: string) => {
+                const [label, open, high, low, close] = seg
+                  .split(',')
+                  .map((x: string) => x.trim());
+
                 return {
                   x: label,
                   o: Number(open),
@@ -330,6 +337,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                   c: Number(close),
                 };
               });
+
               return {
                 label: ds.label,
                 type: 'candlestick',
@@ -337,12 +345,19 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                 datalabels: { display: false },
                 backgroundColor: ds.backgroundColor || '#4caf50',
                 borderColor: ds.borderColor || '#4caf50',
-                borderWidth: ds.borderWidth || 1,
+                borderWidth: ds.borderWidth || 1
               };
             } else if (ds.type === 'ohlc') {
-              const segments = ds.data.split(';').map(s => s.trim()).filter(Boolean);
-              const parsed = segments.map(seg => {
-                const [label, open, high, low, close] = seg.split(',').map(x => x.trim());
+              const segments = ds.data
+                .split(';')
+                .map((s: string) => s.trim())
+                .filter(Boolean);
+
+              const parsed = segments.map((seg: string) => {
+                const [label, open, high, low, close] = seg
+                  .split(',')
+                  .map((x: string) => x.trim());
+
                 return {
                   x: label,
                   o: Number(open),
@@ -351,6 +366,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                   c: Number(close),
                 };
               });
+
               return {
                 label: ds.label,
                 type: 'ohlc',
