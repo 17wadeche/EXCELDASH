@@ -313,9 +313,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                 .map((s: string) => s.trim())
                 .filter(Boolean);
               const parsed = segments.map((seg: string) => {
-                const [label, open, high, low, close] = seg
-                  .split(',')
-                  .map((x: string) => x.trim());
+                const [label, open, high, low, close] = seg.split(',').map((x: string) => x.trim());
                 return {
                   x: label,
                   o: Number(open),
@@ -328,10 +326,19 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                 label: ds.label,
                 type: 'candlestick',
                 data: parsed,
+                color: {
+                  up: '#00b050',
+                  down: '#ff0000',
+                  unchanged: '#555555',
+                },
+                borderColor: '#333',
+                borderWidth: 1,
+                wickColor: {
+                  up: '#00b050',
+                  down: '#ff0000',
+                  unchanged: '#555555',
+                },
                 datalabels: { display: false },
-                backgroundColor: ds.backgroundColor || '#4caf50',
-                borderColor: ds.borderColor || '#4caf50',
-                borderWidth: ds.borderWidth || 1,
                 parsing: {
                   xKey: 'x',
                   openKey: 'o',
@@ -514,7 +521,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
         const existing = widget.data as GanttWidgetData;
         const existingTasks = existing.tasks || [];
         const { arrowColor } = cleanedValues;
-
         // Merge tasks
         const mergedTasks = existingTasks.map((oldTask) => {
           const updated = (cleanedValues.tasks || []).find(
