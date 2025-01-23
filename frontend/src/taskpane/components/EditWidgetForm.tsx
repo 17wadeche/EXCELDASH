@@ -30,6 +30,7 @@ import {
   TitleWidgetData,
 } from './types';
 import { StringGradients } from 'antd/es/progress/progress';
+import { keyBy } from 'lodash';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -369,7 +370,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                 treemapData = ds.data;
               }
               treemapData = treemapData.map((item: any) => ({
-                label: item.label || 'Unnamed',
+                name: item.name || 'Unnamed',
                 value: Number(item.value) || 0,
               }));
               const treemapColors =
@@ -383,7 +384,9 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
               return {
                 label: ds.label || 'Treemap Data',
                 type: ds.type,
-                data: treemapData,
+                tree: treemapData,
+                key: 'value',
+                groups: ['name'],
                 backgroundColor: treemapColors.map((c: any) => c.color),
                 borderColor: ds.borderColor || '#4caf50',
                 borderWidth: ds.borderWidth || 1,
@@ -467,6 +470,9 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
             : {
                 x: {
                   type: cleanedValues.xAxisType || 'category',
+                  time: cleanedValues.xAxisType === 'time'
+                    ? { parser: 'MM/DD/YYYY', unit: 'day' }
+                    : undefined,
                   title: {
                     display: !!cleanedValues.xAxisTitle,
                     text: cleanedValues.xAxisTitle || '',
@@ -710,8 +716,8 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
         const labelStr = headerRow.join(',');
         const rawRows = data.slice(2);
         const treemapData = rawRows.map((row) => {
-          const [label, valueStr] = row.map((x: any) => String(x).trim());
-          return { label, value: parseFloat(valueStr) };
+          const [name, valueStr] = row.map((x: any) => String(x).trim());
+          return { name, value: parseFloat(valueStr) };
         });
         const backgroundColors = treemapData.map(() => getRandomColor())
         form.setFieldsValue({
@@ -720,7 +726,9 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
             {
               label: 'Treemap Series',
               type: 'treemap',
-              data: treemapData,
+              tree: treemapData,
+              key: 'value',
+              groups: ['name'],
               backgroundColor: backgroundColors,
               borderColor: getRandomColor(),
               borderWidth: 1,
@@ -1578,6 +1586,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                       <Option value="category">Category</Option>
                       <Option value="linear">Linear</Option>
                       <Option value="logarithmic">Logarithmic</Option>
+                      <Option value="time">Time</Option>
                     </Select>
                   </Form.Item>
                   <Form.Item label="X-Axis Title" name="xAxisTitle">
