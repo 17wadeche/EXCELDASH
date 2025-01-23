@@ -363,7 +363,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
               let treemapData = [];
               if (typeof ds.data === 'string') {
                 try {
-                  treemapData = typeof ds.data === 'string' ? JSON.parse(ds.data) : ds.data;
+                  treemapData = JSON.parse(ds.data);
                 } catch (error) {
                   console.error("Treemap data parsing failed", error);
                   treemapData = [];
@@ -684,14 +684,11 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           message.error('Candlestick requires at least 2 rows: header + data.');
           return;
         }
-        const headerRow = data[0];
-        const labelStr = headerRow.join(',');
         const rawRows = data.slice(1);
-        const candlestickStr = rawRows
-          .map((row) => row.join(','))
-          .join(';');
+        const dayNames = rawRows.map((row) => row[0]).join(', ');
+        const candlestickStr = rawRows.map((row) => row.join(',')).join(';');
         form.setFieldsValue({
-          labels: labelStr,
+          labels: dayNames,
           datasets: [
             {
               label: 'Candlestick Series',
