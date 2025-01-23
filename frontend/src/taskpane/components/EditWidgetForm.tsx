@@ -173,11 +173,12 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
 
   useEffect(() => {
     if (widget.type !== 'chart' || chartType !== 'treemap') return;
-    const treemapData = form.getFieldValue('datasets')?.[0]?.data || [];
+    const treemapDataRaw = form.getFieldValue('datasets')?.[0]?.data;
+    const treemapData = Array.isArray(treemapDataRaw) ? treemapDataRaw : [];
     const currentColors = form.getFieldValue('treemapColors') || [];
     if (currentColors.length !== treemapData.length) {
-      const newColors = treemapData.map((_item: any, idx: number) => ({
-        color: currentColors[idx]?.color || getRandomColor(),
+      const newColors = treemapData.map((_, idx) => ({
+        color: currentColors[idx]?.color || getRandomColor()
       }));
       form.setFieldsValue({ treemapColors: newColors });
     }
