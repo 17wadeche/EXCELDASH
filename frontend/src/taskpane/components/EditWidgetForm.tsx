@@ -350,7 +350,14 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                 datalabels: { display: false },
                 backgroundColor: ds.backgroundColor || '#4caf50',
                 borderColor: ds.borderColor || '#4caf50',
-                borderWidth: ds.borderWidth || 1
+                borderWidth: ds.borderWidth || 1,
+                parsing: {
+                  xKey: 'x',
+                  openKey: 'o',
+                  highKey: 'h',
+                  lowKey: 'l',
+                  closeKey: 'c'
+                },
               };
             } else if (ds.type === 'ohlc') {
               const segments = ds.data
@@ -380,6 +387,13 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                 backgroundColor: ds.backgroundColor || '#4caf50',
                 borderColor: ds.borderColor || '#4caf50',
                 borderWidth: ds.borderWidth || 1,
+                parsing: {
+                  xKey: 'x',
+                  openKey: 'o',
+                  highKey: 'h',
+                  lowKey: 'l',
+                  closeKey: 'c'
+                },
               };
             } else if (
               ['treemap', 'forceDirectedGraph', 'choropleth', 'parallelCoordinates', 'barWithErrorBars'].includes(ds.type)
