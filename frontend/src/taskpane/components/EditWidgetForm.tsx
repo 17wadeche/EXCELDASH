@@ -224,26 +224,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
       // ========== CHART ==========
       case 'chart': {
         const finalChartType = cleanedValues.chartType === 'area' ? 'line' : cleanedValues.chartType;
-        updatedData = {
-          title: cleanedValues.title,
-          type: finalChartType,
-          worksheetName: cleanedValues.worksheetName,
-          associatedRange: cleanedValues.associatedRange,
-          labels: (cleanedValues.labels || '')
-            .split(',')
-            .map((s: string) => s.trim())
-            .filter(Boolean),
-          datasets: (cleanedValues.datasets || []).map((_ds: any) => {
-        if (finalChartType === 'scatter' || finalChartType === 'bubble') {
-          cleanedValues.xAxisType = 'linear';
-        }
-        if (finalChartType === 'treemap') {
-          const treemapColors = cleanedValues.treemapColors || [];
-          updatedData.datasets = updatedData.datasets.map((ds: any, idx: number) => ({
-            ...ds,
-            backgroundColor: treemapColors[idx]?.color || ds.backgroundColor,
-          }));
-        }
         const noAxisTypes = [
           'pie',
           'doughnut',
@@ -263,14 +243,18 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           const sc: { color: string }[] = cleanedValues.sliceColors || [];
           sliceColorsArray = sc.map((obj) => obj.color);
         }
+        if (finalChartType === 'scatter' || finalChartType === 'bubble') {
+          cleanedValues.xAxisType = 'linear';
+        }
         updatedData = {
           title: cleanedValues.title,
           type: finalChartType,
           worksheetName: cleanedValues.worksheetName,
           associatedRange: cleanedValues.associatedRange,
-          labels: cleanedValues.labels
-            ? cleanedValues.labels.split(',').map((l: string) => l.trim())
-            : [],
+          labels: (cleanedValues.labels || '')
+            .split(',')
+            .map((s: string) => s.trim())
+            .filter(Boolean),
           datasets: (cleanedValues.datasets || []).map((ds: any) => {
             // ===== SCATTER / BUBBLE =====
             if (ds.type === 'scatter' || ds.type === 'bubble') {
@@ -539,6 +523,13 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
             endColor: cleanedValues.gradientEndColor || 'rgba(75,192,192,0.4)',
           },
         } as ChartData;
+        if (finalChartType === 'treemap') {
+          const treemapColors = cleanedValues.treemapColors || [];
+          updatedData.datasets = updatedData.datasets.map((ds, idx) => ({
+            ...ds,
+            backgroundColor: treemapColors[idx]?.color || ds.backgroundColor,
+          }));
+        }
         break;
       }
       // ========== GANTT ==========
