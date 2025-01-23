@@ -287,12 +287,16 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
             }
             // ========= Boxplot special handling =========
             else if (ds.type === 'boxplot') {
-              // ds.data is a JSON string of arrays for each box
-              // e.g. [[10,20,30,5,35],[15,25,40,10,45],...]
+              let parsed = [];
+              try {
+                parsed = JSON.parse(ds.data);
+              } catch {
+                console.warn('BoxPlot data is not valid JSON:', ds.data);
+              }
               return {
                 label: ds.label,
-                type: ds.type,
-                data: ds.data, // Keep as JSON string
+                type: 'boxplot',
+                data: parsed,  // Now it's a real numeric array
                 backgroundColor: ds.backgroundColor || '#4caf50',
                 borderColor: ds.borderColor || '#4caf50',
                 borderWidth: ds.borderWidth || 1,
@@ -575,7 +579,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           message.error('Violin data needs at least 3 rows: title row + header + data.');
           return;
         }
-        // data[0] is the chart title row
         const headerRow = data[1]; // e.g. ["Sample","Value"]
         const labelStr = headerRow.join(', '); // => "Sample, Value"
         const bodyRows = data.slice(2);
@@ -588,7 +591,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           }
           groupMap[sampleName].push(val);
         });
-        // Chart libraries for violin often expect an array-of-objects: [{x: group, y:[]}, ...]
         const dataObjects = Object.keys(groupMap).map((group) => ({
           x: group,
           y: groupMap[group],
@@ -608,7 +610,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
         message.success('Violin data loaded from Excel.');
         break;
       }
-
       // ========== CANDLESTICK ==========
       case 'candlestick': {
         if (data.length < 3) {
@@ -618,8 +619,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
         const headerRow = data[1];
         const labelStr = headerRow.join(',');
         const rawRows = data.slice(2);
-        // We'll store them as a semicolon-delimited string
-        // e.g. "Day1,100,110,95,105;Day2,105,115,100,110"
         const candlestickStr = rawRows
           .map((row) => row.join(','))
           .join(';');
