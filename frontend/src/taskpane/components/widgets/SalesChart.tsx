@@ -64,7 +64,6 @@ ChartJS.register(
   TreemapController,
   TreemapElement,
   FunnelController,
-  WordElement,
   CandlestickController,
   CandlestickElement,
   TrapezoidElement,
