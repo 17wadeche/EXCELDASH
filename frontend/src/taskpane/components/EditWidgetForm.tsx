@@ -341,7 +341,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
               };
             } else if (
               [
-                'candlestick',
                 'ohlc',
                 'treemap',
                 'forceDirectedGraph',
