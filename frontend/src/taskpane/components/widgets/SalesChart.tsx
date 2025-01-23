@@ -34,7 +34,6 @@ import {
 import zoomPlugin from 'chartjs-plugin-zoom';
 import { TreemapController, TreemapElement } from 'chartjs-chart-treemap';
 import { FunnelController, TrapezoidElement } from 'chartjs-chart-funnel';
-import { WordCloudController, WordElement } from 'chartjs-chart-wordcloud';
 import {
   CandlestickController,
   CandlestickElement,
@@ -42,12 +41,7 @@ import {
   OhlcElement,
 } from 'chartjs-chart-financial';
 import { HierarchicalScale } from 'chartjs-plugin-hierarchical';
-import type {
-  ChartData,
-  ChartOptions,
-  ChartType,
-  ChartDataset,
-} from 'chart.js';
+import type { ChartData, ChartOptions, ChartType, ChartDataset } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { ParallelCoordinatesController, LinearAxis, LineSegment, PCPScale } from 'chartjs-chart-pcp';
 import { ForceDirectedGraphController, EdgeLine } from 'chartjs-chart-graph';
@@ -70,7 +64,6 @@ ChartJS.register(
   TreemapController,
   TreemapElement,
   FunnelController,
-  WordCloudController,
   WordElement,
   CandlestickController,
   CandlestickElement,
@@ -120,24 +113,12 @@ const FunnelChart: React.FC<any> = (props) => {
   return <BaseChart type="funnel" {...props} />;
 };
 
-const WordCloudChart: React.FC<any> = (props) => {
-  return <BaseChart type="wordCloud" {...props} />;
-};
-
 const CandlestickChart: React.FC<any> = (props) => {
   return <BaseChart type="candlestick" {...props} />;
 };
 
-const OhlcChart: React.FC<any> = (props) => {
-  return <BaseChart type="ohlc" {...props} />;
-};
-
 const BoxPlotChart: React.FC<any> = (props) => {
   return <BaseChart type="boxplot" {...props} />;
-};
-
-const ViolinChart: React.FC<any> = (props) => {
-  return <BaseChart type="violin" {...props} />;
 };
 
 // Define a mapping from chart type to component
@@ -152,11 +133,8 @@ const chartComponents: Record<string, React.FC<any>> = {
   polarArea: PolarArea,
   treemap: TreemapChart,
   funnel: FunnelChart,
-  wordCloud: WordCloudChart,
   candlestick: CandlestickChart,
-  ohlc: OhlcChart,
   boxplot: BoxPlotChart,
-  violin: ViolinChart,
   forceDirectedGraph: ForceDirectedGraphChart,
   choropleth: ChoroplethChart,
   parallelCoordinates: ParallelCoordinatesChart,
@@ -336,7 +314,7 @@ const SalesChart = ({ data, type }: SalesChartProps) => {
     }
   };
 
-  const noAxisTypes = ['pie', 'doughnut', 'radar', 'polarArea', 'wordCloud', 'funnel'];
+  const noAxisTypes = ['pie', 'doughnut', 'radar', 'polarArea', 'treemap', 'funnel', 'forceDirectedGraph', 'choropleth', 'parallelCoordinates', 'candlestick', 'barWithErrorBars',];
   if (noAxisTypes.includes(type)) {
     chartOptions.scales = {};
   }

@@ -363,8 +363,8 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                 .filter(Boolean);
               const funnelLabels: string[] = [];
               const funnelValues: number[] = [];
-              segments.forEach((seg) => {
-                const [stage, valStr] = seg.split(',').map((x) => x.trim());
+              segments.forEach((seg: string) => {
+                const [stage, valStr] = seg.split(',').map((x: string) => x.trim());
                 funnelLabels.push(stage);
                 funnelValues.push(parseFloat(valStr));
               });
