@@ -357,19 +357,34 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
             }
             // ===== TREEMAP =====
             else if (ds.type === 'treemap') {
-              let treemapData = ds.data;
-              if (typeof treemapData === 'string') {
+              let treemapData = [];
+              if (typeof ds.data === 'string') {
                 try {
-                  treemapData = JSON.parse(treemapData);
-                } catch {
+                  treemapData = JSON.parse(ds.data);
+                } catch (error) {
+                  console.warn('Invalid treemap data:', ds.data);
                   treemapData = [];
                 }
+              } else if (Array.isArray(ds.data)) {
+                treemapData = ds.data;
+              }
+              treemapData = treemapData.map((item: any) => ({
+                label: item.label || 'Unnamed',
+                value: Number(item.value) || 0,
+              }));
+              const treemapColors =
+                form.getFieldValue('treemapColors') || treemapData.map(() => ({ color: getRandomColor() }));
+              if (treemapColors.length !== treemapData.length) {
+                const newColors = treemapData.map((_: any, idx: any) => ({
+                  color: treemapColors[idx]?.color || getRandomColor(),
+                }));
+                form.setFieldsValue({ treemapColors: newColors });
               }
               return {
-                label: ds.label,
+                label: ds.label || 'Treemap Data',
                 type: ds.type,
                 data: treemapData,
-                backgroundColor: ds.backgroundColor || getRandomColor(),
+                backgroundColor: treemapColors.map((c: any) => c.color),
                 borderColor: ds.borderColor || '#4caf50',
                 borderWidth: ds.borderWidth || 1,
               };
@@ -523,6 +538,9 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
             endColor: cleanedValues.gradientEndColor || 'rgba(75,192,192,0.4)',
           },
         } as ChartData;
+        if (finalChartType === 'candlestick') {
+          updatedData.labels = []; 
+        }
         if (finalChartType === 'treemap') {
           const treemapColors = cleanedValues.treemapColors || [];
           updatedData.datasets = updatedData.datasets.map((ds: any, idx: any) => ({
