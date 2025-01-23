@@ -525,7 +525,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
         } as ChartData;
         if (finalChartType === 'treemap') {
           const treemapColors = cleanedValues.treemapColors || [];
-          updatedData.datasets = updatedData.datasets.map((ds, idx) => ({
+          updatedData.datasets = updatedData.datasets.map((ds: any, idx: any) => ({
             ...ds,
             backgroundColor: treemapColors[idx]?.color || ds.backgroundColor,
           }));
