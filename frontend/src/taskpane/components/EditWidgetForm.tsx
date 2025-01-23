@@ -318,6 +318,27 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                 borderColor: ds.borderColor || '#4caf50',
                 borderWidth: ds.borderWidth || 1,
               };
+            } else if (ds.type === 'candlestick') {
+              const segments = ds.data.split(';').map(s => s.trim()).filter(Boolean);
+              const parsed = segments.map(seg => {
+                const [label, open, high, low, close] = seg.split(',').map(x => x.trim());
+                return {
+                  x: label,
+                  o: Number(open),
+                  h: Number(high),
+                  l: Number(low),
+                  c: Number(close),
+                };
+              });
+              return {
+                label: ds.label,
+                type: 'candlestick',
+                data: parsed,
+                datalabels: { display: false },
+                backgroundColor: ds.backgroundColor || '#4caf50',
+                borderColor: ds.borderColor || '#4caf50',
+                borderWidth: ds.borderWidth || 1,
+              };
             } else if (
               [
                 'candlestick',
