@@ -224,6 +224,9 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
       // ========== CHART ==========
       case 'chart': {
         const finalChartType = cleanedValues.chartType === 'area' ? 'line' : cleanedValues.chartType;
+        if (finalChartType === 'candlestick') {
+          cleanedValues.xAxisType = 'category';
+        }
         const noAxisTypes = [
           'pie',
           'doughnut',
@@ -360,9 +363,9 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
               let treemapData = [];
               if (typeof ds.data === 'string') {
                 try {
-                  treemapData = JSON.parse(ds.data);
+                  treemapData = typeof ds.data === 'string' ? JSON.parse(ds.data) : ds.data;
                 } catch (error) {
-                  console.warn('Invalid treemap data:', ds.data);
+                  console.error("Treemap data parsing failed", error);
                   treemapData = [];
                 }
               } else if (Array.isArray(ds.data)) {
@@ -538,9 +541,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
             endColor: cleanedValues.gradientEndColor || 'rgba(75,192,192,0.4)',
           },
         } as ChartData;
-        if (finalChartType === 'candlestick') {
-          updatedData.labels = []; 
-        }
         if (finalChartType === 'treemap') {
           const treemapColors = cleanedValues.treemapColors || [];
           updatedData.datasets = updatedData.datasets.map((ds: any, idx: any) => ({
