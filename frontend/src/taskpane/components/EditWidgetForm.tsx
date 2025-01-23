@@ -305,18 +305,23 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
             } else if (ds.type === 'violin') {
               let parsed: { x: string; y: number[] }[] = [];
               try {
-                parsed = JSON.parse(ds.data);
+                parsed = JSON.parse(ds.data); // e.g. [ {x:"GroupA", y:[5,8,10]}, {x:"GroupB", ...} ]
               } catch {
                 console.warn('Violin data is not valid JSON:', ds.data);
               }
               return {
                 label: ds.label,
                 type: 'violin',
-                data: parsed, // now an actual array
-                datalabels: { display: false }, // optional: turn off numeric labels
+                data: parsed,
+                datalabels: { display: false },
                 backgroundColor: ds.backgroundColor || '#4caf50',
                 borderColor: ds.borderColor || '#4caf50',
                 borderWidth: ds.borderWidth || 1,
+                // Add this object so that the plugin reads { x: "...", y: [...] } properly:
+                parsing: {
+                  xKey: 'x',
+                  yKey: 'y',
+                }
               };
             } else if (ds.type === 'candlestick') {
               const segments = ds.data
