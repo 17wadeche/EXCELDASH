@@ -271,7 +271,7 @@ const CreateDashboard: React.FC = () => {
               // ========== TREEMAP CHART DATA ==========
               exampleSheet.getRange("A47").values = [["Treemap Chart Data"]];
               exampleSheet.getRange("A48:B48").values = [["Label", "Value"]];
-              exampleSheet.getRange("A49:B49").values = [
+              exampleSheet.getRange("A49:B53").values = [
                 ["Category A", 10],
                 ["Category B", 20],
                 ["Category C", 15],
@@ -279,9 +279,9 @@ const CreateDashboard: React.FC = () => {
                 ["Category E", 25],
               ];
               // ========== FUNNEL CHART DATA ==========
-              exampleSheet.getRange("A70").values = [["Funnel Chart Data"]];
-              exampleSheet.getRange("A71:B71").values = [["Stage", "Value"]];
-              exampleSheet.getRange("A72:B76").values = [
+              exampleSheet.getRange("A55").values = [["Funnel Chart Data"]];
+              exampleSheet.getRange("A56:B56").values = [["Stage", "Value"]];
+              exampleSheet.getRange("A57:B61").values = [
                 ["Prospects", 200],
                 ["Qualified", 100],
                 ["Proposal", 60],
@@ -289,45 +289,45 @@ const CreateDashboard: React.FC = () => {
                 ["Closed", 15],
               ];
               // ========== FORCE-DIRECTED GRAPH DATA ==========
-              exampleSheet.getRange("A78").values = [["Force-Directed Graph Data"]];
-              exampleSheet.getRange("A79:C79").values = [["NodeId", "Group", "Value"]];
-              exampleSheet.getRange("A80:C83").values = [
+              exampleSheet.getRange("A63").values = [["Force-Directed Graph Data"]];
+              exampleSheet.getRange("A64:C64").values = [["NodeId", "Group", "Value"]];
+              exampleSheet.getRange("A65:C68").values = [
                 ["A", "Group1", 12],
                 ["B", "Group1", 8],
                 ["C", "Group2", 15],
                 ["D", "Group2", 10],
               ];
-              exampleSheet.getRange("E78").values = [["Edges"]];
-              exampleSheet.getRange("E79:H79").values = [["Source", "Target", "Value", "Label"]];
-              exampleSheet.getRange("E80:H83").values = [
+              exampleSheet.getRange("E70").values = [["Edges"]];
+              exampleSheet.getRange("E71:H71").values = [["Source", "Target", "Value", "Label"]];
+              exampleSheet.getRange("E82:H85").values = [
                 ["A", "B", 1, "AB"],
                 ["B", "C", 1, "BC"],
                 ["C", "D", 1, "CD"],
                 ["A", "D", 2, "AD"],
               ];
               // ========== CHOROPLETH CHART DATA ==========
-              exampleSheet.getRange("A85").values = [["Choropleth Chart Data"]];
-              exampleSheet.getRange("A86:B86").values = [["Region", "Value"]];
-              exampleSheet.getRange("A87:B90").values = [
+              exampleSheet.getRange("A87").values = [["Choropleth Chart Data"]];
+              exampleSheet.getRange("A888:B88").values = [["Region", "Value"]];
+              exampleSheet.getRange("A89:B92").values = [
                 ["US-CA", 25],
                 ["US-TX", 15],
                 ["US-NY", 30],
                 ["US-FL", 10],
               ];
               // ========== PARALLEL COORDINATES (PCP) DATA ==========
-              exampleSheet.getRange("A92").values = [["Parallel Coordinates Chart Data"]];
-              exampleSheet.getRange("A93:D93").values = [["Dim1", "Dim2", "Dim3", "Dim4"]];
-              exampleSheet.getRange("A94:D96").values = [
+              exampleSheet.getRange("A94").values = [["Parallel Coordinates Chart Data"]];
+              exampleSheet.getRange("A95:D95").values = [["Dim1", "Dim2", "Dim3", "Dim4"]];
+              exampleSheet.getRange("A96:D98").values = [
                 [10, 30, 50, 20],
                 [5, 40, 20, 10],
                 [9, 25, 55, 22],
               ];
               // ========== BAR WITH ERROR BARS DATA ==========
-              exampleSheet.getRange("A98").values = [["Bar with Error Bars Data"]];
-              exampleSheet.getRange("A99:D99").values = [
+              exampleSheet.getRange("A100").values = [["Bar with Error Bars Data"]];
+              exampleSheet.getRange("A101:D101").values = [
                 ["Label", "Value", "ErrorMinus", "ErrorPlus"],
               ];
-              exampleSheet.getRange("A100:D102").values = [
+              exampleSheet.getRange("A102:D104").values = [
                 ["A", 10, 2, 3],
                 ["B", 15, 1, 2],
                 ["C", 8, 1.5, 1.5],
