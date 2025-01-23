@@ -266,8 +266,8 @@ const CreateDashboard: React.FC = () => {
               // ========== CANDLESTICK CHART DATA ==========
               exampleSheet.getRange("A42").values = [["Candlestick Chart Data"]];
               exampleSheet.getRange("A43:E43").values = [["Label", "Open", "High", "Low", "Close"]];
-              exampleSheet.getRange("A44:E44").values = [["Day1", 100, 110, 95, 105]];
-              exampleSheet.getRange("A45:E45").values = [["Day2", 105, 115, 100, 110]];
+              exampleSheet.getRange("A44:E44").values = [["2023-01-01", 100, 110, 95, 105]];
+              exampleSheet.getRange("A45:E45").values = [["2023-01-02", 105, 115, 100, 110]];
               // ========== TREEMAP CHART DATA ==========
               exampleSheet.getRange("A47").values = [["Treemap Chart Data"]];
               exampleSheet.getRange("A48:B48").values = [["Label", "Value"]];

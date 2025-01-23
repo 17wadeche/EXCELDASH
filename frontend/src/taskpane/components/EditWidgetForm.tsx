@@ -224,9 +224,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
       // ========== CHART ==========
       case 'chart': {
         const finalChartType = cleanedValues.chartType === 'area' ? 'line' : cleanedValues.chartType;
-        if (finalChartType === 'candlestick') {
-          cleanedValues.xAxisType = 'category';
-        }
         const noAxisTypes = [
           'pie',
           'doughnut',
