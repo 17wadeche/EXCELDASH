@@ -5,6 +5,7 @@ import React, { useEffect, useState, useContext } from 'react';
 import {
   Form,
   Input,
+  Space,
   Button,
   InputNumber,
   message,
@@ -350,14 +351,19 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
             }
             // ===== TREEMAP =====
             else if (ds.type === 'treemap') {
-              const treemapData = ds.data as { label: string; value: number }[];
-              const backgroundColors =
-                ds.backgroundColor || treemapData.map(() => getRandomColor());
+              let treemapData = ds.data;
+              if (typeof treemapData === 'string') {
+                try {
+                  treemapData = JSON.parse(treemapData);
+                } catch {
+                  treemapData = [];
+                }
+              }
               return {
                 label: ds.label,
-                type: 'treemap',
+                type: ds.type,
                 data: treemapData,
-                backgroundColor: backgroundColors,
+                backgroundColor: ds.backgroundColor || getRandomColor(),
                 borderColor: ds.borderColor || '#4caf50',
                 borderWidth: ds.borderWidth || 1,
               };
@@ -1280,71 +1286,135 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                         <Option value="barWithErrorBars">Bar With Error Bars</Option>
                       </Select>
                     </Form.Item>
+                    {/* Conditional Rendering for Data Points based on Chart Type */}
                     <Form.Item
-                      {...restField}
-                      name={[name, 'data']}
-                      label="Data Points"
-                      rules={[
-                        {
-                          required: true,
-                          message: 'Please enter data points',
-                        },
-                        {
-                          validator: (_, value) => {
-                            const dsType = form.getFieldValue([
-                              'datasets',
-                              name,
-                              'type',
-                            ]);
-                            if (!value) return Promise.resolve();
-                            // Validate bubble or scatter format:
-                            if (dsType === 'bubble') {
-                              const segments = value
-                                .split(';')
-                                .map((s: string) => s.trim())
-                                .filter(Boolean);
-                              for (let seg of segments) {
-                                const parts = seg
-                                  .split(',')
-                                  .map((v: string) => v.trim());
-                                if (
-                                  parts.length !== 3 ||
-                                  parts.some((p: string) => isNaN(Number(p)))
-                                ) {
-                                  return Promise.reject(
-                                    new Error(
-                                      'Bubble data must be "x,y,r" triplets, separated by semicolons.'
-                                    )
-                                  );
-                                }
-                              }
-                            } else if (dsType === 'scatter') {
-                              const segments = value
-                                .split(';')
-                                .map((s: string) => s.trim())
-                                .filter(Boolean);
-                              for (let seg of segments) {
-                                const parts = seg
-                                  .split(',')
-                                  .map((v: string) => v.trim());
-                                if (
-                                  parts.length !== 2 ||
-                                  parts.some((p: string) => isNaN(Number(p)))
-                                ) {
-                                  return Promise.reject(
-                                    new Error(
-                                      'Scatter data must be "x,y" pairs, separated by semicolons.'
-                                    )
-                                  );
-                                }
-                              }
-                            }
-                            return Promise.resolve();
-                          },
-                        },
-                      ]}
+                      shouldUpdate={(prevValues, currentValues) =>
+                        prevValues.datasets?.[name]?.type !== currentValues.datasets?.[name]?.type
+                      }
+                      noStyle
                     >
-                      <Input />
+                      {() => {
+                        const dsType = form.getFieldValue(['datasets', name, 'type']);
+                        if (dsType === 'treemap') {
+                          return (
+                            <>
+                              <Form.List name={[name, 'data']}>
+                                {(dataFields, { add: addData, remove: removeData }) => (
+                                  <>
+                                    {dataFields.map(({ key: dataKey, name: dataName, ...dataRestField }) => (
+                                      <Space
+                                        key={dataKey}
+                                        style={{ display: 'flex', marginBottom: 8 }}
+                                        align="baseline"
+                                      >
+                                        <Form.Item
+                                          {...dataRestField}
+                                          name={[dataName, 'label']}
+                                          rules={[{ required: true, message: 'Missing label' }]}
+                                        >
+                                          <Input placeholder="Label" />
+                                        </Form.Item>
+                                        <Form.Item
+                                          {...dataRestField}
+                                          name={[dataName, 'value']}
+                                          rules={[
+                                            { required: true, message: 'Missing value' },
+                                            {
+                                              type: 'number',
+                                              message: 'Value must be a number',
+                                            },
+                                          ]}
+                                        >
+                                          <InputNumber placeholder="Value" />
+                                        </Form.Item>
+                                        <MinusCircleOutlined onClick={() => removeData(dataName)} />
+                                      </Space>
+                                    ))}
+                                    <Form.Item>
+                                      <Button
+                                        type="dashed"
+                                        onClick={() => addData()}
+                                        block
+                                        icon={<PlusOutlined />}
+                                      >
+                                        Add Data Point
+                                      </Button>
+                                    </Form.Item>
+                                  </>
+                                )}
+                              </Form.List>
+                            </>
+                          );
+                        } else {
+                          return (
+                            <Form.Item
+                              {...restField}
+                              name={[name, 'data']}
+                              label="Data Points"
+                              rules={[
+                                {
+                                  required: true,
+                                  message: 'Please enter data points',
+                                },
+                                {
+                                  validator: (_, value) => {
+                                    const dsType = form.getFieldValue([
+                                      'datasets',
+                                      name,
+                                      'type',
+                                    ]);
+                                    if (!value) return Promise.resolve();
+                                    if (dsType === 'bubble') {
+                                      const segments = value
+                                        .split(';')
+                                        .map((s: string) => s.trim())
+                                        .filter(Boolean);
+                                      for (let seg of segments) {
+                                        const parts = seg
+                                          .split(',')
+                                          .map((v: string) => v.trim());
+                                        if (
+                                          parts.length !== 3 ||
+                                          parts.some((p: string) => isNaN(Number(p)))
+                                        ) {
+                                          return Promise.reject(
+                                            new Error(
+                                              'Bubble data must be "x,y,r" triplets, separated by semicolons.'
+                                            )
+                                          );
+                                        }
+                                      }
+                                    } else if (dsType === 'scatter') {
+                                      const segments = value
+                                        .split(';')
+                                        .map((s: string) => s.trim())
+                                        .filter(Boolean);
+                                      for (let seg of segments) {
+                                        const parts = seg
+                                          .split(',')
+                                          .map((v: string) => v.trim());
+                                        if (
+                                          parts.length !== 2 ||
+                                          parts.some((p: string) => isNaN(Number(p)))
+                                        ) {
+                                          return Promise.reject(
+                                            new Error(
+                                              'Scatter data must be "x,y" pairs, separated by semicolons.'
+                                            )
+                                          );
+                                        }
+                                      }
+                                    }
+                                    return Promise.resolve();
+                                  },
+                                },
+                              ]}
+                            >
+                              <Input />
+                            </Form.Item>
+                          );
+                        }
+                      }}
                     </Form.Item>
                     <Form.Item
                       {...restField}
