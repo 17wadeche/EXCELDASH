@@ -223,8 +223,16 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
 
       // ========== CHART ==========
       case 'chart': {
-        const finalChartType =
-          cleanedValues.chartType === 'area' ? 'line' : cleanedValues.chartType;
+        const finalChartType = cleanedValues.chartType === 'area' ? 'line' : cleanedValues.chartType;
+        updatedData = {
+          title: cleanedValues.title,
+          type: finalChartType,
+          worksheetName: cleanedValues.worksheetName,
+          associatedRange: cleanedValues.associatedRange,
+          labels: cleanedValues.labels ? cleanedValues.labels.split(',').map((l: string) => l.trim()): [],
+          datasets: (cleanedValues.datasets || []).map((ds: any) => {
+          }),
+        } as ChartData;
         if (finalChartType === 'scatter' || finalChartType === 'bubble') {
           cleanedValues.xAxisType = 'linear';
         }
