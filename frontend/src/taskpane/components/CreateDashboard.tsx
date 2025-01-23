@@ -263,28 +263,11 @@ const CreateDashboard: React.FC = () => {
               exampleSheet.getRange("A38:F38").values = [["", "Q1", "Median", "Q3", "Min", "Max"]];
               exampleSheet.getRange("A39:F39").values = [["Sample1", 10, 20, 30, 5, 35]];
               exampleSheet.getRange("A40:F40").values = [["Sample2", 15, 25, 40, 10, 45]];
-              // ========== VIOLIN CHART DATA ==========
-              exampleSheet.getRange("A42").values = [["Violin Chart Data"]];
-              exampleSheet.getRange("A43:B43").values = [["Sample", "Value"]];
-              exampleSheet.getRange("A44:B50").values = [
-                ["GroupA", 5],
-                ["GroupA", 8],
-                ["GroupA", 10],
-                ["GroupA", 12],
-                ["GroupA", 9],
-                ["GroupB", 14],
-                ["GroupB", 16],
-              ];
               // ========== CANDLESTICK CHART DATA ==========
-              exampleSheet.getRange("A52").values = [["Candlestick Chart Data"]];
-              exampleSheet.getRange("A53:E53").values = [["Label", "Open", "High", "Low", "Close"]];
-              exampleSheet.getRange("A54:E54").values = [["Day1", 100, 110, 95, 105]];
-              exampleSheet.getRange("A55:E55").values = [["Day2", 105, 115, 100, 110]];
-              // ========== OHLC CHART DATA ==========
-              exampleSheet.getRange("A57").values = [["OHLC Chart Data"]];
-              exampleSheet.getRange("A58:E58").values = [["Label", "Open", "High", "Low", "Close"]];
-              exampleSheet.getRange("A59:E59").values = [["Day1", 50, 60, 45, 55]];
-              exampleSheet.getRange("A60:E60").values = [["Day2", 55, 65, 50, 60]];
+              exampleSheet.getRange("A41").values = [["Candlestick Chart Data"]];
+              exampleSheet.getRange("A42:E42").values = [["Label", "Open", "High", "Low", "Close"]];
+              exampleSheet.getRange("A43:E43").values = [["Day1", 100, 110, 95, 105]];
+              exampleSheet.getRange("A44:E44").values = [["Day2", 105, 115, 100, 110]];
               // ========== TREEMAP CHART DATA ==========
               exampleSheet.getRange("A62").values = [["Treemap Chart Data"]];
               exampleSheet.getRange("A63:B63").values = [["Label", "Value"]];
