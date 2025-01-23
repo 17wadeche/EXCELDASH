@@ -270,7 +270,7 @@ const CreateDashboard: React.FC = () => {
               exampleSheet.getRange("A45:E45").values = [["2023-01-02", 105, 115, 100, 110]];
               // ========== TREEMAP CHART DATA ==========
               exampleSheet.getRange("A47").values = [["Treemap Chart Data"]];
-              exampleSheet.getRange("A48:B48").values = [["Label", "Value"]];
+              exampleSheet.getRange("A48:B48").values = [["Name", "Value"]];
               exampleSheet.getRange("A49:B53").values = [
                 ["Category A", 10],
                 ["Category B", 20],
