@@ -533,29 +533,28 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
     switch (mainType) {
       // ========== BOX PLOT ==========
       case 'boxplot': {
-        if (data.length < 2) {
-          message.error('Need at least two rows (title + header) plus data rows.');
+        if (data.length < 3) {
+          message.error(
+            'Box Plot data must include at least a title row, a header row, and one data row.'
+          );
           return;
         }
-        const labels = data[0].slice(1);
-        const numericRows = data.slice(1);
-        const numLabels = labels.length;
-        // Each column (beyond the first) holds Q1, Median, Q3, Min, Max
-        const boxplotArrays = new Array(numLabels).fill(0).map(() => [] as number[]);
-        numericRows.forEach((row) => {
-          const rowValues = row.slice(1);
-          rowValues.forEach((val: any, i: number) => {
-            if (val != null && val !== '' && !isNaN(val)) {
-              boxplotArrays[i].push(Number(val));
-            }
-          });
-        });
-        // We typically store boxplot data as a JSON string of arrays
-        // each sub-array might be [min, q1, median, q3, max] or your structure
-        // For your example we do the entire row, but typically you’d do 5-value sets
-        const dataJson = JSON.stringify(boxplotArrays);
+        const boxLabels: string[] = [];
+        const boxValues: number[][] = [];
+        for (let i = 2; i < data.length; i++) {
+          const row = data[i];
+          const sampleName = String(row[0]) || 'Sample';
+          const q1 = Number(row[1]);
+          const median = Number(row[2]);
+          const q3 = Number(row[3]);
+          const min = Number(row[4]);
+          const max = Number(row[5]);
+          boxLabels.push(sampleName);
+          boxValues.push([min, q1, median, q3, max]);
+        }
+        const dataJson = JSON.stringify(boxValues);
         form.setFieldsValue({
-          labels: labels.join(', '),
+          labels: boxLabels.join(', '),
           datasets: [
             {
               label: 'BoxPlot Series',
@@ -567,10 +566,9 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
             },
           ],
         });
-        message.success('Loaded boxplot data from Excel!');
+        message.success('Box Plot data loaded successfully!');
         break;
       }
-
       // ========== VIOLIN ==========
       case 'violin': {
         if (data.length < 3) {
