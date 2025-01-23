@@ -1442,10 +1442,10 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
             <Form.List name="treemapColors">
               {() => {
                 const treemapData = form.getFieldValue('datasets')?.[0]?.data || [];
-                const treemapDataArray = Array.isArray(rawTreemapData) ? rawTreemapData : [];
+                const treemapDataArray = Array.isArray(treemapData) ? treemapData : [];
                 return (
                   <>
-                    {treemapDataArray.map((item, index) => (
+                    {treemapDataArray.map((item: any, index: number) => (
                       <Form.Item
                         key={index}
                         label={`Color for ${item.label}`}
@@ -1460,8 +1460,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
               }}
             </Form.List>
           )}
-
-          {/* ADVANCED SETTINGS (Axis, Plugins, Legend, Styling) */}
           <Collapse>
             {![
               'pie',
