@@ -528,21 +528,14 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
       }
       // ========== VIOLIN ==========
       case 'violin': {
-        /**
-         * Sample data:
-         * Row1: ["Violin Chart Data"]
-         * Row2: ["Sample", "Value"]
-         * Row3..: ["GroupA", 5], ["GroupA", 8], ...
-         *
-         * We want multiple groups => e.g. { label: 'GroupA', data: [5,8,10...] }, etc.
-         */
         if (data.length < 3) {
           message.error('Violin data needs at least 3 rows: title row + header + data.');
           return;
         }
-        // skip row0 ("Violin Chart Data"), row1 is ["Sample","Value"]
+        const headerRow = data[1]; // e.g. ["Sample", "Value"]
+        const labelArr = headerRow.slice(1); // e.g. ["Value"]
+        const labelsStr = labelArr.join(', ');
         const bodyRows = data.slice(2);
-        // group them by the first column
         const groupMap: Record<string, number[]> = {};
         bodyRows.forEach((row: any[]) => {
           const groupName = row[0];
@@ -552,40 +545,27 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           }
           groupMap[groupName].push(val);
         });
-
-        // Build one dataset per group
         const violinDatasets = Object.keys(groupMap).map((group) => ({
           label: group,
           type: 'violin',
-          data: groupMap[group],
+          data: groupMap[group].join(','), // so no brackets, e.g. "5,8,10,12,9"
           backgroundColor: getRandomColor(),
           borderColor: getRandomColor(),
           borderWidth: 1,
         }));
-
         form.setFieldsValue({
-          labels: '',
+          labels: labelsStr,     // e.g. "Value"
           datasets: violinDatasets,
         });
         message.success('Violin data loaded from Excel.');
         break;
       }
-
       // ========== CANDLESTICK ==========
       case 'candlestick': {
-        /**
-         * Sample data:
-         * Row1: ["Candlestick Chart Data"]
-         * Row2: ["Label","Open","High","Low","Close"]
-         * Row3..: ["Day1",100,110,95,105], ...
-         *
-         * We'll store e.g. data: [{ x:'Day1', o:100, h:110, l:95, c:105 }, ...]
-         */
         if (data.length < 3) {
           message.error('Candlestick data needs 3+ rows: title row + header + data rows.');
           return;
         }
-        // row2 = e.g. ["Label","Open","High","Low","Close"]
         const rawRows = data.slice(2); // data rows
         const candleData = rawRows.map((row: any[]) => ({
           x: row[0],
@@ -594,7 +574,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           l: Number(row[3]),
           c: Number(row[4]),
         }));
-
         form.setFieldsValue({
           labels: '',
           datasets: [
