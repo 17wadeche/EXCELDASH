@@ -211,8 +211,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
       case 'chart': {
         const finalChartType =
           cleanedValues.chartType === 'area' ? 'line' : cleanedValues.chartType;
-
-        // If scatter/bubble => force xAxis=linear
         if (finalChartType === 'scatter' || finalChartType === 'bubble') {
           cleanedValues.xAxisType = 'linear';
         }
@@ -223,7 +221,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
             backgroundColor: treemapColors[idx]?.color || ds.backgroundColor,
           }));
         }
-
         const noAxisTypes = [
           'pie',
           'doughnut',
@@ -238,14 +235,11 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           'parallelCoordinates',
           'barWithErrorBars',
         ];
-
-        // If it's a pie/doughnut/polar, we might have sliceColors
         let sliceColorsArray: string[] = [];
         if (['pie', 'doughnut', 'polarArea'].includes(finalChartType)) {
           const sc: { color: string }[] = cleanedValues.sliceColors || [];
           sliceColorsArray = sc.map((obj) => obj.color);
         }
-
         updatedData = {
           title: cleanedValues.title,
           type: finalChartType,
@@ -255,20 +249,17 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
             ? cleanedValues.labels.split(',').map((l: string) => l.trim())
             : [],
           datasets: (cleanedValues.datasets || []).map((ds: any) => {
-            // ========= Special handling for scatter/bubble =========
+            // ===== SCATTER / BUBBLE =====
             if (ds.type === 'scatter' || ds.type === 'bubble') {
-              // SCATTER / BUBBLE
               const segments = ds.data
                 .split(';')
                 .map((s: string) => s.trim())
                 .filter(Boolean);
-
               if (ds.type === 'bubble') {
                 const points = segments.map((seg: string) => {
                   const [x, y, r] = seg.split(',').map((v: string) => parseFloat(v.trim()));
                   return { x, y, r };
                 });
-                // If we have bubbleColors in the form, handle them:
                 const bubbleColors = cleanedValues.bubbleColors || [];
                 const backgroundColors = bubbleColors.map((c: any) => c.color);
                 return {
@@ -281,7 +272,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                   borderWidth: ds.borderWidth || 1,
                 };
               } else {
-                // SCATTER
+                // scatter
                 const points = segments.map((seg: string) => {
                   const [x, y] = seg.split(',').map((v: string) => parseFloat(v.trim()));
                   return { x, y };
@@ -297,7 +288,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                 };
               }
             }
-            // ========= Boxplot special handling =========
+            // ===== BOX PLOT =====
             else if (ds.type === 'boxplot') {
               let parsed = [];
               try {
@@ -314,17 +305,17 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                 borderColor: ds.borderColor || '#4caf50',
                 borderWidth: ds.borderWidth || 1,
               };
-            } else if (ds.type === 'candlestick') {
+            }
+            // ===== CANDLESTICK =====
+            else if (ds.type === 'candlestick') {
               const segments = ds.data
                 .split(';')
                 .map((s: string) => s.trim())
                 .filter(Boolean);
-
               const parsed = segments.map((seg: string) => {
                 const [label, open, high, low, close] = seg
                   .split(',')
                   .map((x: string) => x.trim());
-
                 return {
                   x: label,
                   o: Number(open),
@@ -333,7 +324,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                   c: Number(close),
                 };
               });
-
               return {
                 label: ds.label,
                 type: 'candlestick',
@@ -350,9 +340,12 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                   closeKey: 'c'
                 },
               };
-            } else if (ds.type === 'treemap') {
+            }
+            // ===== TREEMAP =====
+            else if (ds.type === 'treemap') {
               const treemapData = ds.data as { label: string; value: number }[];
-              const backgroundColors = ds.backgroundColor || treemapData.map(() => getRandomColor());
+              const backgroundColors =
+                ds.backgroundColor || treemapData.map(() => getRandomColor());
               return {
                 label: ds.label,
                 type: 'treemap',
@@ -361,7 +354,9 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                 borderColor: ds.borderColor || '#4caf50',
                 borderWidth: ds.borderWidth || 1,
               };
-            } else if (ds.type === 'funnel') {
+            }
+            // ===== FUNNEL =====
+            else if (ds.type === 'funnel') {
               const segments = ds.data
                 .split(';')
                 .map((s: string) => s.trim())
@@ -374,7 +369,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                 funnelValues.push(parseFloat(valStr));
               });
               const funnelColors = funnelValues.map(() => getRandomColor());
-
               return {
                 label: ds.label,
                 type: 'funnel',
@@ -384,8 +378,12 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                 borderWidth: ds.borderWidth || 1,
                 options: { plugins: { funnel: { percent: false } } },
               };
-            } else if (
-              ['forceDirectedGraph', 'choropleth', 'parallelCoordinates', 'barWithErrorBars'].includes(ds.type)
+            }
+            // ===== ForceGraph / Choropleth / PCP / BarWithErrorBars =====
+            else if (
+              ['forceDirectedGraph', 'choropleth', 'parallelCoordinates', 'barWithErrorBars'].includes(
+                ds.type
+              )
             ) {
               return {
                 label: ds.label,
@@ -397,7 +395,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                 borderWidth: ds.borderWidth || 1,
               };
             }
-            // ========= Everything else: bar/line/radar/pie/funnel, etc. =========
+            // ===== Everything else: bar/line/radar/pie, etc. =====
             else {
               let parsedValues: number[] = [];
               if (typeof ds.data === 'string') {
@@ -409,19 +407,15 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
               } else {
                 parsedValues = [Number(ds.data)];
               }
-
               const shouldFill =
                 cleanedValues.chartType === 'area' || ds.type === 'area';
-
               let finalBg = ds.backgroundColor || '#4caf50';
-              // If it's a multi-slice type and we have sliceColors
               if (
                 ['pie', 'doughnut', 'polarArea'].includes(finalChartType) &&
                 sliceColorsArray.length
               ) {
                 finalBg = sliceColorsArray;
               }
-
               return {
                 label: ds.label,
                 data: parsedValues,
@@ -510,10 +504,11 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
             endColor: cleanedValues.gradientEndColor || 'rgba(75,192,192,0.4)',
           },
         } as ChartData;
-
+        if (finalChartType === 'candlestick') {
+          updatedData.labels = [];
+        }
         break;
       }
-
       // ========== GANTT ==========
       case 'gantt': {
         const existing = widget.data as GanttWidgetData;
