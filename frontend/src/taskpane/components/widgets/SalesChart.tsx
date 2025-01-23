@@ -29,9 +29,9 @@ import 'chartjs-adapter-moment';
 import {
   BoxPlotController,
   BoxAndWiskers,
-  ViolinController,
-  Violin,
 } from '@sgratzl/chartjs-chart-boxplot';
+import { ViolinController, ViolinElement } from 'chartjs-chart-box-and-violin-plot';
+
 import zoomPlugin from 'chartjs-plugin-zoom';
 import { TreemapController, TreemapElement } from 'chartjs-chart-treemap';
 import { FunnelController } from 'chartjs-chart-funnel';
@@ -79,7 +79,7 @@ ChartJS.register(
   OhlcElement,
   BoxPlotController,
   ViolinController,
-  Violin,
+  ViolinElement,
   BoxAndWiskers,
   HierarchicalScale,
   ParallelCoordinatesController,
