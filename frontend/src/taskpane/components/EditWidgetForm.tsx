@@ -280,6 +280,15 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                   borderWidth: ds.borderWidth || 1,
                 };
               }
+            } else if (ds.type === 'boxplot') {
+              return {
+                label: ds.label,
+                type: ds.type,
+                data: ds.data, // Keep as JSON string
+                backgroundColor: ds.backgroundColor || '#4caf50',
+                borderColor: ds.borderColor || '#4caf50',
+                borderWidth: ds.borderWidth || 1,
+              };
             } else {
               // Normal bar/line/radar/pie
               let parsedValues: number[] = [];
@@ -493,36 +502,37 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
   ) => {
     switch (mainType) {
       case 'boxplot': {
-        if (data.length < 3) {
-          message.error('Boxplot data requires at least 3 rows: title row + header row + data.');
+        if (data.length < 2) {
+          message.error('Need at least two rows (title + header) plus raw data rows.');
           return;
         }
-        const headerRow = data[1];
-        const labelsArr = headerRow.slice(1); // e.g. ["Q1","Median","Q3","Min","Max"]
-        const labelsStr = labelsArr.join(', ');
-        const rawDataRows = data.slice(2);
-        const boxplotDatasets = rawDataRows.map((row) => {
-          const sampleName = row[0]; // e.g. "Sample1"
-          const q1     = Number(row[1]);
-          const median = Number(row[2]);
-          const q3     = Number(row[3]);
-          const min    = Number(row[4]);
-          const max    = Number(row[5]);
-          const dataStr = [min, q1, median, q3, max].join(',');
-          return {
-            label: sampleName,        // e.g. "Sample1"
-            type: 'boxplot',
-            data: dataStr,            // e.g. "5,10,20,30,35"
-            backgroundColor: getRandomColor(),
-            borderColor: getRandomColor(),
-            borderWidth: 1,
-          };
+        const labels = data[0].slice(1);
+        const numericRows = data.slice(1);
+        const numLabels = labels.length;
+        const boxplotArrays = new Array(numLabels).fill(0).map(() => [] as number[]);
+        numericRows.forEach((row) => {
+          const rowValues = row.slice(1); // skip the "DataN" cell
+          rowValues.forEach((val, i) => {
+            if (val != null && val !== '' && !isNaN(val)) {
+              boxplotArrays[i].push(Number(val));
+            }
+          });
         });
+        const dataJson = JSON.stringify(boxplotArrays);
         form.setFieldsValue({
-          labels: labelsStr,    // e.g. "Q1, Median, Q3, Min, Max"
-          datasets: boxplotDatasets,
+          labels: labels.join(', '),
+          datasets: [
+            {
+              label: 'BoxPlot Series',
+              type: 'boxplot',
+              data: dataJson,
+              backgroundColor: getRandomColor(),
+              borderColor: getRandomColor(),
+              borderWidth: 1,
+            },
+          ],
         });
-        message.success('Boxplot data loaded from Excel.');
+        message.success('Loaded raw boxplot data from Excel!');
         break;
       }
       // ========== VIOLIN ==========
