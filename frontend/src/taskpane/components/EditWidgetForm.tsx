@@ -339,15 +339,29 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                 borderColor: ds.borderColor || '#4caf50',
                 borderWidth: ds.borderWidth || 1,
               };
+            } else if (ds.type === 'ohlc') {
+              const segments = ds.data.split(';').map(s => s.trim()).filter(Boolean);
+              const parsed = segments.map(seg => {
+                const [label, open, high, low, close] = seg.split(',').map(x => x.trim());
+                return {
+                  x: label,
+                  o: Number(open),
+                  h: Number(high),
+                  l: Number(low),
+                  c: Number(close),
+                };
+              });
+              return {
+                label: ds.label,
+                type: 'ohlc',
+                data: parsed,
+                datalabels: { display: false },
+                backgroundColor: ds.backgroundColor || '#4caf50',
+                borderColor: ds.borderColor || '#4caf50',
+                borderWidth: ds.borderWidth || 1,
+              };
             } else if (
-              [
-                'ohlc',
-                'treemap',
-                'forceDirectedGraph',
-                'choropleth',
-                'parallelCoordinates',
-                'barWithErrorBars',
-              ].includes(ds.type)
+              ['treemap', 'forceDirectedGraph', 'choropleth', 'parallelCoordinates', 'barWithErrorBars'].includes(ds.type)
             ) {
               return {
                 label: ds.label,
