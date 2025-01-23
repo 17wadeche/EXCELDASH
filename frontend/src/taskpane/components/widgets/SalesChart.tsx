@@ -315,7 +315,7 @@ const SalesChart = ({ data, type }: SalesChartProps) => {
     }
   };
 
-  const noAxisTypes = ['pie', 'doughnut', 'radar', 'polarArea', 'treemap', 'funnel', 'forceDirectedGraph', 'choropleth', 'parallelCoordinates', 'candlestick', 'barWithErrorBars',];
+  const noAxisTypes = ['pie', 'doughnut', 'radar', 'polarArea', 'treemap', 'funnel', 'forceDirectedGraph', 'choropleth', 'parallelCoordinates', 'barWithErrorBars',];
   if (noAxisTypes.includes(type)) {
     chartOptions.scales = {};
   }
