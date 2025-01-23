@@ -335,8 +335,52 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                   closeKey: 'c'
                 },
               };
+            } else if (ds.type === 'treemap') {
+              const segments = ds.data
+                .split(';')
+                .map((s: string) => s.trim())
+                .filter(Boolean);
+
+              // Convert to objects:
+              const treemapData = segments.map((seg: string) => {
+                // Each seg looks like: "Category A,10"
+                const [label, valueStr] = seg.split(',').map((x: string) => x.trim());
+                return { label, value: parseFloat(valueStr) };
+              });
+
+              return {
+                label: ds.label,
+                type: 'treemap',
+                data: treemapData, // now an array of objects
+                backgroundColor: ds.backgroundColor || '#4caf50',
+                borderColor: ds.borderColor || '#4caf50',
+                borderWidth: ds.borderWidth || 1,
+              };
+            } else if (ds.type === 'funnel') {
+              const segments = ds.data
+                .split(';')
+                .map((s: string) => s.trim())
+                .filter(Boolean);
+              const funnelLabels: string[] = [];
+              const funnelValues: number[] = [];
+              segments.forEach((seg) => {
+                const [stage, valStr] = seg.split(',').map((x) => x.trim());
+                funnelLabels.push(stage);
+                funnelValues.push(parseFloat(valStr));
+              });
+              const funnelColors = funnelValues.map(() => getRandomColor());
+
+              return {
+                label: ds.label,
+                type: 'funnel',
+                data: funnelValues,
+                backgroundColor: funnelColors,
+                borderColor: ds.borderColor || '#4caf50',
+                borderWidth: ds.borderWidth || 1,
+                options: { plugins: { funnel: { percent: false } } },
+              };
             } else if (
-              ['treemap', 'forceDirectedGraph', 'choropleth', 'parallelCoordinates', 'barWithErrorBars'].includes(ds.type)
+              ['forceDirectedGraph', 'choropleth', 'parallelCoordinates', 'barWithErrorBars'].includes(ds.type)
             ) {
               return {
                 label: ds.label,
