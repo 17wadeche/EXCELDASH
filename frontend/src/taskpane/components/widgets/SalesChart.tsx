@@ -30,7 +30,6 @@ import {
   BoxPlotController,
   BoxAndWiskers,
 } from '@sgratzl/chartjs-chart-boxplot';
-import { ViolinController, ViolinElement } from 'chartjs-chart-box-and-violin-plot';
 
 import zoomPlugin from 'chartjs-plugin-zoom';
 import { TreemapController, TreemapElement } from 'chartjs-chart-treemap';
@@ -79,8 +78,6 @@ ChartJS.register(
   OhlcController,
   OhlcElement,
   BoxPlotController,
-  ViolinController,
-  ViolinElement,
   BoxAndWiskers,
   HierarchicalScale,
   ParallelCoordinatesController,

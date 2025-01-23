@@ -299,26 +299,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                 borderColor: ds.borderColor || '#4caf50',
                 borderWidth: ds.borderWidth || 1,
               };
-            } else if (ds.type === 'violin') {
-              let parsed: { x: string; y: number[] }[] = [];
-              try {
-                parsed = JSON.parse(ds.data); // e.g. [ {x:"GroupA", y:[5,8,10]}, {x:"GroupB", ...} ]
-              } catch {
-                console.warn('Violin data is not valid JSON:', ds.data);
-              }
-              return {
-                label: ds.label,
-                type: 'violin',
-                data: parsed,
-                datalabels: { display: false },
-                backgroundColor: ds.backgroundColor || '#4caf50',
-                borderColor: ds.borderColor || '#4caf50',
-                borderWidth: ds.borderWidth || 1,
-                parsing: {
-                  xKey: 'x',
-                  yKey: 'y',
-                },
-              };
             } else if (ds.type === 'candlestick') {
               const segments = ds.data
                 .split(';')
@@ -342,42 +322,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
               return {
                 label: ds.label,
                 type: 'candlestick',
-                data: parsed,
-                datalabels: { display: false },
-                backgroundColor: ds.backgroundColor || '#4caf50',
-                borderColor: ds.borderColor || '#4caf50',
-                borderWidth: ds.borderWidth || 1,
-                parsing: {
-                  xKey: 'x',
-                  openKey: 'o',
-                  highKey: 'h',
-                  lowKey: 'l',
-                  closeKey: 'c'
-                },
-              };
-            } else if (ds.type === 'ohlc') {
-              const segments = ds.data
-                .split(';')
-                .map((s: string) => s.trim())
-                .filter(Boolean);
-
-              const parsed = segments.map((seg: string) => {
-                const [label, open, high, low, close] = seg
-                  .split(',')
-                  .map((x: string) => x.trim());
-
-                return {
-                  x: label,
-                  o: Number(open),
-                  h: Number(high),
-                  l: Number(low),
-                  c: Number(close),
-                };
-              });
-
-              return {
-                label: ds.label,
-                type: 'ohlc',
                 data: parsed,
                 datalabels: { display: false },
                 backgroundColor: ds.backgroundColor || '#4caf50',
@@ -650,43 +594,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
         message.success('Box Plot data loaded successfully!');
         break;
       }
-      // ========== VIOLIN ==========
-      case 'violin': {
-        if (data.length < 3) {
-          message.error('Violin data needs at least 3 rows: title row + header + data.');
-          return;
-        }
-        const headerRow = data[1]; // e.g. ["Sample","Value"]
-        const labelStr = headerRow.join(', '); // => "Sample, Value"
-        const bodyRows = data.slice(2);
-        const groupMap: Record<string, number[]> = {};
-        bodyRows.forEach((row) => {
-          const sampleName = String(row[0]);
-          const val = Number(row[1]);
-          if (!groupMap[sampleName]) {
-            groupMap[sampleName] = [];
-          }
-          groupMap[sampleName].push(val);
-        });
-        const dataObjects = Object.keys(groupMap).map((group) => ({
-          x: group,
-          y: groupMap[group],
-        }));
-        const dataset = {
-          label: 'Violin Data',
-          type: 'violin',
-          data: JSON.stringify(dataObjects),
-          backgroundColor: getRandomColor(),
-          borderColor: getRandomColor(),
-          borderWidth: 1,
-        };
-        form.setFieldsValue({
-          labels: labelStr, // "Sample, Value"
-          datasets: [dataset],
-        });
-        message.success('Violin data loaded from Excel.');
-        break;
-      }
       // ========== CANDLESTICK ==========
       case 'candlestick': {
         if (data.length < 3) {
@@ -715,36 +622,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
         message.success('Candlestick data loaded from Excel.');
         break;
       }
-
-      // ========== OHLC ==========
-      case 'ohlc': {
-        if (data.length < 3) {
-          message.error('OHLC data needs at least 3 rows: title + header + data.');
-          return;
-        }
-        const headerRow = data[1]; // e.g. ["Label","Open","High","Low","Close"]
-        const labelStr = headerRow.join(',');
-        const rawRows = data.slice(2);
-        const ohlcStr = rawRows
-          .map((row) => row.join(','))
-          .join(';');
-        form.setFieldsValue({
-          labels: labelStr,
-          datasets: [
-            {
-              label: 'OHLC Series',
-              type: 'ohlc',
-              data: ohlcStr,
-              backgroundColor: getRandomColor(),
-              borderColor: getRandomColor(),
-              borderWidth: 1,
-            },
-          ],
-        });
-        message.success('OHLC data loaded from Excel.');
-        break;
-      }
-
       // ========== TREEMAP ==========
       case 'treemap': {
         if (data.length < 3) {
@@ -1177,9 +1054,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
               <Option value="bubble">Bubble</Option>
               <Option value="scatter">Scatter</Option>
               <Option value="boxplot">Box Plot</Option>
-              <Option value="violin">Violin</Option>
               <Option value="candlestick">Candlestick</Option>
-              <Option value="ohlc">OHLC</Option>
               <Option value="treemap">Treemap</Option>
               <Option value="funnel">Funnel</Option>
               <Option value="forceDirectedGraph">Force-Directed Graph</Option>
@@ -1341,9 +1216,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                         <Option value="bubble">Bubble</Option>
                         <Option value="scatter">Scatter</Option>
                         <Option value="boxplot">Box Plot</Option>
-                        <Option value="violin">Violin</Option>
                         <Option value="candlestick">Candlestick</Option>
-                        <Option value="ohlc">OHLC</Option>
                         <Option value="treemap">Treemap</Option>
                         <Option value="funnel">Funnel</Option>
                         <Option value="forceDirectedGraph">Force-Directed Graph</Option>
@@ -1525,9 +1398,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
               'funnel',
               'treemap',
               'candlestick',
-              'ohlc',
               'boxplot',
-              'violin',
               'forceDirectedGraph',
               'choropleth',
               'parallelCoordinates',
