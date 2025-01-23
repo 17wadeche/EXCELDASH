@@ -217,8 +217,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           'bubble',
           'funnel',
           'treemap',
-          'candlestick',
-          'ohlc',
           'boxplot',
           'forceDirectedGraph',
           'choropleth',
@@ -316,7 +314,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                 backgroundColor: ds.backgroundColor || '#4caf50',
                 borderColor: ds.borderColor || '#4caf50',
                 borderWidth: ds.borderWidth || 1,
-                // Add this object so that the plugin reads { x: "...", y: [...] } properly:
                 parsing: {
                   xKey: 'x',
                   yKey: 'y',
