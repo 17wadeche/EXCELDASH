@@ -230,8 +230,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           worksheetName: cleanedValues.worksheetName,
           associatedRange: cleanedValues.associatedRange,
           labels: cleanedValues.labels ? cleanedValues.labels.split(',').map((l: string) => l.trim()): [],
-          datasets: (cleanedValues.datasets || []).map((ds: any) => {
-          }),
+          datasets: (cleanedValues.datasets || []).map(() => {}),
         } as ChartData;
         if (finalChartType === 'scatter' || finalChartType === 'bubble') {
           cleanedValues.xAxisType = 'linear';
