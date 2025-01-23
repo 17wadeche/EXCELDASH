@@ -229,9 +229,11 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           type: finalChartType,
           worksheetName: cleanedValues.worksheetName,
           associatedRange: cleanedValues.associatedRange,
-          labels: cleanedValues.labels ? cleanedValues.labels.split(',').map((l: string) => l.trim()): [],
-          datasets: (cleanedValues.datasets || []).map(() => {}),
-        } as ChartData;
+          labels: (cleanedValues.labels || '')
+            .split(',')
+            .map((s: string) => s.trim())
+            .filter(Boolean),
+          datasets: (cleanedValues.datasets || []).map((_ds: any) => {
         if (finalChartType === 'scatter' || finalChartType === 'bubble') {
           cleanedValues.xAxisType = 'linear';
         }
@@ -537,9 +539,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
             endColor: cleanedValues.gradientEndColor || 'rgba(75,192,192,0.4)',
           },
         } as ChartData;
-        if (finalChartType === 'candlestick') {
-          updatedData.labels = [];
-        }
         break;
       }
       // ========== GANTT ==========
