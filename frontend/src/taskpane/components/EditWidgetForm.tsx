@@ -108,14 +108,27 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           useGradientFills: data.gradientFills?.enabled || false,
           gradientStartColor: data.gradientFills?.startColor || 'rgba(75,192,192,0)',
           gradientEndColor: data.gradientFills?.endColor || 'rgba(75,192,192,0.4)',
-          datasets: (data.datasets || []).map((ds) => ({
-            label: ds.label,
-            data: Array.isArray(ds.data) ? ds.data.join(', ') : ds.data,
-            type: ds.type || 'bar',
-            backgroundColor: ds.backgroundColor,
-            borderColor: ds.borderColor,
-            borderWidth: ds.borderWidth,
-          })),
+          datasets: (data.datasets || []).map((ds) => {
+            let dataString = '';
+            if (ds.type === 'candlestick' && Array.isArray(ds.data)) {
+              dataString = ds.data
+                .map((point: any) => `${point.x},${point.o},${point.h},${point.l},${point.c}`)
+                .join(';');
+            }
+            else if (Array.isArray(ds.data)) {
+              dataString = ds.data.join(', ');
+            } else {
+              dataString = ds.data;
+            }
+            return {
+              label: ds.label,
+              data: dataString,
+              type: ds.type || 'bar',
+              backgroundColor: ds.backgroundColor,
+              borderColor: ds.borderColor,
+              borderWidth: ds.borderWidth,
+            };
+          }),
         };
       }
 
