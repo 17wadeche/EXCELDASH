@@ -29,6 +29,7 @@ import {
   MetricData,
   TitleWidgetData,
 } from './types';
+import { StringGradients } from 'antd/es/progress/progress';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -110,12 +111,11 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           gradientEndColor: data.gradientFills?.endColor || 'rgba(75,192,192,0.4)',
           datasets: (data.datasets || []).map((ds) => {
             let dataString = '';
-            if (ds.type === 'candlestick' && Array.isArray(ds.data)) {
+            if ((ds.type as String) === 'candlestick' && Array.isArray(ds.data)) {
               dataString = ds.data
                 .map((point: any) => `${point.x},${point.o},${point.h},${point.l},${point.c}`)
                 .join(';');
-            }
-            else if (Array.isArray(ds.data)) {
+            } else if (Array.isArray(ds.data)) {
               dataString = ds.data.join(', ');
             } else {
               dataString = ds.data;
