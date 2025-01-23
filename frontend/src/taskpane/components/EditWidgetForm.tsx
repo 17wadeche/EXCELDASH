@@ -1328,7 +1328,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                         if (dsType === 'treemap') {
                           return (
                             <>
-                              <Form.List name={[name, 'data']}>
+                              <Form.List name={[name, 'tree']}>
                                 {(dataFields, { add: addData, remove: removeData }) => (
                                   <>
                                     {dataFields.map(({ key: dataKey, name: dataName, ...dataRestField }) => (
@@ -1339,14 +1339,14 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                                       >
                                         <Form.Item
                                           {...dataRestField}
-                                          name={[dataName, 'label']}
+                                          name={[dataName, 'name']}
                                           rules={[{ required: true, message: 'Missing label' }]}
                                         >
-                                          <Input placeholder="Label" />
+                                          <Input placeholder="Name" />
                                         </Form.Item>
                                         <Form.Item
                                           {...dataRestField}
-                                          name={[dataName, 'value']}
+                                          name={[dataName, 'Name']}
                                           rules={[
                                             { required: true, message: 'Missing value' },
                                             {
