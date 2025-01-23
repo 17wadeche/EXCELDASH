@@ -220,7 +220,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           'candlestick',
           'ohlc',
           'boxplot',
-          'violin',
           'forceDirectedGraph',
           'choropleth',
           'parallelCoordinates',
@@ -321,7 +320,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                 parsing: {
                   xKey: 'x',
                   yKey: 'y',
-                }
+                },
               };
             } else if (ds.type === 'candlestick') {
               const segments = ds.data
