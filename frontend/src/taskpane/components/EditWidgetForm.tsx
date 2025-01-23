@@ -296,18 +296,30 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
               return {
                 label: ds.label,
                 type: 'boxplot',
-                data: parsed,  // Now it's a real numeric array
+                data: parsed,
+                datalabels: { display: false },
                 backgroundColor: ds.backgroundColor || '#4caf50',
                 borderColor: ds.borderColor || '#4caf50',
                 borderWidth: ds.borderWidth || 1,
               };
-            }
-            // ========= For the specialized new chart types, keep data as-is ========
-            // e.g. violin, candlestick, ohlc, treemap, forceDirectedGraph,
-            // choropleth, parallelCoordinates, barWithErrorBars, etc.
-            else if (
+            } else if (ds.type === 'violin') {
+              let parsed = [];
+              try {
+                parsed = JSON.parse(ds.data);
+              } catch {
+                console.warn('BoxPlot data is not valid JSON:', ds.data);
+              }
+              return {
+                label: ds.label,
+                type: 'violin',
+                data: parsed,
+                datalabels: { display: false },
+                backgroundColor: ds.backgroundColor || '#4caf50',
+                borderColor: ds.borderColor || '#4caf50',
+                borderWidth: ds.borderWidth || 1,
+              };
+            } else if (
               [
-                'violin',
                 'candlestick',
                 'ohlc',
                 'treemap',
