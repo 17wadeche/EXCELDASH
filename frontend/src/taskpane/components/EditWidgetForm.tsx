@@ -531,30 +531,33 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           message.error('Violin data needs at least 3 rows: title row + header + data.');
           return;
         }
-        const headerRow = data[1]; // e.g. ["Sample", "Value"]
-        const labelArr = headerRow.slice(1); // e.g. ["Value"]
-        const labelsStr = labelArr.join(', ');
+        const headerRow = data[1]; // e.g. ["Sample","Value"]
+        const labelStr = headerRow.join(', '); // => "Sample, Value" (so we don't fail label validator)
         const bodyRows = data.slice(2);
         const groupMap: Record<string, number[]> = {};
-        bodyRows.forEach((row: any[]) => {
-          const groupName = row[0];
+        bodyRows.forEach((row) => {
+          const sampleName = String(row[0]);
           const val = Number(row[1]);
-          if (!groupMap[groupName]) {
-            groupMap[groupName] = [];
+          if (!groupMap[sampleName]) {
+            groupMap[sampleName] = [];
           }
-          groupMap[groupName].push(val);
+          groupMap[sampleName].push(val);
         });
-        const violinDatasets = Object.keys(groupMap).map((group) => ({
-          label: group,
+        const dataObjects = Object.keys(groupMap).map((group) => ({
+          x: group,
+          y: groupMap[group],
+        }));
+        const dataset = {
+          label: 'Violin Data',
           type: 'violin',
-          data: groupMap[group].join(','), // so no brackets, e.g. "5,8,10,12,9"
+          data: JSON.stringify(dataObjects),
           backgroundColor: getRandomColor(),
           borderColor: getRandomColor(),
           borderWidth: 1,
-        }));
+        };
         form.setFieldsValue({
-          labels: labelsStr,     // e.g. "Value"
-          datasets: violinDatasets,
+          labels: labelStr,   // "Sample, Value"
+          datasets: [dataset],
         });
         message.success('Violin data loaded from Excel.');
         break;
@@ -567,15 +570,10 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
         }
         const headerRow = data[1];
         const labelStr = headerRow.join(',');
-    
-        // The actual data rows are from index=2 onward
         const rawRows = data.slice(2);
-    
-        // Build a semicolon‐joined string of each row => "Day1,100,110,95,105;Day2,105,115,100,110"
         const candlestickStr = rawRows
           .map((row) => row.join(',')) // e.g. ["Day1",100,110,95,105] => "Day1,100,110,95,105"
           .join(';');
-    
         form.setFieldsValue({
           labels: labelStr,
           datasets: [
