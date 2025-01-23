@@ -148,7 +148,7 @@ interface ExtendedChartData<TType extends ChartType = ChartType, TData = unknown
   titleAlignment?: 'left' | 'center' | 'right';
   scales?: {
     x?: {
-      type?: 'category' | 'linear' | 'logarithmic' | 'time'; // Include 'time'
+      type?: 'category' | 'linear' | 'logarithmic' | 'time';
       title?: {
         display?: boolean;
         text?: string;
@@ -187,8 +187,8 @@ interface ExtendedChartData<TType extends ChartType = ChartType, TData = unknown
   backgroundColor?: string;
   gridLineColor?: string;
   datasets: ChartDataset<TType, TData>[];
-  associatedRange?: string; // Added property
-  chartIndex?: number; // Existing property
+  associatedRange?: string;
+  chartIndex?: number;
 }
 
 interface SalesChartProps {

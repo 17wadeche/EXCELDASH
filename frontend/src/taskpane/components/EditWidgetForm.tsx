@@ -154,7 +154,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
     }
   }, [widget]);
 
-  // For bubble charts, ensure 'bubbleColors' matches the number of data points
   useEffect(() => {
     if (widget.type !== 'chart') return;
     if (chartType !== 'bubble') return;
@@ -172,10 +171,18 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
     }
   }, [chartType, form, widget.type]);
 
-  /**
-   * Transform form values into the final updatedData object
-   * which is sent to onSubmit
-   */
+  useEffect(() => {
+    if (widget.type !== 'chart' || chartType !== 'treemap') return;
+    const treemapData = form.getFieldValue('datasets')?.[0]?.data || [];
+    const currentColors = form.getFieldValue('treemapColors') || [];
+    if (currentColors.length !== treemapData.length) {
+      const newColors = treemapData.map((item: any, idx: number) => ({
+        color: currentColors[idx]?.color || getRandomColor(),
+      }));
+      form.setFieldsValue({ treemapColors: newColors });
+    }
+  }, [chartType, form, widget.type]);
+
   const handleFinish = (values: any) => {
     const cleanedValues: Record<string, any> = {};
     Object.entries(values).forEach(([k, v]) => {
@@ -207,6 +214,13 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
         // If scatter/bubble => force xAxis=linear
         if (finalChartType === 'scatter' || finalChartType === 'bubble') {
           cleanedValues.xAxisType = 'linear';
+        }
+        if (finalChartType === 'treemap') {
+          const treemapColors = cleanedValues.treemapColors || [];
+          updatedData.datasets = updatedData.datasets.map((ds: any, idx: number) => ({
+            ...ds,
+            backgroundColor: treemapColors[idx]?.color || ds.backgroundColor,
+          }));
         }
 
         const noAxisTypes = [
@@ -336,23 +350,13 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                 },
               };
             } else if (ds.type === 'treemap') {
-              const segments = ds.data
-                .split(';')
-                .map((s: string) => s.trim())
-                .filter(Boolean);
-
-              // Convert to objects:
-              const treemapData = segments.map((seg: string) => {
-                // Each seg looks like: "Category A,10"
-                const [label, valueStr] = seg.split(',').map((x: string) => x.trim());
-                return { label, value: parseFloat(valueStr) };
-              });
-
+              const treemapData = ds.data as { label: string; value: number }[];
+              const backgroundColors = ds.backgroundColor || treemapData.map(() => getRandomColor());
               return {
                 label: ds.label,
                 type: 'treemap',
-                data: treemapData, // now an array of objects
-                backgroundColor: ds.backgroundColor || '#4caf50',
+                data: treemapData,
+                backgroundColor: backgroundColors,
                 borderColor: ds.borderColor || '#4caf50',
                 borderWidth: ds.borderWidth || 1,
               };
@@ -675,15 +679,19 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
         const headerRow = data[1]; // e.g. ["Label","Value"]
         const labelStr = headerRow.join(',');
         const rawRows = data.slice(2);
-        const treemapStr = rawRows.map((row) => row.join(',')).join(';');
+        const treemapData = rawRows.map((row) => {
+          const [label, valueStr] = row.map((x: string) => x.trim());
+          return { label, value: parseFloat(valueStr) };
+        });
+        const backgroundColors = treemapData.map(() => getRandomColor())
         form.setFieldsValue({
           labels: labelStr,
           datasets: [
             {
               label: 'Treemap Series',
               type: 'treemap',
-              data: treemapStr,
-              backgroundColor: getRandomColor(),
+              data: treemapData,
+              backgroundColor: backgroundColors,
               borderColor: getRandomColor(),
               borderWidth: 1,
             },
@@ -1429,6 +1437,27 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                 </Form.List>
               </Collapse.Panel>
             </Collapse>
+          )}
+          {chartType === 'treemap' && (
+            <Form.List name="treemapColors">
+              {(fields, { add, remove }) => {
+                const treemapData = form.getFieldValue('datasets')?.[0]?.data || [];
+                return (
+                  <>
+                    {treemapData.map((item: any, index: number) => (
+                      <Form.Item
+                        key={index}
+                        label={`Color for ${item.label}`}
+                        name={[index, 'color']}
+                        rules={[{ required: true, message: 'Please pick a color' }]}
+                      >
+                        <Input type="color" />
+                      </Form.Item>
+                    ))}
+                  </>
+                );
+              }}
+            </Form.List>
           )}
 
           {/* ADVANCED SETTINGS (Axis, Plugins, Legend, Styling) */}
