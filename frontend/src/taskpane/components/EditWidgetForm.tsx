@@ -29,8 +29,6 @@ import {
   MetricData,
   TitleWidgetData,
 } from './types';
-import { StringGradients } from 'antd/es/progress/progress';
-import { keyBy } from 'lodash';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -373,7 +371,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                 treemapData = ds.tree;
               }
               treemapData = treemapData.map((item: any) => ({
-                name: item.name || 'Unnamed',
+                name: String(item.name) || 'Unnamed',
                 value: Number(item.value) || 0,
               }));
               const treemapColors =
@@ -508,7 +506,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
               annotations: cleanedValues.annotations || [],
             },
             datalabels: {
-              display: cleanedValues.showDataLabels !== false,
+              display: chartType === 'treemap' ? true : false,
               color: cleanedValues.dataLabelColor || '#000',
               font: {
                 size: cleanedValues.dataLabelFontSize || 12,
@@ -535,8 +533,9 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                 label: function (context: any) {
                   const chartType = context.dataset.type;
                   if (chartType === 'treemap') {
-                    const label = context.dataset.data[context.dataIndex].name || '';
-                    const value = context.dataset.data[context.dataIndex].value || 0;
+                    const dataPoint = context.dataset.data[context.dataIndex];
+                    const label = dataPoint.name || '';
+                    const value = dataPoint.value || 0;
                     return `${label}: ${value}`;
                   } else {
                     const label = context.label || '';
@@ -560,13 +559,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
             endColor: cleanedValues.gradientEndColor || 'rgba(75,192,192,0.4)',
           },
         } as ChartData;
-        if (finalChartType === 'treemap') {
-          const treemapColors = cleanedValues.treemapColors || [];
-          updatedData.datasets = updatedData.datasets.map((ds: any, idx: any) => ({
-            ...ds,
-            backgroundColor: treemapColors[idx]?.color || ds.backgroundColor,
-          }));
-        }
         break;
       }
       // ========== GANTT ==========
@@ -654,7 +646,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
     if (typeof val === 'number' && val > 30000 && val < 60000) {
       const jsDate = new Date((val - 25569) * 86400 * 1000);
       const mm = jsDate.getMonth() + 1;
-      const dd = jsDate.getDate();
+      const dd = jsDate.getDate() + 1;
       const yyyy = jsDate.getFullYear();
       return `${mm}/${dd}/${yyyy}`;
     }
