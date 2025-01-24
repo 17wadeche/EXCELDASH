@@ -1251,7 +1251,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                                           key={String(field.key)}
                                           label={`Color for ${boxplotLabels[index] || `Sample ${index + 1}`}`}
                                           name={[field.name, 'color']}
-                                          fieldKey={[field.fieldKey, 'color']}
+                                          fieldKey={[String(field.fieldKey), 'color']}
                                           rules={[{ required: true, message: 'Please pick a color' }]}
                                         >
                                           <Input type="color" />
@@ -1413,7 +1413,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                           key={String(field.key)}
                           label={`Color for ${boxplotLabels[index] || `Sample ${index + 1}`}`}
                           name={[field.name, 'color']}
-                          fieldKey={[field.fieldKey, 'color']}
+                          fieldKey={[String(field.fieldKey), 'color']}
                           rules={[{ required: true, message: 'Please pick a color' }]}
                         >
                           <Input type="color" />
