@@ -966,7 +966,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
   useEffect(() => {
     const rawLabels = form.getFieldValue('labels') || '';
     const labelArr = rawLabels.split(',')
-      .map(((l: any) => l.trim())
+      .map((l: any) => l.trim())
       .filter(Boolean);
     const currentSliceColors = form.getFieldValue('sliceColors') || [];
     if (currentSliceColors.length !== labelArr.length) {
