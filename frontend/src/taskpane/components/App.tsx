@@ -24,26 +24,22 @@ const App: React.FC = () => {
       <DashboardProvider>
         <Routes>
           <Route path="/" element={<CustomLayout />}>
-            {/* Protected Routes */}
             <Route element={<PrivateRoute />}>
-              <Route path="/create" element={<CreateDashboard />} />
+              <Route path="create" element={<CreateDashboard />} />
               <Route path="dashboard-editor" element={<DashboardPage />} />
               <Route path="template/:id/edit" element={<EditTemplate />} />
               <Route path="dashboard-list" element={<DashboardList />} />
               <Route path="dashboard/:id" element={<DashboardPage />} />
-              <Route path="/full-screen" element={<Dashboard isFullScreen />} />
+              <Route path="full-screen" element={<Dashboard isFullScreen />} />
               <Route path="edit-dashboard/:id" element={<DashboardPage />} />
-              <Route path="/template/:id/edit" element={<EditTemplate />} />
             </Route>
-
-            {/* Public Routes */}
             <Route path="register" element={<RegisterPage />} />
             <Route path="login" element={<LoginPage />} />
             <Route path="subscribe" element={<SubscribePage />} />
             <Route path="forgot-password" element={<ForgotPasswordPage />} />
             <Route path="enter-code" element={<EnterResetCodePage />} />
             <Route path="reset-password" element={<ResetPasswordPage />} />
-            <Route path="*" element={<Navigate to="/dashboard-list" replace />} />
+            <Route path="*" element={<Navigate to="dashboard-list" replace />} />
           </Route>
         </Routes>
       </DashboardProvider>
