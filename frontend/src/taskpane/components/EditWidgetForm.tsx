@@ -1234,16 +1234,24 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                                 <Input placeholder="Enter boxplot title" />
                               </Form.Item>
                               <Form.List name={[name, 'boxplotSampleColors']}>
-                                {(colorFields) => {
-                                  const boxplotLabels = form.getFieldValue('labels')?.split(',').map((l: string) => l.trim()) || [];
+                                {(fields, { add, remove }) => {
+                                  const boxplotLabels = form.getFieldValue(['datasets', name, 'labels'])?.split(',').map((l: string) => l.trim()) || [];
+                                  while (fields.length < boxplotLabels.length) {
+                                    add({ color: '#000000' });
+                                  }
+                                  while (fields.length > boxplotLabels.length) {
+                                    remove(fields.length - 1);
+                                  }
+
                                   return (
                                     <>
-                                      {boxplotLabels.map((label: string, index: number) => (
+                                      {fields.map((field, index) => (
                                         <Form.Item
-                                          {...colorFields[index]?.restField}
-                                          key={colorFields[index]?.key}
-                                          label={`Color for ${label || `Sample ${index + 1}`}`}
-                                          name={[index, 'color']}
+                                          {...field}
+                                          key={field.key}
+                                          label={`Color for ${boxplotLabels[index] || `Sample ${index + 1}`}`}
+                                          name={[field.name, 'color']}
+                                          fieldKey={[field.fieldKey, 'color']}
                                           rules={[{ required: true, message: 'Please pick a color' }]}
                                         >
                                           <Input type="color" />
@@ -1389,16 +1397,23 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 <Input placeholder="Enter boxplot title" />
               </Form.Item>
               <Form.List name="boxplotSampleColors">
-                {(fields) => {
+                {(fields, { add, remove }) => {
                   const boxplotLabels = form.getFieldValue('labels')?.split(',').map((l: string) => l.trim()) || [];
+                  while (fields.length < boxplotLabels.length) {
+                    add({ color: '#000000' });
+                  }
+                  while (fields.length > boxplotLabels.length) {
+                    remove(fields.length - 1);
+                  }
                   return (
                     <>
-                      {boxplotLabels.map((label: string, index: number) => (
+                      {fields.map((field, index) => (
                         <Form.Item
-                          {...fields[index]?.restField}
-                          key={fields[index]?.key}
-                          label={`Color for ${label || `Sample ${index + 1}`}`}
-                          name={[index, 'color']}
+                          {...field}
+                          key={field.key}
+                          label={`Color for ${boxplotLabels[index] || `Sample ${index + 1}`}`}
+                          name={[field.name, 'color']}
+                          fieldKey={[field.fieldKey, 'color']}
                           rules={[{ required: true, message: 'Please pick a color' }]}
                         >
                           <Input type="color" />
