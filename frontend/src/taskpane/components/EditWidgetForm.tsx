@@ -565,8 +565,8 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
   const loadDataForNewChartType = async (mainType: string, data: any[][], form: any) => {
     switch (mainType) {
       case 'boxplot': {
-        if (data.length < 3) {
-          message.error('Box Plot data must include at least a title row, a header row, and one data row.');
+        if (data.length < 2) {
+          message.error('Box Plot data must include at least a header row, and one data row.');
           return;
         }
         const boxLabels: string[] = [];
