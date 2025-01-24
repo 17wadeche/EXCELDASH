@@ -396,7 +396,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                 datalabels: {
                   display: true,
                   color: '#fff', // Text color inside boxes
-                  formatter: (value: any, context: any) => {
+                  formatter: (_value: any, context: any) => {
                     return context.dataset.data[context.dataIndex].name;
                   },
                   font: {
