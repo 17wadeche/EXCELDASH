@@ -139,30 +139,27 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
     if (widget.type === 'chart') {
       const cData = widget.data as ChartData;
       setChartType(cData.type);
-    }
-    if (widget.type === 'chart') {
-      const cData = widget.data as ChartData;
       if (['pie', 'doughnut', 'polarArea'].includes(cData.type)) {
-        const dataset = cData.datasets[0];
-        if (dataset.backgroundColor && Array.isArray(dataset.backgroundColor)) {
+        const ds0 = cData.datasets[0];
+        if (Array.isArray(ds0.backgroundColor)) {
           form.setFieldsValue({
-            sliceColors: dataset.backgroundColor.map((color: string) => ({ color })),
+            sliceColors: ds0.backgroundColor.map((color: string) => ({ color })),
           });
         }
       }
       if (cData.type === 'bubble') {
-        const dataset = cData.datasets[0];
-        if (dataset.backgroundColor && Array.isArray(dataset.backgroundColor)) {
+        const ds0 = cData.datasets[0];
+        if (Array.isArray(ds0.backgroundColor)) {
           form.setFieldsValue({
-            bubbleColors: dataset.backgroundColor.map((color: string) => ({ color })),
+            bubbleColors: ds0.backgroundColor.map((color: string) => ({ color })),
           });
         }
       }
       if (cData.type === 'boxplot') {
-        const dataset = cData.datasets[0];
-        if (dataset.backgroundColor && Array.isArray(dataset.backgroundColor)) {
+        const ds0 = cData.datasets[0];
+        if (Array.isArray(ds0.backgroundColor)) {
           form.setFieldsValue({
-            boxplotSampleColors: dataset.backgroundColor.map((color: string) => ({ color })),
+            boxplotSampleColors: ds0.backgroundColor.map((color: string) => ({ color })),
           });
         }
       }
@@ -240,8 +237,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                   const [x, y, r] = seg.split(',').map((v: string) => parseFloat(v.trim()));
                   return { x, y, r };
                 });
-                const bubbleColors = cleanedValues.bubbleColors || [];
-                const backgroundColors = bubbleColors.map((c: any) => c.color);
+                const backgroundColors = bubbleColorsArray;
                 return {
                   label: ds.label,
                   type: ds.type,
