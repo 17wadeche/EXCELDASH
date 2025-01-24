@@ -361,13 +361,13 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
               let treemapData = [];
               if (typeof ds.data === 'string') {
                 try {
-                  treemapData = JSON.parse(ds.data);
+                  treemapData = JSON.parse(ds.tree);
                 } catch (error) {
                   console.error("Treemap data parsing failed", error);
                   treemapData = [];
                 }
-              } else if (Array.isArray(ds.data)) {
-                treemapData = ds.data;
+              } else if (Array.isArray(ds.tree)) {
+                treemapData = ds.tree;
               }
               treemapData = treemapData.map((item: any) => ({
                 name: item.name || 'Unnamed',
@@ -471,7 +471,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                 x: {
                   type: cleanedValues.xAxisType || 'category',
                   time: cleanedValues.xAxisType === 'time'
-                    ? { parser: 'MM/DD/YYYY', unit: 'day' }
+                    ? { parser: 'M/D/YYYY', unit: 'day' }
                     : undefined,
                   title: {
                     display: !!cleanedValues.xAxisTitle,
@@ -1346,7 +1346,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                                         </Form.Item>
                                         <Form.Item
                                           {...dataRestField}
-                                          name={[dataName, 'Name']}
+                                          name={[dataName, 'value']}
                                           rules={[
                                             { required: true, message: 'Missing value' },
                                             {
@@ -1551,7 +1551,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                     {treemapDataArray.map((item: any, index: number) => (
                       <Form.Item
                         key={index}
-                        label={`Color for ${item.label}`}
+                        label={`Color for ${item.name}`}
                         name={[index, 'color']}
                         rules={[{ required: true, message: 'Please pick a color' }]}
                       >
