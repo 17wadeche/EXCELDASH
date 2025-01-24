@@ -15,7 +15,7 @@ import {
   Legend,
   TimeScale,
 } from 'chart.js/auto';
-import { Bar, Line, CandlestickChart, Pie, Doughnut, Radar, Scatter, Bubble, PolarArea, Chart as BaseChart } from 'react-chartjs-2';
+import { Bar, Line, Pie, Doughnut, Radar, Scatter, Bubble, PolarArea, Chart as BaseChart } from 'react-chartjs-2';
 import 'chartjs-adapter-moment';
 import { BoxPlotController, BoxAndWiskers } from '@sgratzl/chartjs-chart-boxplot';
 import zoomPlugin from 'chartjs-plugin-zoom';
@@ -67,9 +67,7 @@ ChartJS.register(
   ColorScale,
   ProjectionScale,
   BarWithErrorBarsController,
-  BarWithErrorBar,
-  LinearScale,
-  CategoryScale
+  BarWithErrorBar
 );
 const ForceDirectedGraphChart: React.FC<any> = (props) => {
   return <BaseChart type="forceDirectedGraph" {...props} />;
