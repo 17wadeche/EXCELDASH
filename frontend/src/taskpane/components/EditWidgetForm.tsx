@@ -974,7 +974,65 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
       form.setFieldsValue({ sliceColors: updated });
     }
   }, [form, form.getFieldValue('labels')]);
-  
+
+  useEffect(() => {
+    if (chartType === 'bubble') {
+      const dataSets = form.getFieldValue('datasets') || [];
+      const bubbleDS = dataSets.find((ds: any) => ds.type === 'bubble');
+      if (!bubbleDS) return;
+      if (typeof bubbleDS.data === 'string') {
+        const segments = bubbleDS.data
+          .split(';')
+          .map((s: string) => s.trim())
+          .filter(Boolean);
+        const neededCount = segments.length;
+        const currentBubbleColors = form.getFieldValue('bubbleColors') || [];
+        if (currentBubbleColors.length !== neededCount) {
+          const updated = [...currentBubbleColors];
+          while (updated.length < neededCount) {
+            updated.push({ color: '#000000' });
+          }
+          if (updated.length > neededCount) {
+            updated.splice(neededCount);
+          }
+          form.setFieldsValue({ bubbleColors: updated });
+        }
+      }
+    }
+  }, [chartType, form, form.getFieldValue('datasets')]);
+
+  useEffect(() => {
+    if (chartType === 'boxplot') {
+      const dataSets = form.getFieldValue('datasets') || [];
+      const boxplotDS = dataSets[0];
+      if (!boxplotDS || boxplotDS.type !== 'boxplot') return;
+      const labelStr = boxplotDS.labels || '';
+      const labelArr = labelStr
+        .split(',')
+        .map((s: string) => s.trim())
+        .filter(Boolean);
+      const currentColors = form.getFieldValue(['datasets', 0, 'boxplotSampleColors']) || [];
+      if (currentColors.length !== labelArr.length) {
+        const updated = [...currentColors];
+        while (updated.length < labelArr.length) {
+          updated.push({ color: '#000000' });
+        }
+        if (updated.length > labelArr.length) {
+          updated.splice(labelArr.length);
+        }
+        form.setFieldsValue({
+          datasets: [
+            {
+              ...boxplotDS,
+              boxplotSampleColors: updated,
+            },
+            ...dataSets.slice(1),
+          ],
+        });
+      }
+    }
+  }, [chartType, form, form.getFieldValue('datasets')]);
+
   return (
     <Form form={form} layout="vertical" initialValues={getInitialValues()} onFinish={handleFinish}>
       {widget.type === 'text' && (
@@ -1264,33 +1322,30 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                         } else if (dsType === 'boxplot') {
                           return (
                             <>
-                              <Form.List name={[name, 'boxplotSampleColors']}>
-                                {(fields, { add, remove }) => {
-                                  const boxplotLabels = form.getFieldValue(['datasets', name, 'labels'])?.split(',').map((l: string) => l.trim()) || [];
-                                  while (fields.length < boxplotLabels.length) {
-                                    add({ color: '#000000' });
-                                  }
-                                  while (fields.length > boxplotLabels.length) {
-                                    remove(fields.length - 1);
-                                  }
-
-                                  return (
-                                    <>
-                                      {fields.map((field, index) => (
+                              <Form.List name={[`datasets`, 0, `boxplotSampleColors`]}>
+                                {(fields) => (
+                                  <>
+                                    {fields.map(({ key, name, ...restField }, index) => {
+                                      const boxplotLabels =
+                                        form
+                                          .getFieldValue(['datasets', 0, 'labels'])
+                                          ?.split(',')
+                                          ?.map((l: string) => l.trim()) || [];
+                                      const sampleLabel = boxplotLabels[index] || `Sample #${index + 1}`;
+                                      return (
                                         <Form.Item
-                                          {...field}
-                                          key={String(field.key)}
-                                          label={`Color for ${boxplotLabels[index] || `Sample ${index + 1}`}`}
-                                          name={[field.name, 'color']}
-                                          fieldKey={[String(field.fieldKey), 'color']}
+                                          key={key}
+                                          {...restField}
+                                          label={`Color for ${sampleLabel}`}
+                                          name={[name, 'color']}
                                           rules={[{ required: true, message: 'Please pick a color' }]}
                                         >
                                           <Input type="color" />
                                         </Form.Item>
-                                      ))}
-                                    </>
-                                  );
-                                }}
+                                      );
+                                    })}
+                                  </>
+                                )}
                               </Form.List>
                             </>
                           );
@@ -1457,39 +1512,21 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
             <Collapse>
               <Collapse.Panel header="Bubble Colors" key="bubbleColors">
                 <Form.List name="bubbleColors">
-                  {(fields, { add, remove }) => {
-                    const dataSets = form.getFieldValue('datasets') || [];
-                    const bubbleDS = dataSets.find((ds: any) => ds.type === 'bubble');
-                    let bubbleCount = 0;
-                    if (bubbleDS && typeof bubbleDS.data === 'string') {
-                      const segments = bubbleDS.data
-                        .split(';')
-                        .map((s: string) => s.trim())
-                        .filter(Boolean);
-                      bubbleCount = segments.length;
-                    }
-                    while (fields.length < bubbleCount) {
-                      add({ color: '#000000' });
-                    }
-                    while (fields.length > bubbleCount) {
-                      remove(fields.length - 1);
-                    }
-                    return (
-                      <>
-                        {fields.map(({ key, name, ...restField }, index) => (
-                          <Form.Item
-                            {...restField}
-                            key={key}
-                            name={[name, 'color']}
-                            label={`Color for Bubble #${index + 1}`}
-                            rules={[{ required: true, message: 'Please pick a color' }]}
-                          >
-                            <Input type="color" />
-                          </Form.Item>
-                        ))}
-                      </>
-                    );
-                  }}
+                  {(fields) => (
+                    <>
+                      {fields.map(({ key, name, ...restField }, index) => (
+                        <Form.Item
+                          {...restField}
+                          key={key}
+                          name={[name, 'color']}
+                          label={`Color for Bubble #${index + 1}`}
+                          rules={[{ required: true, message: 'Please pick a color' }]}
+                        >
+                          <Input type="color" />
+                        </Form.Item>
+                      ))}
+                    </>
+                  )}
                 </Form.List>
               </Collapse.Panel>
             </Collapse>
