@@ -14,14 +14,10 @@ import {
   Tooltip,
   Legend,
   TimeScale,
-} from 'chart.js';
+} from 'chart.js/auto';
 import { Bar, Line, Pie, Doughnut, Radar, Scatter, Bubble, PolarArea, Chart as BaseChart } from 'react-chartjs-2';
 import 'chartjs-adapter-moment';
-import {
-  BoxPlotController,
-  BoxAndWiskers,
-} from '@sgratzl/chartjs-chart-boxplot';
-
+import { BoxPlotController, BoxAndWiskers } from '@sgratzl/chartjs-chart-boxplot';
 import zoomPlugin from 'chartjs-plugin-zoom';
 import { TreemapController, TreemapElement } from 'chartjs-chart-treemap';
 import { FunnelController, TrapezoidElement } from 'chartjs-chart-funnel';
@@ -29,7 +25,7 @@ import { CandlestickController, CandlestickElement, OhlcController, OhlcElement 
 import { HierarchicalScale } from 'chartjs-plugin-hierarchical';
 import type { ChartData, ChartOptions, ChartType, ChartDataset } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
-import { ParallelCoordinatesController, LinearAxis, LineSegment, PCPScale } from 'chartjs-chart-pcp';
+import { ParallelCoordinatesController, LineSegment, PCPScale } from 'chartjs-chart-pcp';
 import { ForceDirectedGraphController, EdgeLine } from 'chartjs-chart-graph';
 import { ChoroplethController, GeoFeature, ColorScale, ProjectionScale } from 'chartjs-chart-geo';
 import { BarWithErrorBarsController, BarWithErrorBar } from 'chartjs-chart-error-bars';

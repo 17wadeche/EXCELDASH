@@ -387,7 +387,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                 type: ds.type,
                 tree: treemapData,
                 key: 'value',
-                groups: ['name'],
+                groups: ['category'],
                 backgroundColor: treemapColors.map((c: any) => c.color),
                 borderColor: treemapColors.map((c: any) => c.color),
                 borderWidth: ds.borderWidth || 1,
@@ -395,7 +395,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                   display: true,
                   color: '#fff', // Text color inside boxes
                   formatter: (_value: any, context: any) => {
-                    return context.dataset.data[context.dataIndex].name;
+                    return context.raw.category;
                   },
                   font: {
                     weight: 'bold',
@@ -511,6 +511,9 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
               font: {
                 size: cleanedValues.dataLabelFontSize || 12,
               },
+              formatter: (_value: any, context: any) => {
+                return context.raw.category;
+              },
             },
             zoom: {
               pan: {
@@ -533,8 +536,8 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                 label: function (context: any) {
                   const chartType = context.dataset.type;
                   if (chartType === 'treemap') {
-                    const dataPoint = context.dataset.data[context.dataIndex];
-                    const label = dataPoint.name || '';
+                    const dataPoint = context.raw;
+                    const label = dataPoint.category || 'Category';
                     const value = dataPoint.value || 0;
                     return `${label}: ${value}`;
                   } else {
@@ -642,6 +645,18 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
     return color;
   };
 
+  function colorFromRaw(ctx: any) {
+    if (ctx.type !== 'data') {
+      return 'transparent';
+    }
+    const value = ctx.raw.value;
+    let alpha = (1 + Math.log(value)) / 5;
+    const color = ctx.raw.category === 'main' ? 'green' : 'blue';
+    return Chart.helpers.color(color)
+      .alpha(alpha)
+      .rgbString();
+  }
+
   function convertExcelDate(val: any): string {
     if (typeof val === 'number' && val > 30000 && val < 60000) {
       const jsDate = new Date((val - 25569) * 86400 * 1000);
@@ -740,8 +755,8 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
         const labelStr = headerRow.join(',');
         const rawRows = data.slice(2);
         const treemapData = rawRows.map((row) => {
-          const [name, valueStr] = row.map((x: any) => String(x).trim());
-          return { name, value: parseFloat(valueStr) };
+          const [category, valueStr] = row.map((x: any) => String(x).trim());
+          return { category, value: parseFloat(valueStr) };
         });
         const backgroundColors = treemapData.map(() => getRandomColor())
         form.setFieldsValue({
@@ -752,9 +767,9 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
               type: 'treemap',
               tree: treemapData,
               key: 'value',
-              groups: ['name'],
+              groups: ['category'],
               backgroundColor: backgroundColors,
-              borderColor: getRandomColor(),
+              borderColor: backgroundColors,
               borderWidth: 1,
             },
           ],
@@ -1575,7 +1590,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                     {treemapDataArray.map((item: any, index: number) => (
                       <Form.Item
                         key={index}
-                        label={`Color for ${item.name}`}
+                        label={`Color for ${item.category}`}
                         name={[index, 'color']}
                         rules={[{ required: true, message: 'Please pick a color' }]}
                       >
