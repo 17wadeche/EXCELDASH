@@ -963,7 +963,18 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
       message.error('Failed to load data from Excel.');
     }
   };
-
+  useEffect(() => {
+    const rawLabels = form.getFieldValue('labels') || '';
+    const labelArr = rawLabels.split(',')
+      .map((l) => l.trim())
+      .filter(Boolean);
+    const currentSliceColors = form.getFieldValue('sliceColors') || [];
+    if (currentSliceColors.length !== labelArr.length) {
+      const updated = labelArr.map((_, idx) => currentSliceColors[idx] || { color: '#000000' });
+      form.setFieldsValue({ sliceColors: updated });
+    }
+  }, [form, form.getFieldValue('labels')]);
+  
   return (
     <Form form={form} layout="vertical" initialValues={getInitialValues()} onFinish={handleFinish}>
       {widget.type === 'text' && (
@@ -1086,37 +1097,26 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           </Form.Item>
           {['pie', 'doughnut', 'polarArea'].includes(chartType) && (
             <Form.List name="sliceColors">
-              {(fields, { add, remove }) => {
-                const rawLabels = form.getFieldValue('labels') || '';
-                const labelArr = rawLabels
-                  .split(',')
-                  .map((l: string) => l.trim())
-                  .filter(Boolean);
-                while (fields.length < labelArr.length) {
-                  add({ color: '#000000' });
-                }
-                while (fields.length > labelArr.length) {
-                  remove(fields.length - 1);
-                }
-                return (
-                  <>
-                    {fields.map(({ key, name, ...restField }, index) => {
-                      const sliceLabel = labelArr[index] || `Slice #${index + 1}`;
-                      return (
-                        <Form.Item
-                          {...restField}
-                          key={key}
-                          label={`Color for ${sliceLabel}`}
-                          name={[name, 'color']}
-                          rules={[{ required: true, message: 'Please pick a color'}]}
-                        >
-                          <Input type="color" />
-                        </Form.Item>
-                      );
-                    })}
-                  </>
-                );
-              }}
+              {(fields, { add, remove }) => (
+                <>
+                  {fields.map(({ key, name, ...restField }, index) => {
+                    const rawLabels = form.getFieldValue('labels') || '';
+                    const labelArr = rawLabels.split(',').map((l) => l.trim()).filter(Boolean);
+                    const sliceLabel = labelArr[index] || `Slice #${index + 1}`;
+                    return (
+                      <Form.Item
+                        {...restField}
+                        key={key}
+                        label={`Color for ${sliceLabel}`}
+                        name={[name, 'color']}
+                        rules={[{ required: true, message: 'Please pick a color' }]}
+                      >
+                        <Input type="color" />
+                      </Form.Item>
+                    );
+                  })}
+                </>
+              )}
             </Form.List>
           )}
           <Form.Item
