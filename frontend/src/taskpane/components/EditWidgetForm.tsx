@@ -246,13 +246,14 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
               } catch {
                 console.warn('BoxPlot data is not valid JSON:', ds.data);
               }
+              const boxplotColors = cleanedValues.boxplotSampleColors || [];
               return {
                 label: ds.label,
                 type: 'boxplot',
                 data: parsed,
                 datalabels: { display: false },
-                backgroundColor: ds.backgroundColor || '#4caf50',
-                borderColor: ds.borderColor || '#4caf50',
+                backgroundColor: boxplotColors.map((c: any) => c.color),
+                borderColor: boxplotColors.map((c: any) => c.color),
                 borderWidth: ds.borderWidth || 1,
               };
             } else if (ds.type === 'candlestick') {
@@ -481,6 +482,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
             startColor: cleanedValues.gradientStartColor || 'rgba(75,192,192,0)',
             endColor: cleanedValues.gradientEndColor || 'rgba(75,192,192,0.4)',
           },
+          ...(finalChartType === 'boxplot' && {boxplotTitle: cleanedValues.boxplotTitle})
         } as ChartData;
         break;
       }
@@ -1069,7 +1071,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                     {fields.map(({ key, name, ...restField }) => {
                       const sliceLabel = labelArr[key] || `Slice #${key + 1}`;
                       return (
-                        <Form.Item {...restField} key={key} label={`Color for ${sliceLabel}`} name={[name, 'color']}>
+                        <Form.Item {...restField} key={key} label={`Color for ${sliceLabel}`} name={[name, 'color']} rules={[{ required: true, message: 'Please pick a color'}]}>
                           <Input type="color" />
                         </Form.Item>
                       );
@@ -1221,6 +1223,38 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                               </Form.List>
                             </>
                           );
+                        } else if (dsType === 'boxplot') {
+                          return (
+                            <>
+                              <Form.Item
+                                name={[name, 'boxplotTitle']}
+                                label="Boxplot Title"
+                                rules={[{ required: true, message: 'Please enter a boxplot title' }]}
+                              >
+                                <Input placeholder="Enter boxplot title" />
+                              </Form.Item>
+                              <Form.List name={[name, 'boxplotSampleColors']}>
+                                {(colorFields) => {
+                                  const boxplotLabels = form.getFieldValue('labels')?.split(',').map((l: string) => l.trim()) || [];
+                                  return (
+                                    <>
+                                      {boxplotLabels.map((label: string, index: number) => (
+                                        <Form.Item
+                                          {...colorFields[index]?.restField}
+                                          key={colorFields[index]?.key}
+                                          label={`Color for ${label || `Sample ${index + 1}`}`}
+                                          name={[index, 'color']}
+                                          rules={[{ required: true, message: 'Please pick a color' }]}
+                                        >
+                                          <Input type="color" />
+                                        </Form.Item>
+                                      ))}
+                                    </>
+                                  );
+                                }}
+                              </Form.List>
+                            </>
+                          );
                         } else {
                           return (
                             <Form.Item
@@ -1345,6 +1379,37 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
               </>
             )}
           </Form.List>
+          {chartType === 'boxplot' && (
+            <>
+              <Form.Item
+                name="boxplotTitle"
+                label="Boxplot Title"
+                rules={[{ required: true, message: 'Please enter a boxplot title' }]}
+              >
+                <Input placeholder="Enter boxplot title" />
+              </Form.Item>
+              <Form.List name="boxplotSampleColors">
+                {(fields) => {
+                  const boxplotLabels = form.getFieldValue('labels')?.split(',').map((l: string) => l.trim()) || [];
+                  return (
+                    <>
+                      {boxplotLabels.map((label: string, index: number) => (
+                        <Form.Item
+                          {...fields[index]?.restField}
+                          key={fields[index]?.key}
+                          label={`Color for ${label || `Sample ${index + 1}`}`}
+                          name={[index, 'color']}
+                          rules={[{ required: true, message: 'Please pick a color' }]}
+                        >
+                          <Input type="color" />
+                        </Form.Item>
+                      ))}
+                    </>
+                  );
+                }}
+              </Form.List>
+            </>
+          )}
           {chartType === 'bubble' && (
             <Collapse>
               <Collapse.Panel header="Bubble Colors" key="bubbleColors">
