@@ -245,24 +245,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
         if (finalChartType === 'scatter' || finalChartType === 'bubble') {
           cleanedValues.xAxisType = 'linear';
         }
-        if (finalChartType === 'candlestick') {
-          updatedData.scales = {
-            x: {
-              type: 'category',
-              title: {
-                display: !!cleanedValues.xAxisTitle,
-                text: cleanedValues.xAxisTitle || '',
-              },
-            },
-            y: {
-              type: 'linear',
-              title: {
-                display: !!cleanedValues.yAxisTitle,
-                text: cleanedValues.yAxisTitle || '',
-              },
-            },
-          };
-        }
         updatedData = {
           title: cleanedValues.title,
           type: finalChartType,
