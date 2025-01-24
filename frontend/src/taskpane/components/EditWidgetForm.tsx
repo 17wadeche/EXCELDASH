@@ -1248,7 +1248,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                                       {fields.map((field, index) => (
                                         <Form.Item
                                           {...field}
-                                          key={field.key}
+                                          key={String(field.key)}
                                           label={`Color for ${boxplotLabels[index] || `Sample ${index + 1}`}`}
                                           name={[field.name, 'color']}
                                           fieldKey={[field.fieldKey, 'color']}
@@ -1410,7 +1410,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                       {fields.map((field, index) => (
                         <Form.Item
                           {...field}
-                          key={field.key}
+                          key={String(field.key)}
                           label={`Color for ${boxplotLabels[index] || `Sample ${index + 1}`}`}
                           name={[field.name, 'color']}
                           fieldKey={[field.fieldKey, 'color']}
