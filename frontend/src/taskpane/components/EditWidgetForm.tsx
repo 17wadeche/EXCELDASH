@@ -247,6 +247,9 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
         if (finalChartType === 'scatter' || finalChartType === 'bubble') {
           cleanedValues.xAxisType = 'linear';
         }
+        if (finalChartType === 'candlestick') {
+          cleanedValues.xAxisType = 'time';
+        }
         updatedData = {
           title: cleanedValues.title,
           type: finalChartType,
@@ -359,7 +362,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
             // ===== TREEMAP =====
             else if (ds.type === 'treemap') {
               let treemapData = [];
-              if (typeof ds.data === 'string') {
+              if (typeof ds.tree === 'string') {
                 try {
                   treemapData = JSON.parse(ds.tree);
                 } catch (error) {
@@ -390,6 +393,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                 backgroundColor: treemapColors.map((c: any) => c.color),
                 borderColor: ds.borderColor || '#4caf50',
                 borderWidth: ds.borderWidth || 1,
+                datalabels: { display: false },
               };
             }
             // ===== FUNNEL =====
@@ -1544,7 +1548,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           {chartType === 'treemap' && (
             <Form.List name="treemapColors">
               {() => {
-                const treemapData = form.getFieldValue('datasets')?.[0]?.data || [];
+                const treemapData = form.getFieldValue('datasets')?.[0]?.tree || [];
                 const treemapDataArray = Array.isArray(treemapData) ? treemapData : [];
                 return (
                   <>
