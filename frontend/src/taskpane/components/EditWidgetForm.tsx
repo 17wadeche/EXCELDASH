@@ -1386,13 +1386,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           </Form.List>
           {chartType === 'boxplot' && (
             <>
-              <Form.Item
-                name="boxplotTitle"
-                label="Boxplot Title"
-                rules={[{ required: true, message: 'Please enter a boxplot title' }]}
-              >
-                <Input placeholder="Enter boxplot title" />
-              </Form.Item>
               <Form.List name={[String(name), 'boxplotSampleColors']}>
                 {(fields, { add, remove }) => {
                   const boxplotLabels = form.getFieldValue(['datasets', name, 'labels'])?.split(',').map((l: string) => l.trim()) || [];
