@@ -214,37 +214,54 @@ const CreateDashboard: React.FC = () => {
             await context.sync();
             if (exampleSheet.isNullObject) {
               exampleSheet = sheets.add("Example Chart Data");
+              const headers = [
+                { range: "A1", text: "Bar Chart Data", bold: true, fontSize: 14 },
+                { range: "A5", text: "Line Chart Data", bold: true, fontSize: 14 },
+                { range: "A9", text: "Pie Chart Data", bold: true, fontSize: 14 },
+                { range: "A13", text: "Doughnut Chart Data", bold: true, fontSize: 14 },
+                { range: "A17", text: "Radar Chart Data", bold: true, fontSize: 14 },
+                { range: "A22", text: "Polar Area Chart Data", bold: true, fontSize: 14 },
+                { range: "A26", text: "Bubble Chart Data", bold: true, fontSize: 14 },
+                { range: "A32", text: "Scatter Chart Data", bold: true, fontSize: 14 },
+                { range: "A37", text: "Box Plot Data", bold: true, fontSize: 14 },
+                { range: "A42", text: "Candlestick Chart Data", bold: true, fontSize: 14 },
+                { range: "A47", text: "Treemap Chart Data", bold: true, fontSize: 14 },
+                { range: "A55", text: "Funnel Chart Data", bold: true, fontSize: 14 },
+              ];
+              headers.forEach(header => {
+                const headerRange = exampleSheet.getRange(header.range);
+                headerRange.values = [[header.text]];
+                if (header.bold) {
+                  headerRange.format.font.bold = true;
+                }
+                if (header.fontSize) {
+                  headerRange.format.font.size = header.fontSize;
+                }
+              });
               // ========== BAR CHART DATA ==========
-              exampleSheet.getRange("A1").values = [["Bar Chart Data"]];
               exampleSheet.getRange("A2:D2").values = [["", "Jan", "Feb", "Mar"]];
               exampleSheet.getRange("A3:D3").values = [["Sales", 10, 20, 30]];
               // ========== LINE CHART DATA ==========
-              exampleSheet.getRange("A5").values = [["Line Chart Data"]];
               exampleSheet.getRange("A6:E6").values = [["", "Jan", "Feb", "Mar", "Apr"]];
               exampleSheet.getRange("A7:E7").values = [["Sales", 5000, 7000, 4000, 9000]];
               // ========== PIE CHART DATA ==========
-              exampleSheet.getRange("A9").values = [["Pie Chart Data"]];
               exampleSheet.getRange("A10:F10").values = [["", "Red", "Blue", "Green", "Yellow", "Purple"]];
               exampleSheet.getRange("A11:F11").values = [["Value", 30, 25, 20, 15, 10]];
               // ========== DOUGHNUT CHART DATA ==========
-              exampleSheet.getRange("A13").values = [["Doughnut Chart Data"]];
               exampleSheet.getRange("A14:F14").values = [["", "Group A", "Group B", "Group C", "Group D", "Group E"]];
               exampleSheet.getRange("A15:F15").values = [["Value", 45, 25, 15, 10, 5]];
               // ========== RADAR CHART DATA ==========
-              exampleSheet.getRange("A17").values = [["Radar Chart Data"]];
               exampleSheet.getRange("A18:F18").values = [
                 ["", "Strength", "Speed", "Agility", "Intelligence", "Endurance"]
               ];
               exampleSheet.getRange("A19:F19").values = [["Series1", 10, 8, 6, 7, 9]];
               exampleSheet.getRange("A20:F20").values = [["Series2", 5, 6, 9, 7, 4]];
               // ========== POLAR AREA CHART DATA ==========
-              exampleSheet.getRange("A22").values = [["Polar Area Chart Data"]];
               exampleSheet.getRange("A23:F23").values = [
                 ["", "North", "East", "South", "West", "Center"]
               ];
               exampleSheet.getRange("A24:F24").values = [["Value", 11, 16, 9, 14, 5]];
               // ========== BUBBLE CHART DATA ==========
-              exampleSheet.getRange("A26").values = [["Bubble Chart Data"]];
               exampleSheet.getRange("A27:E27").values = [
                 ["", "Point1", "Point2", "Point3", "Point4"]
               ];
@@ -252,23 +269,19 @@ const CreateDashboard: React.FC = () => {
               exampleSheet.getRange("A29:E29").values = [["Y", 10, 15, 5, 12]];
               exampleSheet.getRange("A30:E30").values = [["R", 10, 20, 15, 25]];
               // ========== SCATTER CHART DATA ==========
-              exampleSheet.getRange("A32").values = [["Scatter Chart Data"]];
               exampleSheet.getRange("A33:E33").values = [
                 ["", "Point1", "Point2", "Point3", "Point4"]
               ];
               exampleSheet.getRange("A34:E34").values = [["X", 1, 2, 3, 4]];
               exampleSheet.getRange("A35:E35").values = [["Y", 2, 5, 3, 7]];
               // ========== BOX PLOT DATA ==========
-              exampleSheet.getRange("A37").values = [["Box Plot Data"]];
               exampleSheet.getRange("A38:F38").values = [["", "Q1", "Median", "Q3", "Min", "Max"]];
               exampleSheet.getRange("A39:F39").values = [["Sample1", 10, 20, 30, 5, 35]];
               exampleSheet.getRange("A40:F40").values = [["Sample2", 15, 25, 40, 10, 45]];
               // ========== CANDLESTICK CHART DATA ==========
-              exampleSheet.getRange("A42").values = [["Candlestick Chart Data"]];
               exampleSheet.getRange("A43:E43").values = [["2023-01-01", 100, 110, 95, 105]];
               exampleSheet.getRange("A44:E44").values = [["2023-01-02", 105, 115, 100, 110]];
               // ========== TREEMAP CHART DATA ==========
-              exampleSheet.getRange("A47").values = [["Treemap Chart Data"]];
               exampleSheet.getRange("A48:B48").values = [["Name", "Value"]];
               exampleSheet.getRange("A49:B53").values = [
                 ["Category A", 10],
@@ -278,7 +291,6 @@ const CreateDashboard: React.FC = () => {
                 ["Category E", 25],
               ];
               // ========== FUNNEL CHART DATA ==========
-              exampleSheet.getRange("A55").values = [["Funnel Chart Data"]];
               exampleSheet.getRange("A56:B56").values = [["Stage", "Value"]];
               exampleSheet.getRange("A57:B61").values = [
                 ["Prospects", 200],
