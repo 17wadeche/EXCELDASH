@@ -1006,7 +1006,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
       const dataSets = form.getFieldValue('datasets') || [];
       const boxplotDS = dataSets[0];
       if (!boxplotDS || boxplotDS.type !== 'boxplot') return;
-      const labelStr = boxplotDS.labels || '';
+      const labelStr = form.getFieldValue('labels') || '';
       const labelArr = labelStr
         .split(',')
         .map((s: string) => s.trim())
