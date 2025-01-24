@@ -24,6 +24,7 @@ const App: React.FC = () => {
       <DashboardProvider>
         <Routes>
           <Route path="/" element={<CustomLayout />}>
+            <Route index element={<Navigate to="create" replace />} />
             <Route element={<PrivateRoute />}>
               <Route path="create" element={<CreateDashboard />} />
               <Route path="dashboard-editor" element={<DashboardPage />} />
@@ -39,7 +40,7 @@ const App: React.FC = () => {
             <Route path="forgot-password" element={<ForgotPasswordPage />} />
             <Route path="enter-code" element={<EnterResetCodePage />} />
             <Route path="reset-password" element={<ResetPasswordPage />} />
-            <Route path="*" element={<Navigate to="dashboard-list" replace />} />
+            <Route path="*" element={<Navigate to="create" replace />} />
           </Route>
         </Routes>
       </DashboardProvider>
