@@ -246,7 +246,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           cleanedValues.xAxisType = 'linear';
         }
         if (finalChartType === 'candlestick') {
-          updatedData.labels = [];
           updatedData.scales = {
             x: {
               type: 'category',
