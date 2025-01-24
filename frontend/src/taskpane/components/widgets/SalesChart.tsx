@@ -225,7 +225,7 @@ const SalesChart = ({ data, type }: SalesChartProps) => {
     },
     scales: {
       x: {
-        type: data.scales?.x?.type || 'category',
+        type: data.scales?.x?.type || (type === 'candlestick' ? 'time' : 'category'),
         time:
           data.scales?.x?.type === 'time'
             ? {
