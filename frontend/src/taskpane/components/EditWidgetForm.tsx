@@ -1396,9 +1396,9 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
               >
                 <Input placeholder="Enter boxplot title" />
               </Form.Item>
-              <Form.List name="boxplotSampleColors">
+              <Form.List name={[name, 'boxplotSampleColors']}>
                 {(fields, { add, remove }) => {
-                  const boxplotLabels = form.getFieldValue('labels')?.split(',').map((l: string) => l.trim()) || [];
+                  const boxplotLabels = form.getFieldValue(['datasets', name, 'labels'])?.split(',').map((l: string) => l.trim()) || [];
                   while (fields.length < boxplotLabels.length) {
                     add({ color: '#000000' });
                   }
