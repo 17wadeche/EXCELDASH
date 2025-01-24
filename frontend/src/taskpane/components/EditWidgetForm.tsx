@@ -188,11 +188,11 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
 
   useEffect(() => {
     if (widget.type !== 'chart' || chartType !== 'treemap') return;
-    const treemapDataRaw = form.getFieldValue('datasets')?.[0]?.data;
+    const treemapDataRaw = form.getFieldValue('datasets')?.[0]?.tree;
     const treemapData = Array.isArray(treemapDataRaw) ? treemapDataRaw : [];
     const currentColors = form.getFieldValue('treemapColors') || [];
     if (currentColors.length !== treemapData.length) {
-      const newColors = treemapData.map((_, idx) => ({
+      const newColors = treemapData.map((_item: any, idx: number) => ({
         color: currentColors[idx]?.color || getRandomColor()
       }));
       form.setFieldsValue({ treemapColors: newColors });
@@ -391,9 +391,18 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
                 key: 'value',
                 groups: ['name'],
                 backgroundColor: treemapColors.map((c: any) => c.color),
-                borderColor: ds.borderColor || '#4caf50',
+                borderColor: treemapColors.map((c: any) => c.color),
                 borderWidth: ds.borderWidth || 1,
-                datalabels: { display: false },
+                datalabels: {
+                  display: true,
+                  color: '#fff', // Text color inside boxes
+                  formatter: (value: any, context: any) => {
+                    return context.dataset.data[context.dataIndex].name;
+                  },
+                  font: {
+                    weight: 'bold',
+                  },
+                },
               };
             }
             // ===== FUNNEL =====
@@ -524,13 +533,16 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
               enabled: cleanedValues.enableTooltips !== false,
               callbacks: {
                 label: function (context: any) {
-                  const label = context.dataset.label || '';
-                  const value = context.formattedValue;
-                  return cleanedValues.tooltipTemplate
-                    ? cleanedValues.tooltipTemplate
-                        .replace('{label}', label)
-                        .replace('{value}', value)
-                    : `${label}: ${value}`;
+                  const chartType = context.dataset.type;
+                  if (chartType === 'treemap') {
+                    const label = context.dataset.data[context.dataIndex].name || '';
+                    const value = context.dataset.data[context.dataIndex].value || 0;
+                    return `${label}: ${value}`;
+                  } else {
+                    const label = context.label || '';
+                    const value = context.formattedValue;
+                    return label ? `${label}: ${value}` : `${value}`;
+                  }
                 },
               },
             },
@@ -638,6 +650,17 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
     return color;
   };
 
+  function convertExcelDate(val: any): string {
+    if (typeof val === 'number' && val > 30000 && val < 60000) {
+      const jsDate = new Date((val - 25569) * 86400 * 1000);
+      const mm = jsDate.getMonth() + 1;
+      const dd = jsDate.getDate();
+      const yyyy = jsDate.getFullYear();
+      return `${mm}/${dd}/${yyyy}`;
+    }
+    return String(val);
+  }
+
   /**
    * Attempt to load data from Excel for the new chart types
    */
@@ -692,8 +715,13 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           return;
         }
         const rawRows = data.slice(1);
-        const dayNames = rawRows.map((row) => row[0]).join(', ');
-        const candlestickStr = rawRows.map((row) => row.join(',')).join(';');
+        const processedRows = rawRows.map(row => {
+          const labelOrNumber = row[0];
+          const dateString = convertExcelDate(labelOrNumber);
+          return [dateString, row[1], row[2], row[3], row[4]];
+        });
+        const dayNames = processedRows.map((row) => row[0]).join(', ');
+        const candlestickStr = processedRows.map((row) => row.join(',')).join(';');
         form.setFieldsValue({
           labels: dayNames,
           datasets: [
