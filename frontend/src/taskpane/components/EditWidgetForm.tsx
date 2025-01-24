@@ -1457,21 +1457,39 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
             <Collapse>
               <Collapse.Panel header="Bubble Colors" key="bubbleColors">
                 <Form.List name="bubbleColors">
-                  {(fields) => (
-                    <>
-                      {fields.map(({ key, name, ...restField }) => (
-                        <Form.Item
-                          {...restField}
-                          key={key}
-                          name={[name, 'color']}
-                          label={`Color for Bubble #${key + 1}`}
-                          rules={[{ required: true, message: 'Please pick a color' }]}
-                        >
-                          <Input type="color" />
-                        </Form.Item>
-                      ))}
-                    </>
-                  )}
+                  {(fields, { add, remove }) => {
+                    const dataSets = form.getFieldValue('datasets') || [];
+                    const bubbleDS = dataSets.find((ds: any) => ds.type === 'bubble');
+                    let bubbleCount = 0;
+                    if (bubbleDS && typeof bubbleDS.data === 'string') {
+                      const segments = bubbleDS.data
+                        .split(';')
+                        .map((s: string) => s.trim())
+                        .filter(Boolean);
+                      bubbleCount = segments.length;
+                    }
+                    while (fields.length < bubbleCount) {
+                      add({ color: '#000000' });
+                    }
+                    while (fields.length > bubbleCount) {
+                      remove(fields.length - 1);
+                    }
+                    return (
+                      <>
+                        {fields.map(({ key, name, ...restField }, index) => (
+                          <Form.Item
+                            {...restField}
+                            key={key}
+                            name={[name, 'color']}
+                            label={`Color for Bubble #${index + 1}`}
+                            rules={[{ required: true, message: 'Please pick a color' }]}
+                          >
+                            <Input type="color" />
+                          </Form.Item>
+                        ))}
+                      </>
+                    );
+                  }}
                 </Form.List>
               </Collapse.Panel>
             </Collapse>
