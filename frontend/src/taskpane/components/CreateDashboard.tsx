@@ -288,50 +288,25 @@ const CreateDashboard: React.FC = () => {
                 ["Closed", 15],
               ];
               // ========== FORCE-DIRECTED GRAPH DATA ==========
-              exampleSheet.getRange("A63").values = [["Force-Directed Graph Data"]];
-              exampleSheet.getRange("A64:C64").values = [["NodeId", "Group", "Value"]];
-              exampleSheet.getRange("A65:C68").values = [
-                ["A", "Group1", 12],
-                ["B", "Group1", 8],
-                ["C", "Group2", 15],
-                ["D", "Group2", 10],
-              ];
-              exampleSheet.getRange("E63").values = [["Edges"]];
-              exampleSheet.getRange("E64:H64").values = [["Source", "Target", "Value", "Label"]];
-              exampleSheet.getRange("E65:H68").values = [
-                ["A", "B", 1, "AB"],
-                ["B", "C", 1, "BC"],
-                ["C", "D", 1, "CD"],
-                ["A", "D", 2, "AD"],
-              ];
+              // exampleSheet.getRange("A63").values = [["Force-Directed Graph Data"]];
+              // exampleSheet.getRange("A64:C64").values = [["NodeId", "Group", "Value"]];
+              // exampleSheet.getRange("A65:C68").values = [["A", "Group1", 12],["B", "Group1", 8],["C", "Group2", 15],["D", "Group2", 10]];
+              // exampleSheet.getRange("E63").values = [["Edges"]];
+              // exampleSheet.getRange("E64:H64").values = [["Source", "Target", "Value", "Label"]];
+              // exampleSheet.getRange("E65:H68").values = [["A", "B", 1, "AB"],["B", "C", 1, "BC"],["C", "D", 1, "CD"],["A", "D", 2, "AD"]];
               // ========== CHOROPLETH CHART DATA ==========
-              exampleSheet.getRange("A70").values = [["Choropleth Chart Data"]];
-              exampleSheet.getRange("A71:B71").values = [["Region", "Value"]];
-              exampleSheet.getRange("A72:B75").values = [
-                ["US-CA", 25],
-                ["US-TX", 15],
-                ["US-NY", 30],
-                ["US-FL", 10],
-              ];
+              //exampleSheet.getRange("A70").values = [["Choropleth Chart Data"]];
+              // exampleSheet.getRange("A71:B71").values = [["Region", "Value"]];
+              //exampleSheet.getRange("A72:B75").values = [["US-CA", 25], ["US-TX", 15],["US-NY", 30],["US-FL", 10]];
               // ========== PARALLEL COORDINATES (PCP) DATA ==========
-              exampleSheet.getRange("A77").values = [["Parallel Coordinates Chart Data"]];
-              exampleSheet.getRange("A78:D78").values = [["Dim1", "Dim2", "Dim3", "Dim4"]];
-              exampleSheet.getRange("A79:D81").values = [
-                [10, 30, 50, 20],
-                [5, 40, 20, 10],
-                [9, 25, 55, 22],
-              ];
+              // exampleSheet.getRange("A77").values = [["Parallel Coordinates Chart Data"]];
+              // exampleSheet.getRange("A78:D78").values = [["Dim1", "Dim2", "Dim3", "Dim4"]];
+              // exampleSheet.getRange("A79:D81").values = [[10, 30, 50, 20],[5, 40, 20, 10],[9, 25, 55, 22]];
               // ========== BAR WITH ERROR BARS DATA ==========
-              exampleSheet.getRange("A83").values = [["Bar with Error Bars Data"]];
-              exampleSheet.getRange("A84:D84").values = [
-                ["Label", "Value", "ErrorMinus", "ErrorPlus"],
-              ];
-              exampleSheet.getRange("A85:D87").values = [
-                ["A", 10, 2, 3],
-                ["B", 15, 1, 2],
-                ["C", 8, 1.5, 1.5],
-              ];
-              exampleSheet.getUsedRange().format.autofitColumns();
+              // exampleSheet.getRange("A83").values = [["Bar with Error Bars Data"]];
+              // exampleSheet.getRange("A84:D84").values = [["Label", "Value", "ErrorMinus", "ErrorPlus"]];
+              // exampleSheet.getRange("A85:D87").values = [["A", 10, 2, 3], ["B", 15, 1, 2], ["C", 8, 1.5, 1.5]];
+              // exampleSheet.getUsedRange().format.autofitColumns();
             }
             await context.sync();
             message.success('"Example Chart Data" sheet is ready.');

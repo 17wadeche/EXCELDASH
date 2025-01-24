@@ -2,19 +2,7 @@
 
 import React, { useRef, useEffect } from 'react';
 import Draggable from 'react-draggable';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  LineElement,
-  PointElement,
-  Title,
-  TimeSeriesScale,
-  Tooltip,
-  Legend,
-  TimeScale,
-} from 'chart.js/auto';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, TimeSeriesScale, Tooltip, Legend, TimeScale } from 'chart.js/auto';
 import { Bar, Line, Pie, Doughnut, Radar, Scatter, Bubble, PolarArea, Chart as BaseChart } from 'react-chartjs-2';
 import 'chartjs-adapter-moment';
 import { BoxPlotController, BoxAndWiskers } from '@sgratzl/chartjs-chart-boxplot';
@@ -30,7 +18,6 @@ import { ForceDirectedGraphController, EdgeLine } from 'chartjs-chart-graph';
 import { ChoroplethController, GeoFeature, ColorScale, ProjectionScale } from 'chartjs-chart-geo';
 import { BarWithErrorBarsController, BarWithErrorBar } from 'chartjs-chart-error-bars';
 
-// Register chart components
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -101,7 +88,6 @@ const BoxPlotChart: React.FC<any> = (props) => {
   return <BaseChart type="boxplot" {...props} />;
 };
 
-// Define a mapping from chart type to component
 const chartComponents: Record<string, React.FC<any>> = {
   bar: Bar,
   line: Line,
@@ -178,7 +164,6 @@ interface SalesChartProps {
 
 const SalesChart = ({ data, type }: SalesChartProps) => {
   const chartRef = useRef<ChartJS>(null);
-
   useEffect(() => {
     return () => {
       if (chartRef.current) {
@@ -186,9 +171,7 @@ const SalesChart = ({ data, type }: SalesChartProps) => {
       }
     };
   }, []);
-
   console.log('SalesChart Datasets:', data.datasets);
-
   const chartOptions: ChartOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -221,12 +204,12 @@ const SalesChart = ({ data, type }: SalesChartProps) => {
     },
     scales: {
       x: {
-        type: type === 'candlestick' ? 'time' : (data.scales?.x?.type || 'category'), // Changed 'category' to 'time'
+        type: type === 'candlestick' ? 'time' : (data.scales?.x?.type || 'category'),
         time:
           type === 'candlestick' 
             ? { 
-                unit: 'day', // Adjust based on your data granularity
-                tooltipFormat: 'll', // Example: 'Jan 1, 2023'
+                unit: 'day',
+                tooltipFormat: 'll',
                 parser: 'YYYY-MM-DD',
               }
             : data.scales?.x?.type === 'time'
@@ -257,8 +240,7 @@ const SalesChart = ({ data, type }: SalesChartProps) => {
         },
         ticks: {
           color: 'black',
-          callback: (value: number | string) =>
-            Number(value).toLocaleString(),
+          callback: (value: number | string) => Number(value).toLocaleString(),
         },
         grid: {
           color: data.gridLineColor || 'rgba(0, 0, 0, 0.2)',
@@ -286,12 +268,7 @@ const SalesChart = ({ data, type }: SalesChartProps) => {
   const handleChartClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
     const chart = chartRef.current;
     if (!chart) return;
-    const elements = chart.getElementsAtEventForMode(
-      event.nativeEvent,
-      'nearest',
-      { intersect: true },
-      true
-    );
+    const elements = chart.getElementsAtEventForMode(event.nativeEvent, 'nearest', { intersect: true }, true);
     if (elements.length > 0) {
       const datasetIndex = elements[0].datasetIndex;
       const dataIndex = elements[0].index;
@@ -304,9 +281,7 @@ const SalesChart = ({ data, type }: SalesChartProps) => {
   if (noAxisTypes.includes(type)) {
     chartOptions.scales = {};
   }
-
   const SelectedChart = chartComponents[type] || Bar;
-
   return (
     <Draggable handle=".drag-handle">
       <div
@@ -323,12 +298,7 @@ const SalesChart = ({ data, type }: SalesChartProps) => {
         }}
       >
         <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-          <SelectedChart
-            data={data}
-            options={chartOptions}
-            ref={chartRef}
-            onClick={handleChartClick}
-          />
+          <SelectedChart data={data} options={chartOptions} ref={chartRef} onClick={handleChartClick} />
         </div>
       </div>
     </Draggable>

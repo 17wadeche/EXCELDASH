@@ -14,14 +14,7 @@ const { Panel } = Collapse;
 
 interface EditWidgetFormProps {
   widget: Widget;
-  onSubmit: (
-    updatedData:
-      | TextData
-      | ChartData
-      | GanttWidgetData
-      | MetricData
-      | TitleWidgetData
-  ) => void;
+  onSubmit: (updatedData: TextData | ChartData | GanttWidgetData | MetricData | TitleWidgetData) => void;
   onCancel: () => void;
   isPresenterMode?: boolean;
 }
@@ -31,9 +24,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
   const widgetId = widget.id;
   const { availableWorksheets } = useContext(DashboardContext)!;
   const [sheets, setSheets] = useState<string[]>([]);
-  const [chartType, setChartType] = useState<string>(
-    widget.type === 'chart' ? (widget.data as ChartData).type : 'bar'
-  );
+  const [chartType, setChartType] = useState<string>(widget.type === 'chart' ? (widget.data as ChartData).type : 'bar');
 
   useEffect(() => {
     setSheets(availableWorksheets);
@@ -43,10 +34,8 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
     switch (widget.type) {
       case 'text':
         return widget.data as TextData;
-
       case 'title':
         return widget.data as TitleWidgetData;
-
       case 'chart': {
         const data = widget.data as ChartData;
         const useArea = data.type === 'line' && data.datasets.some((ds) => ds.fill);
@@ -102,7 +91,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           }),
         };
       }
-
       case 'gantt': {
         const data = widget.data as GanttWidgetData;
         return {
@@ -115,7 +103,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           })),
         };
       }
-
       case 'metric': {
         const data = widget.data as MetricData;
         return {
@@ -125,7 +112,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           cellAddress: data.cellAddress || '',
         };
       }
-
       default:
         return {};
     }
@@ -147,10 +133,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
     const bubbleDataStr = datasets[0].data || '';
     const segments = bubbleDataStr.split(';').map((s: string) => s.trim()).filter(Boolean);
     let currentBubbleColors = form.getFieldValue('bubbleColors');
-    if (
-      !Array.isArray(currentBubbleColors) ||
-      currentBubbleColors.length !== segments.length
-    ) {
+    if (!Array.isArray(currentBubbleColors) || currentBubbleColors.length !== segments.length) {
       currentBubbleColors = segments.map(() => ({ color: '#36A2EB' }));
       form.setFieldsValue({ bubbleColors: currentBubbleColors });
     }
@@ -176,23 +159,16 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
         cleanedValues[k] = v;
       }
     });
-
     let updatedData: any;
-
     switch (widget.type) {
-      // ========== TEXT ==========
       case 'text': {
         updatedData = cleanedValues;
         break;
       }
-
-      // ========== TITLE ==========
       case 'title': {
         updatedData = cleanedValues;
         break;
       }
-
-      // ========== CHART ==========
       case 'chart': {
         const finalChartType = cleanedValues.chartType === 'area' ? 'line' : cleanedValues.chartType;
         const noAxisTypes = [
@@ -227,7 +203,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
             .map((s: string) => s.trim())
             .filter(Boolean),
           datasets: (cleanedValues.datasets || []).map((ds: any) => {
-            // ===== SCATTER / BUBBLE =====
             if (ds.type === 'scatter' || ds.type === 'bubble') {
               const segments = ds.data
                 .split(';')
@@ -250,7 +225,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                   borderWidth: ds.borderWidth || 1,
                 };
               } else {
-                // scatter
                 const points = segments.map((seg: string) => {
                   const [x, y] = seg.split(',').map((v: string) => parseFloat(v.trim()));
                   return { x, y };
@@ -265,9 +239,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                   borderWidth: ds.borderWidth || 1,
                 };
               }
-            }
-            // ===== BOX PLOT =====
-            else if (ds.type === 'boxplot') {
+            } else if (ds.type === 'boxplot') {
               let parsed = [];
               try {
                 parsed = JSON.parse(ds.data);
@@ -283,9 +255,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 borderColor: ds.borderColor || '#4caf50',
                 borderWidth: ds.borderWidth || 1,
               };
-            }
-            // ===== CANDLESTICK =====
-            else if (ds.type === 'candlestick') {
+            } else if (ds.type === 'candlestick') {
               let parsedData = [];
               try {
                 parsedData = JSON.parse(ds.data);
@@ -324,9 +294,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                   closeKey: 'c'
                 },
               };
-            }
-            // ===== TREEMAP =====
-            else if (ds.type === 'treemap') {
+            } else if (ds.type === 'treemap') {
               let treemapData = [];
               if (typeof ds.tree === 'string') {
                 try {
@@ -361,7 +329,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 borderWidth: ds.borderWidth || 1,
                 datalabels: {
                   display: true,
-                  color: '#fff', // Text color inside boxes
+                  color: '#fff',
                   formatter: (_value: any, context: any) => {
                     return context.raw.category;
                   },
@@ -370,9 +338,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                   },
                 },
               };
-            }
-            // ===== FUNNEL =====
-            else if (ds.type === 'funnel') {
+            } else if (ds.type === 'funnel') {
               const segments = ds.data
                 .split(';')
                 .map((s: string) => s.trim())
@@ -394,12 +360,8 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 borderWidth: ds.borderWidth || 1,
                 options: { plugins: { funnel: { percent: false } } },
               };
-            }
-            // ===== ForceGraph / Choropleth / PCP / BarWithErrorBars =====
-            else if (
-              ['forceDirectedGraph', 'choropleth', 'parallelCoordinates', 'barWithErrorBars'].includes(
-                ds.type
-              )
+            } else if (
+              ['forceDirectedGraph', 'choropleth', 'parallelCoordinates', 'barWithErrorBars'].includes(ds.type)
             ) {
               return {
                 label: ds.label,
@@ -410,26 +372,18 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 borderColor: ds.borderColor || '#4caf50',
                 borderWidth: ds.borderWidth || 1,
               };
-            }
-            // ===== Everything else: bar/line/radar/pie, etc. =====
-            else {
+            } else {
               let parsedValues: number[] = [];
               if (typeof ds.data === 'string') {
-                parsedValues = ds.data
-                  .split(',')
-                  .map((num: string) => Number(num.trim()));
+                parsedValues = ds.data.split(',').map((num: string) => Number(num.trim()));
               } else if (Array.isArray(ds.data)) {
                 parsedValues = ds.data.map((n: any) => Number(n));
               } else {
                 parsedValues = [Number(ds.data)];
               }
-              const shouldFill =
-                cleanedValues.chartType === 'area' || ds.type === 'area';
+              const shouldFill = cleanedValues.chartType === 'area' || ds.type === 'area';
               let finalBg = ds.backgroundColor || '#4caf50';
-              if (
-                ['pie', 'doughnut', 'polarArea'].includes(finalChartType) &&
-                sliceColorsArray.length
-              ) {
+              if (['pie', 'doughnut', 'polarArea'].includes(finalChartType) && sliceColorsArray.length) {
                 finalBg = sliceColorsArray;
               }
               return {
@@ -449,9 +403,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
             : {
                 x: {
                   type: cleanedValues.xAxisType || 'category',
-                  time: cleanedValues.xAxisType === 'time'
-                    ? { parser: 'M/D/YYYY', unit: 'day' }
-                    : undefined,
+                  time: cleanedValues.xAxisType === 'time' ? { parser: 'M/D/YYYY', unit: 'day' } : undefined,
                   title: {
                     display: !!cleanedValues.xAxisTitle,
                     text: cleanedValues.xAxisTitle || '',
@@ -532,16 +484,12 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
         } as ChartData;
         break;
       }
-      // ========== GANTT ==========
       case 'gantt': {
         const existing = widget.data as GanttWidgetData;
         const existingTasks = existing.tasks || [];
         const { arrowColor } = cleanedValues;
-        // Merge tasks
         const mergedTasks = existingTasks.map((oldTask) => {
-          const updated = (cleanedValues.tasks || []).find(
-            (t: any) => t.id === oldTask.id
-          );
+          const updated = (cleanedValues.tasks || []).find((t: any) => t.id === oldTask.id);
           if (!updated) return oldTask;
           return {
             ...oldTask,
@@ -557,8 +505,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
             progressColor: updated.progressColor || oldTask.progressColor,
           };
         });
-
-        // Any brand-new tasks
         const newTasks = (cleanedValues.tasks || [])
           .filter((t: any) => !existingTasks.some((old) => old.id === t.id))
           .map((t: any) => ({
@@ -568,13 +514,10 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
             end: t.end.format('YYYY-MM-DD'),
             completed: t.completed ? t.completed.format('YYYY-MM-DD') : undefined,
             progress: t.progress,
-            dependencies: Array.isArray(t.dependencies)
-              ? t.dependencies
-              : (t.dependencies || '').split(','),
+            dependencies: Array.isArray(t.dependencies) ? t.dependencies : (t.dependencies || '').split(','),
             color: t.color || '#FF0000',
             progressColor: t.progressColor || '#00AABB',
           }));
-
         updatedData = {
           ...existing,
           tasks: [...mergedTasks, ...newTasks],
@@ -583,8 +526,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
         };
         break;
       }
-
-      // ========== METRIC ==========
       case 'metric': {
         updatedData = {
           ...cleanedValues,
@@ -595,15 +536,12 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
         };
         break;
       }
-
       default:
         updatedData = {};
     }
-
     onSubmit(updatedData);
   };
 
-  /** Simple random color helper */
   const getRandomColor = () => {
     const letters = '0123456789ABCDEF';
     let color = '#';
@@ -619,23 +557,16 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
       const mm = String(jsDate.getMonth() + 1).padStart(2, '0');
       const dd = String(jsDate.getDate() + 1).padStart(2, '0');
       const yyyy = jsDate.getFullYear();
-      return `${yyyy}-${mm}-${dd}`; // Format: 'YYYY-MM-DD'
+      return `${yyyy}-${mm}-${dd}`;
     }
     return String(val);
   }
 
-  const loadDataForNewChartType = async (
-    mainType: string,
-    data: any[][],
-    form: any
-  ) => {
+  const loadDataForNewChartType = async (mainType: string, data: any[][], form: any) => {
     switch (mainType) {
-      // ========== BOX PLOT ==========
       case 'boxplot': {
         if (data.length < 3) {
-          message.error(
-            'Box Plot data must include at least a title row, a header row, and one data row.'
-          );
+          message.error('Box Plot data must include at least a title row, a header row, and one data row.');
           return;
         }
         const boxLabels: string[] = [];
@@ -668,7 +599,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
         message.success('Box Plot data loaded successfully!');
         break;
       }
-      // ========== CANDLESTICK ==========
       case 'candlestick': {
         if (data.length < 2) {
           message.error('Candlestick requires at least 2 rows: header + data.');
@@ -703,13 +633,12 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
         message.success('Candlestick data loaded from Excel.');
         break;
       }
-      // ========== TREEMAP ==========
       case 'treemap': {
         if (data.length < 3) {
           message.error('Treemap requires 3+ rows: title row + header + data.');
           return;
         }
-        const headerRow = data[1]; // e.g. ["Label","Value"]
+        const headerRow = data[1];
         const labelStr = headerRow.join(',');
         const rawRows = data.slice(2);
         const treemapData = rawRows.map((row) => {
@@ -736,14 +665,12 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
         message.success('Treemap data loaded from Excel.');
         break;
       }
-
-      // ========== FUNNEL ==========
       case 'funnel': {
         if (data.length < 3) {
           message.error('Funnel requires 3+ rows: title + header + data.');
           return;
         }
-        const headerRow = data[1]; // e.g. ["Stage","Value"]
+        const headerRow = data[1];
         const labelStr = headerRow.join(',');
         const rawRows = data.slice(2);
         const labels = rawRows.map((row) => row[0]);
@@ -764,10 +691,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
         message.success('Funnel data loaded from Excel.');
         break;
       }
-
-      // ========== FORCE-DIRECTED GRAPH ==========
       case 'forceDirectedGraph': {
-        // Look for a blank row separating Node definitions and Edges
         let blankRowIndex = -1;
         for (let i = 0; i < data.length; i++) {
           const row = data[i];
@@ -778,24 +702,17 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           }
         }
         if (blankRowIndex < 0) {
-          message.error(
-            'No blank row found to separate Force-Directed Graph nodes from edges.'
-          );
+          message.error('No blank row found to separate Force-Directed Graph nodes from edges.');
           return;
         }
-        // node data
         const nodeHeader = data[0];
         const labelStr = nodeHeader.join(',');
         const nodeRows = data.slice(1, blankRowIndex);
-        // edge data
         const edgeHeader = data[blankRowIndex + 1];
         const edgeRows = data.slice(blankRowIndex + 2);
-
-        // We'll store as "NODES:..., ...|EDGES:..., ..."
         const nodeStr = nodeRows.map((row) => row.join(',')).join(';');
         const edgeStr = edgeRows.map((row) => row.join(',')).join(';');
         const combinedStr = `NODES:${nodeStr}|EDGES:${edgeStr}`;
-
         form.setFieldsValue({
           labels: labelStr,
           datasets: [
@@ -812,14 +729,12 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
         message.success('Force-Directed Graph data loaded!');
         break;
       }
-
-      // ========== CHOROPLETH ==========
       case 'choropleth': {
         if (data.length < 2) {
           message.error('Need at least 2 rows for Choropleth: header + data.');
           return;
         }
-        const header = data[0]; // e.g. ["Region","Value"]
+        const header = data[0];
         if (header.length < 2) {
           message.error('Choropleth: expected at least 2 columns: [Region, Value].');
           return;
@@ -843,14 +758,12 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
         message.success('Choropleth data loaded!');
         break;
       }
-
-      // ========== PARALLEL COORDINATES ==========
       case 'parallelCoordinates': {
         if (data.length < 2) {
           message.error('Need at least 2 rows for Parallel Coordinates: header + data.');
           return;
         }
-        const headers = data[0]; // e.g. ["Dim1","Dim2","Dim3","Dim4"]
+        const headers = data[0];
         const labelStr = headers.join(',');
         const bodyRows = data.slice(1);
         const pcpStr = bodyRows.map((row) => row.join(',')).join(';');
@@ -870,14 +783,12 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
         message.success('Parallel Coordinates data loaded!');
         break;
       }
-
-      // ========== BAR WITH ERROR BARS ==========
       case 'barWithErrorBars': {
         if (data.length < 2) {
           message.error('Need at least 2 rows for Bar with Error Bars: header + data.');
           return;
         }
-        const header = data[0]; // e.g. ["Label","Value","ErrorMinus","ErrorPlus"]
+        const header = data[0];
         if (header.length < 4) {
           message.error('Expected 4 columns: [Label, Value, ErrorMinus, ErrorPlus].');
           return;
@@ -901,7 +812,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
         message.success('Bar with Error Bars data loaded!');
         break;
       }
-
       default:
         message.info(`No import logic for chart type: ${mainType}`);
     }
@@ -928,14 +838,9 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
         const dataRange = worksheet.getRange(associatedRange);
         dataRange.load('values');
         await context.sync();
-        const data = dataRange.values; // 2D array
-
+        const data = dataRange.values;
         console.log(`Loaded data for chartType="${mainType}":`, data);
-
-        // Standard numeric-based charts
-        if (
-          ['bar', 'line', 'pie', 'doughnut', 'radar', 'polarArea'].includes(mainType)
-        ) {
+        if (['bar', 'line', 'pie', 'doughnut', 'radar', 'polarArea'].includes(mainType)) {
           if (data.length < 2) {
             message.error('Selected range must have at least 2 rows (header + data).');
             return;
@@ -954,9 +859,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
             datasets,
           });
           message.success(`${mainType} data loaded from Excel.`);
-        }
-        // Scatter
-        else if (mainType === 'scatter') {
+        } else if (mainType === 'scatter') {
           if (data.length < 3) {
             message.error('Scatter requires 3 rows: header, X row, Y row.');
             return;
@@ -969,9 +872,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
             message.error('X row and Y row must have same # of points.');
             return;
           }
-          const dataString = xVals
-            .map((x: number, idx: number) => `${x},${yVals[idx]}`)
-            .join(';');
+          const dataString = xVals.map((x: number, idx: number) => `${x},${yVals[idx]}`).join(';');
           form.setFieldsValue({
             labels: '',
             datasets: [
@@ -986,13 +887,9 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
             ],
           });
           message.success('Scatter data loaded from Excel.');
-        }
-        // Bubble
-        else if (mainType === 'bubble') {
+        } else if (mainType === 'bubble') {
           if (data.length < 4) {
-            message.error(
-              'Bubble requires 4 rows: header, X row, Y row, R row.'
-            );
+            message.error('Bubble requires 4 rows: header, X row, Y row, R row.');
             return;
           }
           const xRow = data[1];
@@ -1029,9 +926,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
             ],
           });
           message.success('Bubble data loaded from Excel.');
-        }
-        // The "new" chart types
-        else {
+        } else {
           await loadDataForNewChartType(mainType, data, form);
         }
       });
@@ -1042,20 +937,10 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
   };
 
   return (
-    <Form
-      form={form}
-      layout="vertical"
-      initialValues={getInitialValues()}
-      onFinish={handleFinish}
-    >
-      {/* ============================ TEXT WIDGET ============================ */}
+    <Form form={form} layout="vertical" initialValues={getInitialValues()} onFinish={handleFinish}>
       {widget.type === 'text' && (
         <>
-          <Form.Item
-            name="content"
-            label="Content"
-            rules={[{ required: true, message: 'Please enter content' }]}
-          >
+          <Form.Item name="content" label="Content" rules={[{ required: true, message: 'Please enter content' }]}>
             <TextArea rows={4} />
           </Form.Item>
           <Form.Item name="fontSize" label="Font Size">
@@ -1075,8 +960,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           </Form.Item>
         </>
       )}
-
-      {/* ============================ TITLE WIDGET ============================ */}
       {widget.type === 'title' && (
         <>
           <Form.Item
@@ -1104,18 +987,11 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           </Form.Item>
         </>
       )}
-
-      {/* ============================ CHART WIDGET ============================ */}
       {widget.type === 'chart' && (
         <>
-          <Form.Item
-            name="title"
-            label="Chart Title"
-            rules={[{ required: true, message: 'Please enter chart title' }]}
-          >
+          <Form.Item name="title" label="Chart Title" rules={[{ required: true, message: 'Please enter chart title' }]}>
             <Input />
           </Form.Item>
-
           <Form.Item
             name="chartType"
             label="Chart Type"
@@ -1132,7 +1008,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 form.setFieldsValue({ datasets: updatedDatasets });
               }}
             >
-              {/* Standard */}
               <Option value="bar">Bar</Option>
               <Option value="line">Line</Option>
               <Option value="pie">Pie</Option>
@@ -1145,13 +1020,12 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
               <Option value="candlestick">Candlestick</Option>
               <Option value="treemap">Treemap</Option>
               <Option value="funnel">Funnel</Option>
-              <Option value="forceDirectedGraph">Force-Directed Graph</Option>
-              <Option value="choropleth">Choropleth</Option>
-              <Option value="parallelCoordinates">Parallel Coordinates</Option>
-              <Option value="barWithErrorBars">Bar With Error Bars</Option>
+              {/* <Option value="forceDirectedGraph">Force-Directed Graph</Option> */}
+              {/* <Option value="choropleth">Choropleth</Option> */}
+              {/* <Option value="parallelCoordinates">Parallel Coordinates</Option> */}
+              {/* <Option value="barWithErrorBars">Bar With Error Bars</Option> */}
             </Select>
           </Form.Item>
-
           <Form.Item
             name="labels"
             label="Labels (comma-separated)"
@@ -1172,11 +1046,8 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                   ) {
                     return Promise.resolve();
                   }
-                  // Otherwise, we need some label string
                   if (!value || !value.trim()) {
-                    return Promise.reject(
-                      new Error('Please enter labels (header row).')
-                    );
+                    return Promise.reject(new Error('Please enter labels (header row).'));
                   }
                   return Promise.resolve();
                 },
@@ -1185,8 +1056,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           >
             <Input />
           </Form.Item>
-
-          {/* Slice Colors for Pie/Doughnut/Polar */}
           {['pie', 'doughnut', 'polarArea'].includes(chartType) && (
             <Form.List name="sliceColors">
               {(fields) => {
@@ -1200,12 +1069,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                     {fields.map(({ key, name, ...restField }) => {
                       const sliceLabel = labelArr[key] || `Slice #${key + 1}`;
                       return (
-                        <Form.Item
-                          {...restField}
-                          key={key}
-                          label={`Color for ${sliceLabel}`}
-                          name={[name, 'color']}
-                        >
+                        <Form.Item {...restField} key={key} label={`Color for ${sliceLabel}`} name={[name, 'color']}>
                           <Input type="color" />
                         </Form.Item>
                       );
@@ -1215,7 +1079,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
               }}
             </Form.List>
           )}
-
           <Form.Item
             name="worksheetName"
             label="Worksheet"
@@ -1229,7 +1092,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
               ))}
             </Select>
           </Form.Item>
-
           <Form.Item
             name="associatedRange"
             label="Data Range"
@@ -1243,21 +1105,13 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           >
             <Input placeholder="e.g., A1:B10" />
           </Form.Item>
-
-          {/* BUTTON: AUTO-LOAD FROM EXCEL */}
           {!isPresenterMode && (
             <Form.Item>
-              <Button
-                type="primary"
-                icon={<SelectOutlined />}
-                onClick={handleLoadFromExcel}
-              >
+              <Button type="primary" icon={<SelectOutlined />} onClick={handleLoadFromExcel}>
                 Select and Load Data from Excel
               </Button>
             </Form.Item>
           )}
-
-          {/* DATASETS */}
           <Form.List name="datasets">
             {(fields, { add, remove }) => (
               <>
@@ -1308,13 +1162,12 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                         <Option value="candlestick">Candlestick</Option>
                         <Option value="treemap">Treemap</Option>
                         <Option value="funnel">Funnel</Option>
-                        <Option value="forceDirectedGraph">Force-Directed Graph</Option>
-                        <Option value="choropleth">Choropleth</Option>
-                        <Option value="parallelCoordinates">Parallel Coordinates</Option>
-                        <Option value="barWithErrorBars">Bar With Error Bars</Option>
+                        {/* <Option value="forceDirectedGraph">Force-Directed Graph</Option> */}
+                        {/* <Option value="choropleth">Choropleth</Option> */}
+                        {/* <Option value="parallelCoordinates">Parallel Coordinates</Option> */}
+                        {/* <Option value="barWithErrorBars">Bar With Error Bars</Option> */}
                       </Select>
                     </Form.Item>
-                    {/* Conditional Rendering for Data Points based on Chart Type */}
                     <Form.Item
                       shouldUpdate={(prevValues, currentValues) =>
                         prevValues.datasets?.[name]?.type !== currentValues.datasets?.[name]?.type
@@ -1359,12 +1212,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                                       </Space>
                                     ))}
                                     <Form.Item>
-                                      <Button
-                                        type="dashed"
-                                        onClick={() => addData()}
-                                        block
-                                        icon={<PlusOutlined />}
-                                      >
+                                      <Button type="dashed" onClick={() => addData()} block icon={<PlusOutlined />}>
                                         Add Data Point
                                       </Button>
                                     </Form.Item>
@@ -1386,11 +1234,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                                 },
                                 {
                                   validator: (_, value) => {
-                                    const dsType = form.getFieldValue([
-                                      'datasets',
-                                      name,
-                                      'type',
-                                    ]);
+                                    const dsType = form.getFieldValue(['datasets', name, 'type']);
                                     if (!value) return Promise.resolve();
                                     if (dsType === 'bubble') {
                                       const segments = value
@@ -1398,17 +1242,10 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                                         .map((s: string) => s.trim())
                                         .filter(Boolean);
                                       for (let seg of segments) {
-                                        const parts = seg
-                                          .split(',')
-                                          .map((v: string) => v.trim());
-                                        if (
-                                          parts.length !== 3 ||
-                                          parts.some((p: string) => isNaN(Number(p)))
-                                        ) {
+                                        const parts = seg.split(',').map((v: string) => v.trim());
+                                        if (parts.length !== 3 || parts.some((p: string) => isNaN(Number(p)))) {
                                           return Promise.reject(
-                                            new Error(
-                                              'Bubble data must be "x,y,r" triplets, separated by semicolons.'
-                                            )
+                                            new Error('Bubble data must be "x,y,r" triplets, separated by semicolons.')
                                           );
                                         }
                                       }
@@ -1418,17 +1255,10 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                                         .map((s: string) => s.trim())
                                         .filter(Boolean);
                                       for (let seg of segments) {
-                                        const parts = seg
-                                          .split(',')
-                                          .map((v: string) => v.trim());
-                                        if (
-                                          parts.length !== 2 ||
-                                          parts.some((p: string) => isNaN(Number(p)))
-                                        ) {
+                                        const parts = seg.split(',').map((v: string) => v.trim());
+                                        if (parts.length !== 2 || parts.some((p: string) => isNaN(Number(p)))) {
                                           return Promise.reject(
-                                            new Error(
-                                              'Scatter data must be "x,y" pairs, separated by semicolons.'
-                                            )
+                                            new Error('Scatter data must be "x,y" pairs, separated by semicolons.')
                                           );
                                         }
                                       }
@@ -1515,8 +1345,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
               </>
             )}
           </Form.List>
-
-          {/* Bubble-specific color config */}
           {chartType === 'bubble' && (
             <Collapse>
               <Collapse.Panel header="Bubble Colors" key="bubbleColors">
@@ -1601,18 +1429,10 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                   </Form.Item>
                 </Panel>
                 <Panel header="Plugins" key="plugins">
-                  <Form.Item
-                    label="Enable Zoom"
-                    name="enableZoom"
-                    valuePropName="checked"
-                  >
+                  <Form.Item label="Enable Zoom" name="enableZoom" valuePropName="checked">
                     <Switch />
                   </Form.Item>
-                  <Form.Item
-                    label="Enable Pan"
-                    name="enablePan"
-                    valuePropName="checked"
-                  >
+                  <Form.Item label="Enable Pan" name="enablePan" valuePropName="checked">
                     <Switch />
                   </Form.Item>
                   <Form.Item label="Zoom Mode" name="zoomMode">
@@ -1622,11 +1442,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                       <Option value="xy">XY</Option>
                     </Select>
                   </Form.Item>
-                  <Form.Item
-                    label="Show Data Labels"
-                    name="showDataLabels"
-                    valuePropName="checked"
-                  >
+                  <Form.Item label="Show Data Labels" name="showDataLabels" valuePropName="checked">
                     <Switch />
                   </Form.Item>
                   <Form.Item label="Data Label Color" name="dataLabelColor">
@@ -1635,18 +1451,11 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                   <Form.Item label="Data Label Font Size" name="dataLabelFontSize">
                     <InputNumber min={8} max={24} />
                   </Form.Item>
-                  <Form.Item
-                    label="Enable Tooltips"
-                    name="enableTooltips"
-                    valuePropName="checked"
-                  >
+                  <Form.Item label="Enable Tooltips" name="enableTooltips" valuePropName="checked">
                     <Switch />
                   </Form.Item>
                   <Form.Item label="Tooltip Template" name="tooltipTemplate">
-                    <TextArea
-                      placeholder="Use {label} and {value} placeholders"
-                      rows={2}
-                    />
+                    <TextArea placeholder="Use {label} and {value} placeholders" rows={2} />
                   </Form.Item>
                   <Form.Item label="Annotations">
                     <Form.List name="annotations">
@@ -1673,11 +1482,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                               >
                                 <InputNumber />
                               </Form.Item>
-                              <Form.Item
-                                {...restField}
-                                name={[name, 'label']}
-                                label="Label"
-                              >
+                              <Form.Item {...restField} name={[name, 'label']} label="Label">
                                 <Input />
                               </Form.Item>
                               <Form.Item
@@ -1688,21 +1493,13 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                               >
                                 <Input type="color" />
                               </Form.Item>
-                              <Button
-                                type="dashed"
-                                onClick={() => remove(name)}
-                                icon={<MinusCircleOutlined />}
-                              >
+                              <Button type="dashed" onClick={() => remove(name)} icon={<MinusCircleOutlined />}>
                                 Remove
                               </Button>
                             </div>
                           ))}
                           <Form.Item>
-                            <Button
-                              type="dashed"
-                              onClick={() => add()}
-                              icon={<PlusOutlined />}
-                            >
+                            <Button type="dashed" onClick={() => add()} icon={<PlusOutlined />}>
                               Add Annotation
                             </Button>
                           </Form.Item>
@@ -1712,11 +1509,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                   </Form.Item>
                 </Panel>
                 <Panel header="Legend" key="legend">
-                  <Form.Item
-                    label="Show Legend"
-                    name="showLegend"
-                    valuePropName="checked"
-                  >
+                  <Form.Item label="Show Legend" name="showLegend" valuePropName="checked">
                     <Switch />
                   </Form.Item>
                   <Form.Item label="Legend Position" name="legendPosition">
@@ -1729,26 +1522,16 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                   </Form.Item>
                 </Panel>
                 <Panel header="Styling" key="styling">
-                  <Form.Item
-                    label="Chart Background Color"
-                    name="chartBackgroundColor"
-                  >
+                  <Form.Item label="Chart Background Color" name="chartBackgroundColor">
                     <Input type="color" />
                   </Form.Item>
                   <Form.Item label="Grid Line Color" name="gridLineColor">
                     <Input type="color" />
                   </Form.Item>
-                  <Form.Item
-                    label="Use Gradient Fills"
-                    name="useGradientFills"
-                    valuePropName="checked"
-                  >
+                  <Form.Item label="Use Gradient Fills" name="useGradientFills" valuePropName="checked">
                     <Switch />
                   </Form.Item>
-                  <Form.Item
-                    label="Gradient Start Color"
-                    name="gradientStartColor"
-                  >
+                  <Form.Item label="Gradient Start Color" name="gradientStartColor">
                     <Input type="color" />
                   </Form.Item>
                   <Form.Item label="Gradient End Color" name="gradientEndColor">
@@ -1758,7 +1541,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
               </>
             )}
           </Collapse>
-
           <Form.Item name="titleAlignment" label="Title Alignment">
             <Select>
               <Option value="left">Left</Option>
@@ -1767,8 +1549,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           </Form.Item>
         </>
       )}
-
-      {/* ============================ GANTT WIDGET ============================ */}
       {widget.type === 'gantt' && (
         <>
           <Form.Item
@@ -1793,21 +1573,14 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                     <Form.Item {...restField} name={[name, 'id']} hidden>
                       <Input />
                     </Form.Item>
-                    <Form.Item
-                      {...restField}
-                      name={[name, 'name']}
-                      label="Task Name"
-                      tooltip="Non-editable"
-                    >
+                    <Form.Item {...restField} name={[name, 'name']} label="Task Name" tooltip="Non-editable">
                       <Input disabled />
                     </Form.Item>
                     <Form.Item
                       {...restField}
                       name={[name, 'color']}
                       label="Task Color"
-                      rules={[
-                        { required: true, message: 'Please pick a task color' },
-                      ]}
+                      rules={[{ required: true, message: 'Please pick a task color' },]}
                     >
                       <Input type="color" />
                     </Form.Item>
@@ -1826,8 +1599,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           </Form.List>
         </>
       )}
-
-      {/* ============================ METRIC WIDGET ============================ */}
       {widget.type === 'metric' && (
         <>
           <Form.Item
@@ -1860,13 +1631,9 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
             <Button
               icon={<SelectOutlined />}
               onClick={async () => {
-                // If your add-in uses postMessage flow:
                 if (Office.context.ui?.messageParent) {
-                  Office.context.ui.messageParent(
-                    JSON.stringify({ type: 'selectCell', widgetId })
-                  );
+                  Office.context.ui.messageParent(JSON.stringify({ type: 'selectCell', widgetId }));
                 } else {
-                  // Or read directly from the range:
                   try {
                     await Excel.run(async (context) => {
                       const rng = context.workbook.getSelectedRange();
@@ -1876,9 +1643,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                       selectedSheet.load('name');
                       await context.sync();
                       const sheetName = selectedSheet.name;
-                      const address = rng.address.includes('!')
-                        ? rng.address.split('!')[1]
-                        : rng.address;
+                      const address = rng.address.includes('!') ? rng.address.split('!')[1] : rng.address;
                       form.setFieldsValue({
                         cellAddress: address,
                         worksheetName: sheetName,
@@ -1940,8 +1705,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           </Form.Item>
         </>
       )}
-
-      {/* FOOTER BUTTONS */}
       <Form.Item style={{ marginTop: 16 }}>
         <Button type="primary" htmlType="submit" style={{ marginRight: 8 }}>
           Save
