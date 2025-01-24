@@ -2,33 +2,11 @@
 // src/taskpane/components/EditWidgetForm.tsx
 
 import React, { useEffect, useState, useContext } from 'react';
-import {
-  Form,
-  Input,
-  Space,
-  Button,
-  InputNumber,
-  message,
-  Select,
-  Switch,
-  Collapse,
-  DatePicker,
-} from 'antd';
-import {
-  MinusCircleOutlined,
-  PlusOutlined,
-  SelectOutlined,
-} from '@ant-design/icons';
+import { Form, Input, Space, Button, InputNumber, message, Select, Switch, Collapse } from 'antd';
+import { MinusCircleOutlined, PlusOutlined, SelectOutlined } from '@ant-design/icons';
 import moment from 'moment';
 import { DashboardContext } from '../context/DashboardContext';
-import {
-  Widget,
-  TextData,
-  ChartData,
-  GanttWidgetData,
-  MetricData,
-  TitleWidgetData,
-} from './types';
+import { Widget, TextData, ChartData, GanttWidgetData, MetricData, TitleWidgetData } from './types';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -48,12 +26,7 @@ interface EditWidgetFormProps {
   isPresenterMode?: boolean;
 }
 
-const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
-  widget,
-  onSubmit,
-  onCancel,
-  isPresenterMode,
-}) => {
+const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCancel, isPresenterMode }) => {
   const [form] = Form.useForm();
   const widgetId = widget.id;
   const { availableWorksheets } = useContext(DashboardContext)!;
@@ -66,7 +39,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
     setSheets(availableWorksheets);
   }, [availableWorksheets]);
 
-  /** Return form initial values based on widget type/data */
   const getInitialValues = () => {
     switch (widget.type) {
       case 'text':
@@ -314,24 +286,18 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
             }
             // ===== CANDLESTICK =====
             else if (ds.type === 'candlestick') {
-              const segments = ds.data
-                .split(';')
-                .map((s: string) => s.trim())
-                .filter(Boolean);
-              const parsed = segments.map((seg: string) => {
-                const [label, open, high, low, close] = seg.split(',').map((x: string) => x.trim());
-                return {
-                  x: label,
-                  o: Number(open),
-                  h: Number(high),
-                  l: Number(low),
-                  c: Number(close),
-                };
-              });
+              let parsedData = [];
+              try {
+                parsedData = JSON.parse(ds.data);
+              } catch (error) {
+                console.error('Error parsing candlestick data:', error);
+                message.error('Invalid candlestick data format.');
+                return;
+              }
               return {
                 label: ds.label,
                 type: 'candlestick',
-                data: parsed,
+                data: parsedData,
                 color: {
                   up: '#00b050',
                   down: '#ff0000',
@@ -643,12 +609,12 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
   };
 
   function convertExcelDate(val: any): string {
-    if (typeof val === 'number' && val > 30000 && val < 60000) {
+    if (typeof val === 'number' && val > 30000 && val < 60000) { // Valid Excel serial date range
       const jsDate = new Date((val - 25569) * 86400 * 1000);
-      const mm = jsDate.getMonth() + 1;
-      const dd = jsDate.getDate() + 1;
+      const mm = String(jsDate.getMonth() + 1).padStart(2, '0');
+      const dd = String(jsDate.getDate()).padStart(2, '0');
       const yyyy = jsDate.getFullYear();
-      return `${mm}/${dd}/${yyyy}`;
+      return `${yyyy}-${mm}-${dd}`; // Format: 'YYYY-MM-DD'
     }
     return String(val);
   }
@@ -712,15 +678,20 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           const dateString = convertExcelDate(labelOrNumber);
           return [dateString, row[1], row[2], row[3], row[4]];
         });
-        const dayNames = processedRows.map((row) => row[0]).join(', ');
-        const candlestickStr = processedRows.map((row) => row.join(',')).join(';');
+        const candlestickData = processedRows.map(row => ({
+          x: row[0],
+          o: Number(row[1]),
+          h: Number(row[2]),
+          l: Number(row[3]),
+          c: Number(row[4]),
+        }));
         form.setFieldsValue({
-          labels: dayNames,
+          labels: '',
           datasets: [
             {
               label: 'Candlestick Series',
               type: 'candlestick',
-              data: candlestickStr,
+              data: JSON.stringify(candlestickData),
               backgroundColor: getRandomColor(),
               borderColor: getRandomColor(),
               borderWidth: 1,

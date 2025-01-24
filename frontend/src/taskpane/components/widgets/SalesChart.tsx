@@ -219,13 +219,16 @@ const SalesChart = ({ data, type }: SalesChartProps) => {
     },
     scales: {
       x: {
-        type: type === 'candlestick' ? 'category' : (data.scales?.x?.type || 'category'),
+        type: type === 'candlestick' ? 'time' : (data.scales?.x?.type || 'category'), // Changed 'category' to 'time'
         time:
-          data.scales?.x?.type === 'time'
-            ? {
+          type === 'candlestick' 
+            ? { 
                 unit: 'day', // Adjust based on your data granularity
+                tooltipFormat: 'll', // Example: 'Jan 1, 2023'
               }
-            : undefined,
+            : data.scales?.x?.type === 'time'
+              ? { unit: 'day' }
+              : undefined,
         title: {
           display: data.scales?.x?.title?.display !== false,
           text: data.scales?.x?.title?.text || '',
