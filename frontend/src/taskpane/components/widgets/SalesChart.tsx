@@ -187,6 +187,8 @@ const SalesChart = ({ data, type }: SalesChartProps) => {
     };
   }, []);
 
+  console.log('SalesChart Datasets:', data.datasets);
+
   const chartOptions: ChartOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -225,6 +227,7 @@ const SalesChart = ({ data, type }: SalesChartProps) => {
             ? { 
                 unit: 'day', // Adjust based on your data granularity
                 tooltipFormat: 'll', // Example: 'Jan 1, 2023'
+                parser: 'YYYY-MM-DD',
               }
             : data.scales?.x?.type === 'time'
               ? { unit: 'day' }

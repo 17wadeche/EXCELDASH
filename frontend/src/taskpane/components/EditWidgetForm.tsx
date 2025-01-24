@@ -289,6 +289,12 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
               let parsedData = [];
               try {
                 parsedData = JSON.parse(ds.data);
+                if (!Array.isArray(parsedData)) throw new Error('Data is not an array');
+                parsedData.forEach(point => {
+                  if (!point.x || !point.o || !point.h || !point.l || !point.c) {
+                    throw new Error('Missing required candlestick data fields');
+                  }
+                });
               } catch (error) {
                 console.error('Error parsing candlestick data:', error);
                 message.error('Invalid candlestick data format.');
@@ -296,7 +302,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
               }
               return {
                 label: ds.label,
-                type: 'candlestick',
                 data: parsedData,
                 color: {
                   up: '#00b050',
@@ -609,19 +614,16 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
   };
 
   function convertExcelDate(val: any): string {
-    if (typeof val === 'number' && val > 30000 && val < 60000) { // Valid Excel serial date range
+    if (typeof val === 'number' && val > 30000 && val < 60000) {
       const jsDate = new Date((val - 25569) * 86400 * 1000);
       const mm = String(jsDate.getMonth() + 1).padStart(2, '0');
-      const dd = String(jsDate.getDate()).padStart(2, '0');
+      const dd = String(jsDate.getDate() + 1).padStart(2, '0');
       const yyyy = jsDate.getFullYear();
       return `${yyyy}-${mm}-${dd}`; // Format: 'YYYY-MM-DD'
     }
     return String(val);
   }
 
-  /**
-   * Attempt to load data from Excel for the new chart types
-   */
   const loadDataForNewChartType = async (
     mainType: string,
     data: any[][],
