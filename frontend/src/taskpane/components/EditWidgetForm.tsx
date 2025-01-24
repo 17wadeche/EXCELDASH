@@ -1090,18 +1090,30 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           </Form.Item>
           {['pie', 'doughnut', 'polarArea'].includes(chartType) && (
             <Form.List name="sliceColors">
-              {(fields) => {
+              {(fields, { add, remove }) => {
                 const rawLabels = form.getFieldValue('labels') || '';
                 const labelArr = rawLabels
                   .split(',')
                   .map((l: string) => l.trim())
                   .filter(Boolean);
+                while (fields.length < labelArr.length) {
+                  add({ color: '#000000' });
+                }
+                while (fields.length > labelArr.length) {
+                  remove(fields.length - 1);
+                }
                 return (
                   <>
-                    {fields.map(({ key, name, ...restField }) => {
-                      const sliceLabel = labelArr[key] || `Slice #${key + 1}`;
+                    {fields.map(({ key, name, ...restField }, index) => {
+                      const sliceLabel = labelArr[index] || `Slice #${index + 1}`;
                       return (
-                        <Form.Item {...restField} key={key} label={`Color for ${sliceLabel}`} name={[name, 'color']} rules={[{ required: true, message: 'Please pick a color'}]}>
+                        <Form.Item
+                          {...restField}
+                          key={key}
+                          label={`Color for ${sliceLabel}`}
+                          name={[name, 'color']}
+                          rules={[{ required: true, message: 'Please pick a color'}]}
+                        >
                           <Input type="color" />
                         </Form.Item>
                       );
