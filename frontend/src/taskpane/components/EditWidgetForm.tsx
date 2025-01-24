@@ -162,7 +162,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
         const dataset = cData.datasets[0];
         if (dataset.backgroundColor && Array.isArray(dataset.backgroundColor)) {
           form.setFieldsValue({
-            boxColors: dataset.backgroundColor.map((color: string) => ({ color })),
+            boxplotSampleColors: dataset.backgroundColor.map((color: string) => ({ color })),
           });
         }
       }
@@ -273,14 +273,13 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
               } catch {
                 console.warn('BoxPlot data is not valid JSON:', ds.data);
               }
-              const boxplotColors = cleanedValues.boxplotSampleColors || [];
               return {
                 label: ds.label,
                 type: 'boxplot',
                 data: parsed,
                 datalabels: { display: false },
-                backgroundColor: boxplotColors.map((c: any) => c.color),
-                borderColor: boxplotColors.map((c: any) => c.color),
+                backgroundColor: boxplotColorsArray,
+                borderColor: boxplotColorsArray,
                 borderWidth: ds.borderWidth || 1,
               };
             } else if (ds.type === 'candlestick') {
