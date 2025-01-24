@@ -482,7 +482,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
             startColor: cleanedValues.gradientStartColor || 'rgba(75,192,192,0)',
             endColor: cleanedValues.gradientEndColor || 'rgba(75,192,192,0.4)',
           },
-          ...(finalChartType === 'boxplot' && {boxplotTitle: cleanedValues.boxplotTitle})
+          ...(finalChartType === 'boxplot' && {title: cleanedValues.title || 'Box Plot'})
         } as ChartData;
         break;
       }
@@ -567,13 +567,13 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
   const loadDataForNewChartType = async (mainType: string, data: any[][], form: any) => {
     switch (mainType) {
       case 'boxplot': {
-        if (data.length < 2) {
+        if (data.length < 1) {
           message.error('Box Plot data must include at least a header row, and one data row.');
           return;
         }
         const boxLabels: string[] = [];
         const boxValues: number[][] = [];
-        for (let i = 2; i < data.length; i++) {
+        for (let i = 1; i < data.length; i++) {
           const row = data[i];
           const sampleName = String(row[0]) || 'Sample';
           const q1 = Number(row[1]);
@@ -581,6 +581,10 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           const q3 = Number(row[3]);
           const min = Number(row[4]);
           const max = Number(row[5]);
+          if (isNaN(q1) || isNaN(median) || isNaN(q3) || isNaN(min) || isNaN(max)) {
+            message.error(`Invalid data in row ${i + 1}. All boxplot values must be numbers.`);
+            return;
+          }
           boxLabels.push(sampleName);
           boxValues.push([min, q1, median, q3, max]);
         }
@@ -1226,13 +1230,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                         } else if (dsType === 'boxplot') {
                           return (
                             <>
-                              <Form.Item
-                                name={[name, 'boxplotTitle']}
-                                label="Boxplot Title"
-                                rules={[{ required: true, message: 'Please enter a boxplot title' }]}
-                              >
-                                <Input placeholder="Enter boxplot title" />
-                              </Form.Item>
                               <Form.List name={[name, 'boxplotSampleColors']}>
                                 {(fields, { add, remove }) => {
                                   const boxplotLabels = form.getFieldValue(['datasets', name, 'labels'])?.split(',').map((l: string) => l.trim()) || [];
