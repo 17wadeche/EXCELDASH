@@ -966,11 +966,11 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
   useEffect(() => {
     const rawLabels = form.getFieldValue('labels') || '';
     const labelArr = rawLabels.split(',')
-      .map((l) => l.trim())
+      .map(((l: any) => l.trim())
       .filter(Boolean);
     const currentSliceColors = form.getFieldValue('sliceColors') || [];
     if (currentSliceColors.length !== labelArr.length) {
-      const updated = labelArr.map((_, idx) => currentSliceColors[idx] || { color: '#000000' });
+      const updated = labelArr.map((_:any, idx:any) => currentSliceColors[idx] || { color: '#000000' });
       form.setFieldsValue({ sliceColors: updated });
     }
   }, [form, form.getFieldValue('labels')]);
@@ -1097,11 +1097,11 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           </Form.Item>
           {['pie', 'doughnut', 'polarArea'].includes(chartType) && (
             <Form.List name="sliceColors">
-              {(fields, { add, remove }) => (
+              {(fields) => (
                 <>
                   {fields.map(({ key, name, ...restField }, index) => {
                     const rawLabels = form.getFieldValue('labels') || '';
-                    const labelArr = rawLabels.split(',').map((l) => l.trim()).filter(Boolean);
+                    const labelArr = rawLabels.split(',').map((l: string) => l.trim()).filter(Boolean);
                     const sliceLabel = labelArr[index] || `Slice #${index + 1}`;
                     return (
                       <Form.Item
