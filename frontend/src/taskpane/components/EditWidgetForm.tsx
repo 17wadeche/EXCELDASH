@@ -1161,6 +1161,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                     [
                       'scatter',
                       'bubble',
+                      'candlestick',
                       'forceDirectedGraph',
                       'choropleth',
                       'parallelCoordinates',
