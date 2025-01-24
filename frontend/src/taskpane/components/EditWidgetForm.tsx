@@ -39,7 +39,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
       case 'chart': {
         const data = widget.data as ChartData;
         const useArea = data.type === 'line' && data.datasets.some((ds) => ds.fill);
-        return {
+        const initialValues: any = {
           title: data.title || 'Chart',
           chartType: useArea ? 'area' : data.type,
           labels: (data.labels || []).join(', '),
@@ -90,6 +90,23 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
             };
           }),
         };
+        if (['pie', 'doughnut', 'polarArea'].includes(data.type)) {
+          const dataset = data.datasets[0];
+          if (dataset.backgroundColor && Array.isArray(dataset.backgroundColor)) {
+            initialValues.sliceColors = dataset.backgroundColor.map((color: string) => ({ color }));
+          } else {
+            initialValues.sliceColors = [];
+          }
+        }
+        if (data.type === 'bubble') {
+          const dataset = data.datasets[0];
+          if (dataset.backgroundColor && Array.isArray(dataset.backgroundColor)) {
+            initialValues.bubbleColors = dataset.backgroundColor.map((color: string) => ({ color }));
+          } else {
+            initialValues.bubbleColors = [];
+          }
+        }
+        return initialValues;
       }
       case 'gantt': {
         const data = widget.data as GanttWidgetData;
@@ -123,34 +140,34 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
       const cData = widget.data as ChartData;
       setChartType(cData.type);
     }
-  }, [widget]);
-
-  useEffect(() => {
-    if (widget.type !== 'chart') return;
-    if (chartType !== 'bubble') return;
-    const datasets = form.getFieldValue('datasets') || [];
-    if (!datasets.length || datasets[0].type !== 'bubble') return;
-    const bubbleDataStr = datasets[0].data || '';
-    const segments = bubbleDataStr.split(';').map((s: string) => s.trim()).filter(Boolean);
-    let currentBubbleColors = form.getFieldValue('bubbleColors');
-    if (!Array.isArray(currentBubbleColors) || currentBubbleColors.length !== segments.length) {
-      currentBubbleColors = segments.map(() => ({ color: '#36A2EB' }));
-      form.setFieldsValue({ bubbleColors: currentBubbleColors });
+    if (widget.type === 'chart') {
+      const cData = widget.data as ChartData;
+      if (['pie', 'doughnut', 'polarArea'].includes(cData.type)) {
+        const dataset = cData.datasets[0];
+        if (dataset.backgroundColor && Array.isArray(dataset.backgroundColor)) {
+          form.setFieldsValue({
+            sliceColors: dataset.backgroundColor.map((color: string) => ({ color })),
+          });
+        }
+      }
+      if (cData.type === 'bubble') {
+        const dataset = cData.datasets[0];
+        if (dataset.backgroundColor && Array.isArray(dataset.backgroundColor)) {
+          form.setFieldsValue({
+            bubbleColors: dataset.backgroundColor.map((color: string) => ({ color })),
+          });
+        }
+      }
+      if (cData.type === 'boxplot') {
+        const dataset = cData.datasets[0];
+        if (dataset.backgroundColor && Array.isArray(dataset.backgroundColor)) {
+          form.setFieldsValue({
+            boxColors: dataset.backgroundColor.map((color: string) => ({ color })),
+          });
+        }
+      }
     }
-  }, [chartType, form, widget.type]);
-
-  useEffect(() => {
-    if (widget.type !== 'chart' || chartType !== 'treemap') return;
-    const treemapDataRaw = form.getFieldValue('datasets')?.[0]?.tree;
-    const treemapData = Array.isArray(treemapDataRaw) ? treemapDataRaw : [];
-    const currentColors = form.getFieldValue('treemapColors') || [];
-    if (currentColors.length !== treemapData.length) {
-      const newColors = treemapData.map((_item: any, idx: number) => ({
-        color: currentColors[idx]?.color || getRandomColor()
-      }));
-      form.setFieldsValue({ treemapColors: newColors });
-    }
-  }, [chartType, form, widget.type]);
+  }, [widget, form]);
 
   const handleFinish = (values: any) => {
     const cleanedValues: Record<string, any> = {};
@@ -186,9 +203,19 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           'barWithErrorBars',
         ];
         let sliceColorsArray: string[] = [];
+        let bubbleColorsArray: string[] = [];
+        let boxplotColorsArray: string[] = [];
         if (['pie', 'doughnut', 'polarArea'].includes(finalChartType)) {
           const sc: { color: string }[] = cleanedValues.sliceColors || [];
           sliceColorsArray = sc.map((obj) => obj.color);
+        }
+        if (finalChartType === 'bubble') {
+          const bc: { color: string }[] = cleanedValues.bubbleColors || [];
+          bubbleColorsArray = bc.map((obj) => obj.color);
+        }
+        if (finalChartType === 'boxplot') {
+          const bc: { color: string }[] = cleanedValues.boxplotSampleColors || [];
+          boxplotColorsArray = bc.map((obj) => obj.color);
         }
         if (finalChartType === 'scatter' || finalChartType === 'bubble') {
           cleanedValues.xAxisType = 'linear';
@@ -269,7 +296,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
               } catch (error) {
                 console.error('Error parsing candlestick data:', error);
                 message.error('Invalid candlestick data format.');
-                return;
+                return null;
               }
               return {
                 label: ds.label,
@@ -1155,7 +1182,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                         },
                       ]}
                     >
-                      <Select>
+                      <Select disabled={['pie', 'doughnut', 'polarArea'].includes(chartType)}>
                         <Option value="bar">Bar</Option>
                         <Option value="line">Line</Option>
                         <Option value="pie">Pie</Option>
@@ -1352,43 +1379,47 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                     >
                       <InputNumber min={0} />
                     </Form.Item>
-                    <Button
-                      type="dashed"
-                      onClick={() => remove(name)}
-                      icon={<MinusCircleOutlined />}
-                      style={{ marginTop: 8 }}
-                    >
-                      Remove Dataset
-                    </Button>
+                    {!['pie', 'doughnut', 'polarArea'].includes(chartType) && (
+                      <Button
+                        type="dashed"
+                        onClick={() => remove(name)}
+                        icon={<MinusCircleOutlined />}
+                        style={{ marginTop: 8 }}
+                      >
+                        Remove Dataset
+                      </Button>
+                    )}
                   </div>
                 ))}
-                <Form.Item>
-                  <Button
-                    type="dashed"
-                    onClick={() =>
-                      add({
-                        label: '',
-                        type: 'bar',
-                        data: '',
-                        backgroundColor: '#4caf50',
-                        borderColor: '#4caf50',
-                        borderWidth: 1,
-                      })
-                    }
-                    block
-                    icon={<PlusOutlined />}
-                  >
-                    Add Dataset
-                  </Button>
-                </Form.Item>
+                {!['pie', 'doughnut', 'polarArea'].includes(chartType) && (
+                  <Form.Item>
+                    <Button
+                      type="dashed"
+                      onClick={() =>
+                        add({
+                          label: '',
+                          type: 'bar',
+                          data: '',
+                          backgroundColor: '#4caf50',
+                          borderColor: '#4caf50',
+                          borderWidth: 1,
+                        })
+                      }
+                      block
+                      icon={<PlusOutlined />}
+                    >
+                      Add Dataset
+                    </Button>
+                  </Form.Item>
+                )}
               </>
             )}
           </Form.List>
-          {chartType === 'boxplot' && (
+          {['boxplot'].includes(chartType) && (
             <>
-              <Form.List name={[String(name), 'boxplotSampleColors']}>
+              <Form.List name={[`datasets`, 0, `boxplotSampleColors`]}>
                 {(fields, { add, remove }) => {
-                  const boxplotLabels = form.getFieldValue(['datasets', name, 'labels'])?.split(',').map((l: string) => l.trim()) || [];
+                  const boxplotLabels = form.getFieldValue(['datasets', 0, 'labels'])?.split(',').map((l: string) => l.trim()) || [];
                   while (fields.length < boxplotLabels.length) {
                     add({ color: '#000000' });
                   }
@@ -1427,6 +1458,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                           key={key}
                           name={[name, 'color']}
                           label={`Color for Bubble #${key + 1}`}
+                          rules={[{ required: true, message: 'Please pick a color' }]}
                         >
                           <Input type="color" />
                         </Form.Item>
