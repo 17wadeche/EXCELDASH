@@ -246,7 +246,23 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
           cleanedValues.xAxisType = 'linear';
         }
         if (finalChartType === 'candlestick') {
-          cleanedValues.xAxisType = 'time';
+          updatedData.labels = [];
+          updatedData.scales = {
+            x: {
+              type: 'category',
+              title: {
+                display: !!cleanedValues.xAxisTitle,
+                text: cleanedValues.xAxisTitle || '',
+              },
+            },
+            y: {
+              type: 'linear',
+              title: {
+                display: !!cleanedValues.yAxisTitle,
+                text: cleanedValues.yAxisTitle || '',
+              },
+            },
+          };
         }
         updatedData = {
           title: cleanedValues.title,
@@ -644,18 +660,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({
     }
     return color;
   };
-
-  function colorFromRaw(ctx: any) {
-    if (ctx.type !== 'data') {
-      return 'transparent';
-    }
-    const value = ctx.raw.value;
-    let alpha = (1 + Math.log(value)) / 5;
-    const color = ctx.raw.category === 'main' ? 'green' : 'blue';
-    return Chart.helpers.color(color)
-      .alpha(alpha)
-      .rgbString();
-  }
 
   function convertExcelDate(val: any): string {
     if (typeof val === 'number' && val > 30000 && val < 60000) {

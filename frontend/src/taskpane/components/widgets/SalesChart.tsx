@@ -15,7 +15,7 @@ import {
   Legend,
   TimeScale,
 } from 'chart.js/auto';
-import { Bar, Line, Pie, Doughnut, Radar, Scatter, Bubble, PolarArea, Chart as BaseChart } from 'react-chartjs-2';
+import { Bar, Line, CandlestickChart, Pie, Doughnut, Radar, Scatter, Bubble, PolarArea, Chart as BaseChart } from 'react-chartjs-2';
 import 'chartjs-adapter-moment';
 import { BoxPlotController, BoxAndWiskers } from '@sgratzl/chartjs-chart-boxplot';
 import zoomPlugin from 'chartjs-plugin-zoom';
@@ -221,7 +221,7 @@ const SalesChart = ({ data, type }: SalesChartProps) => {
     },
     scales: {
       x: {
-        type: data.scales?.x?.type || (type === 'candlestick' ? 'time' : 'category'),
+        type: type === 'candlestick' ? 'category' : (data.scales?.x?.type || 'category'),
         time:
           data.scales?.x?.type === 'time'
             ? {
