@@ -274,11 +274,11 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 type: 'boxplot',
                 data: parsed,
                 datalabels: { display: false },
-                backgroundColor: ds.backgroundColor,
-                borderColor: ds.borderColor,
+                backgroundColor: boxplotColorsArray,
+                borderColor: boxplotColorsArray,
                 outlierColor: boxplotColorsArray,
-                medianColor: ds.borderColor || '#000000',
-                whiskerColor: ds.borderColor || '#000000',
+                medianColor: boxplotColorsArray,
+                whiskerColor: boxplotColorsArray,
                 borderWidth: ds.borderWidth || 1,
               };
             } else if (ds.type === 'candlestick') {
@@ -1317,36 +1317,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                                         Add Data Point
                                       </Button>
                                     </Form.Item>
-                                  </>
-                                )}
-                              </Form.List>
-                            </>
-                          );
-                        } else if (dsType === 'boxplot') {
-                          return (
-                            <>
-                              <Form.List name={[`datasets`, 0, `boxplotSampleColors`]}>
-                                {(fields) => (
-                                  <>
-                                    {fields.map(({ key, name, ...restField }, index) => {
-                                      const boxplotLabels =
-                                        form
-                                          .getFieldValue(['datasets', 0, 'labels'])
-                                          ?.split(',')
-                                          ?.map((l: string) => l.trim()) || [];
-                                      const sampleLabel = boxplotLabels[index] || `Sample #${index + 1}`;
-                                      return (
-                                        <Form.Item
-                                          key={key}
-                                          {...restField}
-                                          label={`Color for ${sampleLabel}`}
-                                          name={[name, 'color']}
-                                          rules={[{ required: true, message: 'Please pick a color' }]}
-                                        >
-                                          <Input type="color" />
-                                        </Form.Item>
-                                      );
-                                    })}
                                   </>
                                 )}
                               </Form.List>
