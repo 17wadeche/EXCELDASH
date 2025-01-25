@@ -1330,6 +1330,39 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                               </Form.List>
                             </>
                           );
+                        } else if (dsType === 'boxplot') {
+                          return (
+                            <>
+                              <Form.Item
+                                {...restField}
+                                name={[name, 'data']}
+                                label="BoxPlot Data (JSON or CSV)"
+                              >
+                                <TextArea rows={2} />
+                              </Form.Item>
+                              <Form.Item
+                                {...restField}
+                                name={[name, 'outlierColor']}
+                                label="Outlier Color"
+                              >
+                                <Input type="color" />
+                              </Form.Item>
+                              <Form.Item
+                                {...restField}
+                                name={[name, 'medianColor']}
+                                label="Median Color"
+                              >
+                                <Input type="color" />
+                              </Form.Item>
+                              <Form.Item
+                                {...restField}
+                                name={[name, 'whiskerColor']}
+                                label="Whisker Color"
+                              >
+                                <Input type="color" />
+                              </Form.Item>
+                            </>
+                          );
                         } else {
                           return (
                             <Form.Item
