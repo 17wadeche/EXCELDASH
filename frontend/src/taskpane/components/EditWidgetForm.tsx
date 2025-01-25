@@ -280,9 +280,9 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 datalabels: { display: false },
                 backgroundColor: ds.backgroundColor,
                 borderColor: ds.borderColor,
-                outlierColor: ds.outlierColor || '#666',
-                medianColor: ds.medianColor || '#000',
-                whiskerColor: ds.whiskerColor || '#000',
+                outlierColor: ds.outlierColor || getRandomColor(),
+                medianColor: ds.medianColor || getRandomColor(),
+                whiskerColor: ds.whiskerColor || getRandomColor(),
                 borderWidth: ds.borderWidth || 1,
               };
             } else if (ds.type === 'candlestick') {
@@ -873,14 +873,18 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
             return;
           }
           const labels = data[0].slice(1);
-          const datasets = data.slice(1).map((row: any[]) => ({
-            label: row[0],
-            data: row.slice(1).join(', '),
-            type: mainType,
-            backgroundColor: getRandomColor(),
-            borderColor: getRandomColor(),
-            borderWidth: 1,
-          }));
+          const isPieDoughnutPolar = ['pie', 'doughnut', 'polarArea'].includes(mainType);
+          const datasets = data.slice(1).map((row: any[]) => {
+            const sliceColors = labels.map(() => getRandomColor());
+            return {
+              label: row[0],
+              data: row.slice(1).join(', '),
+              type: mainType,
+              backgroundColor: isPieDoughnutPolar ? sliceColors : getRandomColor(),
+              borderColor: getRandomColor(),
+              borderWidth: 1,
+            };
+          });
           form.setFieldsValue({
             labels: labels.join(', '),
             datasets,
