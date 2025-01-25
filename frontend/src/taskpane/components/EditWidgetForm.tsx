@@ -1477,30 +1477,31 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
               </>
             )}
           </Form.List>
-          {['boxplot'].includes(chartType) && (
-            <>
-              <Form.List name={[`datasets`, 0, `boxplotSampleColors`]}>
-                {(fields) => {
-                  const boxplotLabels = form.getFieldValue(['datasets', 0, 'labels'])?.split(',').map((l: string) => l.trim()) || [];
-                  return (
-                    <>
-                      {fields.map((field, index) => (
+          {chartType === 'boxplot' && (
+            <Form.List name={['datasets', 0, 'boxplotSampleColors']}>
+              {(fields) => {
+                const labelStr = form.getFieldValue('labels') || '';
+                const labelArr = labelStr.split(',').map(s => s.trim()).filter(Boolean);
+                return (
+                  <>
+                    {fields.map(({ key, name, ...restField }, index) => {
+                      const sampleLabel = labelArr[index] || `Sample #${index + 1}`;
+                      return (
                         <Form.Item
-                          {...field}
-                          key={String(field.key)}
-                          label={`Color for ${boxplotLabels[index] || `Sample ${index + 1}`}`}
-                          name={[field.name, 'color']}
-                          fieldKey={[String(field.fieldKey), 'color']}
-                          rules={[{ required: true, message: 'Please pick a color' }]}
+                          {...restField}
+                          key={key}
+                          label={`Color for ${sampleLabel}`}
+                          name={[name, 'color']}
+                          rules={[{ required: true, message: 'Pick a color' }]}
                         >
                           <Input type="color" />
                         </Form.Item>
-                      ))}
-                    </>
-                  );
-                }}
-              </Form.List>
-            </>
+                      );
+                    })}
+                  </>
+                );
+              }}
+            </Form.List>
           )}
           {chartType === 'bubble' && (
             <Collapse>
