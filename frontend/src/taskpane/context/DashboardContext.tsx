@@ -2539,12 +2539,14 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       padding: document.documentElement.style.padding,
       overflow: document.documentElement.style.overflow,
       height: document.documentElement.style.height,
+      width: document.documentElement.style.width,
     };
     const originalBodyStyles = {
       margin: document.body.style.margin,
       padding: document.body.style.padding,
       overflow: document.body.style.overflow,
       height: document.body.style.height,
+      width: document.body.style.width,
     };
     const originalInputStyles = {
       margin: input.style.margin,
@@ -2554,39 +2556,41 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       top: input.style.top,
       left: input.style.left,
       height: input.style.height,
+      width: input.style.width,
     };
     try {
+      const fullWidth = input.scrollWidth;
+      const fullHeight = input.scrollHeight;
       document.documentElement.style.margin = '0';
       document.documentElement.style.padding = '0';
       document.documentElement.style.overflow = 'hidden';
+      document.documentElement.style.width = `${fullWidth}px`;
+      document.documentElement.style.height = `${fullHeight}px`;
       document.body.style.margin = '0';
       document.body.style.padding = '0';
       document.body.style.overflow = 'hidden';
+      document.body.style.width = `${fullWidth}px`;
+      document.body.style.height = `${fullHeight}px`;
       input.style.margin = '0';
       input.style.padding = '0';
       input.style.overflow = 'hidden';
       input.style.position = 'absolute';
       input.style.top = '0';
       input.style.left = '0';
-      input.style.height = 'auto';
+      input.style.width = `${fullWidth}px`;
+      input.style.height = `${fullHeight}px`;
       await new Promise((resolve) => requestAnimationFrame(resolve));
       window.scrollTo(0, 0);
-      const rect = input.getBoundingClientRect();
-      const captureWidth = Math.ceil(rect.width);
-      const captureHeight = Math.ceil(rect.height);
-      document.documentElement.style.height = captureHeight + 'px';
-      document.body.style.height = captureHeight + 'px';
-      await new Promise((resolve) => requestAnimationFrame(resolve));
       const canvas = await html2canvas(input, {
         useCORS: true,
         scrollX: 0,
         scrollY: 0,
-        width: captureWidth,
-        height: captureHeight,
-        windowWidth: captureWidth,
-        windowHeight: captureHeight,
+        width: fullWidth,
+        height: fullHeight,
+        windowWidth: fullWidth,
+        windowHeight: fullHeight,
         backgroundColor: '#ffffff',
-        scale: 2,
+        scale: 3,
       });
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('p', 'pt', [canvas.width, canvas.height]);
@@ -2601,12 +2605,12 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       document.documentElement.style.padding = originalHtmlStyles.padding;
       document.documentElement.style.overflow = originalHtmlStyles.overflow;
       document.documentElement.style.height = originalHtmlStyles.height;
-  
+      document.documentElement.style.width = originalHtmlStyles.width;
       document.body.style.margin = originalBodyStyles.margin;
       document.body.style.padding = originalBodyStyles.padding;
       document.body.style.overflow = originalBodyStyles.overflow;
       document.body.style.height = originalBodyStyles.height;
-  
+      document.body.style.width = originalBodyStyles.width;
       input.style.margin = originalInputStyles.margin;
       input.style.padding = originalInputStyles.padding;
       input.style.overflow = originalInputStyles.overflow;
@@ -2614,6 +2618,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       input.style.top = originalInputStyles.top;
       input.style.left = originalInputStyles.left;
       input.style.height = originalInputStyles.height;
+      input.style.width = originalInputStyles.width;
     }
   };
   const emailDashboard = () => {
