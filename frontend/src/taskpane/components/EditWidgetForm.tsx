@@ -264,10 +264,18 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
               }
             } else if (ds.type === 'boxplot') {
               let parsed = [];
+              const rawData = (ds.data || '').trim();
               try {
-                parsed = JSON.parse(ds.data);
-              } catch {
-                console.warn('BoxPlot data is not valid JSON:', ds.data);
+                if (rawData.startsWith('[')) {
+                  parsed = JSON.parse(rawData);
+                } else if (rawData) {
+                  const rowStrings = rawData.split(';').map((r: any) => r.trim()).filter(Boolean);
+                  parsed = rowStrings.map(rowStr => {
+                    return rowStr.split(',').map((v: any) => parseFloat(v.trim()));
+                  });
+                }
+              } catch (e) {
+                console.warn('BoxPlot data parse failed:', rawData, e);
               }
               return {
                 label: ds.label,
