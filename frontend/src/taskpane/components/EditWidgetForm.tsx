@@ -989,7 +989,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
         if (currentBubbleColors.length !== neededCount) {
           const updated = [...currentBubbleColors];
           while (updated.length < neededCount) {
-            updated.push({ color: '#000000' });
+            updated.push({ color: getRandomColor() });
           }
           if (updated.length > neededCount) {
             updated.splice(neededCount);
