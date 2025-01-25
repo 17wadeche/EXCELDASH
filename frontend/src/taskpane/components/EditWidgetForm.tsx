@@ -1619,19 +1619,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                     <TextArea placeholder="Use {label} and {value} placeholders" rows={2} />
                   </Form.Item>
                 </Panel>
-                <Panel header="Legend" key="legend">
-                  <Form.Item label="Show Legend" name="showLegend" valuePropName="checked">
-                    <Switch />
-                  </Form.Item>
-                  <Form.Item label="Legend Position" name="legendPosition">
-                    <Select>
-                      <Option value="top">Top</Option>
-                      <Option value="bottom">Bottom</Option>
-                      <Option value="left">Left</Option>
-                      <Option value="right">Right</Option>
-                    </Select>
-                  </Form.Item>
-                </Panel>
                 <Panel header="Styling" key="styling">
                   {![ 'pie', 'doughnut', 'polarArea', 'bubble' ].includes(chartType) && (
                     <Form.Item label="Chart Background Color" name="chartBackgroundColor">
@@ -1644,6 +1631,19 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 </Panel>
               </>
             )}
+            <Panel header="Legend" key="legend">
+              <Form.Item label="Show Legend" name="showLegend" valuePropName="checked">
+                <Switch />
+              </Form.Item>
+              <Form.Item label="Legend Position" name="legendPosition">
+                <Select>
+                  <Option value="top">Top</Option>
+                  <Option value="bottom">Bottom</Option>
+                  <Option value="left">Left</Option>
+                  <Option value="right">Right</Option>
+                </Select>
+              </Form.Item>
+            </Panel>
           </Collapse>
           <Form.Item name="titleAlignment" label="Title Alignment">
             <Select>
