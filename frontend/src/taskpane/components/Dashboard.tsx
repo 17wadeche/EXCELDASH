@@ -187,25 +187,21 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
     try {
       prepareForCapture(dashboardElement);
       await new Promise((resolve) => requestAnimationFrame(resolve));
-      window.scrollTo(0, 0);
-
-      const rect = dashboardElement.getBoundingClientRect();
-      const captureWidth = Math.ceil(rect.width);
-      const captureHeight = Math.ceil(rect.height);
-      document.documentElement.style.height = captureHeight + 'px';
-      document.body.style.height = captureHeight + 'px';
+      const fullWidth = dashboardElement.scrollWidth;
+      const fullHeight = dashboardElement.scrollHeight;
+      document.documentElement.style.height = `${fullHeight}px`;
+      document.body.style.height = `${fullHeight}px`;
       await new Promise((resolve) => requestAnimationFrame(resolve));
-
       const canvas = await html2canvas(dashboardElement, {
         useCORS: true,
         scrollX: 0,
         scrollY: 0,
-        width: captureWidth,
-        height: captureHeight,
-        windowWidth: captureWidth,
-        windowHeight: captureHeight,
+        width: fullWidth,
+        height: fullHeight,
+        windowWidth: fullWidth,
+        windowHeight: fullHeight,
         backgroundColor: '#ffffff',
-        scale: 2
+        scale: 2,
       });
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('p', 'pt', [canvas.width, canvas.height]);
@@ -215,7 +211,6 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
       restoreOriginalStyles(dashboardElement, originalStyles);
     }
   }
-
   function saveOriginalStyles(el: HTMLDivElement) {
     return {
       htmlOverflow: document.documentElement.style.overflow,
@@ -225,10 +220,9 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
       elHeight: el.style.height,
       elOverflow: el.style.overflow,
       elMargin: el.style.margin,
-      elPadding: el.style.padding
+      elPadding: el.style.padding,
     };
   }
-
   function restoreOriginalStyles(el: HTMLDivElement, styles: any) {
     document.documentElement.style.overflow = styles.htmlOverflow;
     document.body.style.overflow = styles.bodyOverflow;
@@ -239,7 +233,6 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
     el.style.margin = styles.elMargin;
     el.style.padding = styles.elPadding;
   }
-
   function prepareForCapture(el: HTMLDivElement) {
     document.documentElement.style.overflow = 'hidden';
     document.body.style.overflow = 'hidden';
