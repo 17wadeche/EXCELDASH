@@ -2611,98 +2611,33 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     }
   };
   const exportDashboardAsPDF = async (): Promise<void> => {
-    const input = document.getElementById('dashboard-container');
-    if (!input) {
+    const container = document.getElementById('dashboard-container');
+    if (!container) {
       message.error('Dashboard container not found.');
       return;
     }
-    const originalHtmlStyles = {
-      margin: document.documentElement.style.margin,
-      padding: document.documentElement.style.padding,
-      overflow: document.documentElement.style.overflow,
-      width: document.documentElement.style.width,
-      height: document.documentElement.style.height,
-    };
-    const originalBodyStyles = {
-      margin: document.body.style.margin,
-      padding: document.body.style.padding,
-      overflow: document.body.style.overflow,
-      width: document.body.style.width,
-      height: document.body.style.height,
-    };
-    const originalInputStyles = {
-      margin: input.style.margin,
-      padding: input.style.padding,
-      overflow: input.style.overflow,
-      position: input.style.position,
-      top: input.style.top,
-      left: input.style.left,
-      width: input.style.width,
-      height: input.style.height,
-    };
     try {
-      const fullWidth = input.scrollWidth;
-      const fullHeight = input.scrollHeight;
-      document.documentElement.style.margin = '0';
-      document.documentElement.style.padding = '0';
-      document.documentElement.style.overflow = 'hidden';
-      document.documentElement.style.width = `${fullWidth}px`;
-      document.documentElement.style.height = `${fullHeight}px`;
-      document.body.style.margin = '0';
-      document.body.style.padding = '0';
-      document.body.style.overflow = 'hidden';
-      document.body.style.width = `${fullWidth}px`;
-      document.body.style.height = `${fullHeight}px`;
-      input.style.margin = '0';
-      input.style.padding = '0';
-      input.style.overflow = 'visible'; // <--- Make sure content is NOT clipped
-      input.style.position = 'absolute';
-      input.style.top = '0';
-      input.style.left = '0';
-      input.style.width = `${fullWidth}px`;
-      input.style.height = `${fullHeight}px`;
+      const rect = container.getBoundingClientRect();
+      const containerWidth = Math.ceil(rect.width);
+      const containerHeight = Math.ceil(rect.height);
       await new Promise((resolve) => requestAnimationFrame(resolve));
-      window.scrollTo(0, 0);
-      const canvas = await html2canvas(input, {
+      const canvas = await html2canvas(container, {
         useCORS: true,
-        scrollX: 0,
-        scrollY: 0,
-        width: fullWidth,
-        height: fullHeight,
-        windowWidth: fullWidth,
-        windowHeight: fullHeight,
-        backgroundColor: '#ffffff',
+        backgroundColor: '#FFF',
+        width: containerWidth,
+        height: containerHeight,
         scale: 2,
       });
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('p', 'pt', [canvas.width, canvas.height]);
-      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height, undefined, 'FAST');
+      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
       pdf.save('dashboard.pdf');
       message.success('Dashboard exported as PDF successfully!');
     } catch (error) {
       console.error('Error exporting dashboard as PDF:', error);
       message.error('Failed to export dashboard as PDF.');
-    } finally {
-      document.documentElement.style.margin = originalHtmlStyles.margin;
-      document.documentElement.style.padding = originalHtmlStyles.padding;
-      document.documentElement.style.overflow = originalHtmlStyles.overflow;
-      document.documentElement.style.width = originalHtmlStyles.width;
-      document.documentElement.style.height = originalHtmlStyles.height;
-      document.body.style.margin = originalBodyStyles.margin;
-      document.body.style.padding = originalBodyStyles.padding;
-      document.body.style.overflow = originalBodyStyles.overflow;
-      document.body.style.width = originalBodyStyles.width;
-      document.body.style.height = originalBodyStyles.height;
-      input.style.margin = originalInputStyles.margin;
-      input.style.padding = originalInputStyles.padding;
-      input.style.overflow = originalInputStyles.overflow;
-      input.style.position = originalInputStyles.position;
-      input.style.top = originalInputStyles.top;
-      input.style.left = originalInputStyles.left;
-      input.style.width = originalInputStyles.width;
-      input.style.height = originalInputStyles.height;
     }
-  };
+  }
   const emailDashboard = () => {
     exportDashboardAsPDF()
       .then(() => {
