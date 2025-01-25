@@ -1481,7 +1481,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
             <Form.List name={['datasets', 0, 'boxplotSampleColors']}>
               {(fields) => {
                 const labelStr = form.getFieldValue('labels') || '';
-                const labelArr = labelStr.split(',').map(s => s.trim()).filter(Boolean);
+                const labelArr = labelStr.split(',').map((s: String) => s.trim()).filter(Boolean);
                 return (
                   <>
                     {fields.map(({ key, name, ...restField }, index) => {
