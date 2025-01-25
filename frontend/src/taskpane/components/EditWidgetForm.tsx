@@ -71,6 +71,8 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
               dataString = ds.data
                 .map((point: any) => `${point.x},${point.o},${point.h},${point.l},${point.c}`)
                 .join(';');
+            } else if ((ds.type as String) === 'boxplot' && Array.isArray(ds.data)) {
+              dataString = JSON.stringify(ds.data);
             } else if (Array.isArray(ds.data)) {
               dataString = ds.data.join(', ');
             } else {
