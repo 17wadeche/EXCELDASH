@@ -1815,14 +1815,15 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
               const multiDatasetTypes = ["bar", "line", "radar", "scatter", "boxplot", "bubble", "candlestick"];
               const singleDatasetTypes = ["pie", "doughnut", "polarArea", "funnel", "treemap"];
               if (multiDatasetTypes.includes(chartData.type)) {
-                const labels = data.slice(1).map(row => row[0]);
-                const datasetLabels = data[0].slice(1);
-                const updatedDatasets = datasetLabels.map((colLabel: string, colIndex: number) => {
-                  const existingDS = chartData.datasets[colIndex] || {};
+                const labels = data[0].slice(1);
+                const updatedDatasets = data.slice(1).map((row, rowIndex) => {
+                  const seriesLabel = row[0];
+                  const rowData = row.slice(1).map(cell => Number(cell) || 0);
+                  const existingDS = chartData.datasets[rowIndex] || {};
                   return {
                     ...existingDS,
-                    label: colLabel,
-                    data: data.slice(1).map(row => Number(row[colIndex + 1]) || 0),
+                    label: seriesLabel,
+                    data: rowData,
                     backgroundColor: existingDS.backgroundColor ?? getRandomColor(),
                     borderColor: existingDS.borderColor ?? "#000000",
                     borderWidth: existingDS.borderWidth ?? 1,
@@ -1835,13 +1836,13 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
                 };
                 return { ...widget, data: updatedChartData };
               } else if (singleDatasetTypes.includes(chartData.type)) {
-                const labels = data.slice(1).map(row => row[0]);
-                const numericValues = data.slice(1).map(row => Number(row[1]) || 0);
+                const labels = data[0].slice(1);
+                const secondRow = data[1] || [];
                 const existingFirst = chartData.datasets[0] || {};
                 const updatedDataset = {
                   ...existingFirst,
-                  label: existingFirst.label || (data[0][1] || "Series"),
-                  data: numericValues,
+                  label: secondRow[0] || existingFirst.label || "Series",
+                  data: secondRow.slice(1).map((cell: any) => Number(cell) || 0),
                   backgroundColor: Array.isArray(existingFirst.backgroundColor)
                     ? existingFirst.backgroundColor
                     : labels.map(() => getRandomColor()),
