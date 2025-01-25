@@ -969,7 +969,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
       .filter(Boolean);
     const currentSliceColors = form.getFieldValue('sliceColors') || [];
     if (currentSliceColors.length !== labelArr.length) {
-      const updated = labelArr.map((_:any, idx:any) => currentSliceColors[idx] || { color: '#000000' });
+      const updated = labelArr.map((_:any, idx:any) => currentSliceColors[idx] || getRandomColor());
       form.setFieldsValue({ sliceColors: updated });
     }
   }, [form, form.getFieldValue('labels')]);
