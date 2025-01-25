@@ -1480,14 +1480,8 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           {['boxplot'].includes(chartType) && (
             <>
               <Form.List name={[`datasets`, 0, `boxplotSampleColors`]}>
-                {(fields, { add, remove }) => {
+                {(fields) => {
                   const boxplotLabels = form.getFieldValue(['datasets', 0, 'labels'])?.split(',').map((l: string) => l.trim()) || [];
-                  while (fields.length < boxplotLabels.length) {
-                    add({ color: '#000000' });
-                  }
-                  while (fields.length > boxplotLabels.length) {
-                    remove(fields.length - 1);
-                  }
                   return (
                     <>
                       {fields.map((field, index) => (
