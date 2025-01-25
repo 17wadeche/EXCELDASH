@@ -274,8 +274,11 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 type: 'boxplot',
                 data: parsed,
                 datalabels: { display: false },
-                backgroundColor: boxplotColorsArray,
-                borderColor: boxplotColorsArray,
+                backgroundColor: ds.backgroundColor,
+                borderColor: ds.borderColor,
+                outlierColor: boxplotColorsArray,
+                medianColor: ds.borderColor || '#000000',
+                whiskerColor: ds.borderColor || '#000000',
                 borderWidth: ds.borderWidth || 1,
               };
             } else if (ds.type === 'candlestick') {
