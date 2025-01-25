@@ -744,11 +744,14 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
         className={`dashboard-container ${theme}`}
         style={{
           ...borderStyle,
-          width: `${dashboardBorderSettings.width}px`,
+          width: dashboardBorderSettings.width
+            ? `${dashboardBorderSettings.width}px`
+            : '730px',
           backgroundColor: dashboardBorderSettings.backgroundColor || 'white',
+          marginLeft: 0,
+          marginRight: 'auto',
           height: 'auto',
           overflow: 'auto',
-          margin: '0 auto',
           paddingBottom: '3px',
         }}
       >

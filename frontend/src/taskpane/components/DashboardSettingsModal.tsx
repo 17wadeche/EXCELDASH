@@ -2,7 +2,6 @@ import React, { useContext } from 'react';
 import { Modal, Checkbox, Slider, Select, Button, InputNumber } from 'antd';
 import { SketchPicker } from 'react-color';
 import { DashboardContext } from '../context/DashboardContext';
-import { DashboardBorderSettings } from '../components/types';
 
 const { Option } = Select;
 
@@ -47,6 +46,13 @@ const DashboardSettingsModal: React.FC<DashboardSettingsModalProps> = ({ visible
     setDashboardBorderSettings({
       ...dashboardBorderSettings,
       backgroundColor: color.hex,
+    });
+  };
+
+  const handleWidthChange = (value: number) => {
+    setDashboardBorderSettings({
+      ...dashboardBorderSettings,
+      width: value,
     });
   };
 
@@ -98,6 +104,17 @@ const DashboardSettingsModal: React.FC<DashboardSettingsModalProps> = ({ visible
         <SketchPicker
           color={dashboardBorderSettings.backgroundColor || '#ffffff'}
           onChange={handleBackgroundColorChange}
+        />
+      </div>
+      <div style={{ marginTop: 16 }}>
+        <span>Dashboard Width (px):</span>
+        <InputNumber
+          min={400}
+          max={2500}
+          step={50}
+          style={{ width: '100%' }}
+          value={dashboardBorderSettings.width ?? 730}
+          onChange={handleWidthChange}
         />
       </div>
     </Modal>
