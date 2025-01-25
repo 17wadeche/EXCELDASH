@@ -135,32 +135,51 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
     if (widget.type === 'chart') {
       const cData = widget.data as ChartData;
       setChartType(cData.type);
-      if (['pie', 'doughnut', 'polarArea'].includes(cData.type)) {
-        const ds0 = cData.datasets[0];
-        if (Array.isArray(ds0.backgroundColor)) {
-          form.setFieldsValue({
-            sliceColors: ds0.backgroundColor.map((color: string) => ({ color })),
-          });
-        }
-      }
-      if (cData.type === 'bubble') {
-        const ds0 = cData.datasets[0];
-        if (Array.isArray(ds0.backgroundColor)) {
-          form.setFieldsValue({
-            bubbleColors: ds0.backgroundColor.map((color: string) => ({ color })),
-          });
-        }
-      }
-      if (cData.type === 'boxplot') {
-        const ds0 = cData.datasets[0];
-        if (Array.isArray(ds0.backgroundColor)) {
-          form.setFieldsValue({
-            boxplotSampleColors: ds0.backgroundColor.map((color: string) => ({ color })),
-          });
-        }
-      }
     }
   }, [widget, form]);
+
+  useEffect(() => {
+    if (widget.type !== 'chart') return;
+    if (!['pie', 'doughnut', 'polarArea'].includes(chartType)) return;
+    const rawLabels = form.getFieldValue('labels') || '';
+    const labelArr = rawLabels
+      .split(',')
+      .map((l: string) => l.trim())
+      .filter(Boolean);
+    const sliceColors = form.getFieldValue('sliceColors') || [];
+    const updatedColors = [...sliceColors];
+    if (labelArr.length > sliceColors.length) {
+      for (let i = sliceColors.length; i < labelArr.length; i++) {
+        updatedColors.push({ color: getRandomColor() });
+      }
+    } else if (labelArr.length < sliceColors.length) {
+      updatedColors.splice(labelArr.length);
+    }
+    form.setFieldsValue({ sliceColors: updatedColors });
+  }, [chartType, form.getFieldValue('labels')]);
+
+  useEffect(() => {
+    if (widget.type !== 'chart') return;
+    if (chartType !== 'bubble') return;
+    const datasets = form.getFieldValue('datasets') || [];
+    const bubbleDS = datasets.find((ds: any) => ds.type === 'bubble');
+    if (!bubbleDS) return;
+    const rawData = bubbleDS.data || '';
+    const segments = rawData
+      .split(';')
+      .map((s: string) => s.trim())
+      .filter(Boolean);
+    const bubbleColors = form.getFieldValue('bubbleColors') || [];
+    const updatedColors = [...bubbleColors];
+    if (segments.length > bubbleColors.length) {
+      for (let i = bubbleColors.length; i < segments.length; i++) {
+        updatedColors.push({ color: getRandomColor() });
+      }
+    } else if (segments.length < bubbleColors.length) {
+      updatedColors.splice(segments.length);
+    }
+    form.setFieldsValue({ bubbleColors: updatedColors });
+  }, [chartType, form.getFieldValue('datasets')]);
 
   const handleFinish = (values: any) => {
     const cleanedValues: Record<string, any> = {};
@@ -199,12 +218,30 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
         let bubbleColorsArray: string[] = [];
         let boxplotColorsArray: string[] = [];
         if (['pie', 'doughnut', 'polarArea'].includes(finalChartType)) {
-          const sc: { color: string }[] = cleanedValues.sliceColors || [];
-          sliceColorsArray = sc.map((obj) => obj.color);
+          if (cleanedValues.sliceColors && cleanedValues.sliceColors.length) {
+            sliceColorsArray = cleanedValues.sliceColors.map((obj: { color: string }) => obj.color);
+          } else {
+            const labelCount = (cleanedValues.labels || '')
+              .split(',')
+              .map((s: string) => s.trim())
+              .filter(Boolean).length;
+            sliceColorsArray = Array.from({ length: labelCount }, () => getRandomColor());
+          }
         }
         if (finalChartType === 'bubble') {
-          const bc: { color: string }[] = cleanedValues.bubbleColors || [];
-          bubbleColorsArray = bc.map((obj) => obj.color);
+          if (cleanedValues.bubbleColors && cleanedValues.bubbleColors.length) {
+            bubbleColorsArray = cleanedValues.bubbleColors.map((obj: { color: string }) => obj.color);
+          } else {
+            const datasets = cleanedValues.datasets || [];
+            const bubbleDS = datasets.find((ds: any) => ds.type === 'bubble');
+            if (bubbleDS) {
+              const segments = (bubbleDS.data || '')
+                .split(';')
+                .map((s: string) => s.trim())
+                .filter(Boolean);
+              bubbleColorsArray = Array.from({ length: segments.length }, () => getRandomColor());
+            }
+          }
         }
         if (finalChartType === 'boxplot') {
           const bc: { color: string }[] = cleanedValues.boxplotSampleColors || [];
@@ -413,7 +450,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
               }
               const shouldFill = cleanedValues.chartType === 'area' || ds.type === 'area';
               let finalBg = ds.backgroundColor || '#4caf50';
-              if (['pie', 'doughnut', 'polarArea'].includes(finalChartType) && sliceColorsArray.length) {
+              if (['pie', 'doughnut', 'polarArea'].includes(finalChartType)) {
                 finalBg = sliceColorsArray;
               }
               return {
@@ -565,13 +602,13 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
     onSubmit(updatedData);
   };
 
-  const getRandomColor = () => {
+  const getRandomColor = (): string => {
     const letters = '0123456789ABCDEF';
     let color = '#';
     for (let i = 0; i < 6; i++) {
       color += letters[Math.floor(Math.random() * 16)];
     }
-    return color;
+    return color.toUpperCase() === '#000000' ? getRandomColor() : color;
   };
 
   function convertExcelDate(val: any): string {
@@ -1154,346 +1191,22 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           </Form.Item>
           {['pie', 'doughnut', 'polarArea'].includes(chartType) && (
             <Form.List name="sliceColors">
-              {(fields) => (
-                <>
-                  {fields.map(({ key, name, ...restField }, index) => {
-                    const rawLabels = form.getFieldValue('labels') || '';
-                    const labelArr = rawLabels.split(',').map((l: string) => l.trim()).filter(Boolean);
-                    const sliceLabel = labelArr[index] || `Slice #${index + 1}`;
-                    return (
-                      <Form.Item
-                        {...restField}
-                        key={key}
-                        label={`Color for ${sliceLabel}`}
-                        name={[name, 'color']}
-                        rules={[{ required: true, message: 'Please pick a color' }]}
-                      >
-                        <Input type="color" />
-                      </Form.Item>
-                    );
-                  })}
-                </>
-              )}
-            </Form.List>
-          )}
-          <Form.Item
-            name="worksheetName"
-            label="Worksheet"
-            rules={[{ required: true, message: 'Please select a worksheet' }]}
-          >
-            <Select placeholder="Select worksheet">
-              {availableWorksheets.map((sheet) => (
-                <Option key={sheet} value={sheet}>
-                  {sheet}
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
-          <Form.Item
-            name="associatedRange"
-            label="Data Range"
-            rules={[
-              { required: true, message: 'Please enter a data range' },
-              {
-                pattern: /^[A-Za-z]{1,3}[1-9][0-9]{0,6}:[A-Za-z]{1,3}[1-9][0-9]{0,6}$/,
-                message: 'Please enter a valid range (e.g., A1:B10)',
-              },
-            ]}
-          >
-            <Input placeholder="e.g., A1:B10" />
-          </Form.Item>
-          {!isPresenterMode && (
-            <Form.Item>
-              <Button type="primary" icon={<SelectOutlined />} onClick={handleLoadFromExcel}>
-                Select and Load Data from Excel
-              </Button>
-            </Form.Item>
-          )}
-          <Form.List name="datasets">
-            {(fields, { add, remove }) => (
-              <>
-                {fields.map(({ key, name, ...restField }) => (
-                  <div
-                    key={key}
-                    style={{
-                      marginBottom: 16,
-                      borderBottom: '1px solid #eee',
-                      paddingBottom: 16,
-                    }}
-                  >
-                    <Form.Item
-                      {...restField}
-                      name={[name, 'label']}
-                      label="Dataset Label"
-                      rules={[
-                        {
-                          required: true,
-                          message: 'Please enter dataset label',
-                        },
-                      ]}
-                    >
-                      <Input />
-                    </Form.Item>
-                    <Form.Item
-                      {...restField}
-                      name={[name, 'type']}
-                      label="Dataset Chart Type"
-                      initialValue="line"
-                      rules={[
-                        {
-                          required: true,
-                          message: 'Please select chart type for this dataset',
-                        },
-                      ]}
-                    >
-                      <Select disabled={['pie', 'doughnut', 'polarArea'].includes(chartType)}>
-                        <Option value="bar">Bar</Option>
-                        <Option value="line">Line</Option>
-                        <Option value="pie">Pie</Option>
-                        <Option value="doughnut">Doughnut</Option>
-                        <Option value="radar">Radar</Option>
-                        <Option value="polarArea">Polar Area</Option>
-                        <Option value="bubble">Bubble</Option>
-                        <Option value="scatter">Scatter</Option>
-                        <Option value="boxplot">Box Plot</Option>
-                        <Option value="candlestick">Candlestick (Coming Soon)</Option>
-                        <Option value="treemap">Treemap (Coming Soon)</Option>
-                        <Option value="funnel">Funnel (Coming Soon)</Option>
-                        {/* <Option value="forceDirectedGraph">Force-Directed Graph</Option> */}
-                        {/* <Option value="choropleth">Choropleth</Option> */}
-                        {/* <Option value="parallelCoordinates">Parallel Coordinates</Option> */}
-                        {/* <Option value="barWithErrorBars">Bar With Error Bars</Option> */}
-                      </Select>
-                    </Form.Item>
-                    <Form.Item
-                      shouldUpdate={(prevValues, currentValues) =>
-                        prevValues.datasets?.[name]?.type !== currentValues.datasets?.[name]?.type
-                      }
-                      noStyle
-                    >
-                      {() => {
-                        const dsType = form.getFieldValue(['datasets', name, 'type']);
-                        if (dsType === 'treemap') {
-                          return (
-                            <>
-                              <Form.List name={[name, 'tree']}>
-                                {(dataFields, { add: addData, remove: removeData }) => (
-                                  <>
-                                    {dataFields.map(({ key: dataKey, name: dataName, ...dataRestField }) => (
-                                      <Space
-                                        key={dataKey}
-                                        style={{ display: 'flex', marginBottom: 8 }}
-                                        align="baseline"
-                                      >
-                                        <Form.Item
-                                          {...dataRestField}
-                                          name={[dataName, 'name']}
-                                          rules={[{ required: true, message: 'Missing label' }]}
-                                        >
-                                          <Input placeholder="Name" />
-                                        </Form.Item>
-                                        <Form.Item
-                                          {...dataRestField}
-                                          name={[dataName, 'value']}
-                                          rules={[
-                                            { required: true, message: 'Missing value' },
-                                            {
-                                              type: 'number',
-                                              message: 'Value must be a number',
-                                            },
-                                          ]}
-                                        >
-                                          <InputNumber placeholder="Value" />
-                                        </Form.Item>
-                                        <MinusCircleOutlined onClick={() => removeData(dataName)} />
-                                      </Space>
-                                    ))}
-                                    <Form.Item>
-                                      <Button type="dashed" onClick={() => addData()} block icon={<PlusOutlined />}>
-                                        Add Data Point
-                                      </Button>
-                                    </Form.Item>
-                                  </>
-                                )}
-                              </Form.List>
-                            </>
-                          );
-                        } else if (dsType === 'boxplot') {
-                          return (
-                            <>
-                              <Form.Item
-                                {...restField}
-                                name={[name, 'data']}
-                                label="BoxPlot Data (JSON or CSV)"
-                              >
-                                <TextArea rows={2} />
-                              </Form.Item>
-                              <Form.Item
-                                {...restField}
-                                name={[name, 'outlierColor']}
-                                label="Outlier Color"
-                              >
-                                <Input type="color" />
-                              </Form.Item>
-                              <Form.Item
-                                {...restField}
-                                name={[name, 'medianColor']}
-                                label="Median Color"
-                              >
-                                <Input type="color" />
-                              </Form.Item>
-                              <Form.Item
-                                {...restField}
-                                name={[name, 'whiskerColor']}
-                                label="Whisker Color"
-                              >
-                                <Input type="color" />
-                              </Form.Item>
-                            </>
-                          );
-                        } else {
-                          return (
-                            <Form.Item
-                              {...restField}
-                              name={[name, 'data']}
-                              label="Data Points"
-                              rules={[
-                                {
-                                  required: true,
-                                  message: 'Please enter data points',
-                                },
-                                {
-                                  validator: (_, value) => {
-                                    const dsType = form.getFieldValue(['datasets', name, 'type']);
-                                    if (!value) return Promise.resolve();
-                                    if (dsType === 'bubble') {
-                                      const segments = value
-                                        .split(';')
-                                        .map((s: string) => s.trim())
-                                        .filter(Boolean);
-                                      for (let seg of segments) {
-                                        const parts = seg.split(',').map((v: string) => v.trim());
-                                        if (parts.length !== 3 || parts.some((p: string) => isNaN(Number(p)))) {
-                                          return Promise.reject(
-                                            new Error('Bubble data must be "x,y,r" triplets, separated by semicolons.')
-                                          );
-                                        }
-                                      }
-                                    } else if (dsType === 'scatter') {
-                                      const segments = value
-                                        .split(';')
-                                        .map((s: string) => s.trim())
-                                        .filter(Boolean);
-                                      for (let seg of segments) {
-                                        const parts = seg.split(',').map((v: string) => v.trim());
-                                        if (parts.length !== 2 || parts.some((p: string) => isNaN(Number(p)))) {
-                                          return Promise.reject(
-                                            new Error('Scatter data must be "x,y" pairs, separated by semicolons.')
-                                          );
-                                        }
-                                      }
-                                    }
-                                    return Promise.resolve();
-                                  },
-                                },
-                              ]}
-                            >
-                              <Input />
-                            </Form.Item>
-                          );
-                        }
-                      }}
-                    </Form.Item>
-                    <Form.Item
-                      {...restField}
-                      name={[name, 'backgroundColor']}
-                      label="Background Color"
-                      rules={[
-                        {
-                          required: true,
-                          message: 'Please pick a background color',
-                        },
-                      ]}
-                    >
-                      <Input type="color" />
-                    </Form.Item>
-                    <Form.Item
-                      {...restField}
-                      name={[name, 'borderColor']}
-                      label="Border Color"
-                      rules={[
-                        {
-                          required: true,
-                          message: 'Please pick a border color',
-                        },
-                      ]}
-                    >
-                      <Input type="color" />
-                    </Form.Item>
-                    <Form.Item
-                      {...restField}
-                      name={[name, 'borderWidth']}
-                      label="Border Width"
-                      rules={[
-                        {
-                          required: true,
-                          message: 'Please enter border width',
-                        },
-                      ]}
-                    >
-                      <InputNumber min={0} />
-                    </Form.Item>
-                    {!['pie', 'doughnut', 'polarArea'].includes(chartType) && (
-                      <Button
-                        type="dashed"
-                        onClick={() => remove(name)}
-                        icon={<MinusCircleOutlined />}
-                        style={{ marginTop: 8 }}
-                      >
-                        Remove Dataset
-                      </Button>
-                    )}
-                  </div>
-                ))}
-                {!['pie', 'doughnut', 'polarArea'].includes(chartType) && (
-                  <Form.Item>
-                    <Button
-                      type="dashed"
-                      onClick={() =>
-                        add({
-                          label: '',
-                          type: 'bar',
-                          data: '',
-                          backgroundColor: '#4caf50',
-                          borderColor: '#4caf50',
-                          borderWidth: 1,
-                        })
-                      }
-                      block
-                      icon={<PlusOutlined />}
-                    >
-                      Add Dataset
-                    </Button>
-                  </Form.Item>
-                )}
-              </>
-            )}
-          </Form.List>
-          {chartType === 'boxplot' && (
-            <Form.List name="boxplotSampleColors">
               {(fields) => {
-                const labelStr = form.getFieldValue('labels') || '';
-                const labelArr = labelStr.split(',').map((s: String) => s.trim()).filter(Boolean);
+                const rawLabels = form.getFieldValue('labels') || '';
+                const labelArr = rawLabels
+                  .split(',')
+                  .map((l: string) => l.trim())
+                  .filter(Boolean);
                 return (
                   <>
                     {fields.map(({ key, name, ...restField }, index) => {
-                      const sampleLabel = labelArr[index] || `Sample #${index + 1}`;
+                      const sliceLabel = labelArr[index] || `Slice #${index + 1}`;
                       return (
                         <Form.Item
                           {...restField}
                           key={key}
                           name={[name, 'color']}
-                          label={`Color for ${sampleLabel}`}
+                          label={`Color for ${sliceLabel}`}
                           rules={[{ required: true, message: 'Please pick a color' }]}
                         >
                           <Input type="color" />
@@ -1528,29 +1241,346 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
               </Collapse.Panel>
             </Collapse>
           )}
-          {chartType === 'treemap' && (
-            <Form.List name="treemapColors">
-              {() => {
-                const treemapData = form.getFieldValue('datasets')?.[0]?.tree || [];
-                const treemapDataArray = Array.isArray(treemapData) ? treemapData : [];
-                return (
-                  <>
-                    {treemapDataArray.map((item: any, index: number) => (
-                      <Form.Item
-                        key={index}
-                        label={`Color for ${item.category}`}
-                        name={[index, 'color']}
-                        rules={[{ required: true, message: 'Please pick a color' }]}
-                      >
-                        <Input type="color" />
-                      </Form.Item>
-                    ))}
-                  </>
-                );
-              }}
-            </Form.List>
+          <Form.Item
+            name="worksheetName"
+            label="Worksheet"
+            rules={[{ required: true, message: 'Please select a worksheet' }]}
+          >
+            <Select placeholder="Select worksheet">
+              {availableWorksheets.map((sheet) => (
+                <Option key={sheet} value={sheet}>
+                  {sheet}
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
+          <Form.Item
+            name="associatedRange"
+            label="Data Range"
+            rules={[
+              { required: true, message: 'Please enter a data range' },
+              {
+                pattern: /^[A-Za-z]{1,3}[1-9][0-9]{0,6}:[A-Za-z]{1,3}[1-9][0-9]{0,6}$/,
+                message: 'Please enter a valid range (e.g., A1:B10)',
+              },
+            ]}
+          >
+            <Input placeholder="e.g., A1:B10" />
+          </Form.Item>
+          {!isPresenterMode && (
+            <Form.Item>
+              <Button type="primary" icon={<SelectOutlined />} onClick={handleLoadFromExcel}>
+                Select and Load Data from Excel
+              </Button>
+            </Form.Item>
           )}
-          <Collapse>
+
+          <Form.List name="datasets">
+            {(fields, { add, remove }) => (
+              <>
+                {fields.map(({ key, name, ...restField }) => (
+                  const dsType = form.getFieldValue(['datasets', name, 'type']);
+                  const isSliceBased =
+                    ['pie', 'doughnut', 'polarArea'].includes(chartType);
+                  const isBubble = chartType === 'bubble';
+                  return (
+                    <div
+                      key={key}
+                      style={{
+                        marginBottom: 16,
+                        borderBottom: '1px solid #eee',
+                        paddingBottom: 16,
+                      }}
+                    >
+                      <Form.Item
+                        {...restField}
+                        name={[name, 'label']}
+                        label="Dataset Label"
+                        rules={[
+                          {
+                            required: true,
+                            message: 'Please enter dataset label',
+                          },
+                        ]}
+                      >
+                        <Input />
+                      </Form.Item>
+                      <Form.Item
+                        {...restField}
+                        name={[name, 'type']}
+                        label="Dataset Chart Type"
+                        initialValue="line"
+                        rules={[
+                          {
+                            required: true,
+                            message: 'Please select chart type for this dataset',
+                          },
+                        ]}
+                      >
+                        <Select disabled={isSliceBased || isBubble}>
+                            <Option value="bar">Bar</Option>
+                            <Option value="line">Line</Option>
+                            <Option value="pie">Pie</Option>
+                            <Option value="doughnut">Doughnut</Option>
+                            <Option value="radar">Radar</Option>
+                            <Option value="polarArea">Polar Area</Option>
+                            <Option value="bubble">Bubble</Option>
+                            <Option value="scatter">Scatter</Option>
+                            <Option value="boxplot">Box Plot</Option>
+                            <Option value="candlestick">Candlestick (Coming Soon)</Option>
+                            <Option value="treemap">Treemap (Coming Soon)</Option>
+                            <Option value="funnel">Funnel (Coming Soon)</Option>
+                          </Select>
+                        </Form.Item>
+                        <Form.Item
+                          shouldUpdate={(prevValues, currentValues) =>
+                            prevValues.datasets?.[name]?.type !==
+                            currentValues.datasets?.[name]?.type
+                          }
+                          noStyle
+                        >
+                          {() => {
+                            if (dsType === 'treemap') {
+                              return (
+                                <Form.List name={[name, 'tree']}>
+                                  {(dataFields, { add: addData, remove: removeData }) => (
+                                    <>
+                                      {dataFields.map(
+                                        ({ key: dataKey, name: dataName, ...rf }) => (
+                                          <Space
+                                            key={dataKey}
+                                            style={{ display: 'flex', marginBottom: 8 }}
+                                            align="baseline"
+                                          >
+                                            <Form.Item
+                                              {...rf}
+                                              name={[dataName, 'name']}
+                                              rules={[
+                                                {
+                                                  required: true,
+                                                  message: 'Missing label',
+                                                },
+                                              ]}
+                                            >
+                                              <Input placeholder="Name" />
+                                            </Form.Item>
+                                            <Form.Item
+                                              {...rf}
+                                              name={[dataName, 'value']}
+                                              rules={[
+                                                {
+                                                  required: true,
+                                                  message: 'Missing value',
+                                                },
+                                                {
+                                                  type: 'number',
+                                                  message: 'Value must be a number',
+                                                },
+                                              ]}
+                                            >
+                                              <InputNumber placeholder="Value" />
+                                            </Form.Item>
+                                            <MinusCircleOutlined
+                                              onClick={() => removeData(dataName)}
+                                            />
+                                          </Space>
+                                        )
+                                      )}
+                                      <Form.Item>
+                                        <Button
+                                          type="dashed"
+                                          onClick={() => addData()}
+                                          block
+                                          icon={<PlusOutlined />}
+                                        >
+                                          Add Data Point
+                                        </Button>
+                                      </Form.Item>
+                                    </>
+                                  )}
+                                </Form.List>
+                              );
+                            } else if (dsType === 'boxplot') {
+                              return (
+                                <>
+                                  <Form.Item
+                                    {...restField}
+                                    name={[name, 'data']}
+                                    label="BoxPlot Data (JSON or CSV)"
+                                  >
+                                    <TextArea rows={2} />
+                                  </Form.Item>
+                                  <Form.Item
+                                    {...restField}
+                                    name={[name, 'outlierColor']}
+                                    label="Outlier Color"
+                                  >
+                                    <Input type="color" />
+                                  </Form.Item>
+                                  <Form.Item
+                                    {...restField}
+                                    name={[name, 'medianColor']}
+                                    label="Median Color"
+                                  >
+                                    <Input type="color" />
+                                  </Form.Item>
+                                  <Form.Item
+                                    {...restField}
+                                    name={[name, 'whiskerColor']}
+                                    label="Whisker Color"
+                                  >
+                                    <Input type="color" />
+                                  </Form.Item>
+                                </>
+                              );
+                            } else {
+                              // Default: user enters data string
+                              return (
+                                <Form.Item
+                                  {...restField}
+                                  name={[name, 'data']}
+                                  label="Data Points"
+                                  rules={[
+                                    {
+                                      required: true,
+                                      message: 'Please enter data points',
+                                    },
+                                    {
+                                      validator: (_, value) => {
+                                        if (!value) return Promise.resolve();
+                                        if (dsType === 'bubble') {
+                                          // bubble => "x,y,r" sets
+                                          const segments = value
+                                            .split(';')
+                                            .map((s: string) => s.trim())
+                                            .filter(Boolean);
+                                          for (let seg of segments) {
+                                            const parts = seg
+                                              .split(',')
+                                              .map((v: string) => v.trim());
+                                            if (
+                                              parts.length !== 3 ||
+                                              parts.some((p: string) => isNaN(Number(p)))
+                                            ) {
+                                              return Promise.reject(
+                                                new Error(
+                                                  'Bubble data must be "x,y,r" triplets, separated by semicolons.'
+                                                )
+                                              );
+                                            }
+                                          }
+                                        } else if (dsType === 'scatter') {
+                                          // scatter => "x,y" pairs
+                                          const segments = value
+                                            .split(';')
+                                            .map((s: string) => s.trim())
+                                            .filter(Boolean);
+                                          for (let seg of segments) {
+                                            const parts = seg
+                                              .split(',')
+                                              .map((v: string) => v.trim());
+                                            if (
+                                              parts.length !== 2 ||
+                                              parts.some((p: string) => isNaN(Number(p)))
+                                            ) {
+                                              return Promise.reject(
+                                                new Error(
+                                                  'Scatter data must be "x,y" pairs, separated by semicolons.'
+                                                )
+                                              );
+                                            }
+                                          }
+                                        }
+                                        return Promise.resolve();
+                                      },
+                                    },
+                                  ]}
+                                >
+                                  <Input />
+                                </Form.Item>
+                              );
+                            }
+                          }}
+                        </Form.Item>
+                        {!isSliceBased && !isBubble && (
+                          <>
+                            <Form.Item
+                              {...restField}
+                              name={[name, 'backgroundColor']}
+                              label="Background Color"
+                              rules={[
+                                {
+                                  required: true,
+                                  message: 'Please pick a background color',
+                                },
+                              ]}
+                            >
+                              <Input type="color" />
+                            </Form.Item>
+                            <Form.Item
+                              {...restField}
+                              name={[name, 'borderColor']}
+                              label="Border Color"
+                              rules={[
+                                {
+                                  required: true,
+                                  message: 'Please pick a border color',
+                                },
+                              ]}
+                            >
+                              <Input type="color" />
+                            </Form.Item>
+                            <Form.Item
+                              {...restField}
+                              name={[name, 'borderWidth']}
+                              label="Border Width"
+                              rules={[
+                                {
+                                  required: true,
+                                  message: 'Please enter border width',
+                                },
+                              ]}
+                            >
+                              <InputNumber min={0} />
+                            </Form.Item>
+                            <Button
+                              type="dashed"
+                              onClick={() => remove(name)}
+                              icon={<MinusCircleOutlined />}
+                              style={{ marginTop: 8 }}
+                            >
+                              Remove Dataset
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    );
+                  })}
+                  {!['pie', 'doughnut', 'polarArea'].includes(chartType) && (
+                    <Form.Item>
+                      <Button
+                        type="dashed"
+                        onClick={() =>
+                          add({
+                            label: '',
+                            type: chartType, // default to main chart type
+                            data: '',
+                            backgroundColor: '#4caf50',
+                            borderColor: '#4caf50',
+                            borderWidth: 1,
+                          })
+                        }
+                        block
+                        icon={<PlusOutlined />}
+                      >
+                        Add Dataset
+                      </Button>
+                    </Form.Item>
+                  )}
+                </>
+              )}
+            </Form.List>
+            <Collapse>
             {![
               'pie',
               'doughnut',
