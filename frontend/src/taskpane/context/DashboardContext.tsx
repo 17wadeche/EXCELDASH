@@ -1798,49 +1798,67 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           switch (widget.type) {
             case "chart": {
               const chartData = widget.data as ChartData;
-              const key = `${chartData.worksheetName.toLowerCase()}!${chartData.associatedRange.toLowerCase()}`;
+              const key = `${chartData.worksheetName?.toLowerCase()}!${chartData.associatedRange?.toLowerCase()}`;
               const range = rangeMap[key];
               if (!range) {
-                console.warn(`Range ${key} not found for Chart Widget ${widget.id}.`);
+                console.warn(`Range "${key}" not found for Chart widget "${widget.id}".`);
                 return widget;
               }
               const data = range.values as any[][];
-              if (!data || data.length < 2) {
-                console.warn(`Not enough data in range ${key} for widget ${widget.id}.`);
+              if (!data || data.length < 2 || data[0].length < 2) {
+                console.warn(
+                  `Not enough data in range "${key}" for Chart widget "${widget.id}". ` +
+                  `Expected at least 2 rows and 2 columns.`
+                );
                 return widget;
               }
-              if (chartData.type === "bar") {
-                const labels = data.slice(1).map((row) => row[0]);
+              const multiDatasetTypes = ["bar", "line", "radar", "scatter", "boxplot", "bubble", "candlestick"];
+              const singleDatasetTypes = ["pie", "doughnut", "polarArea", "funnel", "treemap"];
+              if (multiDatasetTypes.includes(chartData.type)) {
+                const labels = data.slice(1).map(row => row[0]);
                 const datasetLabels = data[0].slice(1);
-                const updatedDatasets = datasetLabels.map((label, colIdx) => ({
-                  label,
-                  data: data.slice(1).map((row) => Number(row[colIdx + 1])),
-                  backgroundColor:
-                    chartData.datasets[colIdx]?.backgroundColor || getRandomColor(),
-                  borderColor:
-                    chartData.datasets[colIdx]?.borderColor || "#000000",
-                  borderWidth: chartData.datasets[colIdx]?.borderWidth || 1,
-                }));
+                const updatedDatasets = datasetLabels.map((colLabel: string, colIndex: number) => {
+                  const existingDS = chartData.datasets[colIndex] || {};
+                  return {
+                    ...existingDS,
+                    label: colLabel,
+                    data: data.slice(1).map(row => Number(row[colIndex + 1]) || 0),
+                    backgroundColor: existingDS.backgroundColor ?? getRandomColor(),
+                    borderColor: existingDS.borderColor ?? "#000000",
+                    borderWidth: existingDS.borderWidth ?? 1,
+                  };
+                });
                 const updatedChartData: ChartData = {
                   ...chartData,
                   labels,
                   datasets: updatedDatasets,
                 };
                 return { ...widget, data: updatedChartData };
-              } 
-              else {
-                const newLabels = data[0].slice(1);
-                const numericRow = data[1]?.slice(1) || [];
-                const firstDataset = {
-                  ...chartData.datasets[0],
-                  data: numericRow.map((val) => Number(val) || 0),
+              } else if (singleDatasetTypes.includes(chartData.type)) {
+                const labels = data.slice(1).map(row => row[0]);
+                const numericValues = data.slice(1).map(row => Number(row[1]) || 0);
+                const existingFirst = chartData.datasets[0] || {};
+                const updatedDataset = {
+                  ...existingFirst,
+                  label: existingFirst.label || (data[0][1] || "Series"),
+                  data: numericValues,
+                  backgroundColor: Array.isArray(existingFirst.backgroundColor)
+                    ? existingFirst.backgroundColor
+                    : labels.map(() => getRandomColor()),
+                  borderColor: existingFirst.borderColor || "#000000",
+                  borderWidth: existingFirst.borderWidth ?? 1,
                 };
                 const updatedChartData: ChartData = {
                   ...chartData,
-                  labels: newLabels,
-                  datasets: [firstDataset],
+                  labels,
+                  datasets: [updatedDataset],
                 };
                 return { ...widget, data: updatedChartData };
+              } else {
+                console.warn(
+                  `Chart type "${chartData.type}" not explicitly handled; leaving data unmodified.`
+                );
+                return widget;
               }
             }
             case "metric": {
