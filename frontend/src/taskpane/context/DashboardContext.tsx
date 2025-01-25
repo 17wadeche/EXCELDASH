@@ -1804,37 +1804,47 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
               const chartData = widget.data as ChartData;
               const key = `${chartData.worksheetName.toLowerCase()}!${chartData.associatedRange.toLowerCase()}`;
               const range = rangeMap[key];
-              if (range) {
-                const data = range.values as any[][];
-                if (data.length < 2) {
-                  console.warn(`Not enough data in range ${key} for widget ${widget.id}.`);
-                  return widget;
-                }
-                const labels = data.slice(1).map((row) => row[0]);
-                const datasetLabels = data[0].slice(1);
-                const updatedDatasets = datasetLabels.map(
-                  (label: string, colIndex: number) => ({
-                    label,
-                    data: data.slice(1).map((row) => Number(row[colIndex + 1])),
-                    backgroundColor:
-                      chartData.datasets[colIndex]?.backgroundColor || getRandomColor(),
-                    borderColor:
-                      chartData.datasets[colIndex]?.borderColor || "#000000",
-                    borderWidth: chartData.datasets[colIndex]?.borderWidth || 1,
-                  })
-                );
-                const updatedChartData = {
-                  ...chartData,
-                  labels: [...labels],
-                  datasets: updatedDatasets.map((dataset) => ({ ...dataset })),
-                };
-                return {
-                  ...widget,
-                  data: updatedChartData,
-                };
-              } else {
+              if (!range) {
                 console.warn(`Range ${key} not found for Chart Widget ${widget.id}.`);
                 return widget;
+              }
+              const data = range.values as any[][];
+              if (!data || data.length < 2) {
+                console.warn(`Not enough data in range ${key} for widget ${widget.id}.`);
+                return widget;
+              }
+              if (chartData.type === "bar") {
+                const labels = data.slice(1).map((row) => row[0]);
+                const datasetLabels = data[0].slice(1);
+                const updatedDatasets = datasetLabels.map((label, colIdx) => ({
+                  label,
+                  data: data.slice(1).map((row) => Number(row[colIdx + 1])),
+                  backgroundColor:
+                    chartData.datasets[colIdx]?.backgroundColor || getRandomColor(),
+                  borderColor:
+                    chartData.datasets[colIdx]?.borderColor || "#000000",
+                  borderWidth: chartData.datasets[colIdx]?.borderWidth || 1,
+                }));
+                const updatedChartData: ChartData = {
+                  ...chartData,
+                  labels,
+                  datasets: updatedDatasets,
+                };
+                return { ...widget, data: updatedChartData };
+              } 
+              else {
+                const newLabels = data[0].slice(1);
+                const numericRow = data[1]?.slice(1) || [];
+                const firstDataset = {
+                  ...chartData.datasets[0],
+                  data: numericRow.map((val) => Number(val) || 0),
+                };
+                const updatedChartData: ChartData = {
+                  ...chartData,
+                  labels: newLabels,
+                  datasets: [firstDataset],
+                };
+                return { ...widget, data: updatedChartData };
               }
             }
             case "metric": {
