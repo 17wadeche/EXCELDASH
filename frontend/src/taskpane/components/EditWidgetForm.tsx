@@ -1465,6 +1465,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                           key={key}
                           name={[name, 'color']}
                           label={`Color for ${sampleLabel}`}
+                          rules={[{ required: true, message: 'Please pick a color' }]}
                         >
                           <Input type="color" />
                         </Form.Item>
