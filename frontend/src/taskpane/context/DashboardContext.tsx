@@ -1329,7 +1329,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
             throw new Error(`Unsupported widget type: ${type}`);
         }
       }
-  
       let missingFields: string[] = [];
       if (type === 'metric') {
         const metricData = newWidget.data as MetricData;
@@ -1337,13 +1336,11 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           missingFields.push('worksheetName', 'cellAddress');
         }
       }
-  
       if (missingFields.length > 0) {
         message.warning(`Please provide the following fields: ${missingFields.join(', ')}`);
         setPendingWidget(newWidget);
         return;
       }
-  
       updateWidgetsWithHistory((prevWidgets) => {
         const newWidgets = [...prevWidgets, newWidget];
         console.log('addWidgetFunc: New widgets after addition:', newWidgets);
@@ -1590,7 +1587,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
             }
             return widget;
           });
-  
           const cleanedWidgets = newWidgets.map((widget) => {
             if (widget.type === 'image') {
               const { chartIndex, ...rest } = widget.data as ImageWidgetData & { chartIndex?: number };

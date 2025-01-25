@@ -1478,7 +1478,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
             )}
           </Form.List>
           {chartType === 'boxplot' && (
-            <Form.List name={['datasets', 0, 'boxplotSampleColors']}>
+            <Form.List name="boxplotSampleColors">
               {(fields) => {
                 const labelStr = form.getFieldValue('labels') || '';
                 const labelArr = labelStr.split(',').map((s: String) => s.trim()).filter(Boolean);
@@ -1490,9 +1490,8 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                         <Form.Item
                           {...restField}
                           key={key}
-                          label={`Color for ${sampleLabel}`}
                           name={[name, 'color']}
-                          rules={[{ required: true, message: 'Pick a color' }]}
+                          label={`Color for ${sampleLabel}`}
                         >
                           <Input type="color" />
                         </Form.Item>

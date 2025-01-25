@@ -115,11 +115,9 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
       message.error('Dashboard container not found.');
       return;
     }
-
     message.info('Exporting dashboard as PDF (existing method)...');
     await exportDashboardAsPDF(); 
     message.success('PDF downloaded using existing export method.');
-
     message.info('Generating in-memory PDF for embedding...');
     const pdfBlob = await generatePdfBlobFromDom(dashboardRef.current);
     const tempUrl = URL.createObjectURL(pdfBlob);
