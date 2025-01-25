@@ -2534,31 +2534,37 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       message.error('Dashboard container not found.');
       return;
     }
-    const originalBodyOverflow = document.body.style.overflow;
-    const originalHtmlOverflow = document.documentElement.style.overflow;
-    const originalHtmlMargin = document.documentElement.style.margin;
-    const originalHtmlPadding = document.documentElement.style.padding;
-    const originalBodyMargin = document.body.style.margin;
-    const originalBodyPadding = document.body.style.padding;
-    const originalHtmlHeight = document.documentElement.style.height;
-    const originalBodyHeight = document.body.style.height;
-    const originalInputOverflow = input.style.overflow;
-    const originalInputHeight = input.style.height;
-    const originalInputPosition = input.style.position;
-    const originalInputTop = input.style.top;
-    const originalInputLeft = input.style.left;
-    const originalInputMargin = input.style.margin;
-    const originalInputPadding = input.style.padding;
+    const originalHtmlStyles = {
+      margin: document.documentElement.style.margin,
+      padding: document.documentElement.style.padding,
+      overflow: document.documentElement.style.overflow,
+      height: document.documentElement.style.height,
+    };
+    const originalBodyStyles = {
+      margin: document.body.style.margin,
+      padding: document.body.style.padding,
+      overflow: document.body.style.overflow,
+      height: document.body.style.height,
+    };
+    const originalInputStyles = {
+      margin: input.style.margin,
+      padding: input.style.padding,
+      overflow: input.style.overflow,
+      position: input.style.position,
+      top: input.style.top,
+      left: input.style.left,
+      height: input.style.height,
+    };
     try {
       document.documentElement.style.margin = '0';
       document.documentElement.style.padding = '0';
+      document.documentElement.style.overflow = 'hidden';
       document.body.style.margin = '0';
       document.body.style.padding = '0';
-      document.documentElement.style.overflow = 'hidden';
       document.body.style.overflow = 'hidden';
-      input.style.overflow = 'hidden';
       input.style.margin = '0';
       input.style.padding = '0';
+      input.style.overflow = 'hidden';
       input.style.position = 'absolute';
       input.style.top = '0';
       input.style.left = '0';
@@ -2580,7 +2586,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         windowWidth: captureWidth,
         windowHeight: captureHeight,
         backgroundColor: '#ffffff',
-        scale: 2
+        scale: 2,
       });
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('p', 'pt', [canvas.width, canvas.height]);
@@ -2591,21 +2597,23 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       console.error('Error exporting dashboard as PDF:', error);
       message.error('Failed to export dashboard as PDF.');
     } finally {
-      document.documentElement.style.margin = originalHtmlMargin;
-      document.documentElement.style.padding = originalHtmlPadding;
-      document.body.style.margin = originalBodyMargin;
-      document.body.style.padding = originalBodyPadding;
-      document.body.style.overflow = originalBodyOverflow;
-      document.documentElement.style.overflow = originalHtmlOverflow;
-      document.documentElement.style.height = originalHtmlHeight;
-      document.body.style.height = originalBodyHeight;
-      input.style.overflow = originalInputOverflow;
-      input.style.height = originalInputHeight;
-      input.style.position = originalInputPosition;
-      input.style.top = originalInputTop;
-      input.style.left = originalInputLeft;
-      input.style.margin = originalInputMargin;
-      input.style.padding = originalInputPadding;
+      document.documentElement.style.margin = originalHtmlStyles.margin;
+      document.documentElement.style.padding = originalHtmlStyles.padding;
+      document.documentElement.style.overflow = originalHtmlStyles.overflow;
+      document.documentElement.style.height = originalHtmlStyles.height;
+  
+      document.body.style.margin = originalBodyStyles.margin;
+      document.body.style.padding = originalBodyStyles.padding;
+      document.body.style.overflow = originalBodyStyles.overflow;
+      document.body.style.height = originalBodyStyles.height;
+  
+      input.style.margin = originalInputStyles.margin;
+      input.style.padding = originalInputStyles.padding;
+      input.style.overflow = originalInputStyles.overflow;
+      input.style.position = originalInputStyles.position;
+      input.style.top = originalInputStyles.top;
+      input.style.left = originalInputStyles.left;
+      input.style.height = originalInputStyles.height;
     }
   };
   const emailDashboard = () => {
