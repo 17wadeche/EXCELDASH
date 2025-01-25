@@ -2538,15 +2538,15 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       margin: document.documentElement.style.margin,
       padding: document.documentElement.style.padding,
       overflow: document.documentElement.style.overflow,
-      height: document.documentElement.style.height,
       width: document.documentElement.style.width,
+      height: document.documentElement.style.height,
     };
     const originalBodyStyles = {
       margin: document.body.style.margin,
       padding: document.body.style.padding,
       overflow: document.body.style.overflow,
-      height: document.body.style.height,
       width: document.body.style.width,
+      height: document.body.style.height,
     };
     const originalInputStyles = {
       margin: input.style.margin,
@@ -2555,8 +2555,8 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       position: input.style.position,
       top: input.style.top,
       left: input.style.left,
-      height: input.style.height,
       width: input.style.width,
+      height: input.style.height,
     };
     try {
       const fullWidth = input.scrollWidth;
@@ -2573,7 +2573,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       document.body.style.height = `${fullHeight}px`;
       input.style.margin = '0';
       input.style.padding = '0';
-      input.style.overflow = 'hidden';
+      input.style.overflow = 'visible'; // <--- Make sure content is NOT clipped
       input.style.position = 'absolute';
       input.style.top = '0';
       input.style.left = '0';
@@ -2590,7 +2590,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         windowWidth: fullWidth,
         windowHeight: fullHeight,
         backgroundColor: '#ffffff',
-        scale: 3,
+        scale: 2,
       });
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('p', 'pt', [canvas.width, canvas.height]);
@@ -2604,21 +2604,21 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       document.documentElement.style.margin = originalHtmlStyles.margin;
       document.documentElement.style.padding = originalHtmlStyles.padding;
       document.documentElement.style.overflow = originalHtmlStyles.overflow;
-      document.documentElement.style.height = originalHtmlStyles.height;
       document.documentElement.style.width = originalHtmlStyles.width;
+      document.documentElement.style.height = originalHtmlStyles.height;
       document.body.style.margin = originalBodyStyles.margin;
       document.body.style.padding = originalBodyStyles.padding;
       document.body.style.overflow = originalBodyStyles.overflow;
-      document.body.style.height = originalBodyStyles.height;
       document.body.style.width = originalBodyStyles.width;
+      document.body.style.height = originalBodyStyles.height;
       input.style.margin = originalInputStyles.margin;
       input.style.padding = originalInputStyles.padding;
       input.style.overflow = originalInputStyles.overflow;
       input.style.position = originalInputStyles.position;
       input.style.top = originalInputStyles.top;
       input.style.left = originalInputStyles.left;
-      input.style.height = originalInputStyles.height;
       input.style.width = originalInputStyles.width;
+      input.style.height = originalInputStyles.height;
     }
   };
   const emailDashboard = () => {
