@@ -49,10 +49,10 @@ const DashboardSettingsModal: React.FC<DashboardSettingsModalProps> = ({ visible
     });
   };
 
-  const handleWidthChange = (value: number) => {
+  const handleWidthChange = (value: number | null) => {
     setDashboardBorderSettings({
       ...dashboardBorderSettings,
-      width: value,
+      width: value ?? 730,
     });
   };
 
