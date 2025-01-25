@@ -1404,19 +1404,21 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                         }
                       }}
                     </Form.Item>
-                    <Form.Item
-                      {...restField}
-                      name={[name, 'backgroundColor']}
-                      label="Background Color"
-                      rules={[
-                        {
-                          required: true,
-                          message: 'Please pick a background color',
-                        },
-                      ]}
-                    >
-                      <Input type="color" />
-                    </Form.Item>
+                    {![ 'pie', 'doughnut', 'polarArea', 'bubble' ].includes(chartType) && (
+                      <Form.Item
+                        {...restField}
+                        name={[name, 'backgroundColor']}
+                        label="Background Color"
+                        rules={[
+                          {
+                            required: true,
+                            message: 'Please pick a background color',
+                          },
+                        ]}
+                      >
+                        <Input type="color" />
+                      </Form.Item>
+                    )}
                     <Form.Item
                       {...restField}
                       name={[name, 'borderColor']}
@@ -1633,9 +1635,11 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                   </Form.Item>
                 </Panel>
                 <Panel header="Styling" key="styling">
-                  <Form.Item label="Chart Background Color" name="chartBackgroundColor">
-                    <Input type="color" />
-                  </Form.Item>
+                  {![ 'pie', 'doughnut', 'polarArea', 'bubble' ].includes(chartType) && (
+                    <Form.Item label="Chart Background Color" name="chartBackgroundColor">
+                      <Input type="color" />
+                    </Form.Item>
+                  )}
                   <Form.Item label="Grid Line Color" name="gridLineColor">
                     <Input type="color" />
                   </Form.Item>
