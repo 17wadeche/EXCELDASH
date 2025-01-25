@@ -2603,7 +2603,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     }
   };
   const exportDashboardAsPDF = async (): Promise<void> => {
-    const container = document.getElementById('dashboard-container');
+    const container = document.getElementById('dashboard-wrapper');
     if (!container) {
       message.error('Dashboard container not found.');
       return;
