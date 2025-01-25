@@ -1860,41 +1860,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
                   datasets: [updatedDataset],
                 };
                 return { ...widget, data: updatedChartData };
-              } else if (chartData.type === "boxplot") {
-                const headerRow = data[0];
-                const rowData = data.slice(1);
-                const updatedDatasets = rowData.map((row, index) => {
-                  const sampleLabel = row[0];
-                  const q1Val = Number(row[1] ?? 0);
-                  const medianVal = Number(row[2] ?? 0);
-                  const q3Val = Number(row[3] ?? 0);
-                  const minVal = Number(row[4] ?? 0);
-                  const maxVal = Number(row[5] ?? 0);
-                  const existingDS = chartData.datasets[index] || {};
-                  return {
-                    ...existingDS,
-                    label: sampleLabel,
-                    data: [
-                      {
-                        min: minVal,
-                        q1: q1Val,
-                        median: medianVal,
-                        q3: q3Val,
-                        max: maxVal,
-                      },
-                    ],
-                    backgroundColor: existingDS.backgroundColor ?? getRandomColor(),
-                    borderColor: existingDS.borderColor ?? "#000000",
-                    borderWidth: existingDS.borderWidth ?? 1,
-                  };
-                });
-                const labels = rowData.map(r => r[0]);
-                const updatedChartData: ChartData = {
-                  ...chartData,
-                  labels,
-                  datasets: updatedDatasets,
-                };
-                return { ...widget, data: updatedChartData };
               } else if (multiDatasetTypes.includes(chartData.type)) {
                 const labels = data[0].slice(1);
                 const updatedDatasets = data.slice(1).map((row, rowIndex) => {
