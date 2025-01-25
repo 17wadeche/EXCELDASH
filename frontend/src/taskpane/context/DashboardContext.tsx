@@ -15,6 +15,7 @@ import { capitalizeFirstLetter } from '../utils/stringUtils';
 import { deleteDashboardById, createTemplate, updateTemplate } from '../utils/api';
 import { getWorkbookIdFromProperties, isInDialog } from '../utils/excelUtils';
 import SelectTableModal from '../components/SelectTableModal';
+import 'chartjs-chart-box-and-violin-plot';
 const { Option } = Select;
 interface DashboardContextProps {
   widgets: Widget[];
@@ -1858,11 +1859,11 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
                   borderColor: existingDS.borderColor ?? "#000000",
                   borderWidth: existingDS.borderWidth ?? 1,
                 };
-                const updatedChartData: ChartData<"boxplot", number[][]> = {
+                const updatedChartData = {
                   ...chartData,
                   labels,
                   datasets: [updatedDataset],
-                };
+                } as unknown as ChartData;
                 return { ...widget, data: updatedChartData };
               } else if (chartData.type === "scatter") {
                 const xValues = data[1].slice(1).map(n => +n || 0);
