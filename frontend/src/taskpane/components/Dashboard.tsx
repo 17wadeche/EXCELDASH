@@ -136,41 +136,47 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
     const pdfBlob = await generatePdfBlobFromDom(dashboardRef.current);
     const tempUrl = URL.createObjectURL(pdfBlob);
     message.success('In-memory PDF generated.');
-
-    const newWin = window.open('', 'PDFPresentation', 'width=1200,height=800,resizable,scrollbars=yes');
+    const rect = dashboardRef.current.getBoundingClientRect();
+    const windowWidth = Math.round(rect.width) + 50;  // +50 px margin
+    const windowHeight = Math.max(800, Math.round(rect.height) + 100);
+    const newWin = window.open(
+      '',
+      'PDFPresentation',
+      `width=${windowWidth},height=${windowHeight},resizable,scrollbars=yes`
+    );
     if (!newWin) {
       message.error('Failed to open new window for presentation.');
       return;
     }
-
+  
     const htmlContent = `
-    <!DOCTYPE html>
-    <html lang="en">
-      <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-        <title>${dashboardTitle || 'Dashboard Presentation'}</title>
-        <style>
-          html, body {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            overflow: hidden;
-            background: #fff;
-          }
-          iframe {
-            border: none;
-            width: 100%;
-            height: 100%;
-          }
-        </style>
-      </head>
-      <body>
-        <iframe src="${tempUrl}" title="Dashboard PDF"></iframe>
-      </body>
-    </html>
+      <!DOCTYPE html>
+      <html lang="en">
+        <head>
+          <meta charset="UTF-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+          <title>${dashboardTitle || 'Dashboard Presentation'}</title>
+          <style>
+            html, body {
+              margin: 0;
+              padding: 0;
+              height: 100%;
+              overflow: hidden;
+              background: #fff;
+            }
+            iframe {
+              border: none;
+              width: 100%;
+              height: 100%;
+            }
+          </style>
+        </head>
+        <body>
+          <iframe src="${tempUrl}" title="Dashboard PDF"></iframe>
+        </body>
+      </html>
     `;
-
+  
     newWin.document.open();
     newWin.document.write(htmlContent);
     newWin.document.close();
