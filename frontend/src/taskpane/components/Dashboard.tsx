@@ -75,6 +75,20 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
   const prevLayoutsRef = useRef<{ [key: string]: GridLayoutItem[] }>({});
   const [isPresentationMode, setIsPresentationMode] = useState(false);
   const [fullScreenDialog, setFullScreenDialog] = useState<Office.Dialog | null>(null);
+  const dashboardWidth = dashboardBorderSettings.width 
+    ? Math.min(Math.max(dashboardBorderSettings.width, 400), 2500)
+    : 730;
+  const wrapperStyle: React.CSSProperties = {
+    width: `${dashboardWidth}px`,
+    marginLeft: 0,
+    marginRight: 'auto',
+    backgroundColor: dashboardBorderSettings.backgroundColor || 'white',
+    ...(dashboardBorderSettings.showBorder
+      ? {
+          border: `${dashboardBorderSettings.thickness}px ${dashboardBorderSettings.style} ${dashboardBorderSettings.color}`,
+        }
+      : {}),
+  };
 
   const isOfficeInitialized =
     typeof Office !== 'undefined' &&
@@ -657,7 +671,7 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
     });
   }, [widgets, isEditingEnabled, handleRemoveWidget, handleEditWidget, copyWidgetCallback]);
   return (
-    <div className="dashboard-wrapper" style={{ position: 'relative', width: '100%', height: '100vh', backgroundColor: dashboardBorderSettings.backgroundColor || 'white',  }}>
+    <div className="dashboard-wrapper" style={wrapperStyle}>
       <Draggable handle=".drag-handle">
         <div className={`fixed-vertical-toolbar ${isCollapsed ? 'collapsed' : ''}`}>
           <div className="drag-handle">
@@ -741,12 +755,10 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
       <div
         id="dashboard-container"
         ref={dashboardRef}
-        className={`dashboard-container ${theme}`}
+        className="dashboard-container"
         style={{
           ...borderStyle,
-          width: dashboardBorderSettings.width
-            ? `${dashboardBorderSettings.width}px`
-            : '730px',
+          width: '100%',
           backgroundColor: dashboardBorderSettings.backgroundColor || 'white',
           marginLeft: 0,
           marginRight: 'auto',
