@@ -52,7 +52,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           yAxisTitle: data.scales?.y?.title?.text || '',
           showLegend: data.plugins?.legend?.display !== false,
           legendPosition: data.plugins?.legend?.position || 'bottom',
-          annotations: data.plugins?.annotation?.annotations || [],
           showDataLabels: data.plugins?.datalabels?.display !== false,
           dataLabelColor: data.plugins?.datalabels?.color || '#36A2EB',
           dataLabelFontSize: data.plugins?.datalabels?.font?.size || 12,
@@ -66,9 +65,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           locale: data.locale || 'en-US',
           enableDynamicUpdates: data.dynamicUpdate?.enabled || false,
           updateInterval: data.dynamicUpdate?.interval || 5,
-          useGradientFills: data.gradientFills?.enabled || false,
-          gradientStartColor: data.gradientFills?.startColor || 'rgba(75,192,192,0)',
-          gradientEndColor: data.gradientFills?.endColor || 'rgba(75,192,192,0.4)',
           datasets: (data.datasets || []).map((ds) => {
             let dataString = '';
             if ((ds.type as String) === 'candlestick' && Array.isArray(ds.data)) {
@@ -456,9 +452,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
               display: cleanedValues.showLegend !== false,
               position: cleanedValues.legendPosition || 'top',
             },
-            annotation: {
-              annotations: cleanedValues.annotations || [],
-            },
             datalabels: {
               display: chartType === 'treemap' ? true : false,
               color: cleanedValues.dataLabelColor || '#000',
@@ -509,11 +502,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           dynamicUpdate: {
             enabled: cleanedValues.enableDynamicUpdates || false,
             interval: cleanedValues.updateInterval || 5,
-          },
-          gradientFills: {
-            enabled: cleanedValues.useGradientFills || false,
-            startColor: cleanedValues.gradientStartColor || 'rgba(75,192,192,0)',
-            endColor: cleanedValues.gradientEndColor || 'rgba(75,192,192,0.4)',
           },
           ...(finalChartType === 'boxplot' && {title: cleanedValues.title || 'Box Plot'})
         } as ChartData;
@@ -1630,56 +1618,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                   <Form.Item label="Tooltip Template" name="tooltipTemplate">
                     <TextArea placeholder="Use {label} and {value} placeholders" rows={2} />
                   </Form.Item>
-                  <Form.Item label="Annotations">
-                    <Form.List name="annotations">
-                      {(annFields, { add, remove }) => (
-                        <>
-                          {annFields.map(({ key, name, ...restField }) => (
-                            <div key={key} style={{ marginBottom: 16 }}>
-                              <Form.Item
-                                {...restField}
-                                name={[name, 'type']}
-                                label="Annotation Type"
-                                rules={[{ required: true, message: 'Select type' }]}
-                              >
-                                <Select>
-                                  <Option value="line">Line</Option>
-                                  <Option value="box">Box</Option>
-                                </Select>
-                              </Form.Item>
-                              <Form.Item
-                                {...restField}
-                                name={[name, 'value']}
-                                label="Value"
-                                rules={[{ required: true, message: 'Enter value' }]}
-                              >
-                                <InputNumber />
-                              </Form.Item>
-                              <Form.Item {...restField} name={[name, 'label']} label="Label">
-                                <Input />
-                              </Form.Item>
-                              <Form.Item
-                                {...restField}
-                                name={[name, 'color']}
-                                label="Color"
-                                rules={[{ required: true, message: 'Pick a color' }]}
-                              >
-                                <Input type="color" />
-                              </Form.Item>
-                              <Button type="dashed" onClick={() => remove(name)} icon={<MinusCircleOutlined />}>
-                                Remove
-                              </Button>
-                            </div>
-                          ))}
-                          <Form.Item>
-                            <Button type="dashed" onClick={() => add()} icon={<PlusOutlined />}>
-                              Add Annotation
-                            </Button>
-                          </Form.Item>
-                        </>
-                      )}
-                    </Form.List>
-                  </Form.Item>
                 </Panel>
                 <Panel header="Legend" key="legend">
                   <Form.Item label="Show Legend" name="showLegend" valuePropName="checked">
@@ -1699,15 +1637,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                     <Input type="color" />
                   </Form.Item>
                   <Form.Item label="Grid Line Color" name="gridLineColor">
-                    <Input type="color" />
-                  </Form.Item>
-                  <Form.Item label="Use Gradient Fills" name="useGradientFills" valuePropName="checked">
-                    <Switch />
-                  </Form.Item>
-                  <Form.Item label="Gradient Start Color" name="gradientStartColor">
-                    <Input type="color" />
-                  </Form.Item>
-                  <Form.Item label="Gradient End Color" name="gradientEndColor">
                     <Input type="color" />
                   </Form.Item>
                 </Panel>

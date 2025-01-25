@@ -1812,7 +1812,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
                 );
                 return widget;
               }
-              const multiDatasetTypes = ["bar", "line", "radar", "scatter", "boxplot", "bubble", "candlestick"];
+              const multiDatasetTypes = ["bar", "line", "radar", "candlestick"];
               const singleDatasetTypes = ["pie", "doughnut", "polarArea", "funnel", "treemap"];
               if (chartData.type === "bubble") {
                 const xValues = data[1].slice(1).map(n => +n || 0);
@@ -1835,6 +1835,32 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
                 const updatedChartData: ChartData = {
                   ...chartData,
                   labels: data[0].slice(1), 
+                  datasets: [updatedDataset],
+                };
+                return { ...widget, data: updatedChartData };
+              } else if (chartData.type === "boxplot") {
+                const rows = data.slice(1);
+                const labels = rows.map(r => r[0]); 
+                const datasetValues = rows.map(r => {
+                  const q1 = +r[1];
+                  const median = +r[2];
+                  const q3 = +r[3];
+                  const min = +r[4];
+                  const max = +r[5];
+                  return [min, q1, median, q3, max];
+                });
+                const existingDS = chartData.datasets[0] || {};
+                const updatedDataset = {
+                  ...existingDS,
+                  label: existingDS.label ?? "Boxplot Series",
+                  data: datasetValues,
+                  backgroundColor: existingDS.backgroundColor ?? getRandomColor(),
+                  borderColor: existingDS.borderColor ?? "#000000",
+                  borderWidth: existingDS.borderWidth ?? 1,
+                };
+                const updatedChartData: ChartData = {
+                  ...chartData,
+                  labels,
                   datasets: [updatedDataset],
                 };
                 return { ...widget, data: updatedChartData };
