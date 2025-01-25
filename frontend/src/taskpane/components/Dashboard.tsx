@@ -76,8 +76,8 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
   const [isPresentationMode, setIsPresentationMode] = useState(false);
   const [fullScreenDialog, setFullScreenDialog] = useState<Office.Dialog | null>(null);
   const dashboardWidth = dashboardBorderSettings.width 
-    ? Math.min(Math.max(dashboardBorderSettings.width, 400), 2500)
-    : 730;
+    ? Math.min(Math.max(dashboardBorderSettings.width, 300), 733)
+    : 733;
   const wrapperStyle: React.CSSProperties = {
     width: `${dashboardWidth}px`,
     marginLeft: 0,

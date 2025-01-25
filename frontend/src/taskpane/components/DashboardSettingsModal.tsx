@@ -52,7 +52,7 @@ const DashboardSettingsModal: React.FC<DashboardSettingsModalProps> = ({ visible
   const handleWidthChange = (value: number | null) => {
     setDashboardBorderSettings({
       ...dashboardBorderSettings,
-      width: value ?? 730,
+      width: value ?? 733,
     });
   };
 
@@ -109,11 +109,11 @@ const DashboardSettingsModal: React.FC<DashboardSettingsModalProps> = ({ visible
       <div style={{ marginTop: 16 }}>
         <span>Dashboard Width (px):</span>
         <InputNumber
-          min={400}
-          max={2500}
+          min={300}
+          max={733}
           step={50}
           style={{ width: '100%' }}
-          value={dashboardBorderSettings.width ?? 730}
+          value={dashboardBorderSettings.width ?? 733}
           onChange={handleWidthChange}
         />
       </div>
