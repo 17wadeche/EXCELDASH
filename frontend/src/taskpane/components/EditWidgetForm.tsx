@@ -1031,7 +1031,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
         });
       }
     }
-  }, [chartType, form, form.getFieldValue('datasets')]);
+  }, [chartType]);
 
   return (
     <Form form={form} layout="vertical" initialValues={getInitialValues()} onFinish={handleFinish}>
