@@ -263,15 +263,15 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 };
               }
             } else if (ds.type === 'boxplot') {
-              let parsed = [];
+              let parsed: number[][] = [];
               const rawData = (ds.data || '').trim();
               try {
                 if (rawData.startsWith('[')) {
                   parsed = JSON.parse(rawData);
                 } else if (rawData) {
-                  const rowStrings = rawData.split(';').map((r: any) => r.trim()).filter(Boolean);
-                  parsed = rowStrings.map(rowStr => {
-                    return rowStr.split(',').map((v: any) => parseFloat(v.trim()));
+                  const rowStrings = rawData.split(';').map((r: String) => r.trim()).filter(Boolean);
+                  parsed = rowStrings.map((rowStr: String) => {
+                    return rowStr.split(',').map((v: String) => parseFloat(v.trim()));
                   });
                 }
               } catch (e) {
@@ -282,11 +282,11 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 type: 'boxplot',
                 data: parsed,
                 datalabels: { display: false },
-                backgroundColor: boxplotColorsArray,
-                borderColor: boxplotColorsArray,
-                outlierColor: boxplotColorsArray,
-                medianColor: boxplotColorsArray,
-                whiskerColor: boxplotColorsArray,
+                backgroundColor: ds.backgroundColor,
+                borderColor: ds.borderColor,
+                outlierColor: ds.outlierColor || '#666',
+                medianColor: ds.medianColor || '#000',
+                whiskerColor: ds.whiskerColor || '#000',
                 borderWidth: ds.borderWidth || 1,
               };
             } else if (ds.type === 'candlestick') {
