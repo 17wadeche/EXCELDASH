@@ -1858,7 +1858,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
                   borderColor: existingDS.borderColor ?? "#000000",
                   borderWidth: existingDS.borderWidth ?? 1,
                 };
-                const updatedChartData: ChartData = {
+                const updatedChartData: ChartData<"boxplot", number[][]> = {
                   ...chartData,
                   labels,
                   datasets: [updatedDataset],
