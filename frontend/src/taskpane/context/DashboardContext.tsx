@@ -2603,16 +2603,15 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     }
   };
   const exportDashboardAsPDF = async (): Promise<void> => {
-    const container = document.getElementById('dashboard-wrapper');
+    const container = document.getElementById('dashboard-container');
     if (!container) {
       message.error('Dashboard container not found.');
       return;
     }
     try {
-      const rect = container.getBoundingClientRect();
-      const containerWidth = Math.ceil(rect.width);
-      const containerHeight = Math.ceil(rect.height);
       await new Promise((resolve) => requestAnimationFrame(resolve));
+      const containerWidth = container.scrollWidth;
+      const containerHeight = container.scrollHeight;
       const canvas = await html2canvas(container, {
         useCORS: true,
         backgroundColor: '#FFF',
@@ -2621,8 +2620,9 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         scale: 2,
       });
       const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'pt', [canvas.width, canvas.height]);
-      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+      const margin = 20;
+      const pdf = new jsPDF('p', 'pt', [canvas.width + margin * 2, canvas.height + margin * 2]);
+      pdf.addImage(imgData, 'PNG', margin, margin, canvas.width, canvas.height);
       pdf.save('dashboard.pdf');
       message.success('Dashboard exported as PDF successfully!');
     } catch (error) {
