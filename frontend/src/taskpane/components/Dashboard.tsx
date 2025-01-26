@@ -62,7 +62,7 @@ async function generatePdfBlobFromDom(dashboardElement: HTMLDivElement): Promise
     await new Promise((resolve) => requestAnimationFrame(resolve));
     let fullWidth = dashboardElement.scrollWidth;
     let fullHeight = dashboardElement.scrollHeight;
-    const extraPixels = 8;
+    const extraPixels = 9;
     fullWidth += extraPixels;
     fullHeight += extraPixels;
     await new Promise((resolve) => requestAnimationFrame(resolve));
@@ -78,8 +78,8 @@ async function generatePdfBlobFromDom(dashboardElement: HTMLDivElement): Promise
       windowHeight: fullHeight,
     });
     const imgData = canvas.toDataURL('image/png');
-    const pdf = new jsPDF('p', 'pt', [canvas.width, canvas.height + 3]);
-    pdf.addImage(imgData, 'PNG', 0, 3, canvas.width, canvas.height, undefined, 'FAST');
+    const pdf = new jsPDF('p', 'pt', [canvas.width + 4, canvas.height + 4]);
+    pdf.addImage(imgData, 'PNG', 4, 4, canvas.width, canvas.height, undefined, 'FAST');
     return pdf.output('blob');
   } finally {
     restoreOriginalStyles(dashboardElement, originalStyles);
