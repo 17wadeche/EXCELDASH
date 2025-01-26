@@ -150,7 +150,7 @@
 }
 .dashboard-wrapper {
   display: flex;
-  height: 100vh; 
+  min-height: 100vh; 
   position: relative;
   background-color: var(--background-color);
 }

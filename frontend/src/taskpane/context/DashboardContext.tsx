@@ -2610,20 +2610,24 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     }
     try {
       await new Promise((resolve) => requestAnimationFrame(resolve));
+      const containerWidth = container.scrollWidth;
+      const containerHeight = container.scrollHeight;
       const canvas = await html2canvas(container, {
         useCORS: true,
         backgroundColor: '#FFF',
+        width: containerWidth,
+        height: containerHeight,
         scale: 2,
       });
       const imgData = canvas.toDataURL('image/png');
       const margin = 20;
-      const canvasWidth = canvas.width;
-      const canvasHeight = canvas.height;
+      const canvasWidthPx = canvas.width;
+      const canvasHeightPx = canvas.height;
       const pdf = new jsPDF('p', 'pt', [
-        canvasWidth + margin * 2,
-        canvasHeight + margin * 2,
+        canvasWidthPx + margin * 2,
+        canvasHeightPx + margin * 2,
       ]);
-      pdf.addImage(imgData, 'PNG', margin, margin, canvasWidth, canvasHeight);
+      pdf.addImage(imgData, 'PNG', margin, margin, canvasWidthPx, canvasHeightPx);
       pdf.save('dashboard.pdf');
       message.success('Dashboard exported as PDF successfully!');
     } catch (error) {
