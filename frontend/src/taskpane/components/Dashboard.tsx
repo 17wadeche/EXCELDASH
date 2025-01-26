@@ -180,7 +180,6 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
     newWin.document.write(htmlContent);
     newWin.document.close();
   };
-  
   async function generatePdfBlobFromDom(dashboardElement: HTMLDivElement): Promise<Blob> {
     const originalStyles = saveOriginalStyles(dashboardElement);
     try {
@@ -188,28 +187,29 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
       document.body.style.overflow = 'auto';
       document.documentElement.style.height = 'auto';
       document.body.style.height = 'auto';
-      await new Promise((resolve) => requestAnimationFrame(resolve));
-      let fullWidth = dashboardElement.scrollWidth;
-      let fullHeight = dashboardElement.scrollHeight;
+      await new Promise(resolve => requestAnimationFrame(resolve));
+      const rect = dashboardElement.getBoundingClientRect();
+      const scrollX = window.scrollX || window.pageXOffset;
+      const scrollY = window.scrollY || window.pageYOffset;
       const extraPixels = 5;
-      fullWidth += extraPixels;
-      fullHeight += extraPixels;
-      await new Promise((resolve) => requestAnimationFrame(resolve));
-      const canvas = await html2canvas(dashboardElement, {
+      const captureX = rect.left + scrollX - extraPixels;
+      const captureY = rect.top + scrollY - extraPixels;
+      const captureWidth = rect.width + extraPixels * 2;
+      const captureHeight = rect.height + extraPixels * 2;
+      const canvas = await html2canvas(document.body, {
         useCORS: true,
         backgroundColor: '#ffffff',
         scale: 2,
         scrollX: 0,
         scrollY: 0,
-        width: fullWidth,
-        height: fullHeight,
-        windowWidth: fullWidth,
-        windowHeight: fullHeight
+        x: captureX,
+        y: captureY,
+        width: captureWidth,
+        height: captureHeight
       });
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('p', 'pt', [canvas.width, canvas.height]);
       pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height, undefined, 'FAST');
-  
       return pdf.output('blob');
     } finally {
       restoreOriginalStyles(dashboardElement, originalStyles);
