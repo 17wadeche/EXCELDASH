@@ -55,24 +55,17 @@ interface DashboardProps {
 async function generatePdfBlobFromDom(dashboardElement: HTMLDivElement): Promise<Blob> {
   const originalStyles = saveOriginalStyles(dashboardElement);
   try {
-    // Let the layout update
     document.documentElement.style.overflow = 'auto';
     document.body.style.overflow = 'auto';
     document.documentElement.style.height = 'auto';
     document.body.style.height = 'auto';
-
     await new Promise((resolve) => requestAnimationFrame(resolve));
-
-    // Measure size
     let fullWidth = dashboardElement.scrollWidth;
     let fullHeight = dashboardElement.scrollHeight;
-    const extraPixels = 5;
+    const extraPixels = 8;
     fullWidth += extraPixels;
     fullHeight += extraPixels;
-
     await new Promise((resolve) => requestAnimationFrame(resolve));
-
-    // Capture the dashboard with html2canvas
     const canvas = await html2canvas(dashboardElement, {
       useCORS: true,
       backgroundColor: '#ffffff',
@@ -84,18 +77,14 @@ async function generatePdfBlobFromDom(dashboardElement: HTMLDivElement): Promise
       windowWidth: fullWidth,
       windowHeight: fullHeight,
     });
-
-    // Convert canvas to PDF
     const imgData = canvas.toDataURL('image/png');
-    const pdf = new jsPDF('p', 'pt', [canvas.width, canvas.height]);
-    pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height, undefined, 'FAST');
+    const pdf = new jsPDF('p', 'pt', [canvas.width, canvas.height + 3]);
+    pdf.addImage(imgData, 'PNG', 0, 3, canvas.width, canvas.height, undefined, 'FAST');
     return pdf.output('blob');
   } finally {
     restoreOriginalStyles(dashboardElement, originalStyles);
   }
 }
-
-// --- NEW: Style saving and restoring
 function saveOriginalStyles(el: HTMLDivElement) {
   return {
     htmlOverflow: document.documentElement.style.overflow,
@@ -200,28 +189,20 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
       message.error('Dashboard container not found.');
       return;
     }
-
-    // 1) First, call your existing export method
     message.info('Exporting dashboard as PDF (existing method)...');
     if (exportDashboardAsPDF) {
-      await exportDashboardAsPDF(); // existing method from your context
+      await exportDashboardAsPDF();
     } else {
       message.warning('No exportDashboardAsPDF() found in context, skipping that step...');
     }
     message.success('PDF downloaded using existing export method.');
-
-    // 2) Then generate in-memory PDF for embedding
     message.info('Generating in-memory PDF for embedding...');
     const pdfBlob = await generatePdfBlobFromDom(dashboardRef.current);
     const tempUrl = URL.createObjectURL(pdfBlob);
     message.success('In-memory PDF generated.');
-
-    // 3) Determine window size
     const rect = dashboardRef.current.getBoundingClientRect();
     const windowWidth = Math.round(rect.width) + 100;
     const windowHeight = Math.max(900, Math.round(rect.height) + 150);
-
-    // 4) Open a new window to display it
     const newWin = window.open(
       '',
       'PDFPresentation',
@@ -231,8 +212,6 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
       message.error('Failed to open new window for presentation.');
       return;
     }
-
-    // 5) Write an HTML doc with an <iframe> pointing to our in-memory PDF
     const htmlContent = `
       <!DOCTYPE html>
       <html lang="en">
