@@ -130,14 +130,14 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
       return;
     }
     message.info('Exporting dashboard as PDF (existing method)...');
-    await exportDashboardAsPDF(); 
+    await exportDashboardAsPDF();
     message.success('PDF downloaded using existing export method.');
     message.info('Generating in-memory PDF for embedding...');
     const pdfBlob = await generatePdfBlobFromDom(dashboardRef.current);
     const tempUrl = URL.createObjectURL(pdfBlob);
     message.success('In-memory PDF generated.');
     const rect = dashboardRef.current.getBoundingClientRect();
-    const windowWidth = Math.round(rect.width) + 100;  // increased margin
+    const windowWidth = Math.round(rect.width) + 100;
     const windowHeight = Math.max(900, Math.round(rect.height) + 150);
     const newWin = window.open(
       '',
@@ -183,19 +183,29 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
   
   async function generatePdfBlobFromDom(dashboardElement: HTMLDivElement): Promise<Blob> {
     const originalStyles = saveOriginalStyles(dashboardElement);
+    const wrapper = document.createElement('div');
+    wrapper.style.padding = '5px';
+    wrapper.style.backgroundColor = '#fff';
+    const parent = dashboardElement.parentNode;
+    if (!parent) {
+      throw new Error('Dashboard has no parent node.');
+    }
+    parent.insertBefore(wrapper, dashboardElement);
+    wrapper.appendChild(dashboardElement);
+  
     try {
       document.documentElement.style.overflow = 'auto';
       document.body.style.overflow = 'auto';
       document.documentElement.style.height = 'auto';
       document.body.style.height = 'auto';
       await new Promise((resolve) => requestAnimationFrame(resolve));
-      const fullWidth = dashboardElement.scrollWidth;
-      const fullHeight = dashboardElement.scrollHeight;
+      const fullWidth = wrapper.scrollWidth;
+      const fullHeight = wrapper.scrollHeight;
       await new Promise((resolve) => requestAnimationFrame(resolve));
-      const canvas = await html2canvas(dashboardElement, {
+      const canvas = await html2canvas(wrapper, {
         useCORS: true,
         backgroundColor: '#ffffff',
-        scale: 2,          // Increase resolution
+        scale: 2,
         scrollX: 0,
         scrollY: 0,
         width: fullWidth,
@@ -208,6 +218,9 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
       pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height, undefined, 'FAST');
       return pdf.output('blob');
     } finally {
+      wrapper.removeChild(dashboardElement);
+      parent.insertBefore(dashboardElement, wrapper);
+      parent.removeChild(wrapper);
       restoreOriginalStyles(dashboardElement, originalStyles);
     }
   }
