@@ -52,8 +52,50 @@ interface DashboardProps {
   isFullScreen?: boolean;
 }
 
+export const createPDF = async (): Promise<Blob | null> => {
+  const container = document.getElementById('dashboard-container');
+  if (!container) {
+    message.error('Dashboard container not found.');
+    return null;
+  }
+
+  try {
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+
+    const containerWidth = container.scrollWidth + 5;
+    const containerHeight = container.scrollHeight + 5;
+
+    const canvas = await html2canvas(container, {
+      useCORS: true,
+      backgroundColor: '#FFF',
+      width: containerWidth,
+      height: containerHeight,
+      scale: 2,
+    });
+
+    const imgData = canvas.toDataURL('image/png');
+    const margin = 20;
+    const canvasWidthPx = canvas.width;
+    const canvasHeightPx = canvas.height;
+
+    const pdf = new jsPDF('p', 'pt', [
+      canvasWidthPx + margin * 2,
+      canvasHeightPx + margin * 2,
+    ]);
+    pdf.addImage(imgData, 'PNG', margin, margin, canvasWidthPx, canvasHeightPx);
+
+    const pdfBlob = pdf.output('blob');
+    message.success('Dashboard exported as PDF successfully!');
+    return pdfBlob;
+  } catch (error) {
+    console.error('Error exporting dashboard as PDF:', error);
+    message.error('Failed to export dashboard as PDF.');
+    return null;
+  }
+};
+
 const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = false, closePresenterMode, isFullScreen }) => {
-  const { widgets, addWidget, removeWidget, updateWidget, refreshAllCharts, layouts, setLayouts, setWidgets, setDashboardBorderSettings, updateLayoutsForNewWidgets, undo, dashboardBorderSettings, redo, canUndo, dashboardTitle, canRedo, currentDashboardId, currentDashboard, currentWorkbookId, availableWorksheets, setCurrentDashboard, exportDashboardAsPDF, setCurrentDashboardId, setDashboards, refreshTableWidgetData } = useContext(DashboardContext)!;
+  const { widgets, addWidget, removeWidget, updateWidget, refreshAllCharts, layouts, setLayouts, setWidgets, setDashboardBorderSettings, updateLayoutsForNewWidgets, undo, dashboardBorderSettings, redo, canUndo, dashboardTitle, canRedo, currentDashboardId, currentDashboard, currentWorkbookId, availableWorksheets, setCurrentDashboard, setCurrentDashboardId, setDashboards, refreshTableWidgetData } = useContext(DashboardContext)!;
   const { id } = useParams<{ id: string }>();
   const [isFullscreenActive, setIsFullscreenActive] = useState(false);
   const isEditingEnabled = !isPresenterMode && !isFullscreenActive && !isFullScreen;
@@ -123,42 +165,6 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
       updateLayoutsForNewWidgets(widgetsWithoutLayout);
     }
   }, [widgets, isPresenterMode, layouts, updateLayoutsForNewWidgets]);
-
-  export const createPDF = async (): Promise<Blob | null> => {
-    const container = document.getElementById('dashboard-container');
-    if (!container) {
-      message.error('Dashboard container not found.');
-      return null;
-    }
-    try {
-      await new Promise((resolve) => requestAnimationFrame(resolve));
-      const containerWidth = container.scrollWidth + 5;
-      const containerHeight = container.scrollHeight + 5;
-      const canvas = await html2canvas(container, {
-        useCORS: true,
-        backgroundColor: '#FFF',
-        width: containerWidth,
-        height: containerHeight,
-        scale: 2,
-      });
-      const imgData = canvas.toDataURL('image/png');
-      const margin = 20;
-      const canvasWidthPx = canvas.width;
-      const canvasHeightPx = canvas.height;
-      const pdf = new jsPDF('p', 'pt', [
-        canvasWidthPx + margin * 2,
-        canvasHeightPx + margin * 2,
-      ]);
-      pdf.addImage(imgData, 'PNG', margin, margin, canvasWidthPx, canvasHeightPx);
-      const pdfBlob = pdf.output('blob');
-      message.success('Dashboard exported as PDF successfully!');
-      return pdfBlob;
-    } catch (error) {
-      console.error('Error exporting dashboard as PDF:', error);
-      message.error('Failed to export dashboard as PDF.');
-      return null;
-    }
-  };
 
   const handlePresentDashboard = async () => {
     try {
