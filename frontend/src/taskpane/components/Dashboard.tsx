@@ -52,44 +52,79 @@ interface DashboardProps {
   isFullScreen?: boolean;
 }
 
-export const createPDF = async (): Promise<string | null> => {
-  const container = document.getElementById('dashboard-container');
-  if (!container) {
-    message.error('Dashboard container not found.');
-    return null;
-  }
+async function generatePdfBlobFromDom(dashboardElement: HTMLDivElement): Promise<Blob> {
+  const originalStyles = saveOriginalStyles(dashboardElement);
   try {
+    // Let the layout update
+    document.documentElement.style.overflow = 'auto';
+    document.body.style.overflow = 'auto';
+    document.documentElement.style.height = 'auto';
+    document.body.style.height = 'auto';
+
     await new Promise((resolve) => requestAnimationFrame(resolve));
-    const containerWidth = container.scrollWidth + 5;
-    const containerHeight = container.scrollHeight + 5;
-    const canvas = await html2canvas(container, {
+
+    // Measure size
+    let fullWidth = dashboardElement.scrollWidth;
+    let fullHeight = dashboardElement.scrollHeight;
+    const extraPixels = 5;
+    fullWidth += extraPixels;
+    fullHeight += extraPixels;
+
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+
+    // Capture the dashboard with html2canvas
+    const canvas = await html2canvas(dashboardElement, {
       useCORS: true,
-      backgroundColor: '#FFF',
-      width: containerWidth,
-      height: containerHeight,
+      backgroundColor: '#ffffff',
       scale: 2,
+      scrollX: 0,
+      scrollY: 0,
+      width: fullWidth,
+      height: fullHeight,
+      windowWidth: fullWidth,
+      windowHeight: fullHeight,
     });
+
+    // Convert canvas to PDF
     const imgData = canvas.toDataURL('image/png');
-    const margin = 20;
-    const canvasWidthPx = canvas.width;
-    const canvasHeightPx = canvas.height;
-    const pdf = new jsPDF('p', 'pt', [
-      canvasWidthPx + margin * 2,
-      canvasHeightPx + margin * 2,
-    ]);
-    pdf.addImage(imgData, 'PNG', margin, margin, canvasWidthPx, canvasHeightPx);
-    const pdfDataUri = pdf.output('datauristring');
-    message.success('Dashboard exported as PDF successfully!');
-    return pdfDataUri;
-  } catch (error) {
-    console.error('Error exporting dashboard as PDF:', error);
-    message.error('Failed to export dashboard as PDF.');
-    return null;
+    const pdf = new jsPDF('p', 'pt', [canvas.width, canvas.height]);
+    pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height, undefined, 'FAST');
+    return pdf.output('blob');
+  } finally {
+    restoreOriginalStyles(dashboardElement, originalStyles);
   }
-};
+}
+
+// --- NEW: Style saving and restoring
+function saveOriginalStyles(el: HTMLDivElement) {
+  return {
+    htmlOverflow: document.documentElement.style.overflow,
+    bodyOverflow: document.body.style.overflow,
+    htmlHeight: document.documentElement.style.height,
+    bodyHeight: document.body.style.height,
+    elPosition: el.style.position,
+    elWidth: el.style.width,
+    elHeight: el.style.height,
+    elOverflow: el.style.overflow,
+    elMargin: el.style.margin,
+    elPadding: el.style.padding,
+  };
+}
+function restoreOriginalStyles(el: HTMLDivElement, styles: any) {
+  document.documentElement.style.overflow = styles.htmlOverflow;
+  document.body.style.overflow = styles.bodyOverflow;
+  document.documentElement.style.height = styles.htmlHeight;
+  document.body.style.height = styles.bodyHeight;
+  el.style.position = styles.elPosition;
+  el.style.width = styles.elWidth;
+  el.style.height = styles.elHeight;
+  el.style.overflow = styles.elOverflow;
+  el.style.margin = styles.elMargin;
+  el.style.padding = styles.elPadding;
+}
 
 const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = false, closePresenterMode, isFullScreen }) => {
-  const { widgets, addWidget, removeWidget, updateWidget, refreshAllCharts, layouts, setLayouts, setWidgets, setDashboardBorderSettings, updateLayoutsForNewWidgets, undo, dashboardBorderSettings, redo, canUndo, dashboardTitle, canRedo, currentDashboardId, currentDashboard, currentWorkbookId, availableWorksheets, setCurrentDashboard, setCurrentDashboardId, setDashboards, refreshTableWidgetData } = useContext(DashboardContext)!;
+  const { widgets, addWidget, removeWidget, updateWidget, refreshAllCharts, layouts, setLayouts, setWidgets, setDashboardBorderSettings, updateLayoutsForNewWidgets, undo, dashboardBorderSettings, redo, canUndo, dashboardTitle, canRedo, currentDashboardId, currentDashboard, currentWorkbookId, availableWorksheets, setCurrentDashboard, exportDashboardAsPDF, setCurrentDashboardId, setDashboards, refreshTableWidgetData } = useContext(DashboardContext)!;
   const { id } = useParams<{ id: string }>();
   const [isFullscreenActive, setIsFullscreenActive] = useState(false);
   const isEditingEnabled = !isPresenterMode && !isFullscreenActive && !isFullScreen;
@@ -161,54 +196,73 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
   }, [widgets, isPresenterMode, layouts, updateLayoutsForNewWidgets]);
 
   const handlePresentDashboard = async () => {
-    try {
-      // Generate a data URI for the PDF
-      const pdfDataUri = await createPDF();
-      if (!pdfDataUri) {
-        return;
-      }
-  
-      // Attempt to open a new blank window
-      const newWin = window.open('', '_blank');
-      if (!newWin) {
-        message.error('Failed to open new window (possibly blocked).');
-        return;
-      }
-  
-      // Write the HTML we want
-      const doc = newWin.document;
-      doc.open();
-      doc.write(`
-        <html>
-          <head>
-            <title>Dashboard PDF</title>
-            <style>
-              html, body {
-                margin: 0;
-                padding: 0;
-                width: 100%;
-                height: 100%;
-                overflow: hidden;
-              }
-              iframe {
-                width: 100%;
-                height: 100%;
-                border: none;
-              }
-            </style>
-          </head>
-          <body>
-            <iframe src="${pdfDataUri}"></iframe>
-          </body>
-        </html>
-      `);
-      doc.close();
-  
-      message.success('Opened Dashboard PDF in new window via iframe!');
-    } catch (error) {
-      message.error('Failed to export the dashboard as PDF.');
-      console.error(error);
+    if (!dashboardRef.current) {
+      message.error('Dashboard container not found.');
+      return;
     }
+
+    // 1) First, call your existing export method
+    message.info('Exporting dashboard as PDF (existing method)...');
+    if (exportDashboardAsPDF) {
+      await exportDashboardAsPDF(); // existing method from your context
+    } else {
+      message.warning('No exportDashboardAsPDF() found in context, skipping that step...');
+    }
+    message.success('PDF downloaded using existing export method.');
+
+    // 2) Then generate in-memory PDF for embedding
+    message.info('Generating in-memory PDF for embedding...');
+    const pdfBlob = await generatePdfBlobFromDom(dashboardRef.current);
+    const tempUrl = URL.createObjectURL(pdfBlob);
+    message.success('In-memory PDF generated.');
+
+    // 3) Determine window size
+    const rect = dashboardRef.current.getBoundingClientRect();
+    const windowWidth = Math.round(rect.width) + 100;
+    const windowHeight = Math.max(900, Math.round(rect.height) + 150);
+
+    // 4) Open a new window to display it
+    const newWin = window.open(
+      '',
+      'PDFPresentation',
+      `width=${windowWidth},height=${windowHeight},resizable,scrollbars=yes`
+    );
+    if (!newWin) {
+      message.error('Failed to open new window for presentation.');
+      return;
+    }
+
+    // 5) Write an HTML doc with an <iframe> pointing to our in-memory PDF
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html lang="en">
+        <head>
+          <meta charset="UTF-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+          <title>${dashboardTitle || 'Dashboard Presentation'}</title>
+          <style>
+            html, body {
+              margin: 0;
+              padding: 0;
+              height: 100%;
+              overflow: auto;
+              background: #fff;
+            }
+            iframe {
+              border: none;
+              width: 100%;
+              height: 100%;
+            }
+          </style>
+        </head>
+        <body>
+          <iframe src="${tempUrl}" title="Dashboard PDF"></iframe>
+        </body>
+      </html>
+    `;
+    newWin.document.open();
+    newWin.document.write(htmlContent);
+    newWin.document.close();
   };
 
   const handleExitPresentationMode = () => {
@@ -772,5 +826,5 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
     </div>
   );
 });
-Dashboard.displayName = 'Dashboard';
+
 export default Dashboard;
