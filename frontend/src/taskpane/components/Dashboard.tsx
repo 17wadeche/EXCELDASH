@@ -124,20 +124,50 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
     }
   }, [widgets, isPresenterMode, layouts, updateLayoutsForNewWidgets]);
 
+  export const createPDF = async (): Promise<Blob | null> => {
+    const container = document.getElementById('dashboard-container');
+    if (!container) {
+      message.error('Dashboard container not found.');
+      return null;
+    }
+    try {
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+      const containerWidth = container.scrollWidth + 5;
+      const containerHeight = container.scrollHeight + 5;
+      const canvas = await html2canvas(container, {
+        useCORS: true,
+        backgroundColor: '#FFF',
+        width: containerWidth,
+        height: containerHeight,
+        scale: 2,
+      });
+      const imgData = canvas.toDataURL('image/png');
+      const margin = 20;
+      const canvasWidthPx = canvas.width;
+      const canvasHeightPx = canvas.height;
+      const pdf = new jsPDF('p', 'pt', [
+        canvasWidthPx + margin * 2,
+        canvasHeightPx + margin * 2,
+      ]);
+      pdf.addImage(imgData, 'PNG', margin, margin, canvasWidthPx, canvasHeightPx);
+      const pdfBlob = pdf.output('blob');
+      message.success('Dashboard exported as PDF successfully!');
+      return pdfBlob;
+    } catch (error) {
+      console.error('Error exporting dashboard as PDF:', error);
+      message.error('Failed to export dashboard as PDF.');
+      return null;
+    }
+  };
+
   const handlePresentDashboard = async () => {
     try {
-      const pdfUrlOrBlob = await exportDashboardAsPDF();
-      if (!pdfUrlOrBlob) {
-        message.error('Could not generate PDF for the dashboard.');
+      const pdfBlob = await createPDF();
+      if (!pdfBlob) {
         return;
       }
-      if (typeof pdfUrlOrBlob === 'string') {
-        window.open(pdfUrlOrBlob, '_blank');
-      } 
-      else {
-        const pdfUrl = URL.createObjectURL(pdfUrlOrBlob);
-        window.open(pdfUrl, '_blank');
-      }
+      const pdfUrl = URL.createObjectURL(pdfBlob);
+      window.open(pdfUrl, '_blank');
     } catch (error) {
       message.error('Failed to export the dashboard as PDF.');
       console.error(error);
