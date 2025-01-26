@@ -137,7 +137,7 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
     const tempUrl = URL.createObjectURL(pdfBlob);
     message.success('In-memory PDF generated.');
     const rect = dashboardRef.current.getBoundingClientRect();
-    const windowWidth = Math.round(rect.width) + 50;  // +50 px margin
+    const windowWidth = Math.round(rect.width) + 50;
     const windowHeight = Math.max(800, Math.round(rect.height) + 100);
     const newWin = window.open(
       '',
@@ -176,7 +176,6 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
         </body>
       </html>
     `;
-  
     newWin.document.open();
     newWin.document.write(htmlContent);
     newWin.document.close();
@@ -185,7 +184,6 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
   async function generatePdfBlobFromDom(dashboardElement: HTMLDivElement): Promise<Blob> {
     const originalStyles = saveOriginalStyles(dashboardElement);
     try {
-      prepareForCapture(dashboardElement);
       await new Promise((resolve) => requestAnimationFrame(resolve));
       const fullWidth = dashboardElement.scrollWidth;
       const fullHeight = dashboardElement.scrollHeight;
@@ -194,14 +192,14 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
       await new Promise((resolve) => requestAnimationFrame(resolve));
       const canvas = await html2canvas(dashboardElement, {
         useCORS: true,
+        backgroundColor: '#ffffff',
+        scale: 2,
         scrollX: 0,
         scrollY: 0,
         width: fullWidth,
         height: fullHeight,
         windowWidth: fullWidth,
         windowHeight: fullHeight,
-        backgroundColor: '#ffffff',
-        scale: 2,
       });
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('p', 'pt', [canvas.width, canvas.height]);
@@ -211,6 +209,7 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
       restoreOriginalStyles(dashboardElement, originalStyles);
     }
   }
+  
   function saveOriginalStyles(el: HTMLDivElement) {
     return {
       htmlOverflow: document.documentElement.style.overflow,
@@ -232,18 +231,6 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
     el.style.overflow = styles.elOverflow;
     el.style.margin = styles.elMargin;
     el.style.padding = styles.elPadding;
-  }
-  function prepareForCapture(el: HTMLDivElement) {
-    document.documentElement.style.overflow = 'hidden';
-    document.body.style.overflow = 'hidden';
-    el.style.position = 'absolute';
-    el.style.top = '0';
-    el.style.left = '0';
-    el.style.width = `${el.scrollWidth}px`;
-    el.style.height = `${el.scrollHeight}px`;
-    el.style.overflow = 'hidden';
-    el.style.margin = '0';
-    el.style.padding = '0';
   }
 
   const handleExitPresentationMode = () => {
