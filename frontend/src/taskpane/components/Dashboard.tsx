@@ -753,5 +753,5 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
     </div>
   );
 });
-
+Dashboard.displayName = 'Dashboard';
 export default Dashboard;
