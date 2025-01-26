@@ -129,15 +129,93 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
       message.error('Dashboard container not found.');
       return;
     }
-    message.info('Exporting dashboard as PDF (existing method)...');
     await exportDashboardAsPDF();
-    message.success('PDF downloaded using existing export method.');
-    message.info('Generating in-memory PDF for direct open...');
     const pdfBlob = await generatePdfBlobFromDom(dashboardRef.current);
     const pdfUrl = URL.createObjectURL(pdfBlob);
-    message.success('PDF generated. Opening in new tab...');
-    window.open(pdfUrl, '_blank');
+    const rect = dashboardRef.current.getBoundingClientRect();
+    const windowWidth = Math.round(rect.width) + 100;
+    const windowHeight = Math.max(900, Math.round(rect.height) + 150);
+    const newWin = window.open(
+      pdfUrl,
+      'PDFPresentation',
+      `width=${windowWidth},height=${windowHeight},resizable,scrollbars=yes`
+    );
+    if (!newWin) {
+      message.error('Failed to open new window for presentation.');
+      return;
+    }
+    newWin.focus();
   };
+  async function generatePdfBlobFromDom(
+    dashboardElement: HTMLDivElement
+  ): Promise<Blob> {
+    const originalStyles = saveOriginalStyles(dashboardElement);
+    try {
+      document.documentElement.style.overflow = 'auto';
+      document.body.style.overflow = 'auto';
+      document.documentElement.style.height = 'auto';
+      document.body.style.height = 'auto';
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+      let fullWidth = dashboardElement.scrollWidth;
+      let fullHeight = dashboardElement.scrollHeight;
+      const extraPixels = 5;
+      fullWidth += extraPixels;
+      fullHeight += extraPixels;
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+      const canvas = await html2canvas(dashboardElement, {
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        scale: 2,
+        scrollX: 0,
+        scrollY: 0,
+        width: fullWidth,
+        height: fullHeight,
+        windowWidth: fullWidth,
+        windowHeight: fullHeight,
+      });
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'pt', [canvas.width, canvas.height]);
+      pdf.addImage(
+        imgData,
+        'PNG',
+        0,
+        0,
+        canvas.width,
+        canvas.height,
+        undefined,
+        'FAST'
+      );
+      return pdf.output('blob');
+    } finally {
+      restoreOriginalStyles(dashboardElement, originalStyles);
+    }
+  }
+  function saveOriginalStyles(el: HTMLDivElement) {
+    return {
+      htmlOverflow: document.documentElement.style.overflow,
+      bodyOverflow: document.body.style.overflow,
+      htmlHeight: document.documentElement.style.height,
+      bodyHeight: document.body.style.height,
+      elPosition: el.style.position,
+      elWidth: el.style.width,
+      elHeight: el.style.height,
+      elOverflow: el.style.overflow,
+      elMargin: el.style.margin,
+      elPadding: el.style.padding,
+    };
+  }
+  function restoreOriginalStyles(el: HTMLDivElement, styles: any) {
+    document.documentElement.style.overflow = styles.htmlOverflow;
+    document.body.style.overflow = styles.bodyOverflow;
+    document.documentElement.style.height = styles.htmlHeight;
+    document.body.style.height = styles.bodyHeight;
+    el.style.position = styles.elPosition;
+    el.style.width = styles.elWidth;
+    el.style.height = styles.elHeight;
+    el.style.overflow = styles.elOverflow;
+    el.style.margin = styles.elMargin;
+    el.style.padding = styles.elPadding;
+  }
 
   const handleExitPresentationMode = () => {
     setIsPresentationMode(false);
