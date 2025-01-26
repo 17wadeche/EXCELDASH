@@ -52,19 +52,16 @@ interface DashboardProps {
   isFullScreen?: boolean;
 }
 
-export const createPDF = async (): Promise<Blob | null> => {
+export const createPDF = async (): Promise<string | null> => {
   const container = document.getElementById('dashboard-container');
   if (!container) {
     message.error('Dashboard container not found.');
     return null;
   }
-
   try {
     await new Promise((resolve) => requestAnimationFrame(resolve));
-
     const containerWidth = container.scrollWidth + 5;
     const containerHeight = container.scrollHeight + 5;
-
     const canvas = await html2canvas(container, {
       useCORS: true,
       backgroundColor: '#FFF',
@@ -72,21 +69,18 @@ export const createPDF = async (): Promise<Blob | null> => {
       height: containerHeight,
       scale: 2,
     });
-
     const imgData = canvas.toDataURL('image/png');
     const margin = 20;
     const canvasWidthPx = canvas.width;
     const canvasHeightPx = canvas.height;
-
     const pdf = new jsPDF('p', 'pt', [
       canvasWidthPx + margin * 2,
       canvasHeightPx + margin * 2,
     ]);
     pdf.addImage(imgData, 'PNG', margin, margin, canvasWidthPx, canvasHeightPx);
-
-    const pdfBlob = pdf.output('blob');
+    const pdfDataUri = pdf.output('datauristring');
     message.success('Dashboard exported as PDF successfully!');
-    return pdfBlob;
+    return pdfDataUri;
   } catch (error) {
     console.error('Error exporting dashboard as PDF:', error);
     message.error('Failed to export dashboard as PDF.');
@@ -168,12 +162,30 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
 
   const handlePresentDashboard = async () => {
     try {
-      const pdfBlob = await createPDF();
-      if (!pdfBlob) {
+      const pdfDataUri = await createPDF();
+      if (!pdfDataUri) {
         return;
       }
-      const pdfUrl = URL.createObjectURL(pdfBlob);
-      window.open(pdfUrl, '_blank');
+      const newWin = window.open('', '_blank');
+      if (!newWin) {
+        message.error('Failed to open new window (pop-up blocked?).');
+        return;
+      }
+      newWin.document.write(`
+        <html>
+          <head><title>Dashboard PDF</title></head>
+          <body style="margin:0;padding:0;overflow:hidden;">
+            <iframe 
+              width="100%" 
+              height="100%" 
+              style="border:none;" 
+              src="${pdfDataUri}">
+            </iframe>
+          </body>
+        </html>
+      `);
+      newWin.document.close();
+      message.success('Opened Dashboard PDF in new tab via iframe!');
     } catch (error) {
       message.error('Failed to export the dashboard as PDF.');
       console.error(error);
