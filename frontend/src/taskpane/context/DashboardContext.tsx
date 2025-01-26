@@ -2610,8 +2610,8 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     }
     try {
       await new Promise((resolve) => requestAnimationFrame(resolve));
-      const containerWidth = container.scrollWidth;
-      const containerHeight = container.scrollHeight;
+      const containerWidth = container.scrollWidth + 5;
+      const containerHeight = container.scrollHeight + 5;
       const canvas = await html2canvas(container, {
         useCORS: true,
         backgroundColor: '#FFF',
