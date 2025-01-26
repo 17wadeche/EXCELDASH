@@ -162,30 +162,49 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
 
   const handlePresentDashboard = async () => {
     try {
+      // Generate a data URI for the PDF
       const pdfDataUri = await createPDF();
       if (!pdfDataUri) {
         return;
       }
+  
+      // Attempt to open a new blank window
       const newWin = window.open('', '_blank');
       if (!newWin) {
-        message.error('Failed to open new window (pop-up blocked?).');
+        message.error('Failed to open new window (possibly blocked).');
         return;
       }
-      newWin.document.write(`
+  
+      // Write the HTML we want
+      const doc = newWin.document;
+      doc.open();
+      doc.write(`
         <html>
-          <head><title>Dashboard PDF</title></head>
-          <body style="margin:0;padding:0;overflow:hidden;">
-            <iframe 
-              width="100%" 
-              height="100%" 
-              style="border:none;" 
-              src="${pdfDataUri}">
-            </iframe>
+          <head>
+            <title>Dashboard PDF</title>
+            <style>
+              html, body {
+                margin: 0;
+                padding: 0;
+                width: 100%;
+                height: 100%;
+                overflow: hidden;
+              }
+              iframe {
+                width: 100%;
+                height: 100%;
+                border: none;
+              }
+            </style>
+          </head>
+          <body>
+            <iframe src="${pdfDataUri}"></iframe>
           </body>
         </html>
       `);
-      newWin.document.close();
-      message.success('Opened Dashboard PDF in new tab via iframe!');
+      doc.close();
+  
+      message.success('Opened Dashboard PDF in new window via iframe!');
     } catch (error) {
       message.error('Failed to export the dashboard as PDF.');
       console.error(error);
