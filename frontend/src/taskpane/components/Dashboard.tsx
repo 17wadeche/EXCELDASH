@@ -132,10 +132,12 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
     message.info('Exporting dashboard as PDF (existing method)...');
     await exportDashboardAsPDF();
     message.success('PDF downloaded using existing export method.');
+  
     message.info('Generating in-memory PDF for embedding...');
     const pdfBlob = await generatePdfBlobFromDom(dashboardRef.current);
     const tempUrl = URL.createObjectURL(pdfBlob);
     message.success('In-memory PDF generated.');
+  
     const rect = dashboardRef.current.getBoundingClientRect();
     const windowWidth = Math.round(rect.width) + 100;
     const windowHeight = Math.max(900, Math.round(rect.height) + 150);
@@ -181,28 +183,38 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
     newWin.document.close();
   };
   
+  /**
+   * Temporarily adds padding to the dashboard element itself,
+   * so the captured image has a few extra pixels around the edges.
+   */
   async function generatePdfBlobFromDom(dashboardElement: HTMLDivElement): Promise<Blob> {
     const originalStyles = saveOriginalStyles(dashboardElement);
-    const wrapper = document.createElement('div');
-    wrapper.style.padding = '5px';
-    wrapper.style.backgroundColor = '#fff';
-    const parent = dashboardElement.parentNode;
-    if (!parent) {
-      throw new Error('Dashboard has no parent node.');
-    }
-    parent.insertBefore(wrapper, dashboardElement);
-    wrapper.appendChild(dashboardElement);
   
     try {
+      // Ensure the page can expand
       document.documentElement.style.overflow = 'auto';
       document.body.style.overflow = 'auto';
       document.documentElement.style.height = 'auto';
       document.body.style.height = 'auto';
+  
+      // Add extra padding to the dashboard itself
+      dashboardElement.style.display = 'block';
+      dashboardElement.style.boxSizing = 'border-box';
+      dashboardElement.style.padding = '5px';       // extra space
+      dashboardElement.style.backgroundColor = '#fff';
+  
+      // Wait one frame for style changes to apply
       await new Promise((resolve) => requestAnimationFrame(resolve));
-      const fullWidth = wrapper.scrollWidth;
-      const fullHeight = wrapper.scrollHeight;
+  
+      // Measure the total scrollable size
+      const fullWidth = dashboardElement.scrollWidth;
+      const fullHeight = dashboardElement.scrollHeight;
+  
+      // Wait another frame (sometimes helps with complex layouts)
       await new Promise((resolve) => requestAnimationFrame(resolve));
-      const canvas = await html2canvas(wrapper, {
+  
+      // Capture as canvas
+      const canvas = await html2canvas(dashboardElement, {
         useCORS: true,
         backgroundColor: '#ffffff',
         scale: 2,
@@ -213,14 +225,15 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
         windowWidth: fullWidth,
         windowHeight: fullHeight,
       });
+  
+      // Convert to PDF
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('p', 'pt', [canvas.width, canvas.height]);
       pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height, undefined, 'FAST');
+  
       return pdf.output('blob');
     } finally {
-      wrapper.removeChild(dashboardElement);
-      parent.insertBefore(dashboardElement, wrapper);
-      parent.removeChild(wrapper);
+      // Restore original styles after capturing
       restoreOriginalStyles(dashboardElement, originalStyles);
     }
   }
@@ -231,12 +244,15 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
       bodyOverflow: document.body.style.overflow,
       htmlHeight: document.documentElement.style.height,
       bodyHeight: document.body.style.height,
+      elDisplay: el.style.display,
+      elBoxSizing: el.style.boxSizing,
+      elPadding: el.style.padding,
+      elBackground: el.style.backgroundColor,
       elPosition: el.style.position,
       elWidth: el.style.width,
       elHeight: el.style.height,
       elOverflow: el.style.overflow,
       elMargin: el.style.margin,
-      elPadding: el.style.padding,
     };
   }
   
@@ -245,14 +261,16 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
     document.body.style.overflow = styles.bodyOverflow;
     document.documentElement.style.height = styles.htmlHeight;
     document.body.style.height = styles.bodyHeight;
+    el.style.display = styles.elDisplay;
+    el.style.boxSizing = styles.elBoxSizing;
+    el.style.padding = styles.elPadding;
+    el.style.backgroundColor = styles.elBackground;
     el.style.position = styles.elPosition;
     el.style.width = styles.elWidth;
     el.style.height = styles.elHeight;
     el.style.overflow = styles.elOverflow;
     el.style.margin = styles.elMargin;
-    el.style.padding = styles.elPadding;
   }
-
   const handleExitPresentationMode = () => {
     setIsPresentationMode(false);
   };
