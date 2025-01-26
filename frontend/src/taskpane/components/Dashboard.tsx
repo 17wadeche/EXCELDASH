@@ -62,7 +62,7 @@ async function generatePdfBlobFromDom(dashboardElement: HTMLDivElement): Promise
     await new Promise((resolve) => requestAnimationFrame(resolve));
     let fullWidth = dashboardElement.scrollWidth;
     let fullHeight = dashboardElement.scrollHeight;
-    const extraPixels = 9;
+    const extraPixels = 8;
     fullWidth += extraPixels;
     fullHeight += extraPixels;
     await new Promise((resolve) => requestAnimationFrame(resolve));
