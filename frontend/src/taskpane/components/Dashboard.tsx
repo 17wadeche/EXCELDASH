@@ -78,8 +78,8 @@ async function generatePdfBlobFromDom(dashboardElement: HTMLDivElement): Promise
       windowHeight: fullHeight,
     });
     const imgData = canvas.toDataURL('image/png');
-    const pdf = new jsPDF('p', 'pt', [canvas.width + 4, canvas.height + 4]);
-    pdf.addImage(imgData, 'PNG', 4, 4, canvas.width, canvas.height, undefined, 'FAST');
+    const pdf = new jsPDF('p', 'pt', [canvas.width + 5, canvas.height + 4]);
+    pdf.addImage(imgData, 'PNG', 5, 4, canvas.width, canvas.height, undefined, 'FAST');
     return pdf.output('blob');
   } finally {
     restoreOriginalStyles(dashboardElement, originalStyles);
