@@ -512,7 +512,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                     return context.formattedValue;
                 }
               },
-              },
             },
             zoom: {
               pan: {
