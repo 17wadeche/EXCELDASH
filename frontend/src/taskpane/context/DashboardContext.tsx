@@ -1180,7 +1180,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       }
       const newKey = `${type}-${uuidv4()}`;
       let newWidget: Widget;
-      const highestZIndex = widgets.reduce((max, w) => (w.zIndex > max ? w.zIndex : max), 0);
+      let highestZIndex = widgets.reduce((max, w) => Math.max(max, w.zIndex ?? 0), 0);
       const newZIndex = highestZIndex + 1;
       if (type === 'table') {
         try {
@@ -1199,7 +1199,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
               sheetName: '',
               tableName: '',
             } as TableData,
-            zIndex: newZIndex, 
+            zIndex: newZIndex,
           };
           setWidgetToPrompt({
             widget: newWidget,
@@ -1702,12 +1702,12 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
   };
   const copyWidget = useCallback(
     (widget: Widget) => {
-      const highestZIndex = widgets.reduce((max, w) => (w.zIndex > max ? w.zIndex : max), 0);
-      const newZIndex = highestZIndex + 1;
+      let anotherHighestZIndex = widgets.reduce((max, w) => Math.max(max, w.zIndex ?? 0), 0);
+      const anotherNewZIndex = anotherHighestZIndex + 1;
       const newWidget: Widget = {
         ...widget,
         id: `${widget.type}-${uuidv4()}`,
-        zIndex: newZIndex,
+        zIndex: anotherNewZIndex,
       };
       addWidgetFunc(widget.type, newWidget.data);
       message.success('Widget copied!');
