@@ -18,7 +18,7 @@ export interface TitleWidgetData {
 export interface WidgetBase {
   id: string;
   type: WidgetType;
-  order: number;
+  zIndex?: number;
 }
 
 export interface TextWidget extends WidgetBase {

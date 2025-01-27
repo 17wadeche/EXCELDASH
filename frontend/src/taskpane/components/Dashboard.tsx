@@ -568,6 +568,9 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
   ]);
 
   const widgetElements = useMemo(() => {
+    const sortedWidgets = [...widgets].sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
+    return sortedWidgets.map((widget) => {
+      let content;
     return widgets.map((widget) => {
       let content;
       if (widget.type === 'text') {
@@ -609,7 +612,7 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
         <div
           key={widget.id}
           className="grid-item"
-          style={{ padding: 0, margin: 0, position: 'relative' }}
+          style={{ padding: 0, margin: 0, position: 'relative', zIndex: widget.zIndex || 0 }}
         >
           {isEditingEnabled && (
             <div className="widget-actions">
@@ -642,6 +645,7 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
                 padding: 0,
                 margin: 0,
                 backgroundColor: 'white',
+                zIndex: widget.zIndex || 0
               }}
             >
               {content}
@@ -658,6 +662,7 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
                 padding: '0px',
                 boxShadow: 'none',
                 backgroundColor: 'white',
+                zIndex: widget.zIndex || 0
               }}
             >
               {content}

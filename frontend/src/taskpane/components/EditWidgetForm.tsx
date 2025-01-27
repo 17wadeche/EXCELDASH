@@ -2,8 +2,8 @@
 // src/taskpane/components/EditWidgetForm.tsx
 
 import React, { useEffect, useState, useContext } from 'react';
-import { Form, Input, Space, Button, InputNumber, message, Select, Switch, Collapse } from 'antd';
-import { MinusCircleOutlined, PlusOutlined, SelectOutlined } from '@ant-design/icons';
+import { Form, Input, Space, Button, InputNumber, message, Select, Switch, Collapse, Radio } from 'antd';
+import { MinusCircleOutlined, PlusOutlined, SelectOutlined, ArrowUpOutlined, ArrowDownOutlined } from '@ant-design/icons';
 import moment from 'moment';
 import { DashboardContext } from '../context/DashboardContext';
 import { Widget, TextData, ChartData, GanttWidgetData, MetricData, TitleWidgetData } from './types';
@@ -17,15 +17,16 @@ interface EditWidgetFormProps {
   onSubmit: (updatedData: TextData | ChartData | GanttWidgetData | MetricData | TitleWidgetData) => void;
   onCancel: () => void;
   isPresenterMode?: boolean;
+  initialZIndex?: number;
 }
 
 const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCancel, isPresenterMode }) => {
   const [form] = Form.useForm();
   const widgetId = widget.id;
-  const { availableWorksheets, widgets } = useContext(DashboardContext)!;
+  const { availableWorksheets } = useContext(DashboardContext)!;
   const [sheets, setSheets] = useState<string[]>([]);
   const [chartType, setChartType] = useState<string>(widget.type === 'chart' ? (widget.data as ChartData).type : 'bar');
-  const [currentOrder, setCurrentOrder] = useState<number>(widget.order);
+  const [zIndex, setZIndex] = useState<number>(widget.zIndex || 0);
 
   useEffect(() => {
     setSheets(availableWorksheets);
@@ -41,8 +42,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
         const data = widget.data as ChartData;
         const useArea = data.type === 'line' && data.datasets.some((ds) => ds.fill);
         const initialValues: any = {
-          ...widget.data,
-          order: widget.order,
           title: data.title || 'Chart',
           chartType: useArea ? 'area' : data.type,
           labels: (data.labels || []).join(', '),
@@ -137,7 +136,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
 
   useEffect(() => {
     form.setFieldsValue(getInitialValues());
-    setCurrentOrder(widget.order);
     if (widget.type === 'chart') {
       const cData = widget.data as ChartData;
       setChartType(cData.type);
@@ -168,21 +166,42 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
     }
   }, [widget, form]);
 
-  const handleBringToFront = () => {
-    const maxOrder = Math.max(...widgets.map(w => w.order));
-    const newOrder = maxOrder + 1;
-    form.setFieldsValue({ order: newOrder });
-    setCurrentOrder(newOrder);
-    message.success('Widget brought to front.');
-  };
-
-  const handleSendToBack = () => {
-    const minOrder = Math.min(...widgets.map(w => w.order));
-    const newOrder = minOrder - 1;
-    form.setFieldsValue({ order: newOrder });
-    setCurrentOrder(newOrder);
-    message.success('Widget sent to back.');
-  };
+  const renderZIndexControls = () => (
+    <Form.Item label="Layer Position" name="zIndex">
+      <Space>
+        <InputNumber
+          min={0}
+          value={zIndex}
+          onChange={(value) => setZIndex(value || 0)}
+        />
+        <Radio.Group
+          value="position"
+          onChange={(e) => {
+            if (e.target.value === 'front') {
+              setZIndex((prevZ) => prevZ + 1);
+              form.setFieldsValue({ zIndex: zIndex + 1 });
+            } else {
+              setZIndex((prevZ) => Math.max(0, prevZ - 1));
+              form.setFieldsValue({ zIndex: Math.max(0, zIndex - 1) });
+            }
+          }}
+        >
+          <Radio.Button value="front">
+            <Space>
+              <ArrowUpOutlined />
+              Bring Forward
+            </Space>
+          </Radio.Button>
+          <Radio.Button value="back">
+            <Space>
+              <ArrowDownOutlined />
+              Send Backward
+            </Space>
+          </Radio.Button>
+        </Radio.Group>
+      </Space>
+    </Form.Item>
+  );
 
   const handleFinish = (values: any) => {
     const cleanedValues: Record<string, any> = {};
@@ -191,8 +210,8 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
         cleanedValues[k] = v;
       }
     });
+    cleanedValues.zIndex = zIndex;
     let updatedData: any;
-    let updatedOrder: number = currentOrder;
     switch (widget.type) {
       case 'text': {
         updatedData = cleanedValues;
@@ -583,14 +602,9 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
       default:
         updatedData = {};
     }
-    if (values.order !== undefined) {
-      updatedOrder = values.order;
-    }
-    onSubmit(updatedData, updatedOrder);
+    updatedData.zIndex = cleanedValues.zIndex;
+    onSubmit(updatedData);
   };
-
-  const getMaxOrder = () => Math.max(...widgets.map(w => w.order));
-  const getMinOrder = () => Math.min(...widgets.map(w => w.order));
 
   const getRandomColor = () => {
     const letters = '0123456789ABCDEF';
@@ -1840,18 +1854,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           </Form.Item>
         </>
       )}
-      <Form.Item label="Widget Order">
-        <Space>
-          <InputNumber
-            min={getMinOrder() - 10}
-            max={getMaxOrder() + 10}
-            value={currentOrder}
-            onChange={(value) => setCurrentOrder(value || widget.order)}
-          />
-          <Button onClick={handleBringToFront}>Bring to Front</Button>
-          <Button onClick={handleSendToBack}>Send to Back</Button>
-        </Space>
-      </Form.Item>
+      {renderZIndexControls()}
       <Form.Item style={{ marginTop: 16 }}>
         <Button type="primary" htmlType="submit" style={{ marginRight: 8 }}>
           Save
