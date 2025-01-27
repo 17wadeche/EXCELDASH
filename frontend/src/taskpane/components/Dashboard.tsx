@@ -571,8 +571,6 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
     const sortedWidgets = [...widgets].sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
     return sortedWidgets.map((widget) => {
       let content;
-    return widgets.map((widget) => {
-      let content;
       if (widget.type === 'text') {
         content = <TextWidget data={widget.data as TextData} />;
       } else if (widget.type === 'chart') {
