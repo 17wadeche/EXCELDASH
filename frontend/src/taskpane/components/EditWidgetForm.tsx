@@ -22,9 +22,10 @@ interface EditWidgetFormProps {
 const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCancel, isPresenterMode }) => {
   const [form] = Form.useForm();
   const widgetId = widget.id;
-  const { availableWorksheets } = useContext(DashboardContext)!;
+  const { availableWorksheets, widgets } = useContext(DashboardContext)!;
   const [sheets, setSheets] = useState<string[]>([]);
   const [chartType, setChartType] = useState<string>(widget.type === 'chart' ? (widget.data as ChartData).type : 'bar');
+  const [currentOrder, setCurrentOrder] = useState<number>(widget.order);
 
   useEffect(() => {
     setSheets(availableWorksheets);
@@ -40,6 +41,8 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
         const data = widget.data as ChartData;
         const useArea = data.type === 'line' && data.datasets.some((ds) => ds.fill);
         const initialValues: any = {
+          ...widget.data,
+          order: widget.order,
           title: data.title || 'Chart',
           chartType: useArea ? 'area' : data.type,
           labels: (data.labels || []).join(', '),
@@ -134,6 +137,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
 
   useEffect(() => {
     form.setFieldsValue(getInitialValues());
+    setCurrentOrder(widget.order);
     if (widget.type === 'chart') {
       const cData = widget.data as ChartData;
       setChartType(cData.type);
@@ -164,6 +168,22 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
     }
   }, [widget, form]);
 
+  const handleBringToFront = () => {
+    const maxOrder = Math.max(...widgets.map(w => w.order));
+    const newOrder = maxOrder + 1;
+    form.setFieldsValue({ order: newOrder });
+    setCurrentOrder(newOrder);
+    message.success('Widget brought to front.');
+  };
+
+  const handleSendToBack = () => {
+    const minOrder = Math.min(...widgets.map(w => w.order));
+    const newOrder = minOrder - 1;
+    form.setFieldsValue({ order: newOrder });
+    setCurrentOrder(newOrder);
+    message.success('Widget sent to back.');
+  };
+
   const handleFinish = (values: any) => {
     const cleanedValues: Record<string, any> = {};
     Object.entries(values).forEach(([k, v]) => {
@@ -172,6 +192,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
       }
     });
     let updatedData: any;
+    let updatedOrder: number = currentOrder;
     switch (widget.type) {
       case 'text': {
         updatedData = cleanedValues;
@@ -562,8 +583,14 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
       default:
         updatedData = {};
     }
-    onSubmit(updatedData);
+    if (values.order !== undefined) {
+      updatedOrder = values.order;
+    }
+    onSubmit(updatedData, updatedOrder);
   };
+
+  const getMaxOrder = () => Math.max(...widgets.map(w => w.order));
+  const getMinOrder = () => Math.min(...widgets.map(w => w.order));
 
   const getRandomColor = () => {
     const letters = '0123456789ABCDEF';
@@ -1813,6 +1840,18 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           </Form.Item>
         </>
       )}
+      <Form.Item label="Widget Order">
+        <Space>
+          <InputNumber
+            min={getMinOrder() - 10}
+            max={getMaxOrder() + 10}
+            value={currentOrder}
+            onChange={(value) => setCurrentOrder(value || widget.order)}
+          />
+          <Button onClick={handleBringToFront}>Bring to Front</Button>
+          <Button onClick={handleSendToBack}>Send to Back</Button>
+        </Space>
+      </Form.Item>
       <Form.Item style={{ marginTop: 16 }}>
         <Button type="primary" htmlType="submit" style={{ marginRight: 8 }}>
           Save
