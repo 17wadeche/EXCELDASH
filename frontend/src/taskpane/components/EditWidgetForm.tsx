@@ -175,7 +175,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           onChange={(value) => setZIndex(value || 0)}
         />
         <Radio.Group
-          value="position"
           onChange={(e) => {
             if (e.target.value === 'front') {
               setZIndex((prevZ) => prevZ + 1);

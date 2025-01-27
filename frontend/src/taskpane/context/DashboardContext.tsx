@@ -1180,6 +1180,8 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       }
       const newKey = `${type}-${uuidv4()}`;
       let newWidget: Widget;
+      const highestZIndex = widgets.reduce((max, w) => (w.zIndex > max ? w.zIndex : max), 0);
+      const newZIndex = highestZIndex + 1;
       if (type === 'table') {
         try {
           const availableTables = await getAvailableTables();
@@ -1197,6 +1199,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
               sheetName: '',
               tableName: '',
             } as TableData,
+            zIndex: newZIndex, 
           };
           setWidgetToPrompt({
             widget: newWidget,
@@ -1236,6 +1239,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
                 style: 'solid',
                 orientation: 'horizontal',
               } as LineWidgetData,
+              zIndex: newZIndex, 
             };
             break;
           case 'metric':
@@ -1255,6 +1259,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
                 backgroundColor: '#ffffff',
                 textColor: '#000000',
               } as MetricData,
+              zIndex: newZIndex, 
             };
             break;
           case 'text':
@@ -1268,6 +1273,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
                 backgroundColor: '#ffffff',
                 titleAlignment: 'left',
               } as TextData,
+              zIndex: newZIndex, 
             };
             break;
           case 'image':
@@ -1279,6 +1285,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
                 associatedRange: '',
                 worksheetName: '',
               } as ImageWidgetData,
+              zIndex: newZIndex, 
             };
             break;
           case 'chart':
@@ -1300,6 +1307,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
                 associatedRange: '',
                 worksheetName: '',
               } as ChartData,
+              zIndex: newZIndex, 
             };
             break;
           case 'gantt':
@@ -1311,6 +1319,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
                 title: 'Gantt Chart',
                 titleAlignment: 'left',
               } as GanttWidgetData,
+              zIndex: newZIndex, 
             };
             break;
           case 'title':
@@ -1324,6 +1333,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
                 backgroundColor: '#ffffff',
                 titleAlignment: 'center',
               } as TitleWidgetData,
+              zIndex: newZIndex, 
             };
             break;
           default:
@@ -1409,86 +1419,91 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
   const updateWidgetFunc = useCallback(
     (
       id: string,
-      updatedData: Partial<TextData | ChartData | GanttWidgetData | ImageWidgetData | TableData | MetricData | LineWidgetData | TitleWidgetData>
+      updatedData: Partial<TextData | ChartData | GanttWidgetData | ImageWidgetData | TableData | MetricData | LineWidgetData | TitleWidgetData> & { zIndex?: number }
     ) => {
       updateWidgetsWithHistory((prevWidgets) => {
         const newWidgets = prevWidgets.map((widget) => {
           if (widget.id !== id) return widget;
-        switch (widget.type) {
-          case 'text':
-            return {
-              ...widget,
-              data: {
-                ...widget.data,
-                ...updatedData,
-                content: (updatedData as Partial<TextData>).content ?? widget.data.content,
-                fontSize: (updatedData as Partial<TextData>).fontSize ?? widget.data.fontSize,
-                textColor: (updatedData as Partial<TextData>).textColor ?? widget.data.textColor,
-                backgroundColor: (updatedData as Partial<TextData>).backgroundColor ?? widget.data.backgroundColor,
-                titleAlignment: (updatedData as Partial<TextData>).titleAlignment ?? widget.data.titleAlignment,
-              } as TextData,
-            };
-          case 'title':
-            return {
-              ...widget,
-              data: {
-                ...widget.data,
-                ...updatedData,
-              } as TitleWidgetData,
-            };
-          case 'chart':
-            return {
-              ...widget,
-              data: {
-                ...widget.data,
-                ...updatedData,
-              } as ChartData,
-            };
-          case 'gantt':
-            return {
-              ...widget,
-              data: {
-                ...widget.data,
-                ...updatedData,
-              } as GanttWidgetData,
-            };
-          case 'line':
-            return {
-              ...widget,
-              data: {
-                ...widget.data,
-                ...updatedData,
-              } as LineWidgetData,
-            };
-          case 'metric':
-            return {
-              ...widget,
-              data: {
-                ...widget.data,
-                ...updatedData,
-              } as MetricData,
-            };
-          case 'image':
-            return {
-              ...widget,
-              data: {
-                ...widget.data,
-                ...updatedData,
-              } as ImageWidgetData,
-            };
-          case 'table':
-            return {
-              ...widget,
-              data: {
-                ...widget.data,
-                ...updatedData,
-              } as TableData,
-            };
-          default:
-            return widget;
+          const { zIndex, ...restUpdatedData } = updatedData;
+          let updatedWidget = { ...widget };
+          if (zIndex !== undefined) {
+            updatedWidget.zIndex = zIndex;
           }
-        });
-        return newWidgets;
+          switch (widget.type) {
+            case 'text':
+              return {
+                ...widget,
+                data: {
+                  ...widget.data,
+                  ...restUpdatedData,
+                  content: (updatedData as Partial<TextData>).content ?? widget.data.content,
+                  fontSize: (updatedData as Partial<TextData>).fontSize ?? widget.data.fontSize,
+                  textColor: (updatedData as Partial<TextData>).textColor ?? widget.data.textColor,
+                  backgroundColor: (updatedData as Partial<TextData>).backgroundColor ?? widget.data.backgroundColor,
+                  titleAlignment: (updatedData as Partial<TextData>).titleAlignment ?? widget.data.titleAlignment,
+                } as TextData,
+              };
+            case 'title':
+              return {
+                ...widget,
+                data: {
+                  ...widget.data,
+                  ...restUpdatedData,
+                } as TitleWidgetData,
+              };
+            case 'chart':
+              return {
+                ...widget,
+                data: {
+                  ...widget.data,
+                  ...restUpdatedData,
+                } as ChartData,
+              };
+            case 'gantt':
+              return {
+                ...widget,
+                data: {
+                  ...widget.data,
+                  ...restUpdatedData,
+                } as GanttWidgetData,
+              };
+            case 'line':
+              return {
+                ...widget,
+                data: {
+                  ...widget.data,
+                  ...restUpdatedData,
+                } as LineWidgetData,
+              };
+            case 'metric':
+              return {
+                ...widget,
+                data: {
+                  ...widget.data,
+                  ...restUpdatedData,
+                } as MetricData,
+              };
+            case 'image':
+              return {
+                ...widget,
+                data: {
+                  ...widget.data,
+                  ...restUpdatedData,
+                } as ImageWidgetData,
+              };
+            case 'table':
+              return {
+                ...widget,
+                data: {
+                  ...widget.data,
+                  ...restUpdatedData,
+                } as TableData,
+              };
+            default:
+              return widget;
+            }
+          });
+          return newWidgets;
       });
       message.success('Widget updated successfully!');
     },
@@ -1687,14 +1702,17 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
   };
   const copyWidget = useCallback(
     (widget: Widget) => {
+      const highestZIndex = widgets.reduce((max, w) => (w.zIndex > max ? w.zIndex : max), 0);
+      const newZIndex = highestZIndex + 1;
       const newWidget: Widget = {
         ...widget,
         id: `${widget.type}-${uuidv4()}`,
+        zIndex: newZIndex,
       };
       addWidgetFunc(widget.type, newWidget.data);
       message.success('Widget copied!');
     },
-    [addWidgetFunc]
+    [addWidgetFunc, widgets]
   );
   const isCellAddressInRange = async (
     context: Excel.RequestContext,
