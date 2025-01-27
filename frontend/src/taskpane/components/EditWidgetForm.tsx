@@ -54,7 +54,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           yAxisTitle: data.scales?.y?.title?.text || '',
           showLegend: data.plugins?.legend?.display !== false,
           legendPosition: data.plugins?.legend?.position || 'bottom',
-          showDataLabels: data.plugins?.datalabels?.display !== true,
+          showDataLabels: data.plugins?.datalabels?.display ?? false,
           dataLabelColor: data.plugins?.datalabels?.color || '#36A2EB',
           dataLabelFontSize: data.plugins?.datalabels?.font?.size || 12,
           enableTooltips: data.plugins?.tooltip?.enabled !== false,
@@ -492,7 +492,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
               position: cleanedValues.legendPosition || 'top',
             },
             datalabels: {
-              display: cleanedValues.showDataLabels !== false,
+              display: cleanedValues.showDataLabels,
               color: cleanedValues.dataLabelColor || '#000',
               font: {
                 size: cleanedValues.dataLabelFontSize || 12,
