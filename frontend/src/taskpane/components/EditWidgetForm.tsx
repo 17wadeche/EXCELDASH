@@ -54,7 +54,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           yAxisTitle: data.scales?.y?.title?.text || '',
           showLegend: data.plugins?.legend?.display !== false,
           legendPosition: data.plugins?.legend?.position || 'bottom',
-          showDataLabels: data.plugins?.datalabels?.display !== false,
+          showDataLabels: data.plugins?.datalabels?.display !== true,
           dataLabelColor: data.plugins?.datalabels?.color || '#36A2EB',
           dataLabelFontSize: data.plugins?.datalabels?.font?.size || 12,
           enableTooltips: data.plugins?.tooltip?.enabled !== false,
@@ -492,13 +492,26 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
               position: cleanedValues.legendPosition || 'top',
             },
             datalabels: {
-              display: chartType === 'treemap' ? true : false,
+              display: cleanedValues.showDataLabels !== false,
               color: cleanedValues.dataLabelColor || '#000',
               font: {
                 size: cleanedValues.dataLabelFontSize || 12,
               },
               formatter: (_value: any, context: any) => {
-                return context.raw.category;
+                switch (chartType) {
+                  case 'pie':
+                  case 'doughnut':
+                  case 'polarArea':
+                    return context.label;
+                  case 'treemap':
+                    return context.raw.category;
+                  case 'scatter':
+                  case 'bubble':
+                    return `(${context.raw.x}, ${context.raw.y})`;
+                  default:
+                    return context.formattedValue;
+                }
+              },
               },
             },
             zoom: {
@@ -1647,15 +1660,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                       <Option value="xy">XY</Option>
                     </Select>
                   </Form.Item>
-                  <Form.Item label="Show Data Labels" name="showDataLabels" valuePropName="checked">
-                    <Switch />
-                  </Form.Item>
-                  <Form.Item label="Data Label Color" name="dataLabelColor">
-                    <Input type="color" />
-                  </Form.Item>
-                  <Form.Item label="Data Label Font Size" name="dataLabelFontSize">
-                    <InputNumber min={8} max={24} />
-                  </Form.Item>
                   <Form.Item label="Enable Tooltips" name="enableTooltips" valuePropName="checked">
                     <Switch />
                   </Form.Item>
@@ -1686,6 +1690,15 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                   <Option value="left">Left</Option>
                   <Option value="right">Right</Option>
                 </Select>
+              </Form.Item>
+              <Form.Item label="Show Data Labels" name="showDataLabels" valuePropName="checked">
+                <Switch />
+              </Form.Item>
+              <Form.Item label="Data Label Color" name="dataLabelColor">
+                <Input type="color" />
+              </Form.Item>
+              <Form.Item label="Data Label Font Size" name="dataLabelFontSize">
+                <InputNumber min={8} max={24} />
               </Form.Item>
             </Panel>
           </Collapse>
