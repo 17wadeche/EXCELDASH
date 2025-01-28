@@ -9,7 +9,7 @@ import { BREAKPOINTS, GRID_COLS } from './layoutConstants';
 import { isEqual } from 'lodash';
 import LineSettingsModal from './LineSettingsModal';
 import TitleWidgetComponent from './TitleWidget';
-import { ReloadOutlined, CloseOutlined, EditOutlined, UndoOutlined, FundProjectionScreenOutlined, RedoOutlined, FullscreenExitOutlined, CopyOutlined, SaveOutlined, MenuOutlined } from '@ant-design/icons';
+import { ReloadOutlined, CloseOutlined, EditOutlined, UndoOutlined, FundProjectionScreenOutlined, RedoOutlined, FullscreenExitOutlined, CopyOutlined, SaveOutlined, MenuOutlined, Spin } from '@ant-design/icons';
 import './Dashboard.css';
 import { DashboardContext } from '../context/DashboardContext';
 import { Widget, ChartData, TextData, ImageWidgetData, TableData, GridLayoutItem, TableWidget, DashboardBorderSettings, LineWidgetData, TitleWidgetData, GanttWidgetData, MetricData, DashboardItem } from './types';
