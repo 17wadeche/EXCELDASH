@@ -367,7 +367,7 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
     () =>
       debounce(async () => {
         if (!isSavingRef.current) {await handleSave();}
-      }, 2000),
+      }, 300000),
     [handleSave]
   );
 
@@ -731,7 +731,7 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
                   checkedChildren="Auto-Save On"
                   unCheckedChildren="Auto-Save Off"
                   aria-label="Toggle Auto-Save"
-                  style={{ marginTop: '16px', width: '50px' }} // Adjust styling as needed
+                  style={{ marginTop: '16px', width: '30px' }} // Adjust styling as needed
                 />
               </Tooltip>
               <Tooltip title="Refresh All Charts" placement="left">
