@@ -283,17 +283,11 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           cleanedValues.xAxisType = 'linear';
         }
         if (finalChartType === 'treemap') {
-          const treemapColors = values.treemapColors || [];
-          updatedData.datasets = (updatedData.datasets || []).map((ds: any) => {
-            if (ds.type === 'treemap') {
-              return {
-                ...ds,
-                backgroundColor: treemapColors.map((c: any) => c.color),
-                borderColor: treemapColors.map((c: any) => c.color),
-              };
-            }
-            return ds;
-          });
+          const dataset = updatedData.datasets[0];
+          if (dataset && Array.isArray(dataset.backgroundColor)) {
+            dataset.backgroundColor = form.getFieldValue('treemapColors')?.map((c: any) => c.color) || [];
+            dataset.borderColor = form.getFieldValue('treemapColors')?.map((c: any) => c.color) || [];
+          }
         }
         updatedData = {
           title: cleanedValues.title,
