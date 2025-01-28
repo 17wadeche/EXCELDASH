@@ -284,7 +284,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
         }
         if (finalChartType === 'treemap') {
           const treemapColors = values.treemapColors || [];
-          updatedData.datasets = updatedData.datasets.map((ds: any) => {
+          updatedData.datasets = (updatedData.datasets || []).map((ds: any) => {
             if (ds.type === 'treemap') {
               return {
                 ...ds,
