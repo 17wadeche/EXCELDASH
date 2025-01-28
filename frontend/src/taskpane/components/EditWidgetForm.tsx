@@ -29,6 +29,10 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
   const [zIndex, setZIndex] = useState<number>(widget.zIndex || 0);
 
   useEffect(() => {
+    setZIndex(widget.zIndex || 0);
+  }, [widget]);
+
+  useEffect(() => {
     setSheets(availableWorksheets);
   }, [availableWorksheets]);
 
@@ -164,6 +168,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
         }
       }
     }
+    setZIndex(widget.zIndex || 0);
   }, [widget, form]);
 
   const renderZIndexControls = () => (
