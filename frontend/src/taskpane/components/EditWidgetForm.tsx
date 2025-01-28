@@ -119,7 +119,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           if (dataset.backgroundColor && Array.isArray(dataset.backgroundColor)) {
             initialValues.treemapColors = dataset.backgroundColor.map((color: string) => ({ color }));
           } else {
-            initialValues.treemapColors = dataset.tree.map(() => ({ color: getRandomColor() }));
+            initialValues.treemapColors = dataset.tree?.map(() => ({ color: getRandomColor() })) || [];
           }
         }
         return initialValues;
