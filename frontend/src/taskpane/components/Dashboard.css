@@ -193,10 +193,12 @@
   background-color: var(--background-color);
 }
 .dashboard-container {
+  position: relative;
   overflow: visible;
   padding: 0;
   background-color: var(--background-color);
   box-shadow: none;
+  z-index: auto;
 }
 .scaled-container {
   transform-origin: top left;

@@ -23,7 +23,7 @@ interface EditWidgetFormProps {
 const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCancel, isPresenterMode }) => {
   const [form] = Form.useForm();
   const widgetId = widget.id;
-  const { availableWorksheets } = useContext(DashboardContext)!;
+  const { availableWorksheets, widgets } = useContext(DashboardContext)!;
   const [sheets, setSheets] = useState<string[]>([]);
   const [chartType, setChartType] = useState<string>(widget.type === 'chart' ? (widget.data as ChartData).type : 'bar');
   const [zIndex, setZIndex] = useState<number>(widget.zIndex || 0);
@@ -175,41 +175,54 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
     setZIndex(widget.zIndex || 0);
   }, [widget, form]);
 
-  const renderZIndexControls = () => (
-    <Form.Item label="Layer Position" name="zIndex">
-      <Space>
-        <InputNumber
-          min={0}
-          value={zIndex}
-          onChange={(value) => setZIndex(value || 0)}
-        />
-        <Radio.Group
-          onChange={(e) => {
-            if (e.target.value === 'front') {
-              setZIndex((prevZ) => prevZ + 1);
-              form.setFieldsValue({ zIndex: zIndex + 1 });
-            } else {
-              setZIndex((prevZ) => Math.max(0, prevZ - 1));
-              form.setFieldsValue({ zIndex: Math.max(0, zIndex - 1) });
-            }
-          }}
-        >
-          <Radio.Button value="front">
-            <Space>
-              <ArrowUpOutlined />
-              Bring Forward
-            </Space>
-          </Radio.Button>
-          <Radio.Button value="back">
-            <Space>
-              <ArrowDownOutlined />
-              Send Backward
-            </Space>
-          </Radio.Button>
-        </Radio.Group>
-      </Space>
-    </Form.Item>
-  );
+  const getZIndexBounds = () => {
+    const zIndices = widgets.map(w => w.zIndex || 0);
+    const maxZ = Math.max(...zIndices);
+    const minZ = Math.min(...zIndices);
+    return { maxZ, minZ };
+  };
+
+  const renderZIndexControls = () => {
+    const { maxZ, minZ } = getZIndexBounds();
+
+    return (
+      <Form.Item label="Layer Position" name="zIndex">
+        <Space>
+          <InputNumber
+            min={0}
+            value={zIndex}
+            onChange={(value) => setZIndex(value || 0)}
+          />
+          <Radio.Group
+            onChange={(e) => {
+              if (e.target.value === 'front') {
+                const newZIndex = maxZ + 1;
+                setZIndex(newZIndex);
+                form.setFieldsValue({ zIndex: newZIndex });
+              } else {
+                const newZIndex = minZ - 1;
+                setZIndex(newZIndex >= 0 ? newZIndex : 0);
+                form.setFieldsValue({ zIndex: newZIndex >= 0 ? newZIndex : 0 });
+              }
+            }}
+          >
+            <Radio.Button value="front">
+              <Space>
+                <ArrowUpOutlined />
+                Bring to Front
+              </Space>
+            </Radio.Button>
+            <Radio.Button value="back">
+              <Space>
+                <ArrowDownOutlined />
+                Send to Back
+              </Space>
+            </Radio.Button>
+          </Radio.Group>
+        </Space>
+      </Form.Item>
+    );
+  };
 
   const handleFinish = (values: any) => {
     const cleanedValues: Record<string, any> = {};
@@ -622,7 +635,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
       default:
         updatedData = {};
     }
-    updatedData.zIndex = cleanedValues.zIndex;
+    updatedData.zIndex = values.zIndex;
     onSubmit(updatedData);
   };
 

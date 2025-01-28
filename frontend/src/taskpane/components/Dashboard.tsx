@@ -116,6 +116,7 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
   const { widgets, addWidget, removeWidget, updateWidget, refreshAllCharts, layouts, setLayouts, setWidgets, setDashboardBorderSettings, updateLayoutsForNewWidgets, undo, dashboardBorderSettings, redo, canUndo, dashboardTitle, canRedo, currentDashboardId, currentDashboard, currentWorkbookId, availableWorksheets, setCurrentDashboard, exportDashboardAsPDF, setCurrentDashboardId, setDashboards, refreshTableWidgetData } = useContext(DashboardContext)!;
   const { id } = useParams<{ id: string }>();
   const [isFullscreenActive, setIsFullscreenActive] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const isEditingEnabled = !isPresenterMode && !isFullscreenActive && !isFullScreen && !isSaving;
   const borderStyle: React.CSSProperties = useMemo(() => {
     return dashboardBorderSettings?.showBorder
@@ -126,7 +127,6 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
   }, [dashboardBorderSettings]);
 
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const dashboardRef = useRef<HTMLDivElement>(null);
   const [isLineSettingsModalVisible, setIsLineSettingsModalVisible] = useState(false);
