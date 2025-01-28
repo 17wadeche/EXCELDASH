@@ -114,6 +114,14 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
             initialValues.bubbleColors = [];
           }
         }
+        if (data.type === 'treemap') {
+          const dataset = data.datasets[0];
+          if (dataset.backgroundColor && Array.isArray(dataset.backgroundColor)) {
+            initialValues.treemapColors = dataset.backgroundColor.map((color: string) => ({ color }));
+          } else {
+            initialValues.treemapColors = dataset.tree.map(() => ({ color: getRandomColor() }));
+          }
+        }
         return initialValues;
       }
       case 'gantt': {
@@ -273,6 +281,19 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
         }
         if (finalChartType === 'scatter' || finalChartType === 'bubble') {
           cleanedValues.xAxisType = 'linear';
+        }
+        if (finalChartType === 'treemap') {
+          const treemapColors = values.treemapColors || [];
+          updatedData.datasets = updatedData.datasets.map((ds: any) => {
+            if (ds.type === 'treemap') {
+              return {
+                ...ds,
+                backgroundColor: treemapColors.map((c: any) => c.color),
+                borderColor: treemapColors.map((c: any) => c.color),
+              };
+            }
+            return ds;
+          });
         }
         updatedData = {
           title: cleanedValues.title,
@@ -747,7 +768,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           const [name, valueStr] = row.map((x: any) => String(x).trim());
           return { name, value: parseFloat(valueStr) };
         });
-        const backgroundColors = treemapData.map(() => getRandomColor())
+        const backgroundColors = treemapData.map(() => getRandomColor());
         form.setFieldsValue({
           labels: labelStr,
           datasets: [
