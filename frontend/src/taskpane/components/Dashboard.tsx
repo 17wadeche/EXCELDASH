@@ -728,8 +728,8 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
                 <Switch
                   checked={isAutoSaveEnabled}
                   onChange={(checked) => setIsAutoSaveEnabled(checked)}
-                  checkedChildren="Auto-Save On"
-                  unCheckedChildren="Auto-Save Off"
+                  checkedChildren="On"
+                  unCheckedChildren="Off"
                   aria-label="Toggle Auto-Save"
                   style={{ marginTop: '16px', width: '30px' }} // Adjust styling as needed
                 />
