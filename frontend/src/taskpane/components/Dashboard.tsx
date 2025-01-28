@@ -6,7 +6,6 @@ import { Modal, Card, Button, Tooltip, message, Spin, Switch } from 'antd';
 import EditWidgetForm from './EditWidgetForm';
 import MetricWidget from './widgets/MetricWidget';
 import { BREAKPOINTS, GRID_COLS } from './layoutConstants';
-import { isEqual } from 'lodash';
 import LineSettingsModal from './LineSettingsModal';
 import TitleWidgetComponent from './TitleWidget';
 import { ReloadOutlined, CloseOutlined, EditOutlined, UndoOutlined, FundProjectionScreenOutlined, RedoOutlined, FullscreenExitOutlined, CopyOutlined, SaveOutlined, MenuOutlined } from '@ant-design/icons';
