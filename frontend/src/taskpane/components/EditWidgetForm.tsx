@@ -414,7 +414,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 type: ds.type,
                 tree: treemapData,
                 key: 'value',
-                groups: ['name'],
+                groups: ['Name'],
                 backgroundColor: treemapColors.map((c: any) => c.color),
                 borderColor: treemapColors.map((c: any) => c.color),
                 borderWidth: ds.borderWidth || 1,
@@ -767,8 +767,8 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
         break;
       }
       case 'funnel': {
-        if (data.length < 3) {
-          message.error('Funnel requires 3+ rows: title + header + data.');
+        if (data.length < 2) {
+          message.error('Funnel requires at least 2 rows of data.');
           return;
         }
         const headerRow = data[1];
@@ -780,7 +780,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           labels: labels.join(', '),
           datasets: [
             {
-              label: 'Funnel Series',
+              label: 'Funnel',
               type: 'funnel',
               data: values.join(', '),
               backgroundColor: getRandomColor(),

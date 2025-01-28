@@ -77,7 +77,7 @@ const TreemapChart: React.FC<any> = (props) => {
 };
 
 const FunnelChart: React.FC<any> = (props) => {
-  return <BaseChart type="funnel" {...props} />;
+  return <BaseChart type="funnel" {...props} options={{ ...props.options, plugins: { ...props.options.plugins }, elements: { trapezoid: { width: 0.8, spacing: 2 }}}}/>;
 };
 
 const CandlestickChart: React.FC<any> = (props) => {
