@@ -429,18 +429,20 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 },
               };
             } else if (ds.type === 'funnel') {
-              const segments = ds.data
-                .split(';')
-                .map((s: string) => s.trim())
+              const labels = (cleanedValues.labels || '')
+                .split(',')
+                .map((l: string) => l.trim())
                 .filter(Boolean);
-              const funnelLabels: string[] = [];
-              const funnelValues: number[] = [];
-              segments.forEach((seg: string) => {
-                const [stage, valStr] = seg.split(',').map((x: string) => x.trim());
-                funnelLabels.push(stage);
-                funnelValues.push(parseFloat(valStr));
-              });
-              const funnelColors = funnelValues.map(() => getRandomColor());
+              const funnelValues = ds.data
+                .split(',')
+                .map((v: string) => parseFloat(v.trim()))
+                .filter((v: number) => !isNaN(v));
+
+              if (labels.length !== funnelValues.length) {
+                message.error('The number of labels must match the number of data points for the funnel chart.');
+                return null;
+              }
+              const funnelColors = ds.backgroundColor || funnelValues.map(() => getRandomColor());
               return {
                 label: ds.label,
                 type: 'funnel',
