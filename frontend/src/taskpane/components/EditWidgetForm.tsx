@@ -182,62 +182,47 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
     return { maxZ, minZ };
   };
 
-  const finalData = {
-    ...updatedData,
-    zIndex: cleanedValues.zIndex
-  };
-  
-  onSubmit(finalData);
-};
-
   const renderZIndexControls = () => {
     const { maxZ, minZ } = getZIndexBounds();
 
     return (
-    <Form.Item label="Layer Position" name="zIndex">
-      <Space>
-        <InputNumber
-          min={0}
-          value={zIndex}
-          onChange={(value) => {
-            setZIndex(value || 0);
-            form.setFieldsValue({ zIndex: value || 0 });
-          }}
-        />
-        <Radio.Group
-          onChange={(e) => {
-            const maxZ = Math.max(...widgets.map((w: any) => w.zIndex || 0));
-            const minZ = Math.min(...widgets.map((w: any) => w.zIndex || 0));
-            let newZ;
-            if (e.target.value === 'front') {
-              newZ = maxZ + 1;
-              setZIndex(newZ);
-              form.setFieldsValue({ zIndex: newZ });
-            } else {
-              newZ = Math.max(0, minZ - 1);
-              setZIndex(newZ);
-              form.setFieldsValue({ zIndex: newZ });
-            }
-            form.submit();
-          }}
-        >
-          <Radio.Button value="front">
-            <Space>
-              <ArrowUpOutlined />
-              Bring to Front
-            </Space>
-          </Radio.Button>
-          <Radio.Button value="back">
-            <Space>
-              <ArrowDownOutlined />
-              Send to Back
-            </Space>
-          </Radio.Button>
-        </Radio.Group>
-      </Space>
-    </Form.Item>
-  );
-};
+      <Form.Item label="Layer Position" name="zIndex">
+        <Space>
+          <InputNumber
+            min={0}
+            value={zIndex}
+            onChange={(value) => setZIndex(value || 0)}
+          />
+          <Radio.Group
+            onChange={(e) => {
+              if (e.target.value === 'front') {
+                const newZIndex = maxZ + 1;
+                setZIndex(newZIndex);
+                form.setFieldsValue({ zIndex: newZIndex });
+              } else {
+                const newZIndex = minZ - 1;
+                setZIndex(newZIndex >= 0 ? newZIndex : 0);
+                form.setFieldsValue({ zIndex: newZIndex >= 0 ? newZIndex : 0 });
+              }
+            }}
+          >
+            <Radio.Button value="front">
+              <Space>
+                <ArrowUpOutlined />
+                Bring to Front
+              </Space>
+            </Radio.Button>
+            <Radio.Button value="back">
+              <Space>
+                <ArrowDownOutlined />
+                Send to Back
+              </Space>
+            </Radio.Button>
+          </Radio.Group>
+        </Space>
+      </Form.Item>
+    );
+  };
 
   const handleFinish = (values: any) => {
     const cleanedValues: Record<string, any> = {};
