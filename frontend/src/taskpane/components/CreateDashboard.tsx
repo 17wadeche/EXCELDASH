@@ -224,9 +224,9 @@ const CreateDashboard: React.FC = () => {
                 { range: "A26", text: "Bubble Chart Data", bold: true, fontSize: 14 },
                 { range: "A32", text: "Scatter Chart Data", bold: true, fontSize: 14 },
                 { range: "A37", text: "Box Plot Data", bold: true, fontSize: 14 },
-                { range: "A42", text: "Candlestick Chart Data", bold: true, fontSize: 14 },
-                { range: "A47", text: "Treemap Chart Data", bold: true, fontSize: 14 },
-                { range: "A55", text: "Funnel Chart Data", bold: true, fontSize: 14 },
+                { range: "A50", text: "Candlestick Chart Data", bold: true, fontSize: 14 },
+                { range: "A42", text: "Treemap Chart Data", bold: true, fontSize: 14 },
+                { range: "A54", text: "Funnel Chart Data", bold: true, fontSize: 14 },
               ];
               headers.forEach(header => {
                 const headerRange = exampleSheet.getRange(header.range);
@@ -279,11 +279,11 @@ const CreateDashboard: React.FC = () => {
               exampleSheet.getRange("A39:F39").values = [["Sample1", 10, 20, 30, 5, 35]];
               exampleSheet.getRange("A40:F40").values = [["Sample2", 15, 25, 40, 10, 45]];
               // ========== CANDLESTICK CHART DATA ==========
-              exampleSheet.getRange("A43:E43").values = [["2023-01-01", 100, 110, 95, 105]];
-              exampleSheet.getRange("A44:E44").values = [["2023-01-02", 105, 115, 100, 110]];
+              exampleSheet.getRange("A51:E51").values = [["2023-01-01", 100, 110, 95, 105]];
+              exampleSheet.getRange("A52:E52").values = [["2023-01-02", 105, 115, 100, 110]];
               // ========== TREEMAP CHART DATA ==========
-              exampleSheet.getRange("A48:B48").values = [["Name", "Value"]];
-              exampleSheet.getRange("A49:B53").values = [
+              exampleSheet.getRange("A43:B43").values = [["Name", "Value"]];
+              exampleSheet.getRange("A44:B48").values = [
                 ["Category A", 10],
                 ["Category B", 20],
                 ["Category C", 15],
@@ -291,8 +291,8 @@ const CreateDashboard: React.FC = () => {
                 ["Category E", 25],
               ];
               // ========== FUNNEL CHART DATA ==========
-              exampleSheet.getRange("A56:B56").values = [["Stage", "Value"]];
-              exampleSheet.getRange("A57:B61").values = [
+              exampleSheet.getRange("A55:B55").values = [["Stage", "Value"]];
+              exampleSheet.getRange("A56:B60").values = [
                 ["Prospects", 200],
                 ["Qualified", 100],
                 ["Proposal", 60],
