@@ -728,10 +728,10 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
                 <Switch
                   checked={isAutoSaveEnabled}
                   onChange={(checked) => setIsAutoSaveEnabled(checked)}
-                  checkedChildren="On"
-                  unCheckedChildren="Off"
+                  checkedChildren=""
+                  unCheckedChildren=""
                   aria-label="Toggle Auto-Save"
-                  style={{ marginTop: '16px', width: '30px' }} // Adjust styling as needed
+                  style={{ marginTop: '16px', width: '15px' }}
                 />
               </Tooltip>
               <Tooltip title="Refresh All Charts" placement="left">
