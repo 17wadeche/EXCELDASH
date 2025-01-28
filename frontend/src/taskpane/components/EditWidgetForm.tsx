@@ -29,8 +29,12 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
   const [zIndex, setZIndex] = useState<number>(widget.zIndex || 0);
 
   useEffect(() => {
-    setZIndex(widget.zIndex || 0);
-  }, [widget]);
+    const initialValues = getInitialValues();
+    form.setFieldsValue({
+      ...initialValues,
+      zIndex: widget.zIndex || 0,
+    });
+  }, [widget, form]);
 
   useEffect(() => {
     setSheets(availableWorksheets);
@@ -214,7 +218,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
         cleanedValues[k] = v;
       }
     });
-    cleanedValues.zIndex = zIndex;
+    cleanedValues.zIndex = values.zIndex || 0;
     let updatedData: any;
     switch (widget.type) {
       case 'text': {
