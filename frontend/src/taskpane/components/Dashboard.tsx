@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useContext, useMemo, useCallback } from 'react';
 import { Responsive, WidthProvider } from 'react-grid-layout';
-import { Modal, Card, Button, Tooltip, message, Spin } from 'antd';
+import { Modal, Card, Button, Tooltip, message, Spin, Switch } from 'antd';
 import EditWidgetForm from './EditWidgetForm';
 import MetricWidget from './widgets/MetricWidget';
 import { BREAKPOINTS, GRID_COLS } from './layoutConstants';
@@ -23,7 +23,7 @@ import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 import TableWidgetComponent from './widgets/TableWidget';
 import Draggable from 'react-draggable';
-import { debounce } from 'lodash';
+import { isEqual, debounce } from 'lodash';
 import LineWidget from './widgets/LineWidget';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
@@ -135,6 +135,7 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
   const prevLayoutsRef = useRef<{ [key: string]: GridLayoutItem[] }>({});
   const [isPresentationMode, setIsPresentationMode] = useState(false);
   const [fullScreenDialog, setFullScreenDialog] = useState<Office.Dialog | null>(null);
+  const [isAutoSaveEnabled, setIsAutoSaveEnabled] = useState<boolean>(false);
   const dashboardWidth = dashboardBorderSettings.width 
     ? Math.min(Math.max(dashboardBorderSettings.width, 300), 733)
     : 733;
@@ -357,17 +358,23 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
     }
   }, [currentDashboardId, currentDashboard, currentWorkbookId, widgets, layouts, dashboardTitle, dashboardBorderSettings, setCurrentDashboard, setDashboards ]);
 
-  useEffect(() => {
-    const saveDashboard = async () => {
-      if (!isSaving) { // Only save if not already saving
+  const debouncedSave = useMemo(
+    () => debounce(async () => {
+      if (!isSaving) { // Prevent overlapping saves
         await handleSave();
       }
+    }, 2000),
+    [handleSave, isSaving]
+  );
+
+  useEffect(() => {
+    if (isAutoSaveEnabled) {
+      debouncedSave();
+    }
+    return () => {
+      debouncedSave.cancel();
     };
-    const debounceTimer = setTimeout(() => {
-      saveDashboard();
-    }, 2000);
-    return () => clearTimeout(debounceTimer);
-  }, [widgets, layouts, isSaving, handleSave]);
+  }, [widgets, layouts, isAutoSaveEnabled, debouncedSave]);
 
   const handleLayoutChange = useCallback(
     (
@@ -711,6 +718,16 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
                   className="toolbar-button"
                   aria-label="Save"
                   loading={isSaving}
+                />
+              </Tooltip>
+              <Tooltip title="Toggle Auto-Save" placement="left">
+                <Switch
+                  checked={isAutoSaveEnabled}
+                  onChange={(checked) => setIsAutoSaveEnabled(checked)}
+                  checkedChildren="Auto-Save On"
+                  unCheckedChildren="Auto-Save Off"
+                  aria-label="Toggle Auto-Save"
+                  style={{ marginTop: '16px' }} // Adjust styling as needed
                 />
               </Tooltip>
               <Tooltip title="Refresh All Charts" placement="left">
