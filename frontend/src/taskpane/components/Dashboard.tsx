@@ -116,7 +116,7 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
   const { widgets, addWidget, removeWidget, updateWidget, refreshAllCharts, layouts, setLayouts, setWidgets, setDashboardBorderSettings, updateLayoutsForNewWidgets, undo, dashboardBorderSettings, redo, canUndo, dashboardTitle, canRedo, currentDashboardId, currentDashboard, currentWorkbookId, availableWorksheets, setCurrentDashboard, exportDashboardAsPDF, setCurrentDashboardId, setDashboards, refreshTableWidgetData } = useContext(DashboardContext)!;
   const { id } = useParams<{ id: string }>();
   const [isFullscreenActive, setIsFullscreenActive] = useState(false);
-  const isEditingEnabled = !isPresenterMode && !isFullscreenActive && !isFullScreen;
+  const isEditingEnabled = !isPresenterMode && !isFullscreenActive && !isFullScreen && !isSaving;
   const borderStyle: React.CSSProperties = useMemo(() => {
     return dashboardBorderSettings?.showBorder
       ? {
@@ -359,13 +359,15 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
 
   useEffect(() => {
     const saveDashboard = async () => {
-      await handleSave(); 
+      if (!isSaving) { // Only save if not already saving
+        await handleSave();
+      }
     };
     const debounceTimer = setTimeout(() => {
       saveDashboard();
     }, 2000);
     return () => clearTimeout(debounceTimer);
-  }, [widgets, layouts]);
+  }, [widgets, layouts, isSaving, handleSave]);
 
   const handleLayoutChange = useCallback(
     (
@@ -777,6 +779,18 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
           draggableHandle=".drag-handle"
           isResizable={isEditingEnabled}
           isDraggable={isEditingEnabled}
+          onDragStart={(layout, oldItem, newItem, placeholder, e, element) => {
+            if (isSaving) {
+              e.preventDefault();
+              return false;
+            }
+          }}
+          onResizeStart={(layout, oldItem, newItem, placeholder, e, element) => {
+            if (isSaving) {
+              e.preventDefault();
+              return false;
+            }
+          }}
           compactType={null}
           preventCollision={false}
           allowOverlap={true}
@@ -785,6 +799,11 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
         >
           {widgetElements}
         </ResponsiveGridLayout>
+        {isSaving && (
+          <div className="saving-overlay">
+            <Spin tip="Saving..." size="large" />
+          </div>
+        )}
         {isPresentationMode && (<PresentationDashboard /> )}
         <Modal title="Edit Widget" open={isModalVisible} onCancel={handleModalCancel} footer={null}>
           {currentWidget && (
