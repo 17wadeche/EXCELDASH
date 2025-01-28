@@ -357,13 +357,18 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
     }
   }, [currentDashboardId, currentDashboard, currentWorkbookId, widgets, layouts, dashboardTitle, dashboardBorderSettings, setCurrentDashboard, setDashboards ]);
 
+  const isSavingRef = useRef(isSaving);
+
+  useEffect(() => {
+    isSavingRef.current = isSaving;
+  }, [isSaving]);
+
   const debouncedSave = useMemo(
-    () => debounce(async () => {
-      if (!isSaving) { // Prevent overlapping saves
-        await handleSave();
-      }
-    }, 2000),
-    [handleSave, isSaving]
+    () =>
+      debounce(async () => {
+        if (!isSavingRef.current) {await handleSave();}
+      }, 2000),
+    [handleSave]
   );
 
   useEffect(() => {
