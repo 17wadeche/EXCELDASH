@@ -351,7 +351,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
               try {
                 parsedData = JSON.parse(ds.data);
                 if (!Array.isArray(parsedData)) throw new Error('Data is not an array');
-                parsedData.forEach(point => {
+                parsedData.forEach((point) => {
                   if (!point.x || !point.o || !point.h || !point.l || !point.c) {
                     throw new Error('Missing required candlestick data fields');
                   }
@@ -414,7 +414,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 type: ds.type,
                 tree: treemapData,
                 key: 'value',
-                groups: ['category'],
+                groups: ['name'],
                 backgroundColor: treemapColors.map((c: any) => c.color),
                 borderColor: treemapColors.map((c: any) => c.color),
                 borderWidth: ds.borderWidth || 1,
@@ -422,7 +422,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                   display: true,
                   color: '#fff',
                   formatter: (_value: any, context: any) => {
-                    return context.raw.category;
+                    return context.raw.name;
                   },
                   font: {
                     weight: 'bold',
@@ -526,7 +526,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                   case 'polarArea':
                     return context.label;
                   case 'treemap':
-                    return context.raw.category;
+                    return context.raw.name;
                   case 'scatter':
                   case 'bubble':
                     return `(${context.raw.x}, ${context.raw.y})`;
@@ -557,7 +557,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                   const chartType = context.dataset.type;
                   if (chartType === 'treemap') {
                     const dataPoint = context.raw;
-                    const label = dataPoint.category || 'Category';
+                    const label = dataPoint.name || 'Name';
                     const value = dataPoint.value || 0;
                     return `${label}: ${value}`;
                   } else {
@@ -743,8 +743,8 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
         const labelStr = headerRow.join(',');
         const rawRows = data.slice(2);
         const treemapData = rawRows.map((row) => {
-          const [category, valueStr] = row.map((x: any) => String(x).trim());
-          return { category, value: parseFloat(valueStr) };
+          const [name, valueStr] = row.map((x: any) => String(x).trim());
+          return { name, value: parseFloat(valueStr) };
         });
         const backgroundColors = treemapData.map(() => getRandomColor())
         form.setFieldsValue({
@@ -755,7 +755,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
               type: 'treemap',
               tree: treemapData,
               key: 'value',
-              groups: ['category'],
+              groups: ['name'],
               backgroundColor: backgroundColors,
               borderColor: backgroundColors,
               borderWidth: 1,
@@ -1618,7 +1618,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                     {treemapDataArray.map((item: any, index: number) => (
                       <Form.Item
                         key={index}
-                        label={`Color for ${item.category}`}
+                        label={`Color for ${item.name}`}
                         name={[index, 'color']}
                         rules={[{ required: true, message: 'Please pick a color' }]}
                       >
