@@ -414,7 +414,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 type: ds.type,
                 tree: treemapData,
                 key: 'value',
-                groups: ['name'],
                 backgroundColor: treemapColors.map((c: any) => c.color),
                 borderColor: treemapColors.map((c: any) => c.color),
                 borderWidth: ds.borderWidth || 1,
@@ -1191,8 +1190,8 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
               <Option value="bubble">Bubble</Option>
               <Option value="scatter">Scatter</Option>
               <Option value="boxplot">Box Plot</Option>
+              <Option value="treemap">Treemap</Option>
               <Option value="candlestick">Candlestick (Coming Soon)</Option>
-              <Option value="treemap">Treemap (Coming Soon)</Option>
               <Option value="funnel">Funnel (Coming Soon)</Option>
               {/* <Option value="forceDirectedGraph">Force-Directed Graph</Option> */}
               {/* <Option value="choropleth">Choropleth</Option> */}
@@ -1334,8 +1333,8 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                         <Option value="bubble">Bubble</Option>
                         <Option value="scatter">Scatter</Option>
                         <Option value="boxplot">Box Plot</Option>
+                        <Option value="treemap">Treemap</Option>
                         <Option value="candlestick">Candlestick (Coming Soon)</Option>
-                        <Option value="treemap">Treemap (Coming Soon)</Option>
                         <Option value="funnel">Funnel (Coming Soon)</Option>
                         {/* <Option value="forceDirectedGraph">Force-Directed Graph</Option> */}
                         {/* <Option value="choropleth">Choropleth</Option> */}
