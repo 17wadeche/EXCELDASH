@@ -1483,7 +1483,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                         }
                       }}
                     </Form.Item>
-                    {![ 'pie', 'doughnut', 'polarArea', 'bubble' ].includes(chartType) && (
+                    {![ 'pie', 'doughnut', 'polarArea', 'bubble', 'treemap' ].includes(chartType) && (
                       <Form.Item
                         {...restField}
                         name={[name, 'backgroundColor']}
@@ -1690,7 +1690,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                   </Form.Item>
                 </Panel>
                 <Panel header="Styling" key="styling">
-                  {![ 'pie', 'doughnut', 'polarArea', 'bubble' ].includes(chartType) && (
+                  {![ 'pie', 'doughnut', 'polarArea', 'bubble', 'treemap' ].includes(chartType) && (
                     <Form.Item label="Chart Background Color" name="chartBackgroundColor">
                       <Input type="color" />
                     </Form.Item>
