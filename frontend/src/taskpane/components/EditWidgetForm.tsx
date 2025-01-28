@@ -195,14 +195,15 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           />
           <Radio.Group
             onChange={(e) => {
+              const maxZ = Math.max(...widgets.map((w) => w.zIndex || 0));
+              const minZ = Math.min(...widgets.map((w) => w.zIndex || 0));
               if (e.target.value === 'front') {
-                const newZIndex = maxZ + 1;
-                setZIndex(newZIndex);
-                form.setFieldsValue({ zIndex: newZIndex });
+                setZIndex(maxZ + 1);
+                form.setFieldsValue({ zIndex: maxZ + 1 });
               } else {
-                const newZIndex = minZ - 1;
-                setZIndex(newZIndex >= 0 ? newZIndex : 0);
-                form.setFieldsValue({ zIndex: newZIndex >= 0 ? newZIndex : 0 });
+                const newZ = Math.max(minZ - 1, 0);
+                setZIndex(newZ);
+                form.setFieldsValue({ zIndex: newZ });
               }
             }}
           >
