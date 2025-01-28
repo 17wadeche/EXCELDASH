@@ -37,6 +37,7 @@ const LoginPage: React.FC = () => {
           isLoading: true,
         });
         message.success('Login successful.');
+        navigate('dashboard-list');
       } else {
         message.error(response.message || 'Login failed.');
         setAuthState({
@@ -99,6 +100,24 @@ const LoginPage: React.FC = () => {
               <Text>
                 Forgot your password? <Link to="/forgot-password">Reset Password</Link>
               </Text>
+            </Form.Item>
+            <Form.Item>
+              <Button
+                type="link"
+                style={{ padding: 0 }}
+                aria-label="Register Button"
+              >
+                <Link to="/register">Account not created? Register</Link>
+              </Button>
+            </Form.Item>
+            <Form.Item>
+              <Button
+                type="link"
+                style={{ padding: 0 }}
+                aria-label="Subscribe Button"
+              >
+                <Link to="/subscribe">No subscription? Subscribe Now</Link>
+              </Button>
             </Form.Item>
           </Form>
         </div>
