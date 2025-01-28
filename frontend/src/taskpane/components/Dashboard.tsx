@@ -779,17 +779,19 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
           draggableHandle=".drag-handle"
           isResizable={isEditingEnabled}
           isDraggable={isEditingEnabled}
-          onDragStart={(layout, oldItem, newItem, placeholder, e, element) => {
+          onDragStart={(_layout, _oldItem, _newItem, _placeholder, e, _element) => {
             if (isSaving) {
               e.preventDefault();
               return false;
             }
+            return true; // Ensure all code paths return a value
           }}
-          onResizeStart={(layout, oldItem, newItem, placeholder, e, element) => {
+          onResizeStart={(_layout, _oldItem, _newItem, _placeholder, e, _element) => {
             if (isSaving) {
               e.preventDefault();
               return false;
             }
+            return true; // Ensure all code paths return a value
           }}
           compactType={null}
           preventCollision={false}
