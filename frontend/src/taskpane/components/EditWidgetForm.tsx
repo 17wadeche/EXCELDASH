@@ -414,7 +414,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 type: ds.type,
                 tree: treemapData,
                 key: 'value',
-                groups: ['Name'],
+                groups: ['name'],
                 backgroundColor: treemapColors.map((c: any) => c.color),
                 borderColor: treemapColors.map((c: any) => c.color),
                 borderWidth: ds.borderWidth || 1,
@@ -422,7 +422,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                   display: true,
                   color: '#fff',
                   formatter: (_value: any, context: any) => {
-                    return context.raw.name;
+                    return context.raw?.name || 'Unnamed';
                   },
                   font: {
                     weight: 'bold',
