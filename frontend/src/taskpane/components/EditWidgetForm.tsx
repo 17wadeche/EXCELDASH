@@ -400,6 +400,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
               }
               return {
                 label: ds.label,
+                type: 'candlestick',
                 data: parsedData,
                 color: {
                   up: '#00b050',
