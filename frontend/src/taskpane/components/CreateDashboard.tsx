@@ -304,7 +304,7 @@ const CreateDashboard: React.FC = () => {
               exampleSheet.getRange("A66:D69").values = [["A", "B", 1, "AB"],["B", "C", 1, "BC"],["C", "D", 1, "CD"],["A", "D", 2, "AD"]];
               // ========== PARALLEL COORDINATES (PCP) DATA ==========
               exampleSheet.getRange("A72:D72").values = [["Dim1", "Dim2", "Dim3", "Dim4"]];
-              exampleSheet.getRange("A83:D85").values = [[10, 30, 50, 20],[5, 40, 20, 10],[9, 25, 55, 22]];
+              exampleSheet.getRange("A73:D75").values = [[10, 30, 50, 20],[5, 40, 20, 10],[9, 25, 55, 22]];
             }
             await context.sync();
             message.success('"Example Chart Data" sheet is ready.');
