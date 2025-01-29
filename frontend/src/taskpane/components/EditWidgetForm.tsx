@@ -749,10 +749,11 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
             {
               label: 'Candlestick Series',
               type: 'candlestick',
-              data: JSON.stringify(candlestickData),
+              data: candlestickData,
               backgroundColor: getRandomColor(),
               borderColor: getRandomColor(),
               borderWidth: 1,
+              datalabels: { display: false },
             },
           ],
         });
@@ -769,7 +770,11 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
         const rawRows = data.slice(2);
         const treemapData = rawRows.map((row) => {
           const [name, valueStr] = row.map((x: any) => String(x).trim());
-          return { name, value: parseFloat(valueStr) };
+          return {
+            name: name || 'Unnamed',
+            value: parseFloat(valueStr) || 0,
+            group: 'root'
+          };
         });
         const backgroundColors = treemapData.map(() => getRandomColor());
         form.setFieldsValue({
