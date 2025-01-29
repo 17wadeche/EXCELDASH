@@ -50,6 +50,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
         const data = widget.data as ChartData;
         const useArea = data.type === 'line' && data.datasets.some((ds) => ds.fill);
         const initialValues: any = {
+          zIndex: widget.zIndex || 0,
           title: data.title || 'Chart',
           chartType: useArea ? 'area' : data.type,
           labels: (data.labels || []).join(', '),
@@ -151,6 +152,11 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
   };
 
   useEffect(() => {
+    setZIndex(widget.zIndex || 0);
+    form.setFieldsValue(getInitialValues());
+  }, [widget, form]);
+
+  useEffect(() => {
     form.setFieldsValue(getInitialValues());
     if (widget.type === 'chart') {
       const cData = widget.data as ChartData;
@@ -203,15 +209,9 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           />
           <Radio.Group
             onChange={(e) => {
-              if (e.target.value === 'front') {
-                const newZIndex = maxZ + 1;
-                setZIndex(newZIndex);
-                form.setFieldsValue({ zIndex: newZIndex });
-              } else {
-                const newZIndex = minZ - 1;
-                setZIndex(newZIndex >= 0 ? newZIndex : 0);
-                form.setFieldsValue({ zIndex: newZIndex >= 0 ? newZIndex : 0 });
-              }
+              const newZ = e.target.value === 'front' ? zIndex + 1 : Math.max(0, zIndex - 1);
+              setZIndex(newZ);
+              form.setFieldsValue({ zIndex: newZ });
             }}
           >
             <Radio.Button value="front">
