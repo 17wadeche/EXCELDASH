@@ -1,9 +1,8 @@
 // src/taskpane/components/CustomLayout.tsx
 
 import React, { useContext, useState } from 'react';
-import { Layout, Menu, Button, Modal, Switch, Form, Input, message } from 'antd';
+import { Layout, Menu, Button, Modal, Form, Input, message } from 'antd';
 import { Link, useLocation, useNavigate, Outlet } from 'react-router-dom';
-import { Widget, LineWidgetData } from './types';
 import {
   PlusOutlined,
   UnorderedListOutlined,
@@ -12,7 +11,6 @@ import {
   DashboardOutlined,
   ScheduleOutlined,
   UploadOutlined,
-  FileExcelOutlined,
   LineOutlined,
   TableOutlined,
   BorderOutlined,
@@ -20,7 +18,6 @@ import {
   DownloadOutlined,
   MailOutlined,
   SaveOutlined,
-  FileOutlined,
   PictureOutlined,
   HistoryOutlined,
 } from '@ant-design/icons';
@@ -29,8 +26,6 @@ import ImportChartModal from './ImportChartModal';
 import VersionHistoryModal from './VersionHistoryModal';
 import DashboardSettingsModal from './DashboardSettingsModal';
 import './CustomLayout.css';
-import LineSettingsModal from './LineSettingsModal';
-
 const { Content, Sider } = Layout;
 const { SubMenu } = Menu;
 
@@ -42,40 +37,31 @@ const CustomLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) =>
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
   const [isSettingsModalVisible, setIsSettingsModalVisible] = useState(false);
-  const [isLineSettingsModalVisible, setIsLineSettingsModalVisible] = useState(false);
-  const [editingWidget, setEditingWidget] = useState<Widget | null>(null);
   const location = useLocation();
   const isFullScreen = location.pathname === '/full-screen';
   const dashboardContext = useContext(DashboardContext);
   if (!dashboardContext) {
     throw new Error('DashboardContext must be used within a DashboardProvider');
   }
-
   const {
     addWidget,
-    readDataFromExcel,
     generateProjectManagementTemplateAndGanttChart,
     exportDashboardAsPDF,
     emailDashboard,
-    dashboardBorderSettings,
-    setDashboardBorderSettings,
     saveAsTemplate,
     saveDashboardVersion,
   } = dashboardContext;
-
   const isInDashboard = location.pathname.startsWith('/dashboard');
   const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
   const showImportChartModal = () => {
     setIsImportChartModalVisible(true);
   };
-
   const handleImportChartModalCancel = () => {
     setIsImportChartModalVisible(false);
   };
   const showFeedbackModal = () => {
     setIsFeedbackModalVisible(true);
   };
-
   const handleFeedbackCancel = () => {
     setIsFeedbackModalVisible(false);
   };
@@ -85,20 +71,15 @@ const CustomLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) =>
     const body = encodeURIComponent(
       `Name: ${values.name || 'N/A'}\nEmail: ${values.email || 'N/A'}\n\n${values.message}`
     );
-
     const mailtoLink = `mailto:${feedbackEmail}?subject=${subject}&body=${body}`;
     window.location.href = mailtoLink;
-
     message.success('Your email client has been opened to send feedback.');
-
     setIsFeedbackModalVisible(false);
     feedbackForm.resetFields();
   };
-
   const onCollapse = (collapsed: boolean) => {
     setCollapsed(collapsed);
   };
-
   return (
     <Layout className="custom-layout light-theme" style={{ minHeight: '100vh', width: '100%', height: '100%' }}>
       <Sider
@@ -131,11 +112,7 @@ const CustomLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) =>
               <Menu.Item key="add-sales-chart" icon={<LineChartOutlined />} onClick={() => addWidget('chart')}>
                 Chart
               </Menu.Item>
-              <Menu.Item
-                key="import-charts"
-                icon={<UploadOutlined />}
-                onClick={showImportChartModal}
-              >
+              <Menu.Item key="import-charts" icon={<UploadOutlined />} onClick={showImportChartModal}>
                 Import Charts from Excel
               </Menu.Item>
               <Menu.Item
@@ -183,24 +160,14 @@ const CustomLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) =>
           transition: 'margin-left 0.2s',
         }}
       >
-        <ImportChartModal
-          visible={isImportChartModalVisible}
-          onCancel={handleImportChartModalCancel}
-        />
+        <ImportChartModal visible={isImportChartModalVisible} onCancel={handleImportChartModalCancel} />
         <Content style={{ margin: '12px' }}>
           <div style={{ padding: 10, background: 'var(--background-color)', minHeight: 360 }}>
             {children ? children : <Outlet />}
           </div>
         </Content>
-
-        {/* Feedback Modal */}
         {isInDashboard && (
-          <Modal
-            title="Submit Feedback"
-            open={isFeedbackModalVisible}
-            onCancel={handleFeedbackCancel}
-            footer={null}
-          >
+          <Modal title="Submit Feedback" open={isFeedbackModalVisible} onCancel={handleFeedbackCancel} footer={null} >
             <Form form={feedbackForm} onFinish={handleFeedbackSubmit}>
               <Form.Item name="name" label="Name">
                 <Input placeholder="Your name (optional)" />
@@ -208,11 +175,7 @@ const CustomLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) =>
               <Form.Item name="email" label="Email" rules={[{ type: 'email' }]}>
                 <Input placeholder="Your email (optional)" />
               </Form.Item>
-              <Form.Item
-                name="subject"
-                label="Subject"
-                rules={[{ required: true, message: 'Please enter a subject' }]}
-              >
+              <Form.Item name="subject" label="Subject" rules={[{ required: true, message: 'Please enter a subject' }]}>
                 <Input placeholder="Subject" />
               </Form.Item>
               <Form.Item
@@ -231,18 +194,11 @@ const CustomLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) =>
           </Modal>
         )}
         {isInDashboard && (
-          <VersionHistoryModal
-            visible={isVersionHistoryVisible}
-            onClose={() => setIsVersionHistoryVisible(false)}
-          />
+          <VersionHistoryModal visible={isVersionHistoryVisible} onClose={() => setIsVersionHistoryVisible(false)} />
         )}
-        <DashboardSettingsModal
-          visible={isSettingsModalVisible}
-          onClose={() => setIsSettingsModalVisible(false)}
-        />
+        <DashboardSettingsModal visible={isSettingsModalVisible} onClose={() => setIsSettingsModalVisible(false)} />
       </Layout>
     </Layout>
   );
 };
-
 export default CustomLayout;

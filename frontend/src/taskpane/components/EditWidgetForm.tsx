@@ -349,16 +349,21 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 borderWidth: ds.borderWidth || 1,
               };
             } else if (ds.type === 'treemap') {
-              let treemapData = [];
-              if (typeof ds.tree === 'string') {
-                try {
-                  treemapData = JSON.parse(ds.tree);
-                } catch (error) {
-                  console.error("Treemap data parsing failed", error);
-                  treemapData = [];
-                }
-              } else if (Array.isArray(ds.tree)) {
+              let treemapData: any[] = [];
+              if (Array.isArray(ds.tree) && ds.tree.length > 0) {
                 treemapData = ds.tree;
+              } else if (typeof ds.data === 'string' && ds.data.trim()) {
+                const lines = ds.data
+                  .split('\n')
+                  .map((l: any) => l.trim())
+                  .filter(Boolean);
+                treemapData = lines.map((line) => {
+                  const [rawName, rawVal] = line.split(',').map((x: any) => x.trim());
+                  return {
+                    name: rawName || 'Unnamed',
+                    value: parseFloat(rawVal) || 0,
+                  };
+                });
               }
               treemapData = treemapData.map((item: any) => ({
                 name: item.Name ?? item.name ?? 'Unnamed',
