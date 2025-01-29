@@ -9,7 +9,6 @@ import { BoxPlotController, BoxAndWiskers } from '@sgratzl/chartjs-chart-boxplot
 import zoomPlugin from 'chartjs-plugin-zoom';
 import { TreemapController, TreemapElement } from 'chartjs-chart-treemap';
 import { FunnelController, TrapezoidElement } from 'chartjs-chart-funnel';
-import { CandlestickController, CandlestickElement, OhlcController, OhlcElement } from 'chartjs-chart-financial';
 import { HierarchicalScale } from 'chartjs-plugin-hierarchical';
 import type { ChartData, ChartOptions, ChartType, ChartDataset } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
@@ -34,11 +33,7 @@ ChartJS.register(
   TreemapController,
   TreemapElement,
   FunnelController,
-  CandlestickController,
-  CandlestickElement,
   TrapezoidElement,
-  OhlcController,
-  OhlcElement,
   BoxPlotController,
   BoxAndWiskers,
   HierarchicalScale,
@@ -80,10 +75,6 @@ const FunnelChart: React.FC<any> = (props) => {
   return <BaseChart type="funnel" {...props} options={{ ...props.options, plugins: { ...props.options.plugins }, elements: { trapezoid: { width: 0.8, spacing: 2 }}}}/>;
 };
 
-const CandlestickChart: React.FC<any> = (props) => {
-  return <BaseChart type="candlestick" {...props} />;
-};
-
 const BoxPlotChart: React.FC<any> = (props) => {
   return <BaseChart type="boxplot" {...props} />;
 };
@@ -99,7 +90,6 @@ const chartComponents: Record<string, React.FC<any>> = {
   polarArea: PolarArea,
   treemap: TreemapChart,
   funnel: FunnelChart,
-  candlestick: CandlestickChart,
   boxplot: BoxPlotChart,
   forceDirectedGraph: ForceDirectedGraphChart,
   choropleth: ChoroplethChart,

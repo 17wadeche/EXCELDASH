@@ -79,11 +79,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           updateInterval: data.dynamicUpdate?.interval || 5,
           datasets: (data.datasets || []).map((ds) => {
             let dataString = '';
-            if ((ds.type as String) === 'candlestick' && Array.isArray(ds.data)) {
-              dataString = ds.data
-                .map((point: any) => `${point.x},${point.o},${point.h},${point.l},${point.c}`)
-                .join(';');
-            } else if ((ds.type as String) === 'boxplot' && Array.isArray(ds.data)) {
+            if ((ds.type as String) === 'boxplot' && Array.isArray(ds.data)) {
               dataString = JSON.stringify(ds.data);
             } else if (Array.isArray(ds.data)) {
               dataString = ds.data.join(', ');
@@ -354,52 +350,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 medianColor: ds.medianColor || getRandomColor(),
                 whiskerColor: ds.whiskerColor || getRandomColor(),
                 borderWidth: ds.borderWidth || 1,
-              };
-            } else if (ds.type === 'candlestick') {
-              let parsedData = [];
-              try {
-                const rows = (ds.data || '').split(';')
-                  .map((row: any) => row.trim())
-                  .filter(Boolean);
-                parsedData = rows.map((row: any) => {
-                  const [x, o, h, l, c] = row.split(',');
-                  return {
-                    x: x.trim(),
-                    o: parseFloat(o),
-                    h: parseFloat(h),
-                    l: parseFloat(l),
-                    c: parseFloat(c),
-                  };
-                });
-              } catch (error) {
-                console.error('Error parsing candlestick data:', error);
-                message.error('Invalid candlestick data format.');
-                return null;
-              }
-              return {
-                label: ds.label,
-                type: 'candlestick',
-                data: parsedData,
-                color: {
-                  up: '#00b050',
-                  down: '#ff0000',
-                  unchanged: '#555555',
-                },
-                borderColor: '#333',
-                borderWidth: 1,
-                wickColor: {
-                  up: '#00b050',
-                  down: '#ff0000',
-                  unchanged: '#555555',
-                },
-                datalabels: { display: false },
-                parsing: {
-                  xKey: 'x',
-                  openKey: 'o',
-                  highKey: 'h',
-                  lowKey: 'l',
-                  closeKey: 'c'
-                },
               };
             } else if (ds.type === 'treemap') {
               let treemapData = [];
@@ -711,35 +661,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           ],
         });
         message.success('Box Plot data loaded successfully!');
-        break;
-      }
-      case 'candlestick': {
-        if (data.length < 1) {
-          message.error('Candlestick requires at least 1 row of data.');
-          return;
-        }
-        const rawRows = data.slice(0);
-        const processedRows = rawRows.map((row) => {
-          const labelOrNumber = row[0];
-          const dateString = convertExcelDate(labelOrNumber);
-          return [dateString, row[1], row[2], row[3], row[4]];
-        });
-        const candlestickString = processedRows.map((c) => c.join(",")).join(";");
-        form.setFieldsValue({
-          labels: '',
-          datasets: [
-            {
-              label: 'Candlestick Series',
-              type: 'candlestick',
-              data: candlestickString,
-              backgroundColor: getRandomColor(),
-              borderColor: getRandomColor(),
-              borderWidth: 1,
-              datalabels: { display: false },
-            },
-          ],
-        });
-        message.success('Candlestick data loaded from Excel.');
         break;
       }
       case 'treemap': {
@@ -1206,7 +1127,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
               <Option value="boxplot">Box Plot</Option>
               <Option value="funnel">Funnel</Option>
               <Option value="treemap">Treemap</Option>
-              <Option value="candlestick">Candlestick</Option>
               {/* <Option value="forceDirectedGraph">Force-Directed Graph</Option> */}
               {/* <Option value="choropleth">Choropleth</Option> */}
               {/* <Option value="parallelCoordinates">Parallel Coordinates</Option> */}
@@ -1224,7 +1144,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                     [
                       'scatter',
                       'bubble',
-                      'candlestick',
                       'forceDirectedGraph',
                       'choropleth',
                       'parallelCoordinates',
@@ -1382,7 +1301,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                         <Option value="boxplot">Box Plot</Option>
                         <Option value="funnel">Funnel</Option>
                         <Option value="treemap">Treemap</Option>
-                        <Option value="candlestick">Candlestick</Option>
                         {/* <Option value="forceDirectedGraph">Force-Directed Graph</Option> */}
                         {/* <Option value="choropleth">Choropleth</Option> */}
                         {/* <Option value="parallelCoordinates">Parallel Coordinates</Option> */}
@@ -1683,7 +1601,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
               'radar',
               'funnel',
               'treemap',
-              'candlestick',
               'forceDirectedGraph',
               'choropleth',
               'parallelCoordinates',

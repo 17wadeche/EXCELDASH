@@ -296,9 +296,6 @@ const CreateDashboard: React.FC = () => {
                 ["Category D", 5],
                 ["Category E", 25],
               ];
-              // ========== CANDLESTICK CHART DATA ==========
-              exampleSheet.getRange("A59:E59").values = [["2023-01-01", 100, 110, 95, 105]];
-              exampleSheet.getRange("A60:E60").values = [["2023-01-02", 105, 115, 100, 110]];
               // ========== FORCE-DIRECTED GRAPH DATA ==========
               // exampleSheet.getRange("A63").values = [["Force-Directed Graph Data"]];
               // exampleSheet.getRange("A64:C64").values = [["NodeId", "Group", "Value"]];
