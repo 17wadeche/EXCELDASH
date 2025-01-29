@@ -569,6 +569,8 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                   case 'scatter':
                   case 'bubble':
                     return `(${context.raw.x}, ${context.raw.y})`;
+                  case 'funnel':
+                    return context.dataset.label;
                   default:
                     return context.formattedValue;
                 }
@@ -594,6 +596,9 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
               callbacks: {
                 label: function (context: any) {
                   const chartType = context.dataset.type;
+                  if (chartType === 'funnel') {
+                    return `${context.formattedValue}`;
+                  }
                   if (chartType === 'treemap') {
                     const dataPoint = context.raw;
                     const label = dataPoint.name || 'Name';
