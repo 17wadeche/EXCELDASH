@@ -570,7 +570,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                   case 'bubble':
                     return `(${context.raw.x}, ${context.raw.y})`;
                   case 'funnel':
-                    return context.dataset.label;
+                    return context.chart.data.labels[context.dataIndex];
                   default:
                     return context.formattedValue;
                 }
