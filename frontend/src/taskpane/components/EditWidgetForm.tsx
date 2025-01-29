@@ -741,13 +741,13 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
         console.log('Nodes:', nodeRows);
         console.log('Edges:', edgeRows);
         if (nodeRows && Array.isArray(nodeRows)) {
-          nodeRows.forEach((node) => {});
+          nodeRows.forEach((_node) => {});
         } else {
           console.error('Nodes data is not an array:', nodeRows);
           return;
         }
         if (edgeRows && Array.isArray(edgeRows)) {
-          edgeRows.forEach(edge => {});
+          edgeRows.forEach((_edge) => {});
         } else {
           console.error('Edges data is not an array:', edgeRows);
           return;
