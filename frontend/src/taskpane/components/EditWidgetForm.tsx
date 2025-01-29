@@ -732,35 +732,25 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
       }
       case 'forceDirectedGraph': {
         let blankRowIndex = -1;
-        for (let i = 0; i < data.length; i++) {
-          const row = data[i];
-          const isEmpty = row.every((cell: any) => cell === '' || cell == null);
-          if (isEmpty) {
-            blankRowIndex = i;
-            break;
-          }
-        }
+        for (let i = 0; i < data.length; i++) {}
         if (blankRowIndex < 0) {
           message.error('No blank row found to separate Force-Directed Graph nodes from edges.');
           return;
         }
-        const nodeHeader = data[0];
-        const labelStr = nodeHeader.join(',');
         const nodeRows = data.slice(1, blankRowIndex);
-        const edgeHeader = data[blankRowIndex + 1];
         const edgeRows = data.slice(blankRowIndex + 2);
         const nodeStr = nodeRows.map((row) => row.join(',')).join(';');
         const edgeStr = edgeRows.map((row) => row.join(',')).join(';');
         const combinedStr = `NODES:${nodeStr}|EDGES:${edgeStr}`;
         form.setFieldsValue({
-          labels: labelStr,
+          labels: data[0].join(','),
           datasets: [
             {
               label: 'Force Graph',
               type: 'forceDirectedGraph',
               data: combinedStr,
-              backgroundColor: getRandomColor(),
-              borderColor: getRandomColor(),
+              backgroundColor: '#4caf50',
+              borderColor: '#4caf50',
               borderWidth: 1,
             },
           ],
