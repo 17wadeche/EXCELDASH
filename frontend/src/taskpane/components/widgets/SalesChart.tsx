@@ -210,7 +210,7 @@ const SalesChart = ({ data, type }: SalesChartProps) => {
             ? { 
                 unit: "day",
                 tooltipFormat: "ll",
-                parser: "MM-DD-YYYY",
+                parser: "YYYY-MM-DD",
               }
             : data.scales?.x?.type === "time"
               ? { unit: "day" }
