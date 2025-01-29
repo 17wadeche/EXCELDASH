@@ -384,7 +384,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                   .map((row: any) => row.trim())
                   .filter(Boolean);
                 parsedData = rows.map((row: any) => {
-                  const [x, o, h, l, c] = row.split(/\s+/);
+                  const [x, o, h, l, c] = row.split(',');
                   return {
                     x: x.trim(),
                     o: parseFloat(o),
@@ -750,25 +750,19 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           return;
         }
         const rawRows = data.slice(0);
-        const processedRows = rawRows.map(row => {
+        const processedRows = rawRows.map((row) => {
           const labelOrNumber = row[0];
           const dateString = convertExcelDate(labelOrNumber);
           return [dateString, row[1], row[2], row[3], row[4]];
         });
-        const candlestickData = processedRows.map(row => ({
-          x: row[0],
-          o: Number(row[1]),
-          h: Number(row[2]),
-          l: Number(row[3]),
-          c: Number(row[4]),
-        }));
+        const candlestickString = processedRows.map((c) => c.join(",")).join(";");
         form.setFieldsValue({
           labels: '',
           datasets: [
             {
               label: 'Candlestick Series',
               type: 'candlestick',
-              data: candlestickData,
+              data: candlestickString,
               backgroundColor: getRandomColor(),
               borderColor: getRandomColor(),
               borderWidth: 1,
