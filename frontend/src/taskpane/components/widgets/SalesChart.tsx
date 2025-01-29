@@ -47,14 +47,19 @@ const ForceDirectedGraphChart: React.FC<any> = (props) => {
   return <BaseChart type="forceDirectedGraph" {...props} />;
 };
 
-const ParallelCoordinatesChart: React.FC<any> = (props) => {
+interface ParallelCoordinatesChartProps {
+  data: any;
+  options?: ChartOptions<"parallelCoordinates">;
+}
+
+const ParallelCoordinatesChart: React.FC<ParallelCoordinatesChartProps> = (props) => {
   const options = {
     ...props.options,
     scales: {
       ...props.options.scales,
       y: {
-        type: "linear",
-        position: "left",
+        type: 'linear',
+        position: 'left',
         beginAtZero: true,
       },
     },
