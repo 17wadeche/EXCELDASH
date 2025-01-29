@@ -224,9 +224,9 @@ const CreateDashboard: React.FC = () => {
                 { range: "A26", text: "Bubble Chart Data", bold: true, fontSize: 14 },
                 { range: "A32", text: "Scatter Chart Data", bold: true, fontSize: 14 },
                 { range: "A37", text: "Box Plot Data", bold: true, fontSize: 14 },
-                { range: "A50", text: "Candlestick Chart Data", bold: true, fontSize: 14 },
-                { range: "A42", text: "Treemap Chart Data", bold: true, fontSize: 14 },
-                { range: "A54", text: "Funnel Chart Data", bold: true, fontSize: 14 },
+                { range: "A42", text: "Funnel Chart Data", bold: true, fontSize: 14 },
+                { range: "A50", text: "Treemap Chart Data", bold: true, fontSize: 14 },
+                { range: "A58", text: "Candlestick Chart Data", bold: true, fontSize: 14 },
               ];
               headers.forEach(header => {
                 const headerRange = exampleSheet.getRange(header.range);
@@ -278,27 +278,27 @@ const CreateDashboard: React.FC = () => {
               exampleSheet.getRange("A38:F38").values = [["", "Q1", "Median", "Q3", "Min", "Max"]];
               exampleSheet.getRange("A39:F39").values = [["Sample1", 10, 20, 30, 5, 35]];
               exampleSheet.getRange("A40:F40").values = [["Sample2", 15, 25, 40, 10, 45]];
-              // ========== CANDLESTICK CHART DATA ==========
-              exampleSheet.getRange("A51:E51").values = [["2023-01-01", 100, 110, 95, 105]];
-              exampleSheet.getRange("A52:E52").values = [["2023-01-02", 105, 115, 100, 110]];
-              // ========== TREEMAP CHART DATA ==========
-              exampleSheet.getRange("A43:B43").values = [["Name", "Value"]];
-              exampleSheet.getRange("A44:B48").values = [
-                ["Category A", 10],
-                ["Category B", 20],
-                ["Category C", 15],
-                ["Category D", 5],
-                ["Category E", 25],
-              ];
               // ========== FUNNEL CHART DATA ==========
-              exampleSheet.getRange("A55:B55").values = [["Stage", "Value"]];
-              exampleSheet.getRange("A56:B60").values = [
+              exampleSheet.getRange("A43:B43").values = [["Stage", "Value"]];
+              exampleSheet.getRange("A44:B48").values = [
                 ["Prospects", 200],
                 ["Qualified", 100],
                 ["Proposal", 60],
                 ["Negotiation", 30],
                 ["Closed", 15],
               ];
+              // ========== TREEMAP CHART DATA ==========
+              exampleSheet.getRange("A51:B51").values = [["Name", "Value"]];
+              exampleSheet.getRange("A52:B56").values = [
+                ["Category A", 10],
+                ["Category B", 20],
+                ["Category C", 15],
+                ["Category D", 5],
+                ["Category E", 25],
+              ];
+              // ========== CANDLESTICK CHART DATA ==========
+              exampleSheet.getRange("A59:E59").values = [["2023-01-01", 100, 110, 95, 105]];
+              exampleSheet.getRange("A60:E60").values = [["2023-01-02", 105, 115, 100, 110]];
               // ========== FORCE-DIRECTED GRAPH DATA ==========
               // exampleSheet.getRange("A63").values = [["Force-Directed Graph Data"]];
               // exampleSheet.getRange("A64:C64").values = [["NodeId", "Group", "Value"]];
