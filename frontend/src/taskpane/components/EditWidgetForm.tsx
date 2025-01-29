@@ -48,6 +48,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
         return widget.data as TitleWidgetData;
       case 'chart': {
         const data = widget.data as ChartData;
+        const datasets = data.datasets ?? [];
         const useArea = data.type === 'line' && data.datasets.some((ds) => ds.fill);
         const initialValues: any = {
           zIndex: widget.zIndex || 0,
@@ -116,11 +117,11 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           }
         }
         if (data.type === 'treemap') {
-          const dataset = data.datasets[0];
-          if (dataset.backgroundColor && Array.isArray(dataset.backgroundColor)) {
-            initialValues.treemapColors = dataset.backgroundColor.map((color: string) => ({ color }));
+          const firstDataset = datasets[0] ?? { tree: [], backgroundColor: [] };
+          if (Array.isArray(firstDataset.backgroundColor)) {
+            initialValues.treemapColors = firstDataset.backgroundColor.map((color: string) => ({ color }));
           } else {
-            initialValues.treemapColors = dataset.tree?.map(() => ({ color: getRandomColor() })) || [];
+            initialValues.treemapColors = firstDataset.tree?.map(() => ({ color: getRandomColor() })) || [];
           }
         }
         if (data.type === 'funnel') {
