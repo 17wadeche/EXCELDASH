@@ -674,30 +674,25 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
         const headerRow = data[0];
         const labelStr = headerRow.join(',');
         const rawRows = data.slice(1);
-        const datasets = rawRows.map((row, rowIndex) => {
-          const [name, valueStr] = row.map((x: any) => String(x).trim());
-          const parsedValue = parseFloat(valueStr) || 0;
-          const color = getRandomColor();
-          return {
-            label: `${name || `Row${rowIndex + 1}`}`,
-            type: 'treemap',
-            tree: [
-              {
-                name: name || `Unnamed ${rowIndex + 1}`,
-                value: parsedValue,
-                group: 'root'
-              },
-            ],
-            key: 'value',
-            groups: ['name'],
-            backgroundColor: [color],
-            borderColor: [color],
-            borderWidth: 1,
-          };
+        const treeItems = rawRows.map((row, rowIndex) => {
+          const [rawName, rawValue] = row; 
+          const name = String(rawName || `Item ${rowIndex + 1}`).trim();
+          const value = parseFloat(String(rawValue).trim()) || 0;
+          return { name, value };
         });
+        const singleTreemapDataset = {
+          label: 'Treemap Data',
+          type: 'treemap',
+          tree: treeItems,
+          key: 'value',
+          groups: ['name'],
+          backgroundColor: treeItems.map(() => getRandomColor()),
+          borderColor: '#333',
+          borderWidth: 1,
+        };
         form.setFieldsValue({
           labels: labelStr,
-          datasets,
+          datasets: [singleTreemapDataset],
           treemapColors: [],
         });
         message.success('Treemap data loaded from Excel, each line is its own dataset.');
