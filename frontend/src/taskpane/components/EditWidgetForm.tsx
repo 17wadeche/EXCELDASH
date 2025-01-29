@@ -258,9 +258,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           'funnel',
           'treemap',
           'forceDirectedGraph',
-          'choropleth',
           'parallelCoordinates',
-          'barWithErrorBars',
         ];
         let sliceColorsArray: string[] = [];
         let bubbleColorsArray: string[] = [];
@@ -414,7 +412,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 options: { plugins: { funnel: { percent: false } } },
               };
             } else if (
-              ['forceDirectedGraph', 'choropleth', 'parallelCoordinates', 'barWithErrorBars'].includes(ds.type)
+              ['forceDirectedGraph', 'parallelCoordinates' ].includes(ds.type)
             ) {
               return {
                 label: ds.label,
@@ -758,35 +756,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
         message.success('Force-Directed Graph data loaded!');
         break;
       }
-      case 'choropleth': {
-        if (data.length < 2) {
-          message.error('Need at least 2 rows for Choropleth: header + data.');
-          return;
-        }
-        const header = data[0];
-        if (header.length < 2) {
-          message.error('Choropleth: expected at least 2 columns: [Region, Value].');
-          return;
-        }
-        const labelStr = header.join(',');
-        const regionRows = data.slice(1);
-        const regionStr = regionRows.map((row) => row.join(',')).join(';');
-        form.setFieldsValue({
-          labels: labelStr,
-          datasets: [
-            {
-              label: 'Choropleth',
-              type: 'choropleth',
-              data: regionStr,
-              backgroundColor: getRandomColor(),
-              borderColor: getRandomColor(),
-              borderWidth: 1,
-            },
-          ],
-        });
-        message.success('Choropleth data loaded!');
-        break;
-      }
       case 'parallelCoordinates': {
         if (data.length < 2) {
           message.error('Need at least 2 rows for Parallel Coordinates: header + data.');
@@ -1093,7 +1062,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
               <Option value="funnel">Funnel</Option>
               <Option value="treemap">Treemap</Option>
               <Option value="forceDirectedGraph">Force-Directed Graph (Coming Soon)</Option>
-              <Option value="choropleth">Choropleth (Coming Soon)</Option>
               <Option value="parallelCoordinates">Parallel Coordinates (Coming Soon)</Option>
             </Select>
           </Form.Item>
@@ -1109,9 +1077,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                       'scatter',
                       'bubble',
                       'forceDirectedGraph',
-                      'choropleth',
                       'parallelCoordinates',
-                      'barWithErrorBars',
                     ].includes(cType)
                   ) {
                     return Promise.resolve();
@@ -1266,7 +1232,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                         <Option value="funnel">Funnel</Option>
                         <Option value="treemap">Treemap</Option>
                         <Option value="forceDirectedGraph (Coming Soon)">Force-Directed Graph</Option>
-                        <Option value="choropleth (Coming Soon)">Choropleth</Option>
                         <Option value="parallelCoordinates">Parallel Coordinates (Coming Soon)</Option>
                       </Select>
                     </Form.Item>
@@ -1544,9 +1509,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
               'funnel',
               'treemap',
               'forceDirectedGraph',
-              'choropleth',
               'parallelCoordinates',
-              'barWithErrorBars',
             ].includes(chartType) && (
               <>
                 <Panel header="Axis Settings" key="axis">

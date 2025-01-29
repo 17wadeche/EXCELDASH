@@ -14,7 +14,6 @@ import type { ChartData, ChartOptions, ChartType, ChartDataset } from 'chart.js'
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { ParallelCoordinatesController, LineSegment, PCPScale } from 'chartjs-chart-pcp';
 import { ForceDirectedGraphController, EdgeLine } from 'chartjs-chart-graph';
-import { ChoroplethController, GeoFeature, ColorScale, ProjectionScale } from 'chartjs-chart-geo';
 
 ChartJS.register(
   CategoryScale,
@@ -42,18 +41,10 @@ ChartJS.register(
   ForceDirectedGraphController,
   EdgeLine,
   LinearScale,
-  PointElement,
-  ChoroplethController,
-  GeoFeature,
-  ColorScale,
-  ProjectionScale
+  PointElement
 );
 const ForceDirectedGraphChart: React.FC<any> = (props) => {
   return <BaseChart type="forceDirectedGraph" {...props} />;
-};
-
-const ChoroplethChart: React.FC<any> = (props) => {
-  return <BaseChart type="choropleth" {...props} />;
 };
 
 const ParallelCoordinatesChart: React.FC<any> = (props) => {
@@ -85,7 +76,6 @@ const chartComponents: Record<string, React.FC<any>> = {
   funnel: FunnelChart,
   boxplot: BoxPlotChart,
   forceDirectedGraph: ForceDirectedGraphChart,
-  choropleth: ChoroplethChart,
   parallelCoordinates: ParallelCoordinatesChart,
 };
 
@@ -259,7 +249,7 @@ const SalesChart = ({ data, type }: SalesChartProps) => {
     }
   };
 
-  const noAxisTypes = ['pie', 'doughnut', 'radar', 'polarArea', 'treemap', 'funnel', 'forceDirectedGraph', 'choropleth', 'parallelCoordinates'];
+  const noAxisTypes = ['pie', 'doughnut', 'radar', 'polarArea', 'treemap', 'funnel', 'forceDirectedGraph', 'parallelCoordinates'];
   if (noAxisTypes.includes(type)) {
     chartOptions.scales = {};
   }
