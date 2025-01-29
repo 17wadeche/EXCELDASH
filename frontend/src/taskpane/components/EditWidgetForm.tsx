@@ -123,6 +123,14 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
             initialValues.treemapColors = dataset.tree?.map(() => ({ color: getRandomColor() })) || [];
           }
         }
+        if (data.type === 'funnel') {
+          const dataset = data.datasets[0];
+          if (dataset.backgroundColor && Array.isArray(dataset.backgroundColor)) {
+            initialValues.funnelColors = dataset.backgroundColor.map((color: string) => ({ color }));
+          } else {
+            initialValues.funnelColors = [];
+          }
+        }
         return initialValues;
       }
       case 'gantt': {
@@ -472,7 +480,8 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 message.error('The number of labels must match the number of data points for the funnel chart.');
                 return null;
               }
-              const funnelColors = ds.backgroundColor || funnelValues.map(() => getRandomColor());
+              const fc: { color: string }[] = form.getFieldValue('funnelColors') || [];
+              const funnelColors = fc.length ? fc.map((obj) => obj.color) : funnelValues.map(() => getRandomColor());
               return {
                 label: ds.label,
                 type: 'funnel',
@@ -1228,8 +1237,8 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
               <Option value="scatter">Scatter</Option>
               <Option value="boxplot">Box Plot</Option>
               <Option value="treemap">Treemap</Option>
-              <Option value="candlestick">Candlestick (Coming Soon)</Option>
-              <Option value="funnel">Funnel (Coming Soon)</Option>
+              <Option value="candlestick">Candlestick</Option>
+              <Option value="funnel">Funnel</Option>
               {/* <Option value="forceDirectedGraph">Force-Directed Graph</Option> */}
               {/* <Option value="choropleth">Choropleth</Option> */}
               {/* <Option value="parallelCoordinates">Parallel Coordinates</Option> */}
@@ -1289,6 +1298,39 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 </>
               )}
             </Form.List>
+          )}
+          {chartType === 'funnel' && (
+            <Collapse>
+              <Collapse.Panel header="Funnel Colors" key="funnelColors">
+                <Form.List name="funnelColors">
+                  {(fields) => {
+                    const rawLabels = form.getFieldValue('labels') || '';
+                    const labelArr = rawLabels
+                      .split(',')
+                      .map((l: string) => l.trim())
+                      .filter(Boolean);
+                    return (
+                      <>
+                        {fields.map(({ key, name, ...restField }, index) => {
+                          const funnelLabel = labelArr[index] || `Segment #${index + 1}`;
+                          return (
+                            <Form.Item
+                              {...restField}
+                              key={key}
+                              name={[name, 'color']}
+                              label={`Color for ${funnelLabel}`}
+                              rules={[{ required: true, message: 'Please pick a color' }]}
+                            >
+                              <Input type="color" />
+                            </Form.Item>
+                          );
+                        })}
+                      </>
+                    );
+                  }}
+                </Form.List>
+              </Collapse.Panel>
+            </Collapse>
           )}
           <Form.Item
             name="worksheetName"
@@ -1371,8 +1413,8 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                         <Option value="scatter">Scatter</Option>
                         <Option value="boxplot">Box Plot</Option>
                         <Option value="treemap">Treemap</Option>
-                        <Option value="candlestick">Candlestick (Coming Soon)</Option>
-                        <Option value="funnel">Funnel (Coming Soon)</Option>
+                        <Option value="candlestick">Candlestick</Option>
+                        <Option value="funnel">Funnel</Option>
                         {/* <Option value="forceDirectedGraph">Force-Directed Graph</Option> */}
                         {/* <Option value="choropleth">Choropleth</Option> */}
                         {/* <Option value="parallelCoordinates">Parallel Coordinates</Option> */}
