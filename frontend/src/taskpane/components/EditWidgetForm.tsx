@@ -726,11 +726,11 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
         break;
       }
       case 'candlestick': {
-        if (data.length < 2) {
-          message.error('Candlestick requires at least 2 rows: header + data.');
+        if (data.length < 1) {
+          message.error('Candlestick requires at least 1 row of data.');
           return;
         }
-        const rawRows = data.slice(1);
+        const rawRows = data.slice(0);
         const processedRows = rawRows.map(row => {
           const labelOrNumber = row[0];
           const dateString = convertExcelDate(labelOrNumber);
@@ -761,13 +761,13 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
         break;
       }
       case 'treemap': {
-        if (data.length < 3) {
-          message.error('Treemap requires 3+ rows: title row + header + data.');
+        if (data.length < 2) {
+          message.error('Treemap requires 2+ rows: header + data.');
           return;
         }
-        const headerRow = data[1];
+        const headerRow = data[0];
         const labelStr = headerRow.join(',');
-        const rawRows = data.slice(2);
+        const rawRows = data.slice(1);
         const treemapData = rawRows.map((row) => {
           const [name, valueStr] = row.map((x: any) => String(x).trim());
           return {
@@ -801,9 +801,9 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           message.error('Funnel requires at least 2 rows of data.');
           return;
         }
-        const headerRow = data[1];
+        const headerRow = data[0];
         const labelStr = headerRow.join(',');
-        const rawRows = data.slice(2);
+        const rawRows = data.slice(1);
         const labels = rawRows.map((row) => row[0]);
         const values = rawRows.map((row) => Number(row[1]));
         form.setFieldsValue({
