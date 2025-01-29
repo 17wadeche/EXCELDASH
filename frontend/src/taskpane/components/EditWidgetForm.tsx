@@ -357,7 +357,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                   .split('\n')
                   .map((l: any) => l.trim())
                   .filter(Boolean);
-                treemapData = lines.map((line) => {
+                treemapData = lines.map((line: any) => {
                   const [rawName, rawVal] = line.split(',').map((x: any) => x.trim());
                   return {
                     name: rawName || 'Unnamed',
