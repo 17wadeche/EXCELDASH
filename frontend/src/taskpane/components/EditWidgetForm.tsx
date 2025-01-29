@@ -7,6 +7,7 @@ import { MinusCircleOutlined, PlusOutlined, SelectOutlined, ArrowUpOutlined, Arr
 import moment from 'moment';
 import { DashboardContext } from '../context/DashboardContext';
 import { Widget, TextData, ChartData, GanttWidgetData, MetricData, TitleWidgetData } from './types';
+import { COLORS } from 'html2canvas/dist/types/css/types/color';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -367,12 +368,15 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 name: String(item.name) || 'Unnamed',
                 value: Number(item.value) || 0,
               }));
+              const colors = Array.isArray(ds.backgroundColor)
+                ? ds.backgroundColor
+                : treemapData.map(() => getRandomColor());
               return {
                 label: ds.label || 'Treemap Data',
                 type: ds.type,
                 tree: treemapData,
                 key: 'value',
-                backgroundColor: ds.backgroundColor || getRandomColor(),
+                backgroundColor: colors,
                 borderColor: ds.borderColor || '#333',
                 borderWidth: ds.borderWidth || 1,
                 datalabels: {
