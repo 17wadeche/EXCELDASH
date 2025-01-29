@@ -1859,7 +1859,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
                   ...existingDS,
                   label: existingDS.label || "Funnel",
                   data: funnelValues,
-                  backgroundColor: existingDS.backgroundColor ?? getRandomColorArray(funnelValues.length),
+                  backgroundColor: existingDS.backgroundColor ?? getRandomColor(),
                   borderColor: existingDS.borderColor ?? "#000000",
                   borderWidth: existingDS.borderWidth ?? 1,
                 };
