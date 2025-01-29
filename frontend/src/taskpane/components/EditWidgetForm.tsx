@@ -1127,8 +1127,8 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
               <Option value="boxplot">Box Plot</Option>
               <Option value="funnel">Funnel</Option>
               <Option value="treemap">Treemap</Option>
-              {/* <Option value="forceDirectedGraph">Force-Directed Graph</Option> */}
-              {/* <Option value="choropleth">Choropleth</Option> */}
+              <Option value="forceDirectedGraph">Force-Directed Graph (Coming Soon)</Option>
+              <Option value="choropleth">Choropleth (Coming Soon)</Option>
               {/* <Option value="parallelCoordinates">Parallel Coordinates</Option> */}
               {/* <Option value="barWithErrorBars">Bar With Error Bars</Option> */}
             </Select>
@@ -1301,8 +1301,8 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                         <Option value="boxplot">Box Plot</Option>
                         <Option value="funnel">Funnel</Option>
                         <Option value="treemap">Treemap</Option>
-                        {/* <Option value="forceDirectedGraph">Force-Directed Graph</Option> */}
-                        {/* <Option value="choropleth">Choropleth</Option> */}
+                        <Option value="forceDirectedGraph (Coming Soon)">Force-Directed Graph</Option>
+                        <Option value="choropleth (Coming Soon)">Choropleth</Option>
                         {/* <Option value="parallelCoordinates">Parallel Coordinates</Option> */}
                         {/* <Option value="barWithErrorBars">Bar With Error Bars</Option> */}
                       </Select>
