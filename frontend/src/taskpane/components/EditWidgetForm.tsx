@@ -361,25 +361,25 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 treemapData = ds.tree;
               }
               treemapData = treemapData.map((item: any) => ({
-                name: String(item.name) || 'Unnamed',
-                value: Number(item.value) || 0,
+                name: item.Name ?? item.name ?? 'Unnamed',
+                value: item.Value ?? item.value ?? 0,
               }));
-              const colors = Array.isArray(ds.backgroundColor)
-                ? ds.backgroundColor
-                : treemapData.map(() => getRandomColor());
               return {
                 label: ds.label || 'Treemap Data',
                 type: ds.type,
                 tree: treemapData,
                 key: 'value',
                 groups: ds.groups || ['name'],
-                backgroundColor: colors,
+                backgroundColor: (_ctx) => getRandomColor(),
                 borderColor: ds.borderColor || '#333',
                 borderWidth: ds.borderWidth || 1,
                 datalabels: {
                   display: true,
                   color: '#fff',
-                  formatter: (_value: any, context: any) => context.raw?.name || 'Unnamed',
+                  formatter: (_value: any, context: any) => {
+                    const { name, value } = context.raw ?? {};
+                    return `${name ?? 'Unnamed'} (${value ?? 0})`;
+                  },
                   font: {
                     weight: 'bold',
                   },
