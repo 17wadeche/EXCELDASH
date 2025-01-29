@@ -206,14 +206,14 @@ const SalesChart = ({ data, type }: SalesChartProps) => {
       x: {
         type: type === 'candlestick' ? 'time' : (data.scales?.x?.type || 'category'),
         time:
-          type === 'candlestick' 
+          type === "candlestick" 
             ? { 
-                unit: 'day',
-                tooltipFormat: 'll',
-                parser: 'YYYY-MM-DD',
+                unit: "day",
+                tooltipFormat: "ll",
+                parser: "MM-DD-YYYY",
               }
-            : data.scales?.x?.type === 'time'
-              ? { unit: 'day' }
+            : data.scales?.x?.type === "time"
+              ? { unit: "day" }
               : undefined,
         title: {
           display: data.scales?.x?.title?.display !== false,

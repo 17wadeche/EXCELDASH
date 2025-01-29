@@ -373,12 +373,18 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
             } else if (ds.type === 'candlestick') {
               let parsedData = [];
               try {
-                parsedData = JSON.parse(ds.data);
-                if (!Array.isArray(parsedData)) throw new Error('Data is not an array');
-                parsedData.forEach((point) => {
-                  if (!point.x || !point.o || !point.h || !point.l || !point.c) {
-                    throw new Error('Missing required candlestick data fields');
-                  }
+                const rows = (ds.data || '').split(';')
+                  .map(row => row.trim())
+                  .filter(Boolean);
+                parsedData = rows.map(row => {
+                  const [x, o, h, l, c] = row.split(/\s+/);
+                  return {
+                    x: x.trim(),
+                    o: parseFloat(o),
+                    h: parseFloat(h),
+                    l: parseFloat(l),
+                    c: parseFloat(c),
+                  };
                 });
               } catch (error) {
                 console.error('Error parsing candlestick data:', error);
