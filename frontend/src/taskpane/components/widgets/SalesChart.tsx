@@ -15,7 +15,6 @@ import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { ParallelCoordinatesController, LineSegment, PCPScale } from 'chartjs-chart-pcp';
 import { ForceDirectedGraphController, EdgeLine } from 'chartjs-chart-graph';
 import { ChoroplethController, GeoFeature, ColorScale, ProjectionScale } from 'chartjs-chart-geo';
-import { BarWithErrorBarsController, BarWithErrorBar } from 'chartjs-chart-error-bars';
 
 ChartJS.register(
   CategoryScale,
@@ -47,9 +46,7 @@ ChartJS.register(
   ChoroplethController,
   GeoFeature,
   ColorScale,
-  ProjectionScale,
-  BarWithErrorBarsController,
-  BarWithErrorBar
+  ProjectionScale
 );
 const ForceDirectedGraphChart: React.FC<any> = (props) => {
   return <BaseChart type="forceDirectedGraph" {...props} />;
@@ -61,10 +58,6 @@ const ChoroplethChart: React.FC<any> = (props) => {
 
 const ParallelCoordinatesChart: React.FC<any> = (props) => {
   return <BaseChart type="pcp" {...props} />;
-};
-
-const BarWithErrorBarsChart: React.FC<any> = (props) => {
-  return <BaseChart type="barWithErrorBars" {...props} />;
 };
 
 const TreemapChart: React.FC<any> = (props) => {
@@ -94,7 +87,6 @@ const chartComponents: Record<string, React.FC<any>> = {
   forceDirectedGraph: ForceDirectedGraphChart,
   choropleth: ChoroplethChart,
   parallelCoordinates: ParallelCoordinatesChart,
-  barWithErrorBars: BarWithErrorBarsChart,
 };
 
 interface ExtendedChartData<TType extends ChartType = ChartType, TData = unknown>
@@ -267,7 +259,7 @@ const SalesChart = ({ data, type }: SalesChartProps) => {
     }
   };
 
-  const noAxisTypes = ['pie', 'doughnut', 'radar', 'polarArea', 'treemap', 'funnel', 'forceDirectedGraph', 'choropleth', 'parallelCoordinates', 'barWithErrorBars',];
+  const noAxisTypes = ['pie', 'doughnut', 'radar', 'polarArea', 'treemap', 'funnel', 'forceDirectedGraph', 'choropleth', 'parallelCoordinates'];
   if (noAxisTypes.includes(type)) {
     chartOptions.scales = {};
   }

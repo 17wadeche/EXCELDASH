@@ -228,6 +228,7 @@ const CreateDashboard: React.FC = () => {
                 { range: "A50", text: "Treemap Chart Data", bold: true, fontSize: 14 },
                 { range: "A58", text: "Force-Directed Graph Data", bold: true, fontSize: 14 },
                 { range: "A65", text: "Choropleth Chart Data", bold: true, fontSize: 14 },
+                { range: "A72", text: "Parallel Coordinates Data", bold: true, fontSize: 14 },
               ];
               headers.forEach(header => {
                 const headerRange = exampleSheet.getRange(header.range);
@@ -307,14 +308,8 @@ const CreateDashboard: React.FC = () => {
               exampleSheet.getRange("A66:B66").values = [["Region", "Value"]];
               exampleSheet.getRange("A67:B70").values = [["US-CA", 25], ["US-TX", 15],["US-NY", 30],["US-FL", 10]];
               // ========== PARALLEL COORDINATES (PCP) DATA ==========
-              // exampleSheet.getRange("A77").values = [["Parallel Coordinates Chart Data"]];
-              // exampleSheet.getRange("A78:D78").values = [["Dim1", "Dim2", "Dim3", "Dim4"]];
-              // exampleSheet.getRange("A79:D81").values = [[10, 30, 50, 20],[5, 40, 20, 10],[9, 25, 55, 22]];
-              // ========== BAR WITH ERROR BARS DATA ==========
-              // exampleSheet.getRange("A83").values = [["Bar with Error Bars Data"]];
-              // exampleSheet.getRange("A84:D84").values = [["Label", "Value", "ErrorMinus", "ErrorPlus"]];
-              // exampleSheet.getRange("A85:D87").values = [["A", 10, 2, 3], ["B", 15, 1, 2], ["C", 8, 1.5, 1.5]];
-              // exampleSheet.getUsedRange().format.autofitColumns();
+              exampleSheet.getRange("A73:D73").values = [["Dim1", "Dim2", "Dim3", "Dim4"]];
+              exampleSheet.getRange("A74:D76").values = [[10, 30, 50, 20],[5, 40, 20, 10],[9, 25, 55, 22]];
             }
             await context.sync();
             message.success('"Example Chart Data" sheet is ready.');

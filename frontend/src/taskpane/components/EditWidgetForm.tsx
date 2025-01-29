@@ -818,35 +818,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
         message.success('Parallel Coordinates data loaded!');
         break;
       }
-      case 'barWithErrorBars': {
-        if (data.length < 2) {
-          message.error('Need at least 2 rows for Bar with Error Bars: header + data.');
-          return;
-        }
-        const header = data[0];
-        if (header.length < 4) {
-          message.error('Expected 4 columns: [Label, Value, ErrorMinus, ErrorPlus].');
-          return;
-        }
-        const labelStr = header.join(',');
-        const rows = data.slice(1);
-        const barStr = rows.map((row) => row.join(',')).join(';');
-        form.setFieldsValue({
-          labels: labelStr,
-          datasets: [
-            {
-              label: 'Bar w/ Error',
-              type: 'barWithErrorBars',
-              data: barStr,
-              backgroundColor: getRandomColor(),
-              borderColor: getRandomColor(),
-              borderWidth: 1,
-            },
-          ],
-        });
-        message.success('Bar with Error Bars data loaded!');
-        break;
-      }
       default:
         message.info(`No import logic for chart type: ${mainType}`);
     }
@@ -1129,8 +1100,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
               <Option value="treemap">Treemap</Option>
               <Option value="forceDirectedGraph">Force-Directed Graph (Coming Soon)</Option>
               <Option value="choropleth">Choropleth (Coming Soon)</Option>
-              {/* <Option value="parallelCoordinates">Parallel Coordinates</Option> */}
-              {/* <Option value="barWithErrorBars">Bar With Error Bars</Option> */}
+              <Option value="parallelCoordinates">Parallel Coordinates (Coming Soon)</Option>
             </Select>
           </Form.Item>
           <Form.Item
@@ -1303,8 +1273,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                         <Option value="treemap">Treemap</Option>
                         <Option value="forceDirectedGraph (Coming Soon)">Force-Directed Graph</Option>
                         <Option value="choropleth (Coming Soon)">Choropleth</Option>
-                        {/* <Option value="parallelCoordinates">Parallel Coordinates</Option> */}
-                        {/* <Option value="barWithErrorBars">Bar With Error Bars</Option> */}
+                        <Option value="parallelCoordinates">Parallel Coordinates (Coming Soon)</Option>
                       </Select>
                     </Form.Item>
                     <Form.Item
