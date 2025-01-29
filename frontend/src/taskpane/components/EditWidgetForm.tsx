@@ -417,28 +417,18 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 name: String(item.name) || 'Unnamed',
                 value: Number(item.value) || 0,
               }));
-              const treemapColors =
-                form.getFieldValue('treemapColors') || treemapData.map(() => ({ color: getRandomColor() }));
-              if (treemapColors.length !== treemapData.length) {
-                const newColors = treemapData.map((_: any, idx: any) => ({
-                  color: treemapColors[idx]?.color || getRandomColor(),
-                }));
-                form.setFieldsValue({ treemapColors: newColors });
-              }
               return {
                 label: ds.label || 'Treemap Data',
                 type: ds.type,
                 tree: treemapData,
                 key: 'value',
-                backgroundColor: treemapColors.map((c: any) => c.color),
-                borderColor: treemapColors.map((c: any) => c.color),
+                backgroundColor: treemapData.map(() => getRandomColor()),
+                borderColor: ds.borderColor || '#333',
                 borderWidth: ds.borderWidth || 1,
                 datalabels: {
                   display: true,
                   color: '#fff',
-                  formatter: (_value: any, context: any) => {
-                    return context.raw?.name || 'Unnamed';
-                  },
+                  formatter: (_value: any, context: any) => context.raw?.name || 'Unnamed',
                   font: {
                     weight: 'bold',
                   },
@@ -765,7 +755,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           const parsedValue = parseFloat(valueStr) || 0;
           const color = getRandomColor();
           return {
-            label: `Treemap ${name || `Row${rowIndex + 1}`}`,
+            label: `${name || `Row${rowIndex + 1}`}`,
             type: 'treemap',
             tree: [
               {
