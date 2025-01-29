@@ -258,7 +258,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           'funnel',
           'treemap',
           'forceDirectedGraph',
-          'parallelCoordinates',
         ];
         let sliceColorsArray: string[] = [];
         let bubbleColorsArray: string[] = [];
@@ -413,7 +412,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 options: { plugins: { funnel: { percent: false } } },
               };
             } else if (
-              ['forceDirectedGraph', 'parallelCoordinates' ].includes(ds.type)
+              ['forceDirectedGraph'].includes(ds.type)
             ) {
               return {
                 label: ds.label,
@@ -772,31 +771,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
         message.success('Force-Directed Graph data loaded!');
         break;
       }
-      case 'parallelCoordinates': {
-        if (data.length < 2) {
-          message.error('Need at least 2 rows for Parallel Coordinates: header + data.');
-          return;
-        }
-        const headers = data[0];
-        const labelStr = headers.join(',');
-        const bodyRows = data.slice(1);
-        const pcpStr = bodyRows.map((row) => row.join(',')).join(';');
-        form.setFieldsValue({
-          labels: labelStr,
-          datasets: [
-            {
-              label: 'PCP Series',
-              type: 'parallelCoordinates',
-              data: pcpStr,
-              backgroundColor: getRandomColor(),
-              borderColor: getRandomColor(),
-              borderWidth: 1,
-            },
-          ],
-        });
-        message.success('Parallel Coordinates data loaded!');
-        break;
-      }
       default:
         message.info(`No import logic for chart type: ${mainType}`);
     }
@@ -1078,7 +1052,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
               <Option value="funnel">Funnel</Option>
               <Option value="treemap">Treemap</Option>
               <Option value="forceDirectedGraph">Force-Directed Graph (Coming Soon)</Option>
-              <Option value="parallelCoordinates">Parallel Coordinates (Coming Soon)</Option>
             </Select>
           </Form.Item>
           <Form.Item
@@ -1093,7 +1066,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                       'scatter',
                       'bubble',
                       'forceDirectedGraph',
-                      'parallelCoordinates',
                     ].includes(cType)
                   ) {
                     return Promise.resolve();
@@ -1248,7 +1220,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                         <Option value="funnel">Funnel</Option>
                         <Option value="treemap">Treemap</Option>
                         <Option value="forceDirectedGraph (Coming Soon)">Force-Directed Graph</Option>
-                        <Option value="parallelCoordinates">Parallel Coordinates (Coming Soon)</Option>
                       </Select>
                     </Form.Item>
                     <Form.Item
@@ -1525,7 +1496,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
               'funnel',
               'treemap',
               'forceDirectedGraph',
-              'parallelCoordinates',
             ].includes(chartType) && (
               <>
                 <Panel header="Axis Settings" key="axis">

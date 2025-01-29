@@ -12,7 +12,6 @@ import { FunnelController, TrapezoidElement } from 'chartjs-chart-funnel';
 import { HierarchicalScale } from 'chartjs-plugin-hierarchical';
 import type { ChartData, ChartOptions, ChartType, ChartDataset } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
-import { ParallelCoordinatesController, LineSegment, PCPScale } from 'chartjs-chart-pcp';
 import { ForceDirectedGraphController, EdgeLine } from 'chartjs-chart-graph';
 
 ChartJS.register(
@@ -35,9 +34,6 @@ ChartJS.register(
   BoxPlotController,
   BoxAndWiskers,
   HierarchicalScale,
-  ParallelCoordinatesController,
-  PCPScale,
-  LineSegment,
   ForceDirectedGraphController,
   EdgeLine,
   LinearScale,
@@ -45,26 +41,6 @@ ChartJS.register(
 );
 const ForceDirectedGraphChart: React.FC<any> = (props) => {
   return <BaseChart type="forceDirectedGraph" {...props} />;
-};
-
-interface ParallelCoordinatesChartProps {
-  data: any;
-  options?: ChartOptions<"parallelCoordinates">;
-}
-
-const ParallelCoordinatesChart: React.FC<ParallelCoordinatesChartProps> = (props) => {
-  const options = {
-    ...props.options,
-    scales: {
-      ...props.options.scales,
-      y: {
-        type: 'linear',
-        position: 'left',
-        beginAtZero: true,
-      },
-    },
-  };
-  return <BaseChart type="parallelCoordinates" data={props.data} options={options} />;
 };
 
 const TreemapChart: React.FC<any> = (props) => {
@@ -92,7 +68,6 @@ const chartComponents: Record<string, React.FC<any>> = {
   funnel: FunnelChart,
   boxplot: BoxPlotChart,
   forceDirectedGraph: ForceDirectedGraphChart,
-  parallelCoordinates: ParallelCoordinatesChart,
 };
 
 interface ExtendedChartData<TType extends ChartType = ChartType, TData = unknown>
