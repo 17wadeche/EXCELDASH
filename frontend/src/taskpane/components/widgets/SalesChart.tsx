@@ -12,12 +12,14 @@ import { FunnelController, TrapezoidElement } from 'chartjs-chart-funnel';
 import { HierarchicalScale } from 'chartjs-plugin-hierarchical';
 import type { ChartData, ChartOptions, ChartType, ChartDataset } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
+import waterfallPlugin from 'chartjs-plugin-waterfall';
 
 ChartJS.register(
   CategoryScale,
   LinearScale,
   BarElement,
   LineElement,
+  waterfallPlugin,
   PointElement,
   Title,
   Tooltip,
@@ -61,6 +63,7 @@ const chartComponents: Record<string, React.FC<any>> = {
   treemap: TreemapChart,
   funnel: FunnelChart,
   boxplot: BoxPlotChart,
+  waterfall: Bar,
 };
 
 interface ExtendedChartData<TType extends ChartType = ChartType, TData = unknown>

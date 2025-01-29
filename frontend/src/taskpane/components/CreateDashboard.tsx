@@ -226,6 +226,7 @@ const CreateDashboard: React.FC = () => {
                 { range: "A37", text: "Box Plot Data", bold: true, fontSize: 14 },
                 { range: "A42", text: "Funnel Chart Data", bold: true, fontSize: 14 },
                 { range: "A50", text: "Treemap Chart Data", bold: true, fontSize: 14 },
+                { range: "A58", text: "Waterfall Chart Data", bold: true, fontSize: 14 },
               ];
               headers.forEach(header => {
                 const headerRange = exampleSheet.getRange(header.range);
@@ -294,6 +295,15 @@ const CreateDashboard: React.FC = () => {
                 ["Category C", 15],
                 ["Category D", 5],
                 ["Category E", 25],
+              ];
+              // ========== WATERFALL CHART DATA ==========
+              exampleSheet.getRange("A59:C59").values = [["", "Value", "Type"]];
+              exampleSheet.getRange("A60:C64").values = [
+                ["Start", 1000, "start"],
+                ["Increase", 500, "positive"],
+                ["Decrease", -300, "negative"],
+                ["Increase", 700, "positive"],
+                ["End", 1900, "end"],
               ];
             }
             await context.sync();

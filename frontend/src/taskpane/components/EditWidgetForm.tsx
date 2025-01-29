@@ -990,6 +990,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
               <Option value="boxplot">Box Plot</Option>
               <Option value="funnel">Funnel</Option>
               <Option value="treemap">Treemap</Option>
+              <Option value="waterfall">Waterfall</Option>
             </Select>
           </Form.Item>
           <Form.Item
@@ -1151,6 +1152,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                         <Option value="boxplot">Box Plot</Option>
                         <Option value="funnel">Funnel</Option>
                         <Option value="treemap">Treemap</Option>
+                        <Option value="waterfall">Waterfall</Option>
                       </Select>
                     </Form.Item>
                     <Form.Item
