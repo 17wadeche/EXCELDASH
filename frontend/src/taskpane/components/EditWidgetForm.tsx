@@ -283,10 +283,19 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           cleanedValues.xAxisType = 'linear';
         }
         if (finalChartType === 'treemap') {
-          const dataset = updatedData.datasets[0];
-          if (dataset && Array.isArray(dataset.backgroundColor)) {
-            dataset.backgroundColor = form.getFieldValue('treemapColors')?.map((c: any) => c.color) || [];
-            dataset.borderColor = form.getFieldValue('treemapColors')?.map((c: any) => c.color) || [];
+          if (Array.isArray(updatedData.datasets) && updatedData.datasets.length > 0) {
+            const dataset = updatedData.datasets[0];
+            if (dataset && Array.isArray(dataset.backgroundColor)) {
+              const treemapColors = form.getFieldValue('treemapColors')?.map((c: any) => c.color) || [];
+              dataset.backgroundColor = treemapColors;
+              dataset.borderColor = treemapColors;
+            } else {
+              message.error('Treemap dataset is malformed. Please ensure backgroundColor is an array.');
+              return;
+            }
+          } else {
+            message.error('No datasets found for Treemap chart. Please add at least one dataset.');
+            return;
           }
         }
         updatedData = {
