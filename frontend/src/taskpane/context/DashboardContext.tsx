@@ -1833,7 +1833,43 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
               }
               const multiDatasetTypes = ["bar", "line", "radar", "candlestick"];
               const singleDatasetTypes = ["pie", "doughnut", "polarArea", "funnel", "treemap"];
-              if (chartData.type === "bubble") {
+              if (chartData.type === "funnel") {
+                const labels: string[] = [];
+                const funnelValues: number[] = [];
+                data.forEach((row, index) => {
+                  if (row.length < 2) {
+                    console.warn(`Row ${index + 1} in range "${key}" is incomplete.`);
+                    return;
+                  }
+                  const label = row[0];
+                  const value = Number(row[1]);
+                  if (!isNaN(value)) {
+                    labels.push(label);
+                    funnelValues.push(value);
+                  } else {
+                    console.warn(`Invalid value at row ${index + 1} in range "${key}".`);
+                  }
+                });
+                if (labels.length !== funnelValues.length) {
+                  console.warn(`Mismatch between labels and data points for Funnel chart "${widget.id}".`);
+                  return widget;
+                }
+                const existingDS = chartData.datasets[0] || {};
+                const updatedDataset = {
+                  ...existingDS,
+                  label: existingDS.label || "Funnel",
+                  data: funnelValues,
+                  backgroundColor: existingDS.backgroundColor ?? getRandomColorArray(funnelValues.length),
+                  borderColor: existingDS.borderColor ?? "#000000",
+                  borderWidth: existingDS.borderWidth ?? 1,
+                };
+                const updatedChartData: ChartData = {
+                  ...chartData,
+                  labels,
+                  datasets: [updatedDataset],
+                };
+                return { ...widget, data: updatedChartData };
+              } else if (chartData.type === "bubble") {
                 const xValues = data[1].slice(1).map(n => +n || 0);
                 const yValues = data[2].slice(1).map(n => +n || 0);
                 const rValues = data[3].slice(1).map(n => +n || 0);
