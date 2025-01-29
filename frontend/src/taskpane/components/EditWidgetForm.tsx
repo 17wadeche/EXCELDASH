@@ -1572,27 +1572,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
               </Collapse.Panel>
             </Collapse>
           )}
-          {chartType === 'treemap' && (
-            <Form.List name="treemapColors">
-              {() => {
-                const treemapData = form.getFieldValue('datasets')?.[0]?.tree || [];
-                const treemapDataArray = Array.isArray(treemapData) ? treemapData : [];
-                return (
-                  <>
-                    {treemapDataArray.map((_item: any, index: number) => (
-                      <Form.Item
-                        key={index}
-                        name={[index, 'color']}
-                        rules={[{ required: true, message: 'Please pick a color' }]}
-                      >
-                        <Input type="color" />
-                      </Form.Item>
-                    ))}
-                  </>
-                );
-              }}
-            </Form.List>
-          )}
           <Collapse>
             {![
               'pie',
