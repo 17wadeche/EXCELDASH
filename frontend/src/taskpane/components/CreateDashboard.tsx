@@ -226,7 +226,6 @@ const CreateDashboard: React.FC = () => {
                 { range: "A37", text: "Box Plot Data", bold: true, fontSize: 14 },
                 { range: "A42", text: "Funnel Chart Data", bold: true, fontSize: 14 },
                 { range: "A50", text: "Treemap Chart Data", bold: true, fontSize: 14 },
-                { range: "A58", text: "Force-Directed Graph Data", bold: true, fontSize: 14 },
               ];
               headers.forEach(header => {
                 const headerRange = exampleSheet.getRange(header.range);
@@ -296,11 +295,6 @@ const CreateDashboard: React.FC = () => {
                 ["Category D", 5],
                 ["Category E", 25],
               ];
-              // ========== FORCE-DIRECTED GRAPH DATA ==========
-              exampleSheet.getRange("A59:C59").values = [["NodeId", "Group", "Value"]];
-              exampleSheet.getRange("A60:C63").values = [["A", "Group1", 12],["B", "Group1", 8],["C", "Group2", 15],["D", "Group2", 10]];
-              exampleSheet.getRange("A65:D65").values = [["Source", "Target", "Value", "Label"]];
-              exampleSheet.getRange("A66:D69").values = [["A", "B", 1, "AB"],["B", "C", 1, "BC"],["C", "D", 1, "CD"],["A", "D", 2, "AD"]];
             }
             await context.sync();
             message.success('"Example Chart Data" sheet is ready.');

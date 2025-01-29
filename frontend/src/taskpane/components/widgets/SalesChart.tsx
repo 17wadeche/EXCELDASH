@@ -12,7 +12,6 @@ import { FunnelController, TrapezoidElement } from 'chartjs-chart-funnel';
 import { HierarchicalScale } from 'chartjs-plugin-hierarchical';
 import type { ChartData, ChartOptions, ChartType, ChartDataset } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
-import { ForceDirectedGraphController, EdgeLine } from 'chartjs-chart-graph';
 
 ChartJS.register(
   CategoryScale,
@@ -34,14 +33,9 @@ ChartJS.register(
   BoxPlotController,
   BoxAndWiskers,
   HierarchicalScale,
-  ForceDirectedGraphController,
-  EdgeLine,
   LinearScale,
   PointElement
 );
-const ForceDirectedGraphChart: React.FC<any> = (props) => {
-  return <BaseChart type="forceDirectedGraph" {...props} />;
-};
 
 const TreemapChart: React.FC<any> = (props) => {
   return <BaseChart type="treemap" {...props} />;
@@ -67,7 +61,6 @@ const chartComponents: Record<string, React.FC<any>> = {
   treemap: TreemapChart,
   funnel: FunnelChart,
   boxplot: BoxPlotChart,
-  forceDirectedGraph: ForceDirectedGraphChart,
 };
 
 interface ExtendedChartData<TType extends ChartType = ChartType, TData = unknown>
@@ -240,7 +233,7 @@ const SalesChart = ({ data, type }: SalesChartProps) => {
     }
   };
 
-  const noAxisTypes = ['pie', 'doughnut', 'radar', 'polarArea', 'treemap', 'funnel', 'forceDirectedGraph', 'parallelCoordinates'];
+  const noAxisTypes = ['pie', 'doughnut', 'radar', 'polarArea', 'treemap', 'funnel'];
   if (noAxisTypes.includes(type)) {
     chartOptions.scales = {};
   }

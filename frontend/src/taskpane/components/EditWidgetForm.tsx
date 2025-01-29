@@ -257,7 +257,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           'radar',
           'funnel',
           'treemap',
-          'forceDirectedGraph',
         ];
         let sliceColorsArray: string[] = [];
         let bubbleColorsArray: string[] = [];
@@ -410,18 +409,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 borderColor: ds.borderColor || '#4caf50',
                 borderWidth: ds.borderWidth || 1,
                 options: { plugins: { funnel: { percent: false } } },
-              };
-            } else if (
-              ['forceDirectedGraph'].includes(ds.type)
-            ) {
-              return {
-                label: ds.label,
-                type: ds.type,
-                data: ds.data,
-                fill: false,
-                backgroundColor: ds.backgroundColor || '#4caf50',
-                borderColor: ds.borderColor || '#4caf50',
-                borderWidth: ds.borderWidth || 1,
               };
             } else {
               let parsedValues: number[] = [];
@@ -723,54 +710,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
         message.success('Funnel data loaded from Excel.');
         break;
       }
-      case 'forceDirectedGraph': {
-        let blankRowIndex = -1;
-        for (let i = 0; i < data.length; i++) {
-          if (data[i].every((cell) => cell === "")) {
-            blankRowIndex = i;
-            break;
-          }
-        }
-        if (blankRowIndex < 0) {
-          message.error('No blank row found to separate Force-Directed Graph nodes from edges.');
-          return;
-        }
-        const nodeRows = data.slice(1, blankRowIndex);
-        const edgeRows = data.slice(blankRowIndex + 2);
-        console.log('Parsed data:', data);
-        console.log('Nodes:', nodeRows);
-        console.log('Edges:', edgeRows);
-        if (nodeRows && Array.isArray(nodeRows)) {
-          nodeRows.forEach((_node) => {});
-        } else {
-          console.error('Nodes data is not an array:', nodeRows);
-          return;
-        }
-        if (edgeRows && Array.isArray(edgeRows)) {
-          edgeRows.forEach((_edge) => {});
-        } else {
-          console.error('Edges data is not an array:', edgeRows);
-          return;
-        }
-        const nodeStr = nodeRows.map((row) => row.join(',')).join(';');
-        const edgeStr = edgeRows.map((row) => row.join(',')).join(';');
-        const combinedStr = `NODES:${nodeStr}|EDGES:${edgeStr}`;
-        form.setFieldsValue({
-          labels: data[0].join(','),
-          datasets: [
-            {
-              label: 'Force Graph',
-              type: 'forceDirectedGraph',
-              data: combinedStr,
-              backgroundColor: '#4caf50',
-              borderColor: '#4caf50',
-              borderWidth: 1,
-            },
-          ],
-        });
-        message.success('Force-Directed Graph data loaded!');
-        break;
-      }
       default:
         message.info(`No import logic for chart type: ${mainType}`);
     }
@@ -1051,7 +990,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
               <Option value="boxplot">Box Plot</Option>
               <Option value="funnel">Funnel</Option>
               <Option value="treemap">Treemap</Option>
-              <Option value="forceDirectedGraph">Force-Directed Graph (Coming Soon)</Option>
             </Select>
           </Form.Item>
           <Form.Item
@@ -1061,13 +999,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
               ({ getFieldValue }) => ({
                 validator(_, value) {
                   const cType = getFieldValue('chartType');
-                  if (
-                    [
-                      'scatter',
-                      'bubble',
-                      'forceDirectedGraph',
-                    ].includes(cType)
-                  ) {
+                  if (["scatter", "bubble"].includes(cType)) {
                     return Promise.resolve();
                   }
                   if (!value || !value.trim()) {
@@ -1219,7 +1151,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                         <Option value="boxplot">Box Plot</Option>
                         <Option value="funnel">Funnel</Option>
                         <Option value="treemap">Treemap</Option>
-                        <Option value="forceDirectedGraph (Coming Soon)">Force-Directed Graph</Option>
                       </Select>
                     </Form.Item>
                     <Form.Item
@@ -1495,7 +1426,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
               'radar',
               'funnel',
               'treemap',
-              'forceDirectedGraph',
             ].includes(chartType) && (
               <>
                 <Panel header="Axis Settings" key="axis">
