@@ -18,22 +18,18 @@ object-assign
  */
 
 /*!
- * @license
- * chartjs-chart-financial
- * http://chartjs.org/
- * Version: 0.2.1
- *
- * Copyright 2024 Chart.js Contributors
- * Released under the MIT license
- * https://github.com/chartjs/chartjs-chart-financial/blob/master/LICENSE.md
- */
-
-/*!
  * @overview es6-promise - a tiny implementation of Promises/A+.
  * @copyright Copyright (c) 2014 Yehuda Katz, Tom Dale, Stefan Penner and contributors (Conversion to ES6 API by Jake Archibald)
  * @license   Licensed under MIT license
  *            See https://raw.githubusercontent.com/stefanpenner/es6-promise/master/LICENSE
  * @version   v4.2.8+1e68dce6
+ */
+
+/*!
+ * Chart.js v2.9.4
+ * https://www.chartjs.org
+ * (c) 2020 Chart.js Contributors
+ * Released under the MIT License
  */
 
 /*!
