@@ -302,7 +302,7 @@ const CreateDashboard: React.FC = () => {
               exampleSheet.getRange("A59:C59").values = [["NodeId", "Group", "Value"]];
               exampleSheet.getRange("A60:C63").values = [["A", "Group1", 12],["B", "Group1", 8],["C", "Group2", 15],["D", "Group2", 10]];
               exampleSheet.getRange("A65:D65").values = [["Source", "Target", "Value", "Label"]];
-              exampleSheet.getRange("E66:H69").values = [["A", "B", 1, "AB"],["B", "C", 1, "BC"],["C", "D", 1, "CD"],["A", "D", 2, "AD"]];
+              exampleSheet.getRange("A66:D69").values = [["A", "B", 1, "AB"],["B", "C", 1, "BC"],["C", "D", 1, "CD"],["A", "D", 2, "AD"]];
               // ========== CHOROPLETH CHART DATA ==========
               exampleSheet.getRange("A72:B72").values = [["Region", "Value"]];
               exampleSheet.getRange("A73:B76").values = [["US-CA", 25], ["US-TX", 15],["US-NY", 30],["US-FL", 10]];
