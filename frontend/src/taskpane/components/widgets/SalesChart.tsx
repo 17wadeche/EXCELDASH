@@ -206,7 +206,7 @@ const SalesChart = ({ data, type }: SalesChartProps) => {
       x: {
         type: type === 'candlestick' ? 'time' : (data.scales?.x?.type || 'category'),
         time:
-          type === "candlestick" 
+          type === "candlestick"
             ? { 
                 unit: "day",
                 tooltipFormat: "ll",

@@ -422,7 +422,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 type: ds.type,
                 tree: treemapData,
                 key: 'value',
-                backgroundColor: treemapData.map(() => getRandomColor()),
+                backgroundColor: ds.backgroundColor || getRandomColor(),
                 borderColor: ds.borderColor || '#333',
                 borderWidth: ds.borderWidth || 1,
                 datalabels: {
@@ -1528,7 +1528,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                         }
                       }}
                     </Form.Item>
-                    {![ 'pie', 'doughnut', 'polarArea', 'bubble', 'treemap', 'funnel'].includes(chartType) && (
+                    {![ 'pie', 'doughnut', 'polarArea', 'bubble', 'funnel'].includes(chartType) && (
                       <Form.Item
                         {...restField}
                         name={[name, 'backgroundColor']}
@@ -1735,7 +1735,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                   </Form.Item>
                 </Panel>
                 <Panel header="Styling" key="styling">
-                  {![ 'pie', 'doughnut', 'polarArea', 'bubble', 'treemap', 'funnel' ].includes(chartType) && (
+                  {![ 'pie', 'doughnut', 'polarArea', 'bubble', 'funnel' ].includes(chartType) && (
                     <Form.Item label="Chart Background Color" name="chartBackgroundColor">
                       <Input type="color" />
                     </Form.Item>
