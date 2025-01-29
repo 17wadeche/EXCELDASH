@@ -374,9 +374,9 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
               let parsedData = [];
               try {
                 const rows = (ds.data || '').split(';')
-                  .map(row => row.trim())
+                  .map((row: any) => row.trim())
                   .filter(Boolean);
-                parsedData = rows.map(row => {
+                parsedData = rows.map((row: any) => {
                   const [x, o, h, l, c] = row.split(/\s+/);
                   return {
                     x: x.trim(),
