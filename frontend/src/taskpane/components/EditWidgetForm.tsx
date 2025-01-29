@@ -370,7 +370,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 tree: treemapData,
                 key: 'value',
                 groups: ds.groups || ['name'],
-                backgroundColor: (_ctx) => getRandomColor(),
+                backgroundColor: getRandomColor(),
                 borderColor: ds.borderColor || '#333',
                 borderWidth: ds.borderWidth || 1,
                 datalabels: {
