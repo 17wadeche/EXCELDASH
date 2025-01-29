@@ -738,6 +738,21 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
         }
         const nodeRows = data.slice(1, blankRowIndex);
         const edgeRows = data.slice(blankRowIndex + 2);
+        console.log('Parsed data:', data);
+        console.log('Nodes:', nodeRows);
+        console.log('Edges:', edgeRows);
+        if (nodeRows && Array.isArray(nodeRows)) {
+          nodeRows.forEach((node) => {});
+        } else {
+          console.error('Nodes data is not an array:', nodeRows);
+          return;
+        }
+        if (edgeRows && Array.isArray(edgeRows)) {
+          edgeRows.forEach(edge => {});
+        } else {
+          console.error('Edges data is not an array:', edgeRows);
+          return;
+        }
         const nodeStr = nodeRows.map((row) => row.join(',')).join(';');
         const edgeStr = edgeRows.map((row) => row.join(',')).join(';');
         const combinedStr = `NODES:${nodeStr}|EDGES:${edgeStr}`;
