@@ -116,14 +116,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
             initialValues.bubbleColors = [];
           }
         }
-        if (data.type === 'treemap') {
-          const firstDataset = datasets[0] ?? { tree: [], backgroundColor: [] };
-          if (Array.isArray(firstDataset.backgroundColor)) {
-            initialValues.treemapColors = firstDataset.backgroundColor.map((color: string) => ({ color }));
-          } else {
-            initialValues.treemapColors = firstDataset.tree?.map(() => ({ color: getRandomColor() })) || [];
-          }
-        }
         if (data.type === 'funnel') {
           const dataset = data.datasets[0];
           if (dataset.backgroundColor && Array.isArray(dataset.backgroundColor)) {
@@ -290,20 +282,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
         }
         if (finalChartType === 'scatter' || finalChartType === 'bubble') {
           cleanedValues.xAxisType = 'linear';
-        }
-        if (finalChartType === 'treemap') {
-          if (!updatedData || !Array.isArray(updatedData.datasets) || updatedData.datasets.length === 0) {
-            message.error('No datasets found for Treemap chart. Please add at least one dataset.');
-            return;
-          }
-          const dataset = updatedData.datasets[0];
-          if (!dataset || !Array.isArray(dataset.backgroundColor)) {
-            message.error('Treemap dataset is malformed. Please ensure backgroundColor is an array.');
-            return;
-          }
-          const treemapColors = form.getFieldValue('treemapColors')?.map((c: any) => c.color) || [];
-          dataset.backgroundColor = treemapColors;
-          dataset.borderColor = treemapColors;
         }
         updatedData = {
           title: cleanedValues.title,
