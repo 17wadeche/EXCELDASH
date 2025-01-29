@@ -731,7 +731,12 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
       }
       case 'forceDirectedGraph': {
         let blankRowIndex = -1;
-        for (let i = 0; i < data.length; i++) {}
+        for (let i = 0; i < data.length; i++) {
+          if (data[i].every((cell) => cell === "")) {
+            blankRowIndex = i;
+            break;
+          }
+        }
         if (blankRowIndex < 0) {
           message.error('No blank row found to separate Force-Directed Graph nodes from edges.');
           return;
