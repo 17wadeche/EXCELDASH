@@ -20,17 +20,10 @@ module.exports = async (env, options) => {
     devtool: "source-map",
     entry: {
       polyfill: ["core-js/stable", "regenerator-runtime/runtime"],
-      vendor: [
-        "react",
-        "react-dom",
-        "core-js",
-        "@fluentui/react-components",
-        "@fluentui/react-icons",
-      ],
+      vendor: ["react", "react-dom", "core-js", "@fluentui/react-components", "@fluentui/react-icons"],
       taskpane: "./src/taskpane/index.tsx",
       commands: "./src/commands/commands.ts",
       screenshot: "./src/screenshot.tsx",
-      fullScreenDashboard: "./src/fullScreenDashboard.tsx",
       index: "./src/taskpane/index.tsx",
     },
     output: {
@@ -94,11 +87,6 @@ module.exports = async (env, options) => {
         chunks: ["polyfill", "commands"],
       }),
       new HtmlWebpackPlugin({
-        filename: "fullScreenDashboard.html",
-        template: "./src/fullScreenDashboard.html",
-        chunks: ["polyfill", "vendor", "fullScreenDashboard"],
-      }),
-      new HtmlWebpackPlugin({
         filename: "screenshot.html",
         template: "./src/screenshot.html",
         chunks: ["polyfill", "vendor", "screenshot"],
@@ -145,11 +133,7 @@ module.exports = async (env, options) => {
       server: {
         type: "https",
         options:
-          env.WEBPACK_BUILD || options.https !== undefined
-            ? options.https
-            : dev
-            ? await getHttpsOptions()
-            : undefined,
+          env.WEBPACK_BUILD || options.https !== undefined ? options.https : dev ? await getHttpsOptions() : undefined,
       },
       port: process.env.npm_package_config_dev_server_port || 3000,
     },
