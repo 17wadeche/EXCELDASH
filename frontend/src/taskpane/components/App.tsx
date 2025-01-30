@@ -15,7 +15,6 @@ import ForgotPasswordPage from "./ForgotPasswordPage";
 import ResetPasswordPage from "./ResetPasswordPage";
 import EnterResetCodePage from "./EnterResetCodePage";
 import { DashboardProvider } from "../context/DashboardContext";
-import PrivateRoute from "./PrivateRoute";
 import { AuthProvider } from "../context/AuthContext";
 
 const App: React.FC = () => {
@@ -25,15 +24,13 @@ const App: React.FC = () => {
         <Routes>
           <Route path="/" element={<CustomLayout />}>
             <Route index element={<Navigate to="create" replace />} />
-            <Route element={<PrivateRoute />}>
-              <Route path="create" element={<CreateDashboard />} />
-              <Route path="dashboard-editor" element={<DashboardPage />} />
-              <Route path="template/:id/edit" element={<EditTemplate />} />
-              <Route path="dashboard-list" element={<DashboardList />} />
-              <Route path="dashboard/:id" element={<DashboardPage />} />
-              <Route path="full-screen" element={<Dashboard isFullScreen />} />
-              <Route path="edit-dashboard/:id" element={<DashboardPage />} />
-            </Route>
+            <Route path="create" element={<CreateDashboard />} />
+            <Route path="dashboard-editor" element={<DashboardPage />} />
+            <Route path="template/:id/edit" element={<EditTemplate />} />
+            <Route path="dashboard-list" element={<DashboardList />} />
+            <Route path="dashboard/:id" element={<DashboardPage />} />
+            <Route path="full-screen" element={<Dashboard isFullScreen />} />
+            <Route path="edit-dashboard/:id" element={<DashboardPage />} />
             <Route path="register" element={<RegisterPage />} />
             <Route path="login" element={<LoginPage />} />
             <Route path="subscribe" element={<SubscribePage />} />
