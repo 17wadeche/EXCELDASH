@@ -1,3 +1,4 @@
+/* eslint-disable no-redeclare */
 /// <reference types="office-js" />
 
 declare namespace Excel {

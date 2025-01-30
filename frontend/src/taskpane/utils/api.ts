@@ -1,5 +1,6 @@
+/* eslint-disable no-undef */
 // api.ts
-import axios from "axios"; 
+import axios from "axios";
 import { DashboardItem, NewDashboard, TemplateItem, User, LoginResponse } from "../components/types";
 
 const API_BASE_URL = "https://happy-forest-059a9d710.4.azurestaticapps.net/api";

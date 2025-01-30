@@ -1,3 +1,4 @@
+/* eslint-disable react/no-deprecated */
 /* eslint-disable no-undef */
 import React, { useState, useEffect, useRef, useContext } from "react";
 import ReactDOM from "react-dom";
@@ -11,9 +12,9 @@ import { isEqual } from "lodash";
 
 const FullScreenDashboardContent: React.FC = () => {
   const [dashboardData, setDashboardData] = useState<DashboardItem | null>(null);
-  const [setIsPresenterMode] = useState(true);
+  const [, setIsPresenterMode] = useState(true);
   const isUpdatingFromParent = useRef(false);
-  const [setCurrentWorkbookId] = useState<string | null>(null);
+  const [, setCurrentWorkbookId] = useState<string | null>(null);
   const {
     setWidgets,
     setLayouts,
@@ -45,7 +46,6 @@ const FullScreenDashboardContent: React.FC = () => {
         setAvailableWorksheets(data.availableWorksheets);
         isUpdatingFromParent.current = false;
       } else if (data.type === "close") {
-        // eslint-disable-next-line no-undef
         Office.context.ui.closeContainer();
       }
     };

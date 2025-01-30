@@ -13,7 +13,7 @@ import {
   Legend,
   Filler,
   RadialLinearScale,
-} from 'chart.js';
+} from "chart.js";
 
 // Register necessary components
 Chart.register(

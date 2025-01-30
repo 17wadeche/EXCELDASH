@@ -1,12 +1,30 @@
+/* eslint-disable no-undef */
 // src/taskpane/components/CreateDashboard.tsx
 
 import React, { useState, useContext, useEffect } from "react";
-import {Layout, Form, Input, Button, message, Modal, Tooltip, Row, Col, Card, List, Spin, Divider, Empty, Dropdown, Menu} from "antd";
+import {
+  Layout,
+  Form,
+  Input,
+  Button,
+  message,
+  Modal,
+  Tooltip,
+  Row,
+  Col,
+  Card,
+  List,
+  Spin,
+  Divider,
+  Empty,
+  Dropdown,
+  Menu,
+} from "antd";
 import { useNavigate } from "react-router-dom";
 import { DashboardContext } from "../context/DashboardContext";
-import { DeleteOutlined, FolderAddOutlined, PlusOutlined, SettingOutlined} from "@ant-design/icons";
+import { DeleteOutlined, FolderAddOutlined, PlusOutlined, SettingOutlined } from "@ant-design/icons";
 import { DashboardItem, NewDashboard, TemplateItem } from "./types";
-import {  unsubscribeUser, createDashboard, getTemplates, deleteTemplateById, getDashboards} from "./../utils/api";
+import { unsubscribeUser, createDashboard, getTemplates, deleteTemplateById, getDashboards } from "./../utils/api";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
 
@@ -14,7 +32,7 @@ const { Header, Content } = Layout;
 const { Search } = Input;
 
 const CreateDashboard: React.FC = () => {
-  const [dashboardTitle, setDashboardTitle] = useState("");
+  const [dashboardTitle] = useState("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const navigate = useNavigate();
   const {

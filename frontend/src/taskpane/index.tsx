@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 // src/taskpane/index.tsx
 
 import React from "react";
