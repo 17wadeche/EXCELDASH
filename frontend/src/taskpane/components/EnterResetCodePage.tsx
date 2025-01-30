@@ -1,58 +1,53 @@
 // src/taskpane/components/EnterResetCodePage.tsx
 
-import React, { useState } from 'react';
-import { Layout, Form, Input, Button, message, Typography } from 'antd';
-import { useNavigate } from 'react-router-dom';
-import { resetPassword } from '../utils/api'; // same function you already have
+import React, { useState } from "react";
+import { Layout, Form, Input, Button, message, Typography } from "antd";
+import { useNavigate } from "react-router-dom";
+import { resetPassword } from "../utils/api"; // same function you already have
 
 const { Content } = Layout;
 const { Title, Text } = Typography;
 
 const EnterResetCodePage: React.FC = () => {
-  const [code, setCode] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [code, setCode] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const navigate = useNavigate();
 
   const handleResetPassword = async () => {
     if (!code || !newPassword || !confirmPassword) {
-      message.error('Please fill in all fields.');
+      message.error("Please fill in all fields.");
       return;
     }
     if (newPassword !== confirmPassword) {
-      message.error('Passwords do not match.');
+      message.error("Passwords do not match.");
       return;
     }
 
     setIsLoading(true);
     try {
-      // Make the reset call: "token" is your 6-digit code
       await resetPassword(code, newPassword);
-      message.success('Password has been reset successfully.');
-      navigate('/login');
+      message.success("Password has been reset successfully.");
+      navigate("/login");
     } catch (error: any) {
-      console.error('Error resetting password:', error);
-      message.error('Failed to reset password. Please try again.');
+      console.error("Error resetting password:", error);
+      message.error("Failed to reset password. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <Layout style={{ padding: '24px', minHeight: '100vh' }}>
+    <Layout style={{ padding: "24px", minHeight: "100vh" }}>
       <Content>
-        <div style={{ maxWidth: '400px', margin: '0 auto', textAlign: 'center' }}>
+        <div style={{ maxWidth: "400px", margin: "0 auto", textAlign: "center" }}>
           <Title level={2}>Enter Your Reset Code</Title>
           <Text>Please check your email for a 6-digit code.</Text>
-          <Form style={{ marginTop: '24px' }}>
+          <Form style={{ marginTop: "24px" }}>
             <Form.Item label="Reset Code" required>
-              <Input
-                placeholder="6-digit code"
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-              />
+              <Input placeholder="6-digit code" value={code} onChange={(e) => setCode(e.target.value)} />
             </Form.Item>
 
             <Form.Item label="New Password" required>
@@ -72,17 +67,12 @@ const EnterResetCodePage: React.FC = () => {
             </Form.Item>
 
             <Form.Item>
-              <Button
-                type="primary"
-                onClick={handleResetPassword}
-                loading={isLoading}
-                block
-              >
+              <Button type="primary" onClick={handleResetPassword} loading={isLoading} block>
                 Reset Password
               </Button>
             </Form.Item>
             <Form.Item>
-              <Button type="link" onClick={() => navigate('/login')}>
+              <Button type="link" onClick={() => navigate("/login")}>
                 Back to Login
               </Button>
             </Form.Item>

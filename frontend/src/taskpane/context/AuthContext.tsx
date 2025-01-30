@@ -1,7 +1,7 @@
 // src/context/AuthContext.tsx
 
-import React, { createContext, useState, useEffect, ReactNode } from 'react';
-import { checkRegistration, checkSubscription } from './../utils/api';
+import React, { createContext, useState, useEffect, ReactNode } from "react";
+import { checkRegistration, checkSubscription } from "./../utils/api";
 
 interface AuthState {
   isLoggedIn: boolean;
@@ -32,8 +32,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   useEffect(() => {
     const initializeAuth = async () => {
-      const token = localStorage.getItem('token');
-      const email = localStorage.getItem('userEmail');
+      const token = localStorage.getItem("token");
+      const email = localStorage.getItem("userEmail");
       if (token && email) {
         setAuthState({ isLoggedIn: true, isVerified: false, isLoading: true });
         try {
@@ -47,7 +47,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           }
           setAuthState({ isLoggedIn: false, isVerified: false, isLoading: false });
         } catch (error) {
-          console.error('Error during authentication initialization:', error);
+          console.error("Error during authentication initialization:", error);
           setAuthState({ isLoggedIn: false, isVerified: false, isLoading: false });
         }
       }
@@ -56,9 +56,5 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     initializeAuth();
   }, []);
 
-  return (
-    <AuthContext.Provider value={{ ...authState, setAuthState }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={{ ...authState, setAuthState }}> {children} </AuthContext.Provider>;
 };

@@ -1,30 +1,52 @@
 /// <reference types="office-js" />
 // src/taskpane/context/DashboardContext.tsx
-import React, { createContext, useState, useEffect, useCallback, useRef} from 'react';
-import { Widget, TextData, ChartData, GanttWidgetData, ImageWidgetData, TitleWidgetData, TitleWidget, TableData, DashboardVersion, GridLayoutItem, DashboardItem, LineWidgetData, MetricData, Task, TableWidget, TemplateItem} from '../components/types';
-import { v4 as uuidv4 } from 'uuid';
-import { Breakpoint, GRID_COLS, WIDGET_SIZES } from '../components/layoutConstants';
-import { message, Select } from 'antd';
-import html2canvas from 'html2canvas';
-import isEqual from 'lodash.isequal'
-import jsPDF from 'jspdf';
-import axios from 'axios';
-import PromptWidgetDetailsModal from '../components/PromptWidgetDetailsModal';
-import { DashboardBorderSettings } from '../components/types';
-import { capitalizeFirstLetter } from '../utils/stringUtils'; 
-import { deleteDashboardById, createTemplate, updateTemplate } from '../utils/api';
-import { getWorkbookIdFromProperties, isInDialog } from '../utils/excelUtils';
-import SelectTableModal from '../components/SelectTableModal';
-import 'chartjs-chart-box-and-violin-plot';
-const { Option } = Select;
+import React, { createContext, useState, useEffect, useCallback, useRef } from "react";
+import {
+  Widget,
+  TextData,
+  ChartData,
+  GanttWidgetData,
+  ImageWidgetData,
+  TitleWidgetData,
+  TableData,
+  DashboardVersion,
+  GridLayoutItem,
+  DashboardItem,
+  LineWidgetData,
+  MetricData,
+  Task,
+  TableWidget,
+  TemplateItem,
+} from "../components/types";
+import { v4 as uuidv4 } from "uuid";
+import { Breakpoint, GRID_COLS, WIDGET_SIZES } from "../components/layoutConstants";
+import { message } from "antd";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
+import axios from "axios";
+import PromptWidgetDetailsModal from "../components/PromptWidgetDetailsModal";
+import { DashboardBorderSettings } from "../components/types";
+import { deleteDashboardById, createTemplate, updateTemplate } from "../utils/api";
+import { getWorkbookIdFromProperties, isInDialog } from "../utils/excelUtils";
+import SelectTableModal from "../components/SelectTableModal";
+import "chartjs-chart-box-and-violin-plot";
 interface DashboardContextProps {
   widgets: Widget[];
   dashboards: DashboardItem[];
-  addWidget: (type: 'title' | 'text' | 'chart' | 'gantt' | 'image' | 'metric' | 'table' | 'line' , data?: any) => void;
+  addWidget: (type: "title" | "text" | "chart" | "gantt" | "image" | "metric" | "table" | "line", data?: any) => void;
   removeWidget: (id: string) => void;
   updateWidget: (
     id: string,
-    updatedData: Partial< TitleWidgetData | TextData | ChartData | GanttWidgetData | ImageWidgetData | TableData | MetricData | LineWidgetData>
+    updatedData: Partial<
+      | TitleWidgetData
+      | TextData
+      | ChartData
+      | GanttWidgetData
+      | ImageWidgetData
+      | TableData
+      | MetricData
+      | LineWidgetData
+    >
   ) => void;
   copyWidget: (widget: Widget) => void;
   importChartImageFromExcel: () => void;
@@ -86,29 +108,41 @@ interface DashboardProviderProps {
   initialAvailableWorksheets?: string[];
 }
 export const DashboardContext = createContext<DashboardContextProps | undefined>(undefined);
-export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, initialWidgets = [], initialLayouts = {}, initialAvailableWorksheets = [] }) => {
+export const DashboardProvider: React.FC<DashboardProviderProps> = ({
+  children,
+  initialWidgets = [],
+  initialLayouts = {},
+  initialAvailableWorksheets = [],
+}) => {
   const defaultTitleWidget: Widget = {
-    id: 'dashboard-title',
-    type: 'title',
+    id: "dashboard-title",
+    type: "title",
     data: {
-      content: 'Your Dashboard Title',
+      content: "Your Dashboard Title",
       fontSize: 24,
-      textColor: '#000000',
-      backgroundColor: '#ffffff',
-      titleAlignment: 'center',
+      textColor: "#000000",
+      backgroundColor: "#ffffff",
+      titleAlignment: "center",
     } as TitleWidgetData,
   };
-  const [widgets, setWidgetsState] = useState<Widget[]>(initialWidgets && initialWidgets.length > 0 ? initialWidgets : [defaultTitleWidget]);
+  const [widgets, setWidgetsState] = useState<Widget[]>(
+    initialWidgets && initialWidgets.length > 0 ? initialWidgets : [defaultTitleWidget]
+  );
   const [dashboards, setDashboards] = useState<DashboardItem[]>([]);
-  const [dashboardTitle, setDashboardTitle] = useState<string>('My Dashboard');
+  const [dashboardTitle, setDashboardTitle] = useState<string>("My Dashboard");
   const [isFullscreenActive, setIsFullscreenActive] = useState(false);
   const [currentDashboard, setCurrentDashboard] = useState<DashboardItem | null>(null);
   const [currentTemplateId, setCurrentTemplateId] = useState<string | null>(null);
-  const [widgetToPrompt, setWidgetToPrompt] = useState<{widget: Widget; onComplete: (updatedWidget: Widget) => void;} | null>(null);
+  const [widgetToPrompt, setWidgetToPrompt] = useState<{
+    widget: Widget;
+    onComplete: (updatedWidget: Widget) => void;
+  } | null>(null);
   const [layouts, setLayouts] = useState<{ [key: string]: GridLayoutItem[] }>(initialLayouts);
-  const [currentWorkbookId, setCurrentWorkbookId] = useState<string>('');
-  const [pastStates, setPastStates] = useState<{ widgets: Widget[]; layouts: { [key: string]: GridLayoutItem[] } }[] >([]);
-  const [futureStates, setFutureStates] = useState<{ widgets: Widget[]; layouts: { [key: string]: GridLayoutItem[] } }[]>([]);
+  const [currentWorkbookId, setCurrentWorkbookId] = useState<string>("");
+  const [pastStates, setPastStates] = useState<{ widgets: Widget[]; layouts: { [key: string]: GridLayoutItem[] } }[]>([]);
+  const [futureStates, setFutureStates] = useState<
+    { widgets: Widget[]; layouts: { [key: string]: GridLayoutItem[] } }[]
+  >([]);
   const [availableWorksheets, setAvailableWorksheets] = useState<string[]>([]);
   const ganttEventHandlersRef = useRef<((event: Excel.WorksheetChangedEventArgs) => Promise<void>)[]>([]);
   const [currentDashboardId, setCurrentDashboardId] = useState<string | null>(null);
@@ -120,39 +154,39 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
   const [isSelectTableModalVisible, setIsSelectTableModalVisible] = useState(false);
   const isGanttHandlerRegistered = useRef(false);
   const isReadGanttDataInProgress = useRef(false);
-  const [userEmail, setUserEmail] = useState<string>('');
+  const [userEmail, setUserEmail] = useState<string>("");
   const [dashboardBorderSettings, setDashboardBorderSettings] = useState<DashboardBorderSettings>({
     showBorder: false,
-    color: '#000000',
+    color: "#000000",
     thickness: 1,
-    style: 'solid',
-    backgroundColor: '#ffffff',
+    style: "solid",
+    backgroundColor: "#ffffff",
     width: 730,
   });
   const [dashboardLoaded, setDashboardLoaded] = useState(false);
   const fetchUserEmail = async () => {
     try {
-      const storedEmail = localStorage.getItem('userEmail');
+      const storedEmail = localStorage.getItem("userEmail");
       if (storedEmail) {
         setUserEmail(storedEmail);
       } else {
-        console.warn('User email not found in localStorage.');
-        setUserEmail('');
+        console.warn("User email not found in localStorage.");
+        setUserEmail("");
       }
     } catch (error) {
-      console.error('Error fetching user email:', error);
-      message.error('Failed to retrieve user email.');
+      console.error("Error fetching user email:", error);
+      message.error("Failed to retrieve user email.");
     }
   };
   useEffect(() => {
     fetchUserEmail();
   }, []);
-  
+
   useEffect(() => {
     if (currentDashboardId) {
       console.log(`[DashboardProvider] currentDashboardId changed: ${currentDashboardId}`);
     } else {
-      console.log('[DashboardProvider] currentDashboardId is null');
+      console.log("[DashboardProvider] currentDashboardId is null");
     }
   }, [currentDashboardId]);
 
@@ -160,12 +194,12 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     if (currentWorkbookId) {
       console.log(`[DashboardProvider] currentWorkbookId changed: ${currentWorkbookId}`);
     } else {
-      console.log('[DashboardProvider] currentWorkbookId is empty');
+      console.log("[DashboardProvider] currentWorkbookId is empty");
     }
   }, [currentWorkbookId]);
 
   const setWidgets: React.Dispatch<React.SetStateAction<Widget[]>> = (update) => {
-    if (typeof update === 'function') {
+    if (typeof update === "function") {
       setWidgetsState((prevWidgets) => {
         const newWidgets = (update as (prev: Widget[]) => Widget[])(prevWidgets);
         return newWidgets;
@@ -188,17 +222,17 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         } else {
           setDashboardBorderSettings({
             showBorder: false,
-            color: '#000000',
+            color: "#000000",
             thickness: 1,
-            style: 'solid',
+            style: "solid",
           });
         }
         let updatedWidgets = db.components || [];
-        if (!updatedWidgets.some(w => w.type === 'title')) {
+        if (!updatedWidgets.some((w) => w.type === "title")) {
           updatedWidgets = [defaultTitleWidget, ...updatedWidgets];
         }
         setWidgetsState(updatedWidgets);
-        setDashboardTitle(db.title || 'My Dashboard');
+        setDashboardTitle(db.title || "My Dashboard");
         if (db.layouts && Object.keys(db.layouts).length > 0) {
           setLayouts(db.layouts);
         } else {
@@ -207,7 +241,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         setDashboardLoaded(true);
       } catch (error) {
         console.error(`Error loading dashboard ${currentDashboardId}:`, error);
-        message.error('Failed to load the selected dashboard.');
+        message.error("Failed to load the selected dashboard.");
       }
     };
     if (!currentDashboard) {
@@ -232,23 +266,23 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       await axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard);
       setCurrentDashboard(updatedDashboard);
     } catch (error) {
-      console.error('Error syncing dashboard to server:', error);
-      message.error('Failed to save changes to server.');
+      console.error("Error syncing dashboard to server:", error);
+      message.error("Failed to save changes to server.");
     }
   };
   const updateWidgetsWithHistory = (updateFn: (prevWidgets: Widget[]) => Widget[]) => {
-    console.log('updateWidgetsWithHistory: Initiating widget update with history.');
+    console.log("updateWidgetsWithHistory: Initiating widget update with history.");
     setWidgetsState((prevWidgets: Widget[]) => {
       const newWidgets = updateFn(prevWidgets);
-      console.log('updateWidgetsWithHistory: New widgets after update:', newWidgets);
+      console.log("updateWidgetsWithHistory: New widgets after update:", newWidgets);
       setPastStates((prev) => [...prev, { widgets: prevWidgets, layouts }]);
-      console.log('updateWidgetsWithHistory: Past states updated.');
+      console.log("updateWidgetsWithHistory: Past states updated.");
       setFutureStates([]);
-      console.log('updateWidgetsWithHistory: Future states cleared.');
+      console.log("updateWidgetsWithHistory: Future states cleared.");
       return newWidgets;
     });
   };
-  
+
   useEffect(() => {
     if (isUndoRedoRef.current) {
       isUndoRedoRef.current = false;
@@ -258,8 +292,8 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     setCurrentDashboard(null);
     setWidgets([defaultTitleWidget]);
     setLayouts({});
-    setDashboardTitle('My Dashboard');
-    console.log('Dashboard reset to default.');
+    setDashboardTitle("My Dashboard");
+    console.log("Dashboard reset to default.");
   };
   const writeMetricValue = async (
     widgetId: string,
@@ -271,7 +305,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       console.log(`Updating widget ${widgetId} with new value ${newValue}`);
       await Excel.run(async (context: Excel.RequestContext) => {
         const sheet = context.workbook.worksheets.getItemOrNullObject(worksheetName);
-        sheet.load('name');
+        sheet.load("name");
         await context.sync();
         if (sheet.isNullObject) {
           message.error(`Worksheet "${worksheetName}" not found.`);
@@ -283,7 +317,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         console.log(`Setting widget ${widgetId} currentValue to ${newValue}`);
         setWidgets((prevWidgets: Widget[]) =>
           prevWidgets.map((widget: Widget) =>
-            widget.id === widgetId && widget.type === 'metric'
+            widget.id === widgetId && widget.type === "metric"
               ? {
                   ...widget,
                   data: {
@@ -295,10 +329,10 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           )
         );
         console.log(`Widget ${widgetId} updated successfully`);
-        message.success('Metric value updated successfully!');
+        message.success("Metric value updated successfully!");
       });
     } catch (error: any) {
-      console.error('Error writing metric value:', error);
+      console.error("Error writing metric value:", error);
     }
   };
   const promptForWidgetDetails = useCallback((widget: Widget, onComplete: (updatedWidget: Widget) => void) => {
@@ -336,7 +370,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
   }, [currentDashboardId, dashboards, currentWorkbookId]);
   const getAvailableWorksheets = async (): Promise<string[]> => {
     if (isInDialog()) {
-      console.log('Running in dialog; skipping getAvailableWorksheets.');
+      console.log("Running in dialog; skipping getAvailableWorksheets.");
       return [];
     }
     try {
@@ -357,9 +391,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       try {
         const serverWidgets: Widget[] = currentDashboard.components || [];
         const needsMigration = serverWidgets.some(
-          (widget: Widget) =>
-            (widget.type === 'chart' || widget.type === 'image') &&
-            'chartIndex' in widget.data
+          (widget: Widget) => (widget.type === "chart" || widget.type === "image") && "chartIndex" in widget.data
         );
         if (needsMigration) {
           await migrateChartIndexToAssociatedRange();
@@ -367,74 +399,74 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           const updatedWidgets = serverWidgets
             .map((widget: any) => {
               switch (widget.type) {
-                case 'image': {
+                case "image": {
                   const imageData: ImageWidgetData = {
-                    src: widget.data.src || '',
+                    src: widget.data.src || "",
                   };
                   return { ...widget, data: imageData };
                 }
-                case 'chart': {
+                case "chart": {
                   const chartData: ChartData = {
-                    type: widget.data.type || 'bar',
-                    title: widget.data.title || 'Sample Chart',
+                    type: widget.data.type || "bar",
+                    title: widget.data.title || "Sample Chart",
                     labels: widget.data.labels || [],
                     datasets: widget.data.datasets || [],
-                    titleAlignment: widget.data.titleAlignment || 'left',
-                    associatedRange: widget.data.associatedRange || '',
-                    worksheetName: widget.data.worksheetName || '',
+                    titleAlignment: widget.data.titleAlignment || "left",
+                    associatedRange: widget.data.associatedRange || "",
+                    worksheetName: widget.data.worksheetName || "",
                   };
                   return { ...widget, data: chartData };
                 }
-                case 'metric': {
+                case "metric": {
                   const metricData: MetricData = {
-                    cellAddress: widget.data.cellAddress || '',
-                    worksheetName: widget.data.worksheetName || '',
+                    cellAddress: widget.data.cellAddress || "",
+                    worksheetName: widget.data.worksheetName || "",
                     targetValue: widget.data.targetValue ?? 0,
-                    comparison: widget.data.comparison || 'greater',
+                    comparison: widget.data.comparison || "greater",
                     fontSize: widget.data.fontSize ?? 28,
-                    displayName: widget.data.displayName || 'KPI',
-                    format: widget.data.format || 'number',
+                    displayName: widget.data.displayName || "KPI",
+                    format: widget.data.format || "number",
                     currentValue: widget.data.currentValue ?? 0,
-                    titleAlignment: widget.data.titleAlignment || 'left',
-                    backgroundColor: '#ffffff',
-                    textColor: '#000000',
+                    titleAlignment: widget.data.titleAlignment || "left",
+                    backgroundColor: "#ffffff",
+                    textColor: "#000000",
                   };
                   return { ...widget, data: metricData };
                 }
-                case 'text': {
+                case "text": {
                   const textData: TextData = {
-                    content: widget.data.content || 'Your Dashboard Title',
+                    content: widget.data.content || "Your Dashboard Title",
                     fontSize: widget.data.fontSize ?? 24,
-                    textColor: widget.data.textColor || '#000000',
-                    backgroundColor: widget.data.backgroundColor || '#ffffff',
-                    titleAlignment: widget.data.titleAlignment || 'left',
+                    textColor: widget.data.textColor || "#000000",
+                    backgroundColor: widget.data.backgroundColor || "#ffffff",
+                    titleAlignment: widget.data.titleAlignment || "left",
                   };
                   return { ...widget, data: textData };
                 }
-                case 'gantt': {
+                case "gantt": {
                   const ganttData: GanttWidgetData = {
                     tasks: widget.data.tasks || [],
-                    title: widget.data.title || 'Gantt Chart',
-                    titleAlignment: widget.data.titleAlignment || 'left',
+                    title: widget.data.title || "Gantt Chart",
+                    titleAlignment: widget.data.titleAlignment || "left",
                   };
                   return { ...widget, data: ganttData };
                 }
-                case 'table': {
+                case "table": {
                   const tableData: TableData = {
                     columns: widget.data.columns || [],
                     data: widget.data.data || [],
-                    sheetName: widget.data.sheetName || '',
-                    tableName: widget.data.tableName || '',
+                    sheetName: widget.data.sheetName || "",
+                    tableName: widget.data.tableName || "",
                   };
                   return { ...widget, data: tableData };
                 }
-                case 'title': {
+                case "title": {
                   const titleData: TitleWidgetData = {
-                    content: widget.data.content || 'Your Dashboard Title',
+                    content: widget.data.content || "Your Dashboard Title",
                     fontSize: widget.data.fontSize ?? 24,
-                    textColor: widget.data.textColor || '#000000',
-                    backgroundColor: widget.data.backgroundColor || '#ffffff',
-                    titleAlignment: widget.data.titleAlignment || 'center',
+                    textColor: widget.data.textColor || "#000000",
+                    backgroundColor: widget.data.backgroundColor || "#ffffff",
+                    titleAlignment: widget.data.titleAlignment || "center",
                   };
                   return { ...widget, data: titleData };
                 }
@@ -444,7 +476,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
               }
             })
             .filter((widget: Widget | null) => widget !== null) as Widget[];
-          if (!updatedWidgets.some((w: Widget) => w.type === 'title')) {
+          if (!updatedWidgets.some((w: Widget) => w.type === "title")) {
             updatedWidgets.unshift(defaultTitleWidget);
             updateLayoutsForNewWidgets([defaultTitleWidget]);
           }
@@ -452,8 +484,8 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           updateLayoutsForNewWidgets(updatedWidgets);
         }
       } catch (error) {
-        console.error('Error fetching and migrating widgets:', error);
-        message.error('Failed to load widgets from server.');
+        console.error("Error fetching and migrating widgets:", error);
+        message.error("Failed to load widgets from server.");
       }
     };
     migrateWidgets();
@@ -461,11 +493,11 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
   const saveAsTemplate = async () => {
     try {
       if (!userEmail) {
-        message.error('No user email found. Cannot save as template.');
+        message.error("No user email found. Cannot save as template.");
         return;
       }
       const templateToSave: TemplateItem = {
-        id: currentTemplateId ?? '',
+        id: currentTemplateId ?? "",
         name: dashboardTitle,
         widgets: widgets,
         layouts,
@@ -473,24 +505,24 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       };
       if (currentTemplateId) {
         const updatedTemplate = await updateTemplate(currentTemplateId, templateToSave);
-        message.success('Template updated successfully!');
+        message.success("Template updated successfully!");
       } else {
         const newTemplate = await createTemplate(templateToSave);
-        message.success('Template created successfully!');
+        message.success("Template created successfully!");
         setCurrentTemplateId(newTemplate.id);
       }
     } catch (error) {
-      console.error('Error saving template:', error);
-      message.error('Failed to save template to the server.');
+      console.error("Error saving template:", error);
+      message.error("Failed to save template to the server.");
     }
   };
   const excelSerialToDateString = (serial: number): string => {
-    if (typeof serial !== 'number' || isNaN(serial)) {
-      console.warn('Invalid serial number:', serial);
-      return '';
+    if (typeof serial !== "number" || isNaN(serial)) {
+      console.warn("Invalid serial number:", serial);
+      return "";
     }
     const date = new Date((serial - 25569) * 86400000);
-    return date.toISOString().split('T')[0];
+    return date.toISOString().split("T")[0];
   };
   const applyListDataValidation = (
     range: Excel.Range,
@@ -522,7 +554,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
   const insertProjectManagementTemplate = async () => {
     try {
       await Excel.run(async (context: Excel.RequestContext) => {
-        const sheetName = 'Gantt';
+        const sheetName = "Gantt";
         let sheet = context.workbook.worksheets.getItemOrNullObject(sheetName);
         await context.sync();
         if (sheet.isNullObject) {
@@ -532,43 +564,43 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         }
         sheet.activate();
         await context.sync();
-        const existingTable = sheet.tables.getItemOrNullObject('GanttTable');
-        existingTable.load('name');
+        const existingTable = sheet.tables.getItemOrNullObject("GanttTable");
+        existingTable.load("name");
         await context.sync();
         if (!existingTable.isNullObject) {
           existingTable.delete();
           await context.sync();
-          console.log('Existing GanttTable deleted.');
+          console.log("Existing GanttTable deleted.");
         }
         const entireSheet = sheet.getRange();
         entireSheet.clear(Excel.ClearApplyTo.all);
         await context.sync();
-        console.log('Worksheet cleared.');
+        console.log("Worksheet cleared.");
         const headers = [
-          'Task Name',
-          'Task Type',
-          'Start Date',
-          'End Date',
-          'Completed Date',
-          'Duration (Days)',        // Column F
-          'Actual Duration (Days)', // Column G
-          'Progress %',
-          'Dependencies',
+          "Task Name",
+          "Task Type",
+          "Start Date",
+          "End Date",
+          "Completed Date",
+          "Duration (Days)",
+          "Actual Duration (Days)", // Column G
+          "Progress %",
+          "Dependencies",
         ];
-        const headerRange = sheet.getRange('A1:I1');
+        const headerRange = sheet.getRange("A1:I1");
         headerRange.values = [headers];
         headerRange.format.font.bold = true;
-        headerRange.format.fill.color = '#4472C4'; // Blue background
-        headerRange.format.font.color = 'white'; // White text
-        console.log('Headers inserted on A1:I1:', headers);
+        headerRange.format.fill.color = "#4472C4"; // Blue background
+        headerRange.format.font.color = "white"; // White text
+        console.log("Headers inserted on A1:I1:", headers);
         const columnWidths = [25, 15, 15, 15, 15, 18, 22, 12, 20];
         columnWidths.forEach((width, index) => {
-          const columnLetter = String.fromCharCode(65 + index); // 65 is 'A'
+          const columnLetter = String.fromCharCode(65 + index); // 65 is "A"
           sheet.getRange(`${columnLetter}:${columnLetter}`).columnWidth = width;
         });
-        console.log('Column widths set:', columnWidths);
+        console.log("Column widths set:", columnWidths);
         const parseDate = (dateString: string): Date => {
-          const [month, day, year] = dateString.split('/').map(Number);
+          const [month, day, year] = dateString.split("/").map(Number);
           return new Date(year, month - 1, day);
         };
         const dateToExcelSerial = (date: Date): number => {
@@ -576,59 +608,59 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         };
         const sampleData = [
           [
-            'Design Interface',
-            'Task',
-            dateToExcelSerial(parseDate('01/01/2023')),
-            dateToExcelSerial(parseDate('01/09/2023')),
-            dateToExcelSerial(parseDate('01/10/2023')),
-            '', // Duration (Days) - Will be calculated
-            '', // Actual Duration (Days) - Will be calculated
-            50, 
-            '',
+            "Design Interface",
+            "Task",
+            dateToExcelSerial(parseDate("01/01/2023")),
+            dateToExcelSerial(parseDate("01/09/2023")),
+            dateToExcelSerial(parseDate("01/10/2023")),
+            "", // Duration (Days) - Will be calculated
+            "", // Actual Duration (Days) - Will be calculated
+            50,
+            "",
           ],
           [
-            'Develop Backend',
-            'Task',
-            dateToExcelSerial(parseDate('01/05/2023')),
-            dateToExcelSerial(parseDate('01/19/2023')),
-            '', 
-            '',
-            '',
+            "Develop Backend",
+            "Task",
+            dateToExcelSerial(parseDate("01/05/2023")),
+            dateToExcelSerial(parseDate("01/19/2023")),
+            "", 
+            "",
+            "",
             30, 
-            'Design Interface',
+            "Design Interface",
           ],
           [
-            'Testing',
-            'Task',
-            dateToExcelSerial(parseDate('01/15/2023')),
-            dateToExcelSerial(parseDate('01/24/2023')),
-            '', 
-            '',
-            '',
-            0, 
-            'Develop Backend',
+            "Testing",
+            "Task",
+            dateToExcelSerial(parseDate("01/15/2023")),
+            dateToExcelSerial(parseDate("01/24/2023")),
+            "",
+            "",
+            "",
+            0,
+            "Develop Backend",
           ],
           [
-            'Deployment',
-            'Milestone',
-            dateToExcelSerial(parseDate('01/30/2023')),
-            dateToExcelSerial(parseDate('01/30/2023')),
-            dateToExcelSerial(parseDate('01/30/2023')),
-            '',
-            '',
-            0, 
-            'Testing',
+            "Deployment",
+            "Milestone",
+            dateToExcelSerial(parseDate("01/30/2023")),
+            dateToExcelSerial(parseDate("01/30/2023")),
+            dateToExcelSerial(parseDate("01/30/2023")),
+            "",
+            "",
+            0,
+            "Testing",
           ],
           [
-            'Project Complete',
-            'Project',
-            dateToExcelSerial(parseDate('01/01/2023')),
-            dateToExcelSerial(parseDate('01/29/2023')),
-            dateToExcelSerial(parseDate('01/30/2023')),
-            '',
-            '',
+            "Project Complete",
+            "Project",
+            dateToExcelSerial(parseDate("01/01/2023")),
+            dateToExcelSerial(parseDate("01/29/2023")),
+            dateToExcelSerial(parseDate("01/30/2023")),
+            "",
+            "",
             100,
-            '',
+            "",
           ],
         ];
         const dataRowStart = 2;
@@ -636,76 +668,76 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         const dataRangeAddress = `A${dataRowStart}:I${dataRowEnd}`;
         const dataRange = sheet.getRange(dataRangeAddress);
         dataRange.values = sampleData;
-        console.log('Sample data inserted on A2:I6:', sampleData);
-        const dateColumns = ['C', 'D', 'E'];
+        console.log("Sample data inserted on A2:I6:", sampleData);
+        const dateColumns = ["C", "D", "E"];
         dateColumns.forEach((col) => {
           const range = sheet.getRange(`${col}${dataRowStart}:${col}${dataRowEnd}`);
-          range.numberFormat = [['mm/dd/yyyy']];
+          range.numberFormat = [["mm/dd/yyyy"]];
         });
-        const durationColumns = ['F', 'G'];
+        const durationColumns = ["F", "G"];
         durationColumns.forEach((col) => {
           const range = sheet.getRange(`${col}${dataRowStart}:${col}${dataRowEnd}`);
-          range.numberFormat = [['0']];
+          range.numberFormat = [["0"]];
         });
         const progressRange = sheet.getRange(`H${dataRowStart}:H${dataRowEnd}`);
-        const progressFormat = '0'; 
+        const progressFormat = "0";
         const progressFormats = Array.from({ length: dataRowEnd - dataRowStart + 1 }, () => [progressFormat]);
         progressRange.numberFormat = progressFormats;
-        console.log('Progress column formatted as number');
+        console.log("Progress column formatted as number");
         try {
           const table = sheet.tables.add(`A1:I${dataRowEnd}`, true);
-          table.name = 'GanttTable';
-          console.log('GanttTable created successfully.');
+          table.name = "GanttTable";
+          console.log("GanttTable created successfully.");
         } catch (tableError) {
-          console.error('Failed to create GanttTable:', tableError);
+          console.error("Failed to create GanttTable:", tableError);
           throw tableError;
         }
         try {
-          const table = sheet.tables.getItem('GanttTable');
+          const table = sheet.tables.getItem("GanttTable");
           const durationColumn = table.columns.getItemAt(5); // Column F
           const actualDurationColumn = table.columns.getItemAt(6); // Column G
           const durationFormula = "=[@[End Date]]-[@[Start Date]]";
-          const actualDurationFormula = '=IF([@[Completed Date]]="", "", [@[Completed Date]] - [@[Start Date]])';
+          const actualDurationFormula = "=IF([@[Completed Date]]='', '', [@[Completed Date]] - [@[Start Date]])";
           const durationRange = durationColumn.getDataBodyRange();
           const actualDurationRange = actualDurationColumn.getDataBodyRange();
-          durationRange.load('rowCount');
-          actualDurationRange.load('rowCount');
+          durationRange.load("rowCount");
+          actualDurationRange.load("rowCount");
           await context.sync();
           durationRange.formulas = Array(durationRange.rowCount).fill([durationFormula]);
           actualDurationRange.formulas = Array(actualDurationRange.rowCount).fill([actualDurationFormula]);
           await context.sync();
         } catch (calcError) {
-          console.error('Error setting calculated columns:', calcError);
+          console.error("Error setting calculated columns:", calcError);
           throw calcError;
         }
-        const taskTypeOptions = ['Task', 'Milestone', 'Project'];
-        const taskTypeValues = taskTypeOptions.join(',');
+        const taskTypeOptions = ["Task", "Milestone", "Project"];
+        const taskTypeValues = taskTypeOptions.join(",");
         const taskTypeRangeAddress = `B${dataRowStart}:B${dataRowEnd}`;
         const taskTypeRange = sheet.getRange(taskTypeRangeAddress);
         applyListDataValidation(
           taskTypeRange,
           taskTypeValues,
-          `Please select a valid Task Type: ${taskTypeOptions.join(', ')}`,
-          'Invalid Task Type',
-          'Select a Task Type from the dropdown.',
-          'Task Type'
+          `Please select a valid Task Type: ${taskTypeOptions.join(", ")}`,
+          "Invalid Task Type",
+          "Select a Task Type from the dropdown.",
+          "Task Type"
         );
-        const taskNamesRangeName = 'TaskNames';
+        const taskNamesRangeName = "TaskNames";
         const taskNamesRangeAddress = `A${dataRowStart}:A${dataRowEnd}`; 
         const taskNamesRange = sheet.getRange(taskNamesRangeAddress);
-        taskNamesRange.load('values'); 
+        taskNamesRange.load("values"); 
         const existingNamedRange = context.workbook.names.getItemOrNullObject(taskNamesRangeName);
         await context.sync();
         if (!existingNamedRange.isNullObject) {
           existingNamedRange.delete();
           await context.sync();
-          console.log(`Existing named range '${taskNamesRangeName}' deleted.`);
+          console.log(`Existing named range "${taskNamesRangeName}" deleted.`);
         }
         try {
           context.workbook.names.add(taskNamesRangeName, taskNamesRange);
-          console.log(`Named range '${taskNamesRangeName}' created for range ${taskNamesRangeAddress}`);
+          console.log(`Named range "${taskNamesRangeName}" created for range ${taskNamesRangeAddress}`);
         } catch (nameError) {
-          console.error(`Error creating named range '${taskNamesRangeName}':`, nameError);
+          console.error(`Error creating named range "${taskNamesRangeName}":`, nameError);
           throw nameError;
         }
         const dependenciesRangeAddress = `I${dataRowStart}:I${dataRowEnd}`;
@@ -713,12 +745,12 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         applyListDataValidation(
           dependenciesRange,
           `=${taskNamesRangeName}`, 
-          'Please select a valid Task Name from the dropdown.',
-          'Invalid Dependency',
-          'Select a Task Name from the dropdown.',
-          'Dependencies'
+          "Please select a valid Task Name from the dropdown.",
+          "Invalid Dependency",
+          "Select a Task Name from the dropdown.",
+          "Dependencies"
         );
-        dependenciesRange.dataValidation.load(['rule', 'errorAlert', 'prompt']);
+        dependenciesRange.dataValidation.load(["rule", "errorAlert", "prompt"]);
         await context.sync();
         console.log(`Data validation for Dependencies applied to range ${dependenciesRangeAddress}`);
         const borderEdges = [
@@ -733,39 +765,39 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           const border = dataRange.format.borders.getItem(edge);
           border.style = Excel.BorderLineStyle.continuous;
           border.weight = Excel.BorderWeight.thin;
-          border.color = '#000000';
+          border.color = "#000000";
         });
-        console.log('Borders applied to data range');
+        console.log("Borders applied to data range");
         sheet.getUsedRange().format.autofitColumns();
         sheet.getUsedRange().format.autofitRows();
-        console.log('Autofit applied to columns and rows');
+        console.log("Autofit applied to columns and rows");
         sheet.freezePanes.freezeRows(1);
-        console.log('Top row frozen');
+        console.log("Top row frozen");
         await context.sync();
-        message.success('Project management template inserted successfully.');
+        message.success("Project management template inserted successfully.");
       }); 
     } catch (error) {
-      console.error('Error inserting template into Excel:', error);
-      message.error('Failed to insert template into Excel.');
+      console.error("Error inserting template into Excel:", error);
+      message.error("Failed to insert template into Excel.");
     }
   };
   const createGanttChart = async () => {
     try {
       await Excel.run(async (context: Excel.RequestContext) => {
         const sheet = context.workbook.worksheets.getActiveWorksheet();
-        const table = sheet.tables.getItemOrNullObject('GanttTable');
-        table.load(['name', 'dataBodyRange', 'rows']);
+        const table = sheet.tables.getItemOrNullObject("GanttTable");
+        table.load(["name", "dataBodyRange", "rows"]);
         await context.sync();
         if (table.isNullObject) {
-          message.warning('GanttTable not found on the active worksheet.');
+          message.warning("GanttTable not found on the active worksheet.");
           return;
         }
         const dataRange = table.getDataBodyRange();
-        dataRange.load('values');
+        dataRange.load("values");
         await context.sync();
         const data: any[][] = dataRange.values;
         if (!data || data.length === 0) {
-          message.warning('No Gantt data found in the GanttTable.');
+          message.warning("No Gantt data found in the GanttTable.");
           return;
         }
         const excelSerialToDate = (serial: number): Date => {
@@ -777,13 +809,13 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
             const taskType: string = row[1];
             const startSerial: number = row[2];
             const endSerial: number = row[3];
-            const completedSerial: number | '' = row[4];
+            const completedSerial: number | "" = row[4];
             const progress: number = row[7];
             const dependenciesRaw: string = row[8];
             if (
-              typeof startSerial !== 'number' ||
-              typeof endSerial !== 'number' ||
-              (completedSerial !== '' && typeof completedSerial !== 'number')
+              typeof startSerial !== "number" ||
+              typeof endSerial !== "number" ||
+              (completedSerial !== "" && typeof completedSerial !== "number")
             ) {
               console.warn(`Invalid serial numbers for task: ${taskName}, row`);
               return null;
@@ -791,7 +823,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
             const startDate: Date = excelSerialToDate(startSerial);
             const endDate: Date = excelSerialToDate(endSerial);
             const completedDate: Date | undefined =
-              completedSerial !== '' ? excelSerialToDate(completedSerial) : undefined;
+              completedSerial !== "" ? excelSerialToDate(completedSerial) : undefined;
             if (!(startDate instanceof Date) || isNaN(startDate.getTime())) {
               console.warn(`Invalid start date for task: ${taskName}`);
               return null;
@@ -800,27 +832,27 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
               console.warn(`Invalid end date for task: ${taskName}`);
               return null;
             }
-            if (completedSerial !== '' && (!completedDate || isNaN(completedDate.getTime()))) {
+            if (completedSerial !== "" && (!completedDate || isNaN(completedDate.getTime()))) {
               console.warn(`Invalid completed date for task: ${taskName}`);
               return null;
             }
             const dependencies: string = dependenciesRaw
               ? dependenciesRaw
                   .toString()
-                  .split(',')
-                  .map((dep: string) => `task-${dep.trim().replace(/\s+/g, '-')}`)
-                  .join(',')
-              : '';
+                  .split(",")
+                  .map((dep: string) => `task-${dep.trim().replace(/\s+/g, "-")}`)
+                  .join(",")
+              : "";
             let color: string;
             if (progress > 75) {
-              color = '#00FF00';
+              color = "#00FF00";
             } else if (progress > 50) {
-              color = '#FFFF00';
+              color = "#FFFF00";
             } else {
-              color = '#FF0000';
+              color = "#FF0000";
             }
             return {
-              id: `task-${taskName.replace(/\s+/g, '-')}`,
+              id: `task-${taskName.replace(/\s+/g, "-")}`,
               name: taskName,
               type: taskType.toLowerCase(),
               start: startDate.toISOString(),
@@ -833,10 +865,10 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           .filter((task) => task !== null) as Task[];
         setWidgets((prevWidgets: Widget[]) => {
           let updatedWidgets: Widget[];
-          const ganttWidgetExists = prevWidgets.some((widget: Widget) => widget.type === 'gantt');
+          const ganttWidgetExists = prevWidgets.some((widget: Widget) => widget.type === "gantt");
           if (ganttWidgetExists) {
             updatedWidgets = prevWidgets.map((widget: Widget) => {
-              if (widget.type === 'gantt') {
+              if (widget.type === "gantt") {
                 return { ...widget, data: { ...widget.data, tasks } };
               }
               return widget;
@@ -844,11 +876,11 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           } else {
             const newGanttWidget: Widget = {
               id: `gantt-${uuidv4()}`,
-              type: 'gantt',
+              type: "gantt",
               data: {
                 tasks,
-                title: 'Gantt Chart',
-                titleAlignment: 'left',
+                title: "Gantt Chart",
+                titleAlignment: "left",
               } as GanttWidgetData,
             };
             updatedWidgets = [...prevWidgets, newGanttWidget];
@@ -857,15 +889,15 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           if (currentDashboard) {
             editDashboard(currentDashboard).then(() => {
               setCurrentDashboard(currentDashboard);
-              message.success('Gantt chart data prepared and saved successfully!');
+              message.success("Gantt chart data prepared and saved successfully!");
             });
           }
           return updatedWidgets;
         });
       });
     } catch (error) {
-      console.error('Error creating Gantt chart:', error);
-      message.error('Failed to create Gantt chart.');
+      console.error("Error creating Gantt chart:", error);
+      message.error("Failed to create Gantt chart.");
     }
   };
   const generateProjectManagementTemplateAndGanttChart = async () => {
@@ -890,7 +922,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         };
         axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard)
           .catch(err => {
-            console.error('Error syncing undo to server:', err);
+            console.error("Error syncing undo to server:", err);
           });
       }
     }
@@ -913,7 +945,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         };
         axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard)
           .catch(err => {
-            console.error('Error syncing redo to server:', err);
+            console.error("Error syncing redo to server:", err);
           });
       }
     }
@@ -921,7 +953,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
   const MAX_VERSIONS = 5;
   const saveDashboardVersion = () => {
     if (!currentDashboardId || !currentDashboard) {
-      message.error('No dashboard is currently active.');
+      message.error("No dashboard is currently active.");
       return;
     }
     const newVersion: DashboardVersion = {
@@ -948,7 +980,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     };
     axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard)
       .then(() => {
-        message.success('Dashboard version saved.');
+        message.success("Dashboard version saved.");
         setCurrentDashboard(updatedDashboard);
         setDashboards(prev => {
           const idx = prev.findIndex(d => d.id === currentDashboardId);
@@ -961,18 +993,18 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         });
       })
       .catch(err => {
-        console.error('Error saving version to server:', err);
-        message.error('Failed to save dashboard version.');
+        console.error("Error saving version to server:", err);
+        message.error("Failed to save dashboard version.");
       });
   };
   const restoreDashboardVersion = (versionId: string) => {
     if (!currentDashboardId || !currentDashboard || !currentDashboard.versions) {
-      message.error('No versions available for this dashboard.');
+      message.error("No versions available for this dashboard.");
       return;
     }
     const version = currentDashboard.versions.find((v) => v.id === versionId);
     if (!version) {
-      message.error('Version not found.');
+      message.error("Version not found.");
       return;
     }
     setWidgets(version.components);
@@ -987,7 +1019,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     };
     axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard)
       .then(() => {
-        message.success('Dashboard restored to selected version.');
+        message.success("Dashboard restored to selected version.");
         setCurrentDashboard(updatedDashboard);
         setDashboards(prev => {
           const idx = prev.findIndex(d => d.id === currentDashboardId);
@@ -1000,8 +1032,8 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         });
       })
       .catch(err => {
-        console.error('Error restoring version to server:', err);
-        message.error('Failed to restore version.');
+        console.error("Error restoring version to server:", err);
+        message.error("Failed to restore version.");
       });
   };
   const fixInvalidLayouts = (
@@ -1014,7 +1046,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       updatedLayouts[breakpoint] = layoutItems.map((item) => {
         if (item.w <= 0 || item.h <= 0) {
           const widget = widgets.find((w) => w.id === item.i);
-          const size = WIDGET_SIZES[widget?.type || ''] || { w: 8, h: 4 };
+          const size = WIDGET_SIZES[widget?.type || ""] || { w: 8, h: 4 };
           return { ...item, w: size.w, h: size.h };
         }
         return item;
@@ -1025,7 +1057,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
   const updateLayoutsForNewWidgets = (newWidgets: Widget[]) => {
     setLayouts((prevLayouts) => {
       const updatedLayouts: { [key: string]: GridLayoutItem[] } = {...prevLayouts};
-      const breakpointList: Breakpoint[] = ['lg', 'md', 'sm', 'xl', 'xxl'];
+      const breakpointList: Breakpoint[] = ["lg", "md", "sm", "xl", "xxl"];
       breakpointList.forEach((breakpoint) => {
         const breakpointCols = GRID_COLS[breakpoint];
         const existingItemIds = new Set(updatedLayouts[breakpoint]?.map((item) => item.i));
@@ -1037,7 +1069,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
             size.w = breakpointCols;
           }
           let x = 0;
-          if (widget.type === 'title') {
+          if (widget.type === "title") {
             x = Math.floor((breakpointCols - size.w) / 2);
           }
           const layoutItem: GridLayoutItem = {
@@ -1059,7 +1091,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
   };
   const generateLayoutsForWidgets = (widgets: Widget[]): { [key: string]: GridLayoutItem[] } => {
     const updatedLayouts: { [key: string]: GridLayoutItem[] } = {};
-    const breakpointList: Breakpoint[] = ['lg', 'md', 'sm'];
+    const breakpointList: Breakpoint[] = ["lg", "md", "sm"];
     breakpointList.forEach((breakpoint) => {
       const breakpointCols = GRID_COLS[breakpoint];
       let yOffset = 0;
@@ -1069,7 +1101,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           size.w = breakpointCols;
         }
         let x = 0;
-        if (widget.type === 'title') {
+        if (widget.type === "title") {
           x = Math.floor((breakpointCols - size.w) / 2);
         }
         const layoutItem: GridLayoutItem = {
@@ -1107,8 +1139,8 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         return prevDashboards;
       });
     } catch (err) {
-      console.error('Error updating dashboard on server:', err);
-      message.error('Failed to update dashboard on server.');
+      console.error("Error updating dashboard on server:", err);
+      message.error("Failed to update dashboard on server.");
       throw err;
     }
   };
@@ -1121,12 +1153,12 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         setCurrentDashboardId(null);
         setWidgets([defaultTitleWidget]);
         setLayouts({});
-        setDashboardTitle('My Dashboard');
+        setDashboardTitle("My Dashboard");
       }
-      message.success('Dashboard deleted successfully!');
+      message.success("Dashboard deleted successfully!");
     } catch (err) {
-      console.error('Error deleting dashboard on server:', err);
-      message.error('Failed to delete dashboard.');
+      console.error("Error deleting dashboard on server:", err);
+      message.error("Failed to delete dashboard.");
     }
   };
   const setWidgetsAndLayouts = (newWidgets: Widget[]) => {
@@ -1138,7 +1170,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
   > = (update) => {
     setLayouts((prevLayouts) => {
       const newLayouts =
-        typeof update === 'function' ? update(prevLayouts) : update;
+        typeof update === "function" ? update(prevLayouts) : update;
 
       if (!isUndoRedoRef.current) {
         setPastStates((prevPastStates) => [
@@ -1155,7 +1187,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     try {
       return await Excel.run(async (context: Excel.RequestContext) => {
         const tables = context.workbook.tables;
-        tables.load('items/name, items/worksheet/name');
+        tables.load("items/name, items/worksheet/name");
         await context.sync();
         return tables.items.map(table => ({
           name: table.name,
@@ -1164,40 +1196,40 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         }));
       });
     } catch (error) {
-      console.error('Error fetching tables from Excel:', error);
-      message.error('Failed to fetch tables from Excel.');
+      console.error("Error fetching tables from Excel:", error);
+      message.error("Failed to fetch tables from Excel.");
       return [];
     }
   };
   const addWidgetFunc = useCallback(
     async (
-      type: 'text' | 'chart' | 'gantt' | 'image' | 'metric' | 'table' | 'line' | 'title',
+      type: "text" | "chart" | "gantt" | "image" | "metric" | "table" | "line" | "title",
       data?: TextData | ChartData | GanttWidgetData | ImageWidgetData | MetricData | TableData | LineWidgetData | TitleWidgetData
     ): Promise<void> => {
-      if (type === 'title' && widgets.some((w) => w.type === 'title')) {
-        message.warning('A title widget already exists.');
+      if (type === "title" && widgets.some((w) => w.type === "title")) {
+        message.warning("A title widget already exists.");
         return;
       }
       const newKey = `${type}-${uuidv4()}`;
       let newWidget: Widget;
       let highestZIndex = widgets.reduce((max, w) => Math.max(max, w.zIndex ?? 0), 0);
       const newZIndex = highestZIndex + 1;
-      if (type === 'table') {
+      if (type === "table") {
         try {
           const availableTables = await getAvailableTables();
           if (availableTables.length === 0) {
-            message.warning('No tables found in the Excel workbook.');
+            message.warning("No tables found in the Excel workbook.");
             return;
           }
           newWidget = {
             id: newKey,
             type,
-            name: 'New Table',
+            name: "New Table",
             data: {
               columns: [],
               data: [],
-              sheetName: '',
-              tableName: '',
+              sheetName: "",
+              tableName: "",
             } as TableData,
             zIndex: newZIndex,
           };
@@ -1210,14 +1242,14 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
               if (sheetName && tableName) {
                 await readTableFromExcel(newWidget.id, sheetName, tableName);
               } else {
-                message.error('Sheet name or table name is missing.');
+                message.error("Sheet name or table name is missing.");
               }
             },
           });
           setIsSelectTableModalVisible(true);
         } catch (error) {
-          console.error('Error adding table widget:', error);
-          message.error('Failed to add table widget.');
+          console.error("Error adding table widget:", error);
+          message.error("Failed to add table widget.");
           return;
         }
       }
@@ -1229,109 +1261,109 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         } as Widget;
       } else {
         switch (type) {
-          case 'line':
+          case "line":
             newWidget = {
               id: newKey,
-              type: 'line',
+              type: "line",
               data: {
-                color: '#000000',
+                color: "#000000",
                 thickness: 2,
-                style: 'solid',
-                orientation: 'horizontal',
+                style: "solid",
+                orientation: "horizontal",
               } as LineWidgetData,
               zIndex: newZIndex, 
             };
             break;
-          case 'metric':
+          case "metric":
             newWidget = {
               id: newKey,
-              type: 'metric',
+              type: "metric",
               data: {
-                cellAddress: 'C3',
-                worksheetName: 'Sheet1',
+                cellAddress: "C3",
+                worksheetName: "Sheet1",
                 targetValue: 0,
-                comparison: 'greater',
+                comparison: "greater",
                 fontSize: 28,
-                displayName: 'KPI',
-                format: 'number',
+                displayName: "KPI",
+                format: "number",
                 currentValue: 0,
-                titleAlignment: 'left',
-                backgroundColor: '#ffffff',
-                textColor: '#000000',
+                titleAlignment: "left",
+                backgroundColor: "#ffffff",
+                textColor: "#000000",
               } as MetricData,
               zIndex: newZIndex, 
             };
             break;
-          case 'text':
+          case "text":
             newWidget = {
               id: newKey,
-              type: 'text',
+              type: "text",
               data: {
-                content: '',
+                content: "",
                 fontSize: 16,
-                textColor: '#000000',
-                backgroundColor: '#ffffff',
-                titleAlignment: 'left',
+                textColor: "#000000",
+                backgroundColor: "#ffffff",
+                titleAlignment: "left",
               } as TextData,
               zIndex: newZIndex, 
             };
             break;
-          case 'image':
+          case "image":
             newWidget = {
               id: newKey,
-              type: 'image',
+              type: "image",
               data: {
-                src: '',
-                associatedRange: '',
-                worksheetName: '',
+                src: "",
+                associatedRange: "",
+                worksheetName: "",
               } as ImageWidgetData,
               zIndex: newZIndex, 
             };
             break;
-          case 'chart':
+          case "chart":
             newWidget = {
               id: newKey,
-              type: 'chart',
+              type: "chart",
               data: {
-                type: 'bar',
-                title: 'Sample Chart',
-                labels: ['January', 'February', 'March'],
+                type: "bar",
+                title: "Sample Chart",
+                labels: ["January", "February", "March"],
                 datasets: [
                   {
-                    label: 'Sample Data',
+                    label: "Sample Data",
                     data: [10, 20, 30],
-                    backgroundColor: '#4caf50',
+                    backgroundColor: "#4caf50",
                   },
                 ],
-                titleAlignment: 'left',
-                associatedRange: '',
-                worksheetName: '',
+                titleAlignment: "left",
+                associatedRange: "",
+                worksheetName: "",
               } as ChartData,
               zIndex: newZIndex, 
             };
             break;
-          case 'gantt':
+          case "gantt":
             newWidget = {
               id: newKey,
-              type: 'gantt',
+              type: "gantt",
               data: {
                 tasks: [],
-                title: 'Gantt Chart',
-                titleAlignment: 'left',
+                title: "Gantt Chart",
+                titleAlignment: "left",
               } as GanttWidgetData,
               zIndex: newZIndex, 
             };
             break;
-          case 'title':
+          case "title":
             newWidget = {
               id: newKey,
-              type: 'title',
+              type: "title",
               data: {
-                content: 'Your Dashboard Title',
+                content: "Your Dashboard Title",
                 fontSize: 24,
-                textColor: '#000000',
-                backgroundColor: '#ffffff',
-                titleAlignment: 'center',
+                textColor: "#000000",
+                backgroundColor: "#ffffff",
+                titleAlignment: "center",
               } as TitleWidgetData,
               zIndex: newZIndex, 
             };
@@ -1341,22 +1373,22 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         }
       }
       let missingFields: string[] = [];
-      if (type === 'metric') {
+      if (type === "metric") {
         const metricData = newWidget.data as MetricData;
         if (!metricData.worksheetName || !metricData.cellAddress) {
-          missingFields.push('worksheetName', 'cellAddress');
+          missingFields.push("worksheetName", "cellAddress");
         }
       }
       if (missingFields.length > 0) {
-        message.warning(`Please provide the following fields: ${missingFields.join(', ')}`);
+        message.warning(`Please provide the following fields: ${missingFields.join(", ")}`);
         setPendingWidget(newWidget);
         return;
       }
       updateWidgetsWithHistory((prevWidgets) => {
         const newWidgets = [...prevWidgets, newWidget];
-        console.log('addWidgetFunc: New widgets after addition:', newWidgets);
+        console.log("addWidgetFunc: New widgets after addition:", newWidgets);
         updateLayoutsForNewWidgets(newWidgets);
-        console.log('addWidgetFunc: Layouts updated for new widgets.');
+        console.log("addWidgetFunc: Layouts updated for new widgets.");
         return newWidgets;
       });
     },
@@ -1378,7 +1410,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
   const handleWidgetDetailsComplete = (updatedWidget: Widget) => {
     if (pendingWidget && updatedWidget.id === pendingWidget.id) {
       setPendingWidget(undefined);
-      if (updatedWidget.type === 'table') {
+      if (updatedWidget.type === "table") {
         setIsSelectTableModalVisible(true);
       } else {
         updateWidgetsWithHistory((prevWidgets) => {
@@ -1430,7 +1462,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
             updatedWidget.zIndex = zIndex;
           }
           switch (widget.type) {
-            case 'text':
+            case "text":
               return {
                 ...widget,
                 data: {
@@ -1443,7 +1475,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
                   titleAlignment: (updatedData as Partial<TextData>).titleAlignment ?? widget.data.titleAlignment,
                 } as TextData,
               };
-            case 'title':
+            case "title":
               return {
                 ...widget,
                 data: {
@@ -1451,7 +1483,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
                   ...restUpdatedData,
                 } as TitleWidgetData,
               };
-            case 'chart':
+            case "chart":
               return {
                 ...widget,
                 data: {
@@ -1459,7 +1491,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
                   ...restUpdatedData,
                 } as ChartData,
               };
-            case 'gantt':
+            case "gantt":
               return {
                 ...widget,
                 data: {
@@ -1467,7 +1499,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
                   ...restUpdatedData,
                 } as GanttWidgetData,
               };
-            case 'line':
+            case "line":
               return {
                 ...widget,
                 data: {
@@ -1475,7 +1507,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
                   ...restUpdatedData,
                 } as LineWidgetData,
               };
-            case 'metric':
+            case "metric":
               return {
                 ...widget,
                 data: {
@@ -1483,7 +1515,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
                   ...restUpdatedData,
                 } as MetricData,
               };
-            case 'image':
+            case "image":
               return {
                 ...widget,
                 data: {
@@ -1491,7 +1523,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
                   ...restUpdatedData,
                 } as ImageWidgetData,
               };
-            case 'table':
+            case "table":
               return {
                 ...widget,
                 data: {
@@ -1505,34 +1537,34 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           });
           return newWidgets;
       });
-      message.success('Widget updated successfully!');
+      message.success("Widget updated successfully!");
     },
     [currentDashboard, dashboards, editDashboard, setDashboards, setCurrentDashboard, dashboardTitle, layouts, currentDashboardId]
   );
   const migrateChartIndexToAssociatedRange = async () => {
     if (!currentDashboardId || !currentDashboard) {
-      console.warn('No current dashboard available for migration.');
+      console.warn("No current dashboard available for migration.");
       return;
     }
     try {
       await Excel.run(async (context) => {
         const worksheets = context.workbook.worksheets;
-        worksheets.load('items');
+        worksheets.load("items");
         await context.sync();
         let globalChartIndex = 0;
         const chartMap: { [key: number]: { worksheetName: string; associatedRange: string } } = {};
         for (const sheet of worksheets.items) {
           const charts = sheet.charts;
-          charts.load('items');
+          charts.load("items");
         }
         await context.sync();
         for (const sheet of worksheets.items) {
           for (const chart of sheet.charts.items) {
             const dataRange = chart.getDataBodyRange();
-            dataRange.load('address');
+            dataRange.load("address");
             chartMap[globalChartIndex] = {
               worksheetName: sheet.name,
-              associatedRange: '',
+              associatedRange: "",
             };
             globalChartIndex++;
           }
@@ -1558,9 +1590,9 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         }
         setWidgets((prevWidgets: Widget[]) => {
           const newWidgets = prevWidgets.map((widget: Widget) => {
-            if (widget.type === 'image') {
+            if (widget.type === "image") {
               const imageData = widget.data as ImageWidgetData & { chartIndex?: number };
-              if ('chartIndex' in imageData && imageData.chartIndex !== undefined) {
+              if ("chartIndex" in imageData && imageData.chartIndex !== undefined) {
                 const chartIndex = imageData.chartIndex;
                 const mapping = chartMap[chartIndex];
                 if (mapping && mapping.associatedRange) {
@@ -1579,9 +1611,9 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
                 }
               }
               return widget;
-            } else if (widget.type === 'chart') {
+            } else if (widget.type === "chart") {
               const chartData = widget.data as ChartData & { chartIndex?: number };
-              if ('chartIndex' in chartData && chartData.chartIndex !== undefined) {
+              if ("chartIndex" in chartData && chartData.chartIndex !== undefined) {
                 const chartIndex = chartData.chartIndex;
                 const mapping = chartMap[chartIndex];
                 if (mapping && mapping.associatedRange) {
@@ -1599,15 +1631,15 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
                   );
                 }
               }
-              return widget; // Added return statement for 'chart' type
+              return widget; // Added return statement for "chart" type
             }
             return widget;
           });
           const cleanedWidgets = newWidgets.map((widget) => {
-            if (widget.type === 'image') {
+            if (widget.type === "image") {
               const { chartIndex, ...rest } = widget.data as ImageWidgetData & { chartIndex?: number };
               return { ...widget, data: rest };
-            } else if (widget.type === 'chart') {
+            } else if (widget.type === "chart") {
               const { chartIndex, ...rest } = widget.data as ChartData & { chartIndex?: number };
               return { ...widget, data: rest };
             }
@@ -1620,38 +1652,38 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           axios
             .put(`/api/dashboards/${currentDashboardId}`, updatedDashboard)
             .then(() => {
-              message.success('Widgets migrated to use associatedRange successfully.');
+              message.success("Widgets migrated to use associatedRange successfully.");
             })
             .catch((err) => {
-              console.error('Error updating widgets on server:', err);
-              message.error('Failed to update migrated widgets on server.');
+              console.error("Error updating widgets on server:", err);
+              message.error("Failed to update migrated widgets on server.");
             });
   
           return cleanedWidgets;
         });
-        console.log('Migration from chartIndex to associatedRange completed.');
+        console.log("Migration from chartIndex to associatedRange completed.");
       });
     } catch (error) {
-      console.error('Error migrating widgets:', error);
-      message.error('Failed to migrate widgets to use associatedRange.');
+      console.error("Error migrating widgets:", error);
+      message.error("Failed to migrate widgets to use associatedRange.");
     }
   };
   const promptUserToSelectWorksheetAndRange = async (): Promise<{ worksheetName: string; associatedRange: string }> => {
     return {
-      worksheetName: 'Sheet1',
-      associatedRange: 'A1:B4',
+      worksheetName: "Sheet1",
+      associatedRange: "A1:B4",
     };
   };
   const importChartImageFromExcel = async () => {
     if (!currentDashboardId || !currentDashboard) {
-      console.warn('No current dashboard ID or dashboard available.');
+      console.warn("No current dashboard ID or dashboard available.");
       return;
     }
     try {
       await Excel.run(async (context: Excel.RequestContext) => {
         const sheet = context.workbook.worksheets.getActiveWorksheet();
         const charts = sheet.charts;
-        charts.load('items');
+        charts.load("items");
         await context.sync();
         if (charts.items.length > 0) {
           const imagePromises = charts.items.map(async (chart) => {
@@ -1661,15 +1693,15 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           });
           const imageResults = await Promise.all(imagePromises);
           setWidgets((prevWidgets: Widget[]) => {
-            const nonImageWidgets = prevWidgets.filter((widget: Widget) => widget.type !== 'image');
-            let imageWidgets = prevWidgets.filter((widget: Widget) => widget.type === 'image');
+            const nonImageWidgets = prevWidgets.filter((widget: Widget) => widget.type !== "image");
+            let imageWidgets = prevWidgets.filter((widget: Widget) => widget.type === "image");
             imageResults.forEach((base64Image, index) => {
               if (imageWidgets[index]) {
                 imageWidgets[index].data.src = `data:image/png;base64,${base64Image}`;
               } else {
                 imageWidgets.push({
                   id: `image-${uuidv4()}`,
-                  type: 'image',
+                  type: "image",
                   data: { src: `data:image/png;base64,${base64Image}` },
                 });
               }
@@ -1682,22 +1714,22 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
             };
             axios.put(`/api/dashboards/${currentDashboardId}`, updatedDashboard)
               .then(() => {
-                message.success('All chart images imported and updated successfully.');
+                message.success("All chart images imported and updated successfully.");
               })
               .catch((err) => {
-                console.error('Error updating widgets on server:', err);
-                message.error('Failed to update widgets with imported images on server.');
+                console.error("Error updating widgets on server:", err);
+                message.error("Failed to update widgets with imported images on server.");
               });
   
             return updatedWidgets;
           });
         } else {
-          message.warning('No charts found on the active worksheet.');
+          message.warning("No charts found on the active worksheet.");
         }
       });
     } catch (error) {
-      console.error('Error importing chart image from Excel:', error);
-      message.error('Failed to import chart image from Excel.');
+      console.error("Error importing chart image from Excel:", error);
+      message.error("Failed to import chart image from Excel.");
     }
   };
   const copyWidget = useCallback(
@@ -1710,7 +1742,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         zIndex: anotherNewZIndex,
       };
       addWidgetFunc(widget.type, newWidget.data);
-      message.success('Widget copied!');
+      message.success("Widget copied!");
     },
     [addWidgetFunc, widgets]
   );
@@ -1723,8 +1755,8 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     try {
       const cellRange = sheet.getRange(cellAddress);
       const selectedRange = sheet.getRange(rangeAddress);
-      cellRange.load(['rowIndex', 'columnIndex']);
-      selectedRange.load(['rowIndex', 'columnIndex', 'rowCount', 'columnCount']);
+      cellRange.load(["rowIndex", "columnIndex"]);
+      selectedRange.load(["rowIndex", "columnIndex", "rowCount", "columnCount"]);
       await context.sync();
       const cellRow = cellRange.rowIndex;
       const cellColumn = cellRange.columnIndex;
@@ -1739,7 +1771,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         cellColumn <= rangeEndColumn
       );
     } catch (error) {
-      console.error('Error checking if cell is within range:', error);
+      console.error("Error checking if cell is within range:", error);
       return false;
     }
   };
@@ -2028,8 +2060,8 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
             await axios.put(`/api/dashboards/${currentDashboard.id}`, updatedDashboard);
             message.success("Charts and metrics have been refreshed and saved successfully.");
           } catch (err) {
-            console.error('Error updating dashboard on server:', err);
-            message.error('Failed to update dashboard on server.');
+            console.error("Error updating dashboard on server:", err);
+            message.error("Failed to update dashboard on server.");
           }
           setCurrentDashboard(updatedDashboard);
           const updatedDashboards = dashboards.map((d) =>
@@ -2050,8 +2082,8 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     }
   }, [widgets, setWidgets, importChartImageFromExcel, updateWidgetFunc, addWidgetFunc, currentDashboard, currentWorkbookId]);
   const getRandomColor = () => {
-    const letters = '0123456789ABCDEF';
-    let color = '#';
+    const letters = "0123456789ABCDEF";
+    let color = "#";
     for (let i = 0; i < 6; i++) {
       color += letters[Math.floor(Math.random() * 16)];
     }
@@ -2059,7 +2091,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
   };
 
   async function refreshTableWidgetData(widgetId: string) {
-    const widget = widgets.find(w => w.id === widgetId && w.type === 'table');
+    const widget = widgets.find(w => w.id === widgetId && w.type === "table");
     if (!widget) {
       message.error(`No table widget found with ID: ${widgetId}`);
       return;
@@ -2067,7 +2099,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     const tableData = widget.data as TableData;
     const { sheetName, tableName } = tableData;
     if (!sheetName || !tableName) {
-      message.error('Sheet name or table name is missing on this widget.');
+      message.error("Sheet name or table name is missing on this widget.");
       return;
     }
     try {
@@ -2075,11 +2107,11 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         const sheet = context.workbook.worksheets.getItem(sheetName);
         const table = sheet.tables.getItem(tableName);
         const range = table.getRange();
-        range.load(['values']);
+        range.load(["values"]);
         await context.sync();
         const values = range.values;
         if (!values || values.length < 2) {
-          message.warning('The selected table does not contain enough data.');
+          message.warning("The selected table does not contain enough data.");
           return;
         }
         const headers = values[0] as string[];
@@ -2098,7 +2130,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         });
         updateWidgetsWithHistory(prevWidgets =>
           prevWidgets.map((w) => {
-            if (w.id === widgetId && w.type === 'table') {
+            if (w.id === widgetId && w.type === "table") {
               return {
                 ...w,
                 data: {
@@ -2113,11 +2145,11 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         );
       });
     } catch (error:any) {
-      if (error.code === 'InvalidOperationInCellEditMode') {
-        message.error('Excel is in cell-editing mode. Please press Enter or Esc...');
+      if (error.code === "InvalidOperationInCellEditMode") {
+        message.error("Excel is in cell-editing mode. Please press Enter or Esc...");
       } else {
-        console.error('Error refreshing table data:', error);
-        message.error('Failed to refresh table data.');
+        console.error("Error refreshing table data:", error);
+        message.error("Failed to refresh table data.");
       }
     }
   }
@@ -2162,59 +2194,59 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
   }
   const readDataFromExcel = async () => {
     if (!currentDashboard || !currentDashboard.workbookId) {
-      message.error('No dashboard or workbook ID found.');
+      message.error("No dashboard or workbook ID found.");
       return;
     }
     if (currentWorkbookId !== currentDashboard.workbookId) {
-      message.warning('This dashboard is not associated with the currently open workbook.');
+      message.warning("This dashboard is not associated with the currently open workbook.");
       return;
     }
     try {
       await Excel.run(async (context: Excel.RequestContext) => {
         const sheet = context.workbook.worksheets.getActiveWorksheet();
         const range = sheet.getUsedRange();
-        range.load(['address', 'values']);
+        range.load(["address", "values"]);
         await context.sync();
         const data: any[][] = range.values;
         if (data.length > 1) {
           const labels = data.slice(1).map((row: any[]) => row[0].toString());
           const values = data.slice(1).map((row: any[]) => Number(row[1]));
           const charts = sheet.charts;
-          charts.load('items');
+          charts.load("items");
           await context.sync();
           if (charts.items.length === 0) {
-            message.warning('No charts found to associate with the imported data.');
+            message.warning("No charts found to associate with the imported data.");
             return;
           }
           const chart = charts.items[0];
           const dataRange = chart.getDataBodyRange();
-          dataRange.load('address');
+          dataRange.load("address");
           await context.sync();
           const associatedRange = dataRange.address.toLowerCase();
           const chartData: ChartData = {
-            type: 'bar',
-            title: 'Imported Data',
+            type: "bar",
+            title: "Imported Data",
             labels,
             datasets: [
               {
-                label: 'Data from Excel',
+                label: "Data from Excel",
                 data: values,
-                backgroundColor: '#4caf50',
+                backgroundColor: "#4caf50",
               },
             ],
-            titleAlignment: 'left',
+            titleAlignment: "left",
             associatedRange: associatedRange,
             worksheetName: sheet.name,
           };
-          addWidgetFunc('chart', chartData);
-          message.success('Data imported from Excel successfully.');
+          addWidgetFunc("chart", chartData);
+          message.success("Data imported from Excel successfully.");
         } else {
-          message.warning('No data found in the active worksheet.');
+          message.warning("No data found in the active worksheet.");
         }
       });
     } catch (error) {
-      console.error('Error reading data from Excel:', error);
-      message.error('Failed to read data from Excel.');
+      console.error("Error reading data from Excel:", error);
+      message.error("Failed to read data from Excel.");
     }
   };
   const readGanttDataFromExcel = async () => {
@@ -2222,33 +2254,33 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       `[DashboardProvider] readGanttDataFromExcel => currentDashboardId: ${currentDashboardId}, currentWorkbookId: ${currentWorkbookId}`
     );
     if (!currentDashboardId) {
-      console.warn('No current dashboard ID found. Will not save changes to server, but will update local state.');
+      console.warn("No current dashboard ID found. Will not save changes to server, but will update local state.");
     }
     if (!currentWorkbookId) {
-      console.warn('No workbook ID found. Proceeding without blocking...');
+      console.warn("No workbook ID found. Proceeding without blocking...");
     }
     try {
       await Excel.run(async (context: Excel.RequestContext) => {
-        const sheet = context.workbook.worksheets.getItem('Gantt');
-        sheet.load('name');
+        const sheet = context.workbook.worksheets.getItem("Gantt");
+        sheet.load("name");
         await context.sync();
-        if (sheet.name !== 'Gantt') {
-          console.log('Not on Gantt sheet. Exiting readGanttDataFromExcel.');
+        if (sheet.name !== "Gantt") {
+          console.log("Not on Gantt sheet. Exiting readGanttDataFromExcel.");
           return;
         }
-        const table = sheet.tables.getItemOrNullObject('GanttTable');
-        table.load(['name', 'dataBodyRange']);
+        const table = sheet.tables.getItemOrNullObject("GanttTable");
+        table.load(["name", "dataBodyRange"]);
         await context.sync();
         if (table.isNullObject) {
-          message.warning('GanttTable not found on the Gantt worksheet.');
+          message.warning("GanttTable not found on the Gantt worksheet.");
           return;
         }
         const dataBodyRange = table.getDataBodyRange();
-        dataBodyRange.load('values');
+        dataBodyRange.load("values");
         await context.sync();
         const data: any[][] = dataBodyRange.values;
         if (!data || data.length === 0) {
-          message.warning('No Gantt data found in the GanttTable.');
+          message.warning("No Gantt data found in the GanttTable.");
           return;
         }
         const tasks: Task[] = data
@@ -2257,13 +2289,13 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
             const taskType: string = row[1];
             const startSerial: number = row[2];
             const endSerial: number = row[3];
-            const completedSerial: number | '' = row[4];
+            const completedSerial: number | "" = row[4];
             const progress: number = row[7];
             const dependenciesRaw: string = row[8];
             if (
-              typeof startSerial !== 'number' ||
-              typeof endSerial !== 'number' ||
-              (completedSerial !== '' && typeof completedSerial !== 'number')
+              typeof startSerial !== "number" ||
+              typeof endSerial !== "number" ||
+              (completedSerial !== "" && typeof completedSerial !== "number")
             ) {
               console.warn(`Invalid serial numbers for task: ${taskName}, row`);
               return null;
@@ -2271,24 +2303,24 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
             const startDate = excelSerialToDateString(startSerial);
             const endDate = excelSerialToDateString(endSerial);
             const completedDate =
-              completedSerial !== '' ? excelSerialToDateString(completedSerial) : undefined;
+              completedSerial !== "" ? excelSerialToDateString(completedSerial) : undefined;
             const dependencies: string = dependenciesRaw
               ? dependenciesRaw
                   .toString()
-                  .split(',')
-                  .map((dep: string) => `task-${dep.trim().replace(/\s+/g, '-')}`)
-                  .join(',')
-              : '';
+                  .split(",")
+                  .map((dep: string) => `task-${dep.trim().replace(/\s+/g, "-")}`)
+                  .join(",")
+              : "";
             let color: string;
             if (progress > 75) {
-              color = '#00FF00';
+              color = "#00FF00";
             } else if (progress > 50) {
-              color = '#FFFF00';
+              color = "#FFFF00";
             } else {
-              color = '#FF0000';
+              color = "#FF0000";
             }
             return {
-              id: `task-${taskName.replace(/\s+/g, '-')}`,
+              id: `task-${taskName.replace(/\s+/g, "-")}`,
               name: taskName,
               type: taskType.toLowerCase(),
               start: startDate,
@@ -2300,12 +2332,12 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           })
           .filter((task): task is Task => task !== null);
         setWidgets((prevWidgets: Widget[]) => {
-          const ganttWidget = prevWidgets.find((widget) => widget.type === 'gantt');
+          const ganttWidget = prevWidgets.find((widget) => widget.type === "gantt");
           let updatedWidgets: Widget[];
           if (ganttWidget) {
             updatedWidgets = prevWidgets.map((widget: Widget) => {
               if (widget.id !== ganttWidget.id) return widget;
-              if (widget.type === 'gantt') {
+              if (widget.type === "gantt") {
                 return {
                   ...widget,
                   data: {
@@ -2321,11 +2353,11 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           } else {
             const newGanttWidget: Widget = {
               id: `gantt-${uuidv4()}`,
-              type: 'gantt',
+              type: "gantt",
               data: {
                 tasks,
-                title: 'Gantt Chart',
-                titleAlignment: 'left',
+                title: "Gantt Chart",
+                titleAlignment: "left",
               } as GanttWidgetData,
             };
             updatedWidgets = [...prevWidgets, newGanttWidget];
@@ -2340,17 +2372,17 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           };
           try {
             await axios.put(`/api/dashboards/${currentDashboard.id}`, updatedDashboard);
-            message.success('Gantt chart data loaded from Excel and saved successfully.');
+            message.success("Gantt chart data loaded from Excel and saved successfully.");
           } catch (err) {
-            console.error('Error updating dashboard on server:', err);
-            message.error('Failed to update dashboard on server.');
+            console.error("Error updating dashboard on server:", err);
+            message.error("Failed to update dashboard on server.");
           }
           setCurrentDashboard(updatedDashboard);
         }
       });
     } catch (error) {
-      console.error('Error reading Gantt data from Excel:', error);
-      message.error('Failed to read Gantt data from Excel.');
+      console.error("Error reading Gantt data from Excel:", error);
+      message.error("Failed to read Gantt data from Excel.");
     } finally {
       isReadGanttDataInProgress.current = false;
     }
@@ -2363,12 +2395,12 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         return;
       }
       if (currentWorkbookId.toLowerCase() !== currentDashboard.workbookId.toLowerCase()) {
-        console.warn('Current workbook does not match the dashboard workbook. Skipping event handler setup.');
+        console.warn("Current workbook does not match the dashboard workbook. Skipping event handler setup.");
         return;
       }
       await Excel.run(async (context) => {
         for (const widget of widgets) {
-          if (widget.type === 'metric') {
+          if (widget.type === "metric") {
             if (registeredWidgets.has(widget.id)) {
               continue;
             }
@@ -2379,14 +2411,14 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
               continue;
             }
             const sheet = context.workbook.worksheets.getItemOrNullObject(metricData.worksheetName);
-            sheet.load('name');
+            sheet.load("name");
             await context.sync();
             if (sheet.isNullObject) {
               console.warn(`Worksheet ${metricData.worksheetName} not found.`);
               continue;
             }
             const range = sheet.getRange(metricData.cellAddress);
-            range.load('address');
+            range.load("address");
             await context.sync();
             const eventHandler = async (event: Excel.WorksheetChangedEventArgs) => {
               if (event.address.toLowerCase() === range.address.toLowerCase()) {
@@ -2399,7 +2431,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           }
         }
       }).catch((error) => {
-        console.error('Error setting up event handlers:', error);
+        console.error("Error setting up event handlers:", error);
       });
     };
     setupMetricEventHandlers();
@@ -2412,41 +2444,41 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
   }, [widgets, currentDashboardId, currentWorkbookId]); 
   useEffect(() => {
     const setupGanttEventHandlers = async () => {
-      console.log('[setupGanttEventHandlers] Checking preconditions...');
+      console.log("[setupGanttEventHandlers] Checking preconditions...");
       if (!currentDashboard || !currentDashboard.workbookId || !currentWorkbookId) {
-        console.log('[setupGanttEventHandlers] Missing currentDashboard or workbookId. Skipping...');
+        console.log("[setupGanttEventHandlers] Missing currentDashboard or workbookId. Skipping...");
         return;
       }
       if (currentWorkbookId.toLowerCase() !== currentDashboard.workbookId.toLowerCase()) {
-        console.warn('[setupGanttEventHandlers] Workbook mismatch. Skipping...');
+        console.warn("[setupGanttEventHandlers] Workbook mismatch. Skipping...");
         return;
       }
       if (isGanttHandlerRegistered.current) {
-        console.log('[setupGanttEventHandlers] Gantt handler already registered...');
+        console.log("[setupGanttEventHandlers] Gantt handler already registered...");
         return;
       }
       try {
         await Excel.run(async (context: Excel.RequestContext) => {
-          console.log('[setupGanttEventHandlers] Starting Excel.run...');
-          const sheet = context.workbook.worksheets.getItemOrNullObject('Gantt');
-          sheet.load('name');
+          console.log("[setupGanttEventHandlers] Starting Excel.run...");
+          const sheet = context.workbook.worksheets.getItemOrNullObject("Gantt");
+          sheet.load("name");
           await context.sync();
           if (sheet.isNullObject) {
-            console.warn('[setupGanttEventHandlers] "Gantt" worksheet not found. Aborting...');
+            console.warn("[setupGanttEventHandlers] Gantt worksheet not found. Aborting...");
             return;
           }
-          console.log('[setupGanttEventHandlers] Found "Gantt" worksheet. Adding onChanged event...');
+          console.log("[setupGanttEventHandlers] Found Gantt worksheet. Adding onChanged event...");
           const eventHandler = async (event: Excel.WorksheetChangedEventArgs) => {
-            console.log('[setupGanttEventHandlers] Gantt onChanged event fired!', event.address);
+            console.log("[setupGanttEventHandlers] Gantt onChanged event fired!", event.address);
             await readGanttDataFromExcel(); 
           };
           sheet.onChanged.add(eventHandler);
           ganttEventHandlersRef.current.push(eventHandler);
           isGanttHandlerRegistered.current = true;
-          console.log('[setupGanttEventHandlers] Gantt event handler successfully set up.');
+          console.log("[setupGanttEventHandlers] Gantt event handler successfully set up.");
         });
       } catch (error) {
-        console.error('[setupGanttEventHandlers] Error setting up Gantt event handlers:', error);
+        console.error("[setupGanttEventHandlers] Error setting up Gantt event handlers:", error);
       }
     };
     setupGanttEventHandlers();
@@ -2454,23 +2486,23 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       const removeGanttEventHandlers = async () => {
         try {
           await Excel.run(async (context: Excel.RequestContext) => {
-            const sheet = context.workbook.worksheets.getItemOrNullObject('Gantt');
-            sheet.load('name');
+            const sheet = context.workbook.worksheets.getItemOrNullObject("Gantt");
+            sheet.load("name");
             await context.sync();
             if (sheet.isNullObject) {
-              console.warn('[setupGanttEventHandlers] Cleanup: "Gantt" sheet not found.');
+              console.warn("[setupGanttEventHandlers] Cleanup: Gantt sheet not found.");
               return;
             }
-            console.log('[setupGanttEventHandlers] Cleanup: removing onChanged handlers...');
+            console.log("[setupGanttEventHandlers] Cleanup: removing onChanged handlers...");
             ganttEventHandlersRef.current.forEach(handler => {
               sheet.onChanged.remove(handler);
             });
             ganttEventHandlersRef.current = [];
             isGanttHandlerRegistered.current = false;
-            console.log('[setupGanttEventHandlers] Cleanup: all Gantt event handlers removed.');
+            console.log("[setupGanttEventHandlers] Cleanup: all Gantt event handlers removed.");
           });
         } catch (error) {
-          console.error('[setupGanttEventHandlers] Cleanup: Error removing Gantt handlers:', error);
+          console.error("[setupGanttEventHandlers] Cleanup: Error removing Gantt handlers:", error);
         }
       };
       removeGanttEventHandlers();
@@ -2489,23 +2521,23 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
     console.log(`[DashboardProvider] addTaskToGantt => ID: ${currentDashboardId}, workbookId: ${currentWorkbookId}`);
 
     if (!currentWorkbookId) {
-      message.error('No workbook ID found. Please open or re-open the correct workbook.');
+      message.error("No workbook ID found. Please open or re-open the correct workbook.");
       return;
     }
     if (!currentDashboardId) {
       console.warn(
-        'No current dashboard ID found. The task will be added locally and to Excel, but not saved to server yet.'
+        "No current dashboard ID found. The task will be added locally and to Excel, but not saved to server yet."
       );
     }
     if (!newTask.name || !newTask.type || !newTask.start || !newTask.end) {
-      message.error('Task is missing required fields.');
+      message.error("Task is missing required fields.");
       return;
     }
     try {
       let updatedWidgets: Widget[] = [];
       setWidgets((prevWidgets: Widget[]) => {
         updatedWidgets = prevWidgets.map((widget: Widget) => {
-          if (widget.type === 'gantt') {
+          if (widget.type === "gantt") {
             const ganttData = widget.data as GanttWidgetData;
             return {
               ...widget,
@@ -2517,15 +2549,15 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
           }
           return widget;
         });
-        const ganttExists = updatedWidgets.some((w) => w.type === 'gantt');
+        const ganttExists = updatedWidgets.some((w) => w.type === "gantt");
         if (!ganttExists) {
           const newGanttWidget: Widget = {
             id: `gantt-${uuidv4()}`,
-            type: 'gantt',
+            type: "gantt",
             data: {
               tasks: [newTask],
-              title: 'Gantt Chart',
-              titleAlignment: 'left',
+              title: "Gantt Chart",
+              titleAlignment: "left",
             },
           };
           updatedWidgets.push(newGanttWidget);
@@ -2534,38 +2566,38 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         return updatedWidgets;
       });
       await Excel.run(async (context) => {
-        const sheet = context.workbook.worksheets.getItemOrNullObject('Gantt');
-        sheet.load('name');
+        const sheet = context.workbook.worksheets.getItemOrNullObject("Gantt");
+        sheet.load("name");
         await context.sync();
         if (sheet.isNullObject) {
-          message.error('Gantt sheet not found. Make sure you inserted the template first.');
+          message.error("Gantt sheet not found. Make sure you inserted the template first.");
           return;
         }
-        const table = sheet.tables.getItemOrNullObject('GanttTable');
-        table.load(['name']);
+        const table = sheet.tables.getItemOrNullObject("GanttTable");
+        table.load(["name"]);
         await context.sync();
         if (table.isNullObject) {
-          message.error('GanttTable not found in the Gantt worksheet.');
+          message.error("GanttTable not found in the Gantt worksheet.");
           return;
         }
-        let dependenciesValue = '';
+        let dependenciesValue = "";
         if (Array.isArray(newTask.dependencies)) {
-          dependenciesValue = newTask.dependencies.join(', ');
-        } else if (typeof newTask.dependencies === 'string') {
+          dependenciesValue = newTask.dependencies.join(", ");
+        } else if (typeof newTask.dependencies === "string") {
           dependenciesValue = newTask.dependencies;
         }
-        const durationValue = newTask.duration ?? '';
+        const durationValue = newTask.duration ?? "";
         const capitalizedType = newTask.type
           ? newTask.type.charAt(0).toUpperCase() + newTask.type.slice(1)
-          : 'Task';
+          : "Task";
         const rowData: (string | number | boolean)[] = [
           newTask.name,
           capitalizedType,
           newTask.start,
           newTask.end,
-          newTask.completed ?? '',
+          newTask.completed ?? "",
           durationValue,
-          '',
+          "",
           newTask.progress || 0,
           dependenciesValue,
         ];
@@ -2579,19 +2611,19 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         };
         try {
           await axios.put(`/api/dashboards/${currentDashboard.id}`, updatedDashboard);
-          message.success('Task added successfully and synced to Excel and server!');
+          message.success("Task added successfully and synced to Excel and server!");
         } catch (err) {
-          console.error('Error updating dashboard on server:', err);
-          message.error('Failed to update dashboard on server.');
+          console.error("Error updating dashboard on server:", err);
+          message.error("Failed to update dashboard on server.");
         }
         setCurrentDashboard(updatedDashboard);
       }
     } catch (error) {
-      console.error('Error adding task to Gantt widget and Excel:', error);
+      console.error("Error adding task to Gantt widget and Excel:", error);
       if (error instanceof OfficeExtension.Error) {
         message.error(`Office.js Error: ${error.code} - ${error.message}`);
       } else {
-        message.error('Failed to add task to Gantt widget and Excel.');
+        message.error("Failed to add task to Gantt widget and Excel.");
       }
     }
   };
@@ -2608,17 +2640,17 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       console.log(`Updating metric value for widget ID: ${widgetId}`);
       await Excel.run(async (context) => {
         const widgetIndex = widgets.findIndex((w) => w.id === widgetId);
-        if (widgetIndex !== -1 && widgets[widgetIndex].type === 'metric') {
+        if (widgetIndex !== -1 && widgets[widgetIndex].type === "metric") {
           const metricData = widgets[widgetIndex].data as MetricData;
           if (!isValidCellAddress(metricData.cellAddress)) {
             console.warn(`Invalid cell address for widget ${widgetId}: ${metricData.cellAddress}`);
-            message.error('Invalid cell address specified for the metric widget.');
+            message.error("Invalid cell address specified for the metric widget.");
             return; 
           }
           console.log(`Fetching value from ${metricData.worksheetName}!${metricData.cellAddress}`);
           const sheet = context.workbook.worksheets.getItem(metricData.worksheetName);
           const range = sheet.getRange(metricData.cellAddress);
-          range.load('values');
+          range.load("values");
           await context.sync();
           const cellValue = range.values[0][0];
           console.log(`Retrieved cell value: ${cellValue}`); 
@@ -2630,12 +2662,12 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
             return;
           }
           if (metricData.currentValue === newValue) {
-            console.log('Metric value has not changed, skipping update.');
+            console.log("Metric value has not changed, skipping update.");
             return;
           }
           updateWidgetsWithHistory((prevWidgets) => {
             return prevWidgets.map((widget) => {
-              if (widget.id === widgetId && widget.type === 'metric') {
+              if (widget.id === widgetId && widget.type === "metric") {
                 return {
                   ...widget,
                   data: {
@@ -2652,14 +2684,14 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
         }
       });
     } catch (error) {
-      console.error('Error updating metric value:', error);
-      message.error('Failed to update metric value. Please ensure the cell address is valid.');
+      console.error("Error updating metric value:", error);
+      message.error("Failed to update metric value. Please ensure the cell address is valid.");
     }
   };
   const exportDashboardAsPDF = async (): Promise<void> => {
-    const container = document.getElementById('dashboard-container');
+    const container = document.getElementById("dashboard-container");
     if (!container) {
-      message.error('Dashboard container not found.');
+      message.error("Dashboard container not found.");
       return;
     }
     try {
@@ -2668,25 +2700,25 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       const containerHeight = container.scrollHeight + 5;
       const canvas = await html2canvas(container, {
         useCORS: true,
-        backgroundColor: '#FFF',
+        backgroundColor: "#FFF",
         width: containerWidth,
         height: containerHeight,
         scale: 2,
       });
-      const imgData = canvas.toDataURL('image/png');
+      const imgData = canvas.toDataURL("image/png");
       const margin = 20;
       const canvasWidthPx = canvas.width;
       const canvasHeightPx = canvas.height;
-      const pdf = new jsPDF('p', 'pt', [
+      const pdf = new jsPDF("p", "pt", [
         canvasWidthPx + margin * 2,
         canvasHeightPx + margin * 2,
       ]);
-      pdf.addImage(imgData, 'PNG', margin, margin, canvasWidthPx, canvasHeightPx);
-      pdf.save('dashboard.pdf');
-      message.success('Dashboard exported as PDF successfully!');
+      pdf.addImage(imgData, "PNG", margin, margin, canvasWidthPx, canvasHeightPx);
+      pdf.save("dashboard.pdf");
+      message.success("Dashboard exported as PDF successfully!");
     } catch (error) {
-      console.error('Error exporting dashboard as PDF:', error);
-      message.error('Failed to export dashboard as PDF.');
+      console.error("Error exporting dashboard as PDF:", error);
+      message.error("Failed to export dashboard as PDF.");
     }
   };
   const emailDashboard = () => {
@@ -2694,49 +2726,49 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       .then(() => {
         const mailtoLink = `mailto:?subject=Dashboard&body=Please find the attached dashboard.`;
         window.location.href = mailtoLink;
-        message.info('Please attach the downloaded PDF to your email.');
+        message.info("Please attach the downloaded PDF to your email.");
       })
       .catch((error) => {
-        console.error('Error exporting dashboard as PDF:', error);
-        message.error('Failed to export dashboard as PDF.');
+        console.error("Error exporting dashboard as PDF:", error);
+        message.error("Failed to export dashboard as PDF.");
       });
   };
   const applyDataValidation = async () => {
     try {
       await Excel.run(async (context: Excel.RequestContext) => {
         const sheet = context.workbook.worksheets.getActiveWorksheet();
-        const taskTypeRange = sheet.getRange('B2:B100'); 
-        const dependenciesRange = sheet.getRange('I2:I100'); 
-        const taskTypeOptions = ['Task', 'Milestone', 'Project'];
-        const taskTypeValues = taskTypeOptions.join(','); 
+        const taskTypeRange = sheet.getRange("B2:B100"); 
+        const dependenciesRange = sheet.getRange("I2:I100"); 
+        const taskTypeOptions = ["Task", "Milestone", "Project"];
+        const taskTypeValues = taskTypeOptions.join(","); 
         applyListDataValidation(
           taskTypeRange,
           taskTypeValues,
-          `Please select a valid Task Type: ${taskTypeOptions.join(', ')}`,
-          'Invalid Task Type',
-          'Select a Task Type from the dropdown.',
-          'Task Type'
+          `Please select a valid Task Type: ${taskTypeOptions.join(", ")}`,
+          "Invalid Task Type",
+          "Select a Task Type from the dropdown.",
+          "Task Type"
         );
-        console.log('Data validation applied to Task Type column');
+        console.log("Data validation applied to Task Type column");
         applyListDataValidation(
           dependenciesRange,
-          '=TaskNames',
-          'Please select a valid Task Name from the dropdown.',
-          'Invalid Dependency',
-          'Select a Task Name from the dropdown.',
-          'Dependencies'
+          "=TaskNames",
+          "Please select a valid Task Name from the dropdown.",
+          "Invalid Dependency",
+          "Select a Task Name from the dropdown.",
+          "Dependencies"
         );
-        console.log('Data validation applied to Dependencies column');
+        console.log("Data validation applied to Dependencies column");
         await context.sync();
-        message.success('Data validation applied successfully!');
+        message.success("Data validation applied successfully!");
       });
     } catch (error) {
       if (error instanceof OfficeExtension.Error) {
         console.error(`Office.js Error: ${error.code} - ${error.message}`);
       } else {
-        console.error('Unexpected Error:', error);
+        console.error("Unexpected Error:", error);
       }
-      message.error('Failed to apply data validation.');
+      message.error("Failed to apply data validation.");
     }
   };
   return (
@@ -2801,7 +2833,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       }}
     >
       {children}
-    {widgetToPrompt && widgetToPrompt.widget.type !== 'table' && (
+    {widgetToPrompt && widgetToPrompt.widget.type !== "table" && (
       <PromptWidgetDetailsModal
         widget={widgetToPrompt.widget}
         onComplete={(updatedWidget) => {
@@ -2811,7 +2843,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children, 
       />
     )}
     <SelectTableModal
-      visible={isSelectTableModalVisible && widgetToPrompt?.widget.type === 'table'}
+      visible={isSelectTableModalVisible && widgetToPrompt?.widget.type === "table"}
       widget={widgetToPrompt?.widget as TableWidget}
       onComplete={(updatedWidget: TableWidget) => {
         handleWidgetDetailsComplete(updatedWidget);

@@ -9,7 +9,6 @@ import {
   BarController,
   PointElement,
   ArcElement,
-  Title,
   Tooltip,
   Legend,
   Filler,

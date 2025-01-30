@@ -1,18 +1,18 @@
 // src/taskpane/components/types.ts
 
-import { ColumnType } from 'antd/lib/table/interface';
-import { TdHTMLAttributes } from 'react';
-import { ChartType, ChartOptions, LegendOptions, TooltipOptions, ChartDataset, DefaultDataPoint } from 'chart.js';
-import { Layout } from 'react-grid-layout';
+import { ColumnType } from "antd/lib/table/interface";
+import { TdHTMLAttributes } from "react";
+import { ChartType, ChartDataset } from "chart.js";
+import { Layout } from "react-grid-layout";
 
-export type WidgetType = 'title' | 'text' | 'chart' | 'gantt' | 'image' | 'metric' | 'table' | 'line';
+export type WidgetType = "title" | "text" | "chart" | "gantt" | "image" | "metric" | "table" | "line";
 
 export interface TitleWidgetData {
   content: string;
   fontSize: number;
   textColor: string;
   backgroundColor: string;
-  titleAlignment: 'left' | 'center' | 'right';
+  titleAlignment: "left" | "center" | "right";
 }
 
 export interface WidgetBase {
@@ -22,50 +22,50 @@ export interface WidgetBase {
 }
 
 export interface TextWidget extends WidgetBase {
-  type: 'text';
+  type: "text";
   data: TextData;
 }
 
 export interface LineWidgetData {
   color: string;
   thickness: number;
-  style: 'solid' | 'dashed' | 'dotted';
-  orientation: 'horizontal' | 'vertical';
+  style: "solid" | "dashed" | "dotted";
+  orientation: "horizontal" | "vertical";
 }
 
 export interface ChartWidget extends WidgetBase {
-  type: 'chart';
+  type: "chart";
   data: ChartData;
 }
 
 export interface GanttWidget extends WidgetBase {
-  type: 'gantt';
+  type: "gantt";
   data: GanttWidgetData;
 }
 
 export interface ImageWidget extends WidgetBase {
-  type: 'image';
+  type: "image";
   data: ImageWidgetData;
 }
 
 export interface MetricWidget extends WidgetBase {
-  type: 'metric';
+  type: "metric";
   data: MetricData;
 }
 
 export interface TableWidget extends WidgetBase {
-  type: 'table';
+  type: "table";
   name: string;
   data: TableData;
 }
 
 export interface LineWidget extends WidgetBase {
-  type: 'line';
+  type: "line";
   data: LineWidgetData;
 }
 
 export interface TitleWidget extends WidgetBase {
-  type: 'title';
+  type: "title";
   data: TitleWidgetData;
 }
 
@@ -81,28 +81,28 @@ export type Widget =
 
 
 export type WidgetData<T extends WidgetType> =
-  T extends 'title' ? TitleWidgetData :
-  T extends 'text' ? TextData :
-  T extends 'chart' ? ChartData :
-  T extends 'gantt' ? GanttWidgetData :
-  T extends 'image' ? ImageWidgetData :
-  T extends 'metric' ? MetricData :
-  T extends 'table' ? TableData :
-  T extends 'line' ? LineWidgetData :
+  T extends "title" ? TitleWidgetData :
+  T extends "text" ? TextData :
+  T extends "chart" ? ChartData :
+  T extends "gantt" ? GanttWidgetData :
+  T extends "image" ? ImageWidgetData :
+  T extends "metric" ? MetricData :
+  T extends "table" ? TableData :
+  T extends "line" ? LineWidgetData :
   never;
 
 export interface MetricData {
   worksheetName: string;
   cellAddress: string;
   targetValue: number;
-  comparison: 'greater' | 'less';
+  comparison: "greater" | "less";
   displayName: string;
-  format: 'percentage' | 'currency' | 'number';
+  format: "percentage" | "currency" | "number";
   currentValue: number;
   fontSize: number;
   textColor: string;
   backgroundColor: string;
-  titleAlignment: 'left' | 'center'| 'right';
+  titleAlignment: "left" | "center"| "right";
 }
 
 export interface TableItem {
@@ -112,7 +112,7 @@ export interface TableItem {
   workbookId: string;
 }
 
-export interface TableColumn<T> extends Omit<ColumnType<T>, 'title'> {
+export interface TableColumn<T> extends Omit<ColumnType<T>, "title"> {
   dataIndex: string;
   key: string | number;
   title: string;
@@ -134,7 +134,7 @@ export interface TextData {
   fontSize: number;
   textColor: string;
   backgroundColor: string;
-  titleAlignment: 'left' | 'center' | 'right';
+  titleAlignment: "left" | "center" | "right";
 }
 
 export interface Task {
@@ -155,35 +155,35 @@ export interface Task {
 export interface GanttWidgetData {
   tasks: Task[];
   title: string;
-  titleAlignment?: 'left' | 'center' | 'right';
+  titleAlignment?: "left" | "center" | "right";
   arrowColor?: string;
   defaultProgressColor?: string;
 }
 
 export interface ChartData {
   title?: string;
-  titleAlignment?: 'left' | 'center' | 'right';
+  titleAlignment?: "left" | "center" | "right";
   type: ChartType;
   labels: string[];
   scales?: {
     x?: {
-      type?: 'category' | 'linear' | 'logarithmic'| 'time';
+      type?: "category" | "linear" | "logarithmic"| "time";
       title?: {
         display?: boolean;
         text?: string;
       };
     };
     y?: {
-      type?: 'category' | 'linear' | 'logarithmic';
+      type?: "category" | "linear" | "logarithmic";
       title?: {
         display?: boolean;
         text?: string;
       };
     };
     y1?: {
-      type?: 'category' | 'linear' | 'logarithmic';
+      type?: "category" | "linear" | "logarithmic";
       display?: boolean;
-      position?: 'left' | 'right';
+      position?: "left" | "right";
       title?: {
         display?: boolean;
         text?: string;
@@ -193,7 +193,7 @@ export interface ChartData {
   plugins?: {
     legend?: {
       display?: boolean;
-      position?: 'top' | 'left' | 'bottom' | 'right';
+      position?: "top" | "left" | "bottom" | "right";
     };
     tooltip?: {
       enabled?: boolean;
@@ -209,7 +209,7 @@ export interface ChartData {
   associatedRange: string;
   worksheetName: string;
   chartIndex?: number;
-  datasets: ChartDataset<'line'>[];
+  datasets: ChartDataset<"line">[];
   dynamicUpdate?: {
     enabled?: boolean;
     interval?: number;
@@ -225,7 +225,7 @@ export interface DashboardBorderSettings {
   showBorder: boolean;
   color: string;
   thickness: number;
-  style: 'solid' | 'dashed' | 'dotted';
+  style: "solid" | "dashed" | "dotted";
   backgroundColor?: string;
   width?: number;
 }
@@ -238,7 +238,7 @@ export { ChartType, ChartDataset };
 export type ComponentData = TextData | ChartData | GanttWidgetData;
 export interface DashboardComponent {
   id: string;
-  type: 'gantt' | 'chart' | 'text' | 'image'| 'metric' | 'table' | 'line';
+  type: "gantt" | "chart" | "text" | "image"| "metric" | "table" | "line";
   data: WidgetData<WidgetType>;
 }
 export type GridLayoutItem = Layout;
@@ -249,7 +249,7 @@ export interface NewDashboard {
   versions?: DashboardVersion[];
   workbookId: string;
 }
-export interface DashboardItem extends Omit<NewDashboard, 'title' | 'components' | 'layouts'> {
+export interface DashboardItem extends Omit<NewDashboard, "title" | "components" | "layouts"> {
   id: string;
   title: string;
   components: Widget[];

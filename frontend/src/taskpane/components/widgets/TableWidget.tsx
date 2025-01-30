@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { Button, Table, Input } from 'antd';
-import { ColumnsType } from 'antd/es/table';
-import { TableData } from '../types';
+import React, { useState, useEffect } from "react";
+import { Button, Table, Input } from "antd";
+import { ColumnsType } from "antd/es/table";
+import { TableData } from "../types";
 
 interface TableWidgetProps {
   id: string;
@@ -11,13 +11,7 @@ interface TableWidgetProps {
   onRefresh?: (id: string) => void;
 }
 
-const TableWidgetComponent: React.FC<TableWidgetProps> = ({
-  id,
-  name,
-  data,
-  onUpdateName,
-  onRefresh,
-}) => {
+const TableWidgetComponent: React.FC<TableWidgetProps> = ({ id, name, data, onUpdateName, onRefresh }) => {
   const [title, setTitle] = useState(name);
   const [isEditing, setIsEditing] = useState(false);
   useEffect(() => {
@@ -30,14 +24,14 @@ const TableWidgetComponent: React.FC<TableWidgetProps> = ({
     setIsEditing(false);
   };
   return (
-    <div style={{ width: '100%', height: '100%' }}>
+    <div style={{ width: "100%", height: "100%" }}>
       <div
         className="drag-handle"
         style={{
-          cursor: 'move',
+          cursor: "move",
           marginBottom: 8,
-          display: 'flex',
-          alignItems: 'center',
+          display: "flex",
+          alignItems: "center",
         }}
       >
         {onRefresh && (
@@ -45,7 +39,7 @@ const TableWidgetComponent: React.FC<TableWidgetProps> = ({
             Refresh
           </Button>
         )}
-        <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
+        <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
           {isEditing ? (
             <Input
               autoFocus
@@ -53,14 +47,14 @@ const TableWidgetComponent: React.FC<TableWidgetProps> = ({
               onChange={(e) => setTitle(e.target.value)}
               onBlur={handleBlur}
               onPressEnter={handleBlur}
-              style={{ width: '70%' }}
+              style={{ width: "70%" }}
             />
           ) : (
             <h3
               style={{
-                cursor: 'pointer',
+                cursor: "pointer",
                 margin: 0,
-                textAlign: 'center',
+                textAlign: "center",
               }}
               onClick={() => setIsEditing(true)}
             >
@@ -74,7 +68,7 @@ const TableWidgetComponent: React.FC<TableWidgetProps> = ({
         dataSource={data.data}
         pagination={false}
         rowKey="key"
-        style={{ width: '100%' }}
+        style={{ width: "100%" }}
       />
     </div>
   );

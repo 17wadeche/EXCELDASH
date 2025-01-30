@@ -1,26 +1,25 @@
 // src/taskpane/components/CreateDashboard.tsx
 
-import React, { useState, useContext, useEffect } from 'react';
-import {Layout, Form, Input, Button, message, Modal, Tooltip, Row, Col, Card, List, Spin, Divider, Empty, Dropdown, Menu} from 'antd';
-import { useNavigate } from 'react-router-dom';
-import { DashboardContext } from '../context/DashboardContext';
-import { DeleteOutlined, FolderAddOutlined, PlusOutlined, SettingOutlined} from '@ant-design/icons';
-import { DashboardItem, NewDashboard, TemplateItem } from './types';
-import { createCheckoutSession, checkSubscription, loginUser, registerUser, verifySubscription, checkRegistration,  unsubscribeUser, createDashboard, getTemplates, deleteTemplateById, getDashboards} from './../utils/api';
-import axios from 'axios';
-import { AuthContext } from '../context/AuthContext';
+import React, { useState, useContext, useEffect } from "react";
+import {Layout, Form, Input, Button, message, Modal, Tooltip, Row, Col, Card, List, Spin, Divider, Empty, Dropdown, Menu} from "antd";
+import { useNavigate } from "react-router-dom";
+import { DashboardContext } from "../context/DashboardContext";
+import { DeleteOutlined, FolderAddOutlined, PlusOutlined, SettingOutlined} from "@ant-design/icons";
+import { DashboardItem, NewDashboard, TemplateItem } from "./types";
+import {  unsubscribeUser, createDashboard, getTemplates, deleteTemplateById, getDashboards} from "./../utils/api";
+import axios from "axios";
+import { AuthContext } from "../context/AuthContext";
 
 const { Header, Content } = Layout;
 const { Search } = Input;
 
 const CreateDashboard: React.FC = () => {
-  const [dashboardTitle, setDashboardTitle] = useState('');
+  const [dashboardTitle, setDashboardTitle] = useState("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const navigate = useNavigate();
   const {
-    setDashboardTitle: setContextTitle,
+    setDashboardTitle:
     setWidgets,
-    setCurrentTemplateId,
     setCurrentWorkbookId,
     setCurrentDashboardId,
     currentWorkbookId,
@@ -28,54 +27,54 @@ const CreateDashboard: React.FC = () => {
     setDashboards,
   } = useContext(DashboardContext)!;
 
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [templates, setTemplates] = useState<TemplateItem[]>([]);
   const [previewTemplate, setPreviewTemplate] = useState<TemplateItem | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const authContext = useContext(AuthContext);
   if (!authContext) {
-    throw new Error('AuthContext must be used within an AuthProvider');
+    throw new Error("AuthContext must be used within an AuthProvider");
   }
-  const { isLoggedIn, isVerified, setAuthState } = authContext;
+  const { isLoggedIn, isVerified } = authContext;
 
   const handleLogout = () => {
     Modal.confirm({
-      title: 'Are you sure you want to logout?',
-      okText: 'Yes',
-      cancelText: 'No',
+      title: "Are you sure you want to logout?",
+      okText: "Yes",
+      cancelText: "No",
       onOk: () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('userEmail');
-        localStorage.removeItem('isLoggedIn');
-        localStorage.removeItem('isSubscribed');
-        localStorage.removeItem('isRegistered');
-        delete axios.defaults.headers.common['Authorization'];
-        message.success('Logged out successfully!');
-        navigate('/login');
+        localStorage.removeItem("token");
+        localStorage.removeItem("userEmail");
+        localStorage.removeItem("isLoggedIn");
+        localStorage.removeItem("isSubscribed");
+        localStorage.removeItem("isRegistered");
+        delete axios.defaults.headers.common["Authorization"];
+        message.success("Logged out successfully!");
+        navigate("/login");
       },
     });
   };
 
   const handleUnsubscribe = () => {
     Modal.confirm({
-      title: 'Are you sure you want to unsubscribe?',
-      content: 'This will cancel your subscription.',
-      okText: 'Yes',
-      cancelText: 'No',
+      title: "Are you sure you want to unsubscribe?",
+      content: "This will cancel your subscription.",
+      okText: "Yes",
+      cancelText: "No",
       onOk: async () => {
         try {
-          const email = localStorage.getItem('userEmail');
+          const email = localStorage.getItem("userEmail");
           if (!email) {
-            message.error('User email not found.');
+            message.error("User email not found.");
             return;
           }
           await unsubscribeUser(email);
-          localStorage.setItem('isSubscribed', 'false');
-          message.success('You have successfully unsubscribed.');
-          navigate('/subscribe');
+          localStorage.setItem("isSubscribed", "false");
+          message.success("You have successfully unsubscribed.");
+          navigate("/subscribe");
         } catch (error: any) {
-          console.error('Error unsubscribing:', error);
-          message.error('Failed to unsubscribe.');
+          console.error("Error unsubscribing:", error);
+          message.error("Failed to unsubscribe.");
         }
       },
     });
@@ -103,8 +102,8 @@ const CreateDashboard: React.FC = () => {
         setTemplates(fetchedTemplates);
         setDashboards(fetchedDashboards);
       } catch (error) {
-        console.error('Error fetching data:', error);
-        message.error('Failed to fetch templates/dashboards.');
+        console.error("Error fetching data:", error);
+        message.error("Failed to fetch templates/dashboards.");
       } finally {
         setLoading(false);
       }
@@ -114,20 +113,20 @@ const CreateDashboard: React.FC = () => {
 
   const handleCreate = async () => {
     if (!dashboardTitle.trim()) {
-      message.error('Dashboard title cannot be empty.');
+      message.error("Dashboard title cannot be empty.");
       return;
     }
     setLoading(true);
     try {
       let workbookId = currentWorkbookId;
       if (!workbookId) {
-        message.info('Waiting for Workbook ID to be initialized...');
+        message.info("Waiting for Workbook ID to be initialized...");
         return;
       }
       workbookId = workbookId.toLowerCase();
       setCurrentWorkbookId(workbookId);
-      console.log('Front-End: Using Workbook ID to create dashboard:', workbookId);
-      console.log('Front-End: Current Workbook ID from state:', currentWorkbookId);
+      console.log("Front-End: Using Workbook ID to create dashboard:", workbookId);
+      console.log("Front-End: Current Workbook ID from state:", currentWorkbookId);
       const newDashboard: NewDashboard = {
         title: dashboardTitle,
         components: [],
@@ -139,11 +138,11 @@ const CreateDashboard: React.FC = () => {
       setLayouts(createdDashboard.layouts || {});
       setDashboards((prev) => [...prev, createdDashboard]);
       setCurrentDashboardId(createdDashboard.id);
-      message.success('Dashboard created successfully!');
+      message.success("Dashboard created successfully!");
       navigate(`/dashboard/${createdDashboard.id}`);
     } catch (error) {
       console.error(error);
-      message.error('Failed to create dashboard. Please try again.');
+      message.error("Failed to create dashboard. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -151,11 +150,11 @@ const CreateDashboard: React.FC = () => {
 
   const createDashboardFromTemplate = async (template: any) => {
     if (!currentWorkbookId) {
-      message.error('No workbook ID found. Cannot create dashboard from template.');
+      message.error("No workbook ID found. Cannot create dashboard from template.");
       return;
     }
     const dashboardToCreate: NewDashboard = {
-      title: template.name || 'Untitled Dashboard',
+      title: template.name || "Untitled Dashboard",
       components: template.widgets || [],
       layouts: template.layouts || {},
       workbookId: currentWorkbookId,
@@ -167,17 +166,17 @@ const CreateDashboard: React.FC = () => {
       navigate(`/dashboard/${createdDashboard.id}`);
       message.success(`Dashboard "${createdDashboard.title}" created from template!`);
     } catch (error) {
-      console.error('Error creating dashboard from template:', error);
-      message.error('Failed to create dashboard from template.');
+      console.error("Error creating dashboard from template:", error);
+      message.error("Failed to create dashboard from template.");
     }
   };
 
   const confirmDeleteTemplate = (id: string) => {
     Modal.confirm({
-      title: 'Are you sure you want to delete this template?',
-      okText: 'Yes',
-      okType: 'danger',
-      cancelText: 'No',
+      title: "Are you sure you want to delete this template?",
+      okText: "Yes",
+      okType: "danger",
+      cancelText: "No",
       onOk: () => deleteTemplate(id),
       maskClosable: true,
     });
@@ -189,10 +188,10 @@ const CreateDashboard: React.FC = () => {
       await deleteTemplateById(id);
       const updatedTemplates = templates.filter((template) => template.id !== id);
       setTemplates(updatedTemplates);
-      message.success('Template deleted successfully!');
+      message.success("Template deleted successfully!");
     } catch (error: any) {
-      console.error('Error deleting template:', error);
-      message.error('Failed to delete template. Please try again.');
+      console.error("Error deleting template:", error);
+      message.error("Failed to delete template. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -297,43 +296,43 @@ const CreateDashboard: React.FC = () => {
               ];
             }
             await context.sync();
-            message.success('"Example Chart Data" sheet is ready.');
+            message.success("Example Chart Data sheet is ready.");
           });
         } catch (error) {
           console.error("Error creating Example Chart Data sheet:", error);
-          message.error('Failed to initialize Excel sheet. Check console for details.');
+          message.error("Failed to initialize Excel sheet. Check console for details.");
         }
       }
     };
     initializeExcel();
   }, [isLoggedIn, isVerified]);
   return (
-    <Layout style={{ minHeight: '100vh' }}>
+    <Layout style={{ minHeight: "100vh" }}>
       <Header
         style={{
-          background: '#f0f2f5',
-          padding: '0 24px',
-          display: 'flex',
-          justifyContent: 'flex-end',
-          alignItems: 'center',
-          boxShadow: 'none',
+          background: "#f0f2f5",
+          padding: "0 24px",
+          display: "flex",
+          justifyContent: "flex-end",
+          alignItems: "center",
+          boxShadow: "none",
         }}
       >
         <Dropdown overlay={menu} placement="bottomRight">
           <Tooltip title="Settings">
-            <SettingOutlined style={{ fontSize: '24px', cursor: 'pointer' }} />
+            <SettingOutlined style={{ fontSize: "24px", cursor: "pointer" }} />
           </Tooltip>
         </Dropdown>
       </Header>
-      <Content style={{ padding: '24px', background: '#f0f2f5' }}>
+      <Content style={{ padding: "24px", background: "#f0f2f5" }}>
         <Row justify="center" gutter={[100, 24]}>
           <Col xs={24} sm={20} md={16} lg={12}>
             <Card
               bordered={false}
               style={{
-                borderRadius: '12px',
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                background: '#fff',
+                borderRadius: "12px",
+                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+                background: "#fff",
               }}
             >
               <Form layout="vertical" onFinish={handleCreate}>
@@ -343,7 +342,7 @@ const CreateDashboard: React.FC = () => {
                   rules={[
                     {
                       required: true,
-                      message: 'Please input the dashboard title!',
+                      message: "Please input the dashboard title!",
                     },
                   ]}
                 >
@@ -366,18 +365,18 @@ const CreateDashboard: React.FC = () => {
                     size="large"
                     icon={<FolderAddOutlined />}
                     style={{
-                      borderRadius: '8px',
-                      height: '50px',
-                      fontSize: '16px',
-                      backgroundColor: '#1890ff',
-                      borderColor: '#1890ff',
-                      transition: 'background-color 0.3s ease',
+                      borderRadius: "8px",
+                      height: "50px",
+                      fontSize: "16px",
+                      backgroundColor: "#1890ff",
+                      borderColor: "#1890ff",
+                      transition: "background-color 0.3s ease",
                     }}
                     onMouseEnter={(e) => {
-                      (e.target as HTMLButtonElement).style.backgroundColor = '#40a9ff';
+                      (e.target as HTMLButtonElement).style.backgroundColor = "#40a9ff";
                     }}
                     onMouseLeave={(e) => {
-                      (e.target as HTMLButtonElement).style.backgroundColor = '#1890ff';
+                      (e.target as HTMLButtonElement).style.backgroundColor = "#1890ff";
                     }}
                   >
                     Create Dashboard
@@ -392,9 +391,9 @@ const CreateDashboard: React.FC = () => {
 
         <Row justify="center" gutter={[16, 24]}>
           <Col xs={24} sm={20} md={16} lg={12}>
-            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-              <h2 style={{ fontWeight: '600', color: '#001529' }}>Choose a Template</h2>
-              <p style={{ color: '#595959' }}>Select a template to quickly create a new dashboard.</p>
+            <div style={{ textAlign: "center", marginBottom: "20px" }}>
+              <h2 style={{ fontWeight: "600", color: "#001529" }}>Choose a Template</h2>
+              <p style={{ color: "#595959" }}>Select a template to quickly create a new dashboard.</p>
             </div>
             <Search
               placeholder="Search Templates"
@@ -403,10 +402,10 @@ const CreateDashboard: React.FC = () => {
               enterButton
               allowClear
               size="large"
-              style={{ marginBottom: '20px' }}
+              style={{ marginBottom: "20px" }}
             />
             {loading ? (
-              <div style={{ textAlign: 'center', padding: '50px 0' }}>
+              <div style={{ textAlign: "center", padding: "50px 0" }}>
                 <Spin tip="Loading templates..." size="large" />
               </div>
             ) : filteredTemplates.length > 0 ? (
@@ -448,24 +447,20 @@ const CreateDashboard: React.FC = () => {
                         </Tooltip>,
                       ]}
                       style={{
-                        borderRadius: '12px',
-                        overflow: 'hidden',
-                        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                        borderRadius: "12px",
+                        overflow: "hidden",
+                        transition: "transform 0.3s ease, box-shadow 0.3s ease",
                       }}
                       onMouseEnter={(e) => {
-                        (e.currentTarget as HTMLElement).style.transform = 'scale(1.03)';
-                        (e.currentTarget as HTMLElement).style.boxShadow =
-                          '0 8px 16px rgba(0, 0, 0, 0.2)';
+                        (e.currentTarget as HTMLElement).style.transform = "scale(1.03)";
+                        (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 16px rgba(0, 0, 0, 0.2)";
                       }}
                       onMouseLeave={(e) => {
-                        (e.currentTarget as HTMLElement).style.transform = 'scale(1)';
-                        (e.currentTarget as HTMLElement).style.boxShadow =
-                          '0 4px 12px rgba(0, 0, 0, 0.1)';
+                        (e.currentTarget as HTMLElement).style.transform = "scale(1)";
+                        (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 12px rgba(0, 0, 0, 0.1)";
                       }}
                     >
-                      <Card.Meta
-                        title={<span style={{ fontSize: '18px', fontWeight: '500' }}>{template.name}</span>}
-                      />
+                      <Card.Meta title={<span style={{ fontSize: "18px", fontWeight: "500" }}>{template.name}</span>} />
                     </Card>
                   </List.Item>
                 )}
@@ -484,7 +479,7 @@ const CreateDashboard: React.FC = () => {
             onCancel={() => setPreviewTemplate(null)}
             width={800}
             centered
-            bodyStyle={{ maxHeight: '70vh', overflowY: 'auto' }}
+            bodyStyle={{ maxHeight: "70vh", overflowY: "auto" }}
             destroyOnClose
           >
             <p>Preview functionality has been removed.</p>

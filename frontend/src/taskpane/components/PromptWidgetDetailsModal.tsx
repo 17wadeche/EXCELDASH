@@ -1,8 +1,8 @@
 // src/taskpane/components/PromptWidgetDetailsModal.tsx
 
-import React from 'react';
-import { Modal, Form, Input } from 'antd';
-import { Widget, WidgetData, MetricData, ImageWidgetData } from './types';
+import React from "react";
+import { Modal, Form, Input } from "antd";
+import { Widget } from "./types";
 
 interface PromptWidgetDetailsModalProps {
   widget: Widget;
@@ -17,26 +17,10 @@ const PromptWidgetDetailsModal: React.FC<PromptWidgetDetailsModalProps> = ({
 }) => {
   const [form] = Form.useForm();
 
-  // Determine required fields based on widget type
-  const getRequiredFields = () => {
-    switch (widget.type) {
-      case 'metric':
-        return ['worksheetName', 'cellAddress'];
-      case 'image':
-        return ['worksheetName', 'associatedRange'];
-      // ... handle other widget types if necessary
-      default:
-        return [];
-    }
-  };
-
-  const requiredFields = getRequiredFields();
-
   const handleOk = () => {
     form
       .validateFields()
       .then((values) => {
-        // Merge the existing widget data with the updated values
         const updatedWidget: Widget = {
           ...widget,
           data: {
@@ -48,7 +32,7 @@ const PromptWidgetDetailsModal: React.FC<PromptWidgetDetailsModalProps> = ({
         form.resetFields();
       })
       .catch((info) => {
-        console.log('Validate Failed:', info);
+        console.log("Validate Failed:", info);
       });
   };
 
@@ -64,17 +48,17 @@ const PromptWidgetDetailsModal: React.FC<PromptWidgetDetailsModalProps> = ({
         form={form}
         layout="vertical"
         initialValues={{
-          worksheetName: '',
-          cellAddress: '',
-          associatedRange: '',
+          worksheetName: "",
+          cellAddress: "",
+          associatedRange: "",
         }}
       >
-        {widget.type === 'metric' && (
+        {widget.type === "metric" && (
           <>
             <Form.Item
               name="worksheetName"
               label="Worksheet Name"
-              rules={[{ required: true, message: 'Please enter the worksheet name' }]}
+              rules={[{ required: true, message: "Please enter the worksheet name" }]}
             >
               <Input placeholder="e.g., Sheet1" />
             </Form.Item>
@@ -82,10 +66,10 @@ const PromptWidgetDetailsModal: React.FC<PromptWidgetDetailsModalProps> = ({
               name="cellAddress"
               label="Cell Address"
               rules={[
-                { required: true, message: 'Please enter the cell address' },
+                { required: true, message: "Please enter the cell address" },
                 {
                   pattern: /^[A-Za-z]{1,3}[1-9][0-9]{0,6}$/,
-                  message: 'Please enter a valid cell address (e.g., A1, B2)',
+                  message: "Please enter a valid cell address (e.g., A1, B2)",
                 },
               ]}
             >
@@ -93,12 +77,12 @@ const PromptWidgetDetailsModal: React.FC<PromptWidgetDetailsModalProps> = ({
             </Form.Item>
           </>
         )}
-        {widget.type === 'image' && (
+        {widget.type === "image" && (
           <>
             <Form.Item
               name="worksheetName"
               label="Worksheet Name"
-              rules={[{ required: true, message: 'Please enter the worksheet name' }]}
+              rules={[{ required: true, message: "Please enter the worksheet name" }]}
             >
               <Input placeholder="e.g., Sheet1" />
             </Form.Item>
@@ -106,10 +90,10 @@ const PromptWidgetDetailsModal: React.FC<PromptWidgetDetailsModalProps> = ({
               name="associatedRange"
               label="Associated Range"
               rules={[
-                { required: true, message: 'Please enter the associated range' },
+                { required: true, message: "Please enter the associated range" },
                 {
                   pattern: /^[A-Za-z]{1,3}[1-9][0-9]{0,6}:[A-Za-z]{1,3}[1-9][0-9]{0,6}$/,
-                  message: 'Please enter a valid range (e.g., A1:B10)',
+                  message: "Please enter a valid range (e.g., A1:B10)",
                 },
               ]}
             >
@@ -117,7 +101,6 @@ const PromptWidgetDetailsModal: React.FC<PromptWidgetDetailsModalProps> = ({
             </Form.Item>
           </>
         )}
-        {/* Add more fields for other widget types if necessary */}
       </Form>
     </Modal>
   );

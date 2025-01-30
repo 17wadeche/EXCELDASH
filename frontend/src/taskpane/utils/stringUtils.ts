@@ -6,6 +6,6 @@
  * @returns The capitalized string.
  */
 export const capitalizeFirstLetter = (s: string): string => {
-  if (!s) return '';
+  if (!s) return "";
   return s.charAt(0).toUpperCase() + s.slice(1);
 };

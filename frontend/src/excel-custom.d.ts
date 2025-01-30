@@ -1,6 +1,6 @@
 // src/excel-custom.d.ts
 
-import 'office-js';
+import "office-js";
 
 declare global {
   namespace Excel {

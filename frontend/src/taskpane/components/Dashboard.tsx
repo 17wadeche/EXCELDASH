@@ -1,45 +1,70 @@
 // src/taskpane/components/Dashboard.tsx
 
-import React, { useState, useEffect, useRef, useContext, useMemo, useCallback } from 'react';
-import { Responsive, WidthProvider } from 'react-grid-layout';
-import { Modal, Card, Button, Tooltip, message, Spin, Switch } from 'antd';
-import EditWidgetForm from './EditWidgetForm';
-import MetricWidget from './widgets/MetricWidget';
-import { BREAKPOINTS, GRID_COLS } from './layoutConstants';
-import LineSettingsModal from './LineSettingsModal';
-import TitleWidgetComponent from './TitleWidget';
-import { ReloadOutlined, CloseOutlined, EditOutlined, UndoOutlined, FundProjectionScreenOutlined, RedoOutlined, FullscreenExitOutlined, CopyOutlined, SaveOutlined, MenuOutlined } from '@ant-design/icons';
-import './Dashboard.css';
-import { DashboardContext } from '../context/DashboardContext';
-import { Widget, ChartData, TextData, ImageWidgetData, TableData, GridLayoutItem, TableWidget, DashboardBorderSettings, LineWidgetData, TitleWidgetData, GanttWidgetData, MetricData, DashboardItem } from './types';
-import TextWidget from './widgets/TextWidget';
-import SalesChart from './widgets/SalesChart';
-import GanttChartComponent from './widgets/GanttChart';
-import ImageWidget from './widgets/ImageWidget';
-import './themes.css';
-import { v4 as uuidv4 } from 'uuid';
-import 'react-grid-layout/css/styles.css';
-import 'react-resizable/css/styles.css';
-import TableWidgetComponent from './widgets/TableWidget';
-import Draggable from 'react-draggable';
-import { isEqual, debounce } from 'lodash';
-import LineWidget from './widgets/LineWidget';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
-import PresentationDashboard from './PresentationDashboard';
-import axios from 'axios';
-import { useParams } from 'react-router-dom';
+import React, { useState, useEffect, useRef, useContext, useMemo, useCallback } from "react";
+import { Responsive, WidthProvider } from "react-grid-layout";
+import { Modal, Card, Button, Tooltip, message, Spin, Switch } from "antd";
+import EditWidgetForm from "./EditWidgetForm";
+import MetricWidget from "./widgets/MetricWidget";
+import { BREAKPOINTS, GRID_COLS } from "./layoutConstants";
+import LineSettingsModal from "./LineSettingsModal";
+import TitleWidgetComponent from "./TitleWidget";
+import {
+  ReloadOutlined,
+  CloseOutlined,
+  EditOutlined,
+  UndoOutlined,
+  FundProjectionScreenOutlined,
+  RedoOutlined,
+  FullscreenExitOutlined,
+  CopyOutlined,
+  SaveOutlined,
+  MenuOutlined,
+} from "@ant-design/icons";
+import "./Dashboard.css";
+import { DashboardContext } from "../context/DashboardContext";
+import {
+  Widget,
+  ChartData,
+  TextData,
+  ImageWidgetData,
+  TableData,
+  GridLayoutItem,
+  TableWidget,
+  DashboardBorderSettings,
+  LineWidgetData,
+  TitleWidgetData,
+  GanttWidgetData,
+  MetricData,
+  DashboardItem,
+} from "./types";
+import TextWidget from "./widgets/TextWidget";
+import SalesChart from "./widgets/SalesChart";
+import GanttChartComponent from "./widgets/GanttChart";
+import ImageWidget from "./widgets/ImageWidget";
+import "./themes.css";
+import { v4 as uuidv4 } from "uuid";
+import "react-grid-layout/css/styles.css";
+import "react-resizable/css/styles.css";
+import TableWidgetComponent from "./widgets/TableWidget";
+import Draggable from "react-draggable";
+import { isEqual, debounce } from "lodash";
+import LineWidget from "./widgets/LineWidget";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
+import PresentationDashboard from "./PresentationDashboard";
+import axios from "axios";
+import { useParams } from "react-router-dom";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 const defaultTitleWidget: Widget = {
-  id: 'dashboard-title',
-  type: 'title',
+  id: "dashboard-title",
+  type: "title",
   data: {
-    content: 'Your Dashboard Title',
+    content: "Your Dashboard Title",
     fontSize: 24,
-    textColor: '#000000',
-    backgroundColor: '#ffffff',
-    titleAlignment: 'center',
+    textColor: "#000000",
+    backgroundColor: "#ffffff",
+    titleAlignment: "center",
   } as TitleWidgetData,
 };
 
@@ -54,10 +79,10 @@ interface DashboardProps {
 async function generatePdfBlobFromDom(dashboardElement: HTMLDivElement): Promise<Blob> {
   const originalStyles = saveOriginalStyles(dashboardElement);
   try {
-    document.documentElement.style.overflow = 'auto';
-    document.body.style.overflow = 'auto';
-    document.documentElement.style.height = 'auto';
-    document.body.style.height = 'auto';
+    document.documentElement.style.overflow = "auto";
+    document.body.style.overflow = "auto";
+    document.documentElement.style.height = "auto";
+    document.body.style.height = "auto";
     await new Promise((resolve) => requestAnimationFrame(resolve));
     let fullWidth = dashboardElement.scrollWidth;
     let fullHeight = dashboardElement.scrollHeight;
@@ -67,7 +92,7 @@ async function generatePdfBlobFromDom(dashboardElement: HTMLDivElement): Promise
     await new Promise((resolve) => requestAnimationFrame(resolve));
     const canvas = await html2canvas(dashboardElement, {
       useCORS: true,
-      backgroundColor: '#ffffff',
+      backgroundColor: "#ffffff",
       scale: 2,
       scrollX: 0,
       scrollY: 0,
@@ -76,10 +101,10 @@ async function generatePdfBlobFromDom(dashboardElement: HTMLDivElement): Promise
       windowWidth: fullWidth,
       windowHeight: fullHeight,
     });
-    const imgData = canvas.toDataURL('image/png');
-    const pdf = new jsPDF('p', 'pt', [canvas.width + 5, canvas.height + 4]);
-    pdf.addImage(imgData, 'PNG', 5, 4, canvas.width, canvas.height, undefined, 'FAST');
-    return pdf.output('blob');
+    const imgData = canvas.toDataURL("image/png");
+    const pdf = new jsPDF("p", "pt", [canvas.width + 5, canvas.height + 4]);
+    pdf.addImage(imgData, "PNG", 5, 4, canvas.width, canvas.height, undefined, "FAST");
+    return pdf.output("blob");
   } finally {
     restoreOriginalStyles(dashboardElement, originalStyles);
   }
@@ -111,7 +136,8 @@ function restoreOriginalStyles(el: HTMLDivElement, styles: any) {
   el.style.padding = styles.elPadding;
 }
 
-const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = false, closePresenterMode, isFullScreen }) => {
+const Dashboard: React.FC<DashboardProps> = React.memo(
+  ({ isPresenterMode = false, closePresenterMode, isFullScreen }) => {
   const { widgets, addWidget, removeWidget, updateWidget, refreshAllCharts, layouts, setLayouts, setWidgets, setDashboardBorderSettings, updateLayoutsForNewWidgets, undo, dashboardBorderSettings, redo, canUndo, dashboardTitle, canRedo, currentDashboardId, currentDashboard, currentWorkbookId, availableWorksheets, setCurrentDashboard, exportDashboardAsPDF, setCurrentDashboardId, setDashboards, refreshTableWidgetData } = useContext(DashboardContext)!;
   const { id } = useParams<{ id: string }>();
   const [isFullscreenActive, setIsFullscreenActive] = useState(false);
@@ -141,8 +167,8 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
   const wrapperStyle: React.CSSProperties = {
     width: `${dashboardWidth}px`,
     marginLeft: 0,
-    marginRight: 'auto',
-    backgroundColor: dashboardBorderSettings.backgroundColor || 'white',
+    marginRight: "auto",
+    backgroundColor: dashboardBorderSettings.backgroundColor || "white",
     ...(dashboardBorderSettings.showBorder
       ? {
           border: `${dashboardBorderSettings.thickness}px ${dashboardBorderSettings.style} ${dashboardBorderSettings.color}`,
@@ -151,12 +177,12 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
   };
 
   const isOfficeInitialized =
-    typeof Office !== 'undefined' &&
+    typeof Office !== "undefined" &&
     Office.context &&
     Office.context.ui &&
-    typeof Office.context.ui.displayDialogAsync === 'function';
+    typeof Office.context.ui.displayDialogAsync === "function";
 
-  const [theme, setTheme] = useState('light-theme');
+  const [theme, setTheme] = useState("light-theme");
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [currentWidget, setCurrentWidget] = useState<Widget | null>(null);
 
@@ -179,37 +205,37 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
     );
     const widgetsWithoutLayout = widgets.filter((widget) => !layoutItemIds.has(widget.id));
     if (widgetsWithoutLayout.length > 0) {
-      console.log('Adding layouts for new widgets:', widgetsWithoutLayout.map((w) => w.id));
+      console.log("Adding layouts for new widgets:", widgetsWithoutLayout.map((w) => w.id));
       updateLayoutsForNewWidgets(widgetsWithoutLayout);
     }
   }, [widgets, isPresenterMode, layouts, updateLayoutsForNewWidgets]);
 
   const handlePresentDashboard = async () => {
     if (!dashboardRef.current) {
-      message.error('Dashboard container not found.');
+      message.error("Dashboard container not found.");
       return;
     }
-    message.info('Exporting dashboard as PDF (existing method)...');
+    message.info("Exporting dashboard as PDF (existing method)...");
     if (exportDashboardAsPDF) {
       await exportDashboardAsPDF();
     } else {
-      message.warning('No exportDashboardAsPDF() found in context, skipping that step...');
+      message.warning("No exportDashboardAsPDF() found in context, skipping that step...");
     }
-    message.success('PDF downloaded using existing export method.');
-    message.info('Generating in-memory PDF for embedding...');
+    message.success("PDF downloaded using existing export method.");
+    message.info("Generating in-memory PDF for embedding...");
     const pdfBlob = await generatePdfBlobFromDom(dashboardRef.current);
     const tempUrl = URL.createObjectURL(pdfBlob);
-    message.success('In-memory PDF generated.');
+    message.success("In-memory PDF generated.");
     const rect = dashboardRef.current.getBoundingClientRect();
     const windowWidth = Math.round(rect.width) + 100;
     const windowHeight = Math.max(900, Math.round(rect.height) + 150);
     const newWin = window.open(
-      '',
-      'PDFPresentation',
+      "",
+      "PDFPresentation",
       `width=${windowWidth},height=${windowHeight},resizable,scrollbars=yes`
     );
     if (!newWin) {
-      message.error('Failed to open new window for presentation.');
+      message.error("Failed to open new window for presentation.");
       return;
     }
     const htmlContent = `
@@ -218,7 +244,7 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
         <head>
           <meta charset="UTF-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-          <title>${dashboardTitle || 'Dashboard Presentation'}</title>
+          <title>${dashboardTitle || "Dashboard Presentation"}</title>
           <style>
             html, body {
               margin: 0;
@@ -250,33 +276,33 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
 
   const handleDialogMessage = (args: Office.DialogParentMessageReceivedEventArgs) => {
     const messageFromChild = JSON.parse(args.message);
-    if (isPresenterMode && messageFromChild.type === 'getDataFromRange') {
+    if (isPresenterMode && messageFromChild.type === "getDataFromRange") {
       fullScreenDialog?.messageChild(JSON.stringify({
-        type: 'dataFromRangeError',
+        type: "dataFromRangeError",
         widgetId: messageFromChild.widgetId,
-        error: 'Data loading is disabled in full-screen mode.',
+        error: "Data loading is disabled in full-screen mode.",
       }));
       return;
     }
     switch (messageFromChild.type) {
-      case 'getDataFromRange': {
+      case "getDataFromRange": {
         const { widgetId, worksheetName, associatedRange } = messageFromChild;
         Excel.run(async (context) => {
           try {
             const sheet = context.workbook.worksheets.getItem(worksheetName);
             const range = sheet.getRange(associatedRange);
-            range.load('values');
+            range.load("values");
             await context.sync();
             const data = range.values;
             fullScreenDialog?.messageChild(JSON.stringify({
-              type: 'dataFromRange',
+              type: "dataFromRange",
               widgetId: widgetId,
               data: data,
             }));
           } catch (error: any) {
-            console.error('Error getting data from range:', error);
+            console.error("Error getting data from range:", error);
             fullScreenDialog?.messageChild(JSON.stringify({
-              type: 'dataFromRangeError',
+              type: "dataFromRangeError",
               widgetId: widgetId,
               error: error.message || error.toString(),
             }));
@@ -298,7 +324,7 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
       };
       fullScreenDialog.messageChild(
         JSON.stringify({
-          type: 'updateDashboardData',
+          type: "updateDashboardData",
           dashboard: dashboardData,
           currentWorkbookId,
           availableWorksheets,
@@ -348,10 +374,10 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
           return newDashboards;
         }
       });
-      message.success('Dashboard saved successfully!');
+      message.success("Dashboard saved successfully!");
     } catch (err) {
-      console.error('Error saving dashboard:', err);
-      message.error('Failed to save changes to server.');
+      console.error("Error saving dashboard:", err);
+      message.error("Failed to save changes to server.");
     } finally {
       setIsSaving(false);
     }
@@ -396,7 +422,7 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
       setLayouts(syncedLayouts);
       if (!isEqual(allLayouts, prevLayoutsRef.current)) {
         prevLayoutsRef.current = allLayouts;
-        console.log('Layouts updated locally (not saved).');
+        console.log("Layouts updated locally (not saved).");
       }
     },
     [
@@ -411,7 +437,7 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
         id: `${widget.type}-${uuidv4()}`,
       };
       addWidget(widget.type, newWidget.data);
-      message.success('Widget copied!');
+      message.success("Widget copied!");
     },
     [addWidget]
   );
@@ -419,12 +445,12 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
   const handleRemoveWidget = useCallback(
     (id: string) => {
       const widgetToRemove = widgets.find((widget) => widget.id === id);
-      if (widgetToRemove?.type === 'title') {
-        message.warning('The title widget cannot be removed.');
+      if (widgetToRemove?.type === "title") {
+        message.warning("The title widget cannot be removed.");
         return;
       } else {
         removeWidget(id);
-        message.info('Widget removed!');
+        message.info("Widget removed!");
       }
     },
     [widgets, removeWidget]
@@ -432,7 +458,7 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
 
   const handleEditWidget = useCallback((widget: Widget) => {
     setEditingWidget(widget);
-    if (widget.type === 'line') {
+    if (widget.type === "line") {
       setIsLineSettingsModalVisible(true);
     } else {
       setCurrentWidget(widget);
@@ -474,22 +500,22 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
 
   const openPresenterMode = useCallback(() => {
     if (isOfficeInitialized) {
-      const url = window.location.origin + '/fullScreenDashboard.html';
+      const url = window.location.origin + "/fullScreenDashboard.html";
       Office.context.ui.displayDialogAsync(
         url,
         { height: 99.5, width: 99.5, displayInIframe: true },
         (result) => {
           if (result.status === Office.AsyncResultStatus.Failed) {
-            message.error('Failed to open presenter mode.');
+            message.error("Failed to open presenter mode.");
           } else {
             const dialog = result.value;
             setFullScreenDialog(dialog);
             dialog.addEventHandler(Office.EventType.DialogMessageReceived, (args: any) => {
               const data = JSON.parse(args.message);
-              console.log('Received message from dialog:', data);
-              if (data.type === 'fullscreenActive') {
+              console.log("Received message from dialog:", data);
+              if (data.type === "fullscreenActive") {
                 setIsFullscreenActive(data.active);
-              } else if (data.type === 'requestState') {
+              } else if (data.type === "requestState") {
                 const dashboardData = {
                   components: widgets,
                   layouts,
@@ -499,42 +525,42 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
                 };
                 dialog.messageChild(
                   JSON.stringify({
-                    type: 'initialState',
+                    type: "initialState",
                     dashboard: dashboardData,
                     currentWorkbookId,
                     availableWorksheets,
                   })
                 );
-              } else if (data.type === 'close') {
+              } else if (data.type === "close") {
                 dialog.close();
                 setFullScreenDialog(null);
-              } else if (data.type === 'updateDashboardData') {
+              } else if (data.type === "updateDashboardData") {
                 isUpdatingFromItem.current = true;
                 setWidgets(data.dashboard.components);
                 setLayouts(data.dashboard.layouts);
                 setDashboardBorderSettings(data.dashboard.borderSettings);
                 isUpdatingFromItem.current = false;
-              } else if (data.type === 'getDataFromRange') {
+              } else if (data.type === "getDataFromRange") {
                 const { widgetId, worksheetName, associatedRange } = data;
                 Excel.run(async (context) => {
                   try {
                     const sheet = context.workbook.worksheets.getItem(worksheetName);
                     const range = sheet.getRange(associatedRange);
-                    range.load('values');
+                    range.load("values");
                     await context.sync();
                     const dataFromExcel = range.values;
                     dialog.messageChild(
                       JSON.stringify({
-                        type: 'dataFromRange',
+                        type: "dataFromRange",
                         widgetId: widgetId,
                         data: dataFromExcel,
                       })
                     );
                   } catch (error: any) {
-                    console.error('Error getting data from range:', error);
+                    console.error("Error getting data from range:", error);
                     dialog.messageChild(
                       JSON.stringify({
-                        type: 'dataFromRangeError',
+                        type: "dataFromRangeError",
                         widgetId: widgetId,
                         error: error.message || error.toString(),
                       })
@@ -552,7 +578,7 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
             };
             dialog.messageChild(
               JSON.stringify({
-                type: 'initialState',
+                type: "initialState",
                 dashboard: dashboardData,
                 currentWorkbookId,
                 availableWorksheets,
@@ -562,7 +588,7 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
         }
       );
     } else {
-      message.error('Presenter mode is not available outside of Office.');
+      message.error("Presenter mode is not available outside of Office.");
     }
   }, [
     isOfficeInitialized,
@@ -584,29 +610,29 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
     const sortedWidgets = [...widgets].sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
     return sortedWidgets.map((widget) => {
       let content;
-      if (widget.type === 'text') {
+      if (widget.type === "text") {
         content = <TextWidget data={widget.data as TextData} />;
-      } else if (widget.type === 'chart') {
+      } else if (widget.type === "chart") {
         const chartData = widget.data as ChartData;
         content = <SalesChart key={widget.id} data={chartData} type={chartData.type} />;
-      } else if (widget.type === 'title') {
+      } else if (widget.type === "title") {
         content = <TitleWidgetComponent data={widget.data as TitleWidgetData} />;
-      } else if (widget.type === 'image') {
+      } else if (widget.type === "image") {
         content = <ImageWidget data={widget.data as ImageWidgetData} />;
-      } else if (widget.type === 'line') {
+      } else if (widget.type === "line") {
         content = <LineWidget data={widget.data as LineWidgetData} />;
-      } else if (widget.type === 'gantt') {
+      } else if (widget.type === "gantt") {
         content = (
           <GanttChartComponent
             tasks={(widget.data as GanttWidgetData).tasks}
             title={(widget.data as GanttWidgetData).title}
-            arrowColor={(widget.data as GanttWidgetData).arrowColor ?? '#7d7d7d'}
-            defaultProgressColor={(widget.data as GanttWidgetData).defaultProgressColor ?? '#1890ff'}
+            arrowColor={(widget.data as GanttWidgetData).arrowColor ?? "#7d7d7d"}
+            defaultProgressColor={(widget.data as GanttWidgetData).defaultProgressColor ?? "#1890ff"}
           />
         );
-      } else if (widget.type === 'metric') {
+      } else if (widget.type === "metric") {
         content = <MetricWidget id={widget.id} data={widget.data as MetricData} />;
-      } else if (widget.type === 'table') {
+      } else if (widget.type === "table") {
         const tableWidget = widget as TableWidget;
         content = (
           <TableWidgetComponent
@@ -623,7 +649,7 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
         <div
           key={widget.id}
           className="grid-item"
-          style={{ padding: 0, margin: 0, position: 'relative', zIndex: widget.zIndex || 0 }}
+          style={{ padding: 0, margin: 0, position: "relative", zIndex: widget.zIndex || 0 }}
         >
           {isEditingEnabled && (
             <div className="widget-actions">
@@ -632,7 +658,7 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
                 className="action-icon"
                 aria-label={`Edit ${widget.type} Widget`}
               />
-              {widget.id !== 'dashboard-title' && (
+              {widget.id !== "dashboard-title" && (
                 <>
                   <CloseOutlined
                     onClick={() => handleRemoveWidget(widget.id)}
@@ -648,14 +674,14 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
               )}
             </div>
           )}
-          {widget.type === 'line' ? (
+          {widget.type === "line" ? (
             <div
               style={{
-                width: '100%',
-                height: '100%',
+                width: "100%",
+                height: "100%",
                 padding: 0,
                 margin: 0,
-                backgroundColor: 'white',
+                backgroundColor: "white",
                 zIndex: widget.zIndex || 0
               }}
             >
@@ -666,13 +692,13 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
               className="widget-card"
               bordered={false}
               style={{
-                width: '100%',
-                height: '100%',
-                position: 'relative',
-                margin: '0px',
-                padding: '0px',
-                boxShadow: 'none',
-                backgroundColor: 'white',
+                width: "100%",
+                height: "100%",
+                position: "relative",
+                margin: "0px",
+                padding: "0px",
+                boxShadow: "none",
+                backgroundColor: "white",
                 zIndex: widget.zIndex || 0
               }}
             >
@@ -686,7 +712,7 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
   return (
     <div className="dashboard-wrapper" style={wrapperStyle}>
       <Draggable handle=".drag-handle">
-        <div className={`fixed-vertical-toolbar ${isCollapsed ? 'collapsed' : ''}`}>
+        <div className={`fixed-vertical-toolbar ${isCollapsed ? "collapsed" : ""}`}>
           <div className="drag-handle">
             <Tooltip title="Drag Toolbar" placement="right">
               <MenuOutlined />
@@ -731,7 +757,7 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
                   checkedChildren=""
                   unCheckedChildren=""
                   aria-label="Toggle Auto-Save"
-                  style={{ marginTop: '16px', width: '15px' }}
+                  style={{ marginTop: "16px", width: "15px" }}
                 />
               </Tooltip>
               <Tooltip title="Refresh All Charts" placement="left">
@@ -757,13 +783,13 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
               {isPresentationMode && <PresentationDashboard />}
             </>
           )}
-          <Tooltip title={isCollapsed ? 'Expand Toolbar' : 'Collapse Toolbar'} placement="left">
+          <Tooltip title={isCollapsed ? "Expand Toolbar" : "Collapse Toolbar"} placement="left">
             <Button
               type="text"
               icon={isCollapsed ? <MenuOutlined /> : <CloseOutlined />}
               onClick={() => setIsCollapsed(!isCollapsed)}
               className="toolbar-button toggle-button"
-              aria-label={isCollapsed ? 'Expand Toolbar' : 'Collapse Toolbar'}
+              aria-label={isCollapsed ? "Expand Toolbar" : "Collapse Toolbar"}
             />
           </Tooltip>
         </div>
@@ -781,13 +807,13 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
         className="dashboard-container"
         style={{
           ...borderStyle,
-          width: '100%',
-          backgroundColor: dashboardBorderSettings.backgroundColor || 'white',
+          width: "100%",
+          backgroundColor: dashboardBorderSettings.backgroundColor || "white",
           marginLeft: 0,
-          marginRight: 'auto',
-          height: 'auto',
-          overflow: 'auto',
-          paddingBottom: '3px',
+          marginRight: "auto",
+          height: "auto",
+          overflow: "auto",
+          paddingBottom: "3px",
         }}
       >
         <ResponsiveGridLayout
@@ -838,7 +864,7 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isPresenterMode = fals
             />
           )}
         </Modal>
-        {isLineSettingsModalVisible && editingWidget && editingWidget.type === 'line' && (
+        {isLineSettingsModalVisible && editingWidget && editingWidget.type === "line" && (
           <LineSettingsModal
             visible={isLineSettingsModalVisible}
             data={editingWidget.data as LineWidgetData}

@@ -1,11 +1,11 @@
-import React, { useContext } from 'react';
-import { Modal, Checkbox, Slider, Select, Button, InputNumber } from 'antd';
-import { SketchPicker } from 'react-color';
-import { DashboardContext } from '../context/DashboardContext';
+import React, { useContext } from "react";
+import { Modal, Checkbox, Slider, Select, Button, InputNumber } from "antd";
+import { SketchPicker } from "react-color";
+import { DashboardContext } from "../context/DashboardContext";
 
 const { Option } = Select;
 
-type BorderStyleType = 'solid' | 'dashed' | 'dotted';
+type BorderStyleType = "solid" | "dashed" | "dotted";
 
 interface DashboardSettingsModalProps {
   visible: boolean;
@@ -15,7 +15,7 @@ interface DashboardSettingsModalProps {
 const DashboardSettingsModal: React.FC<DashboardSettingsModalProps> = ({ visible, onClose }) => {
   const dashboardContext = useContext(DashboardContext);
   if (!dashboardContext) {
-    throw new Error('DashboardContext must be used within a DashboardProvider');
+    throw new Error("DashboardContext must be used within a DashboardProvider");
   }
   const { dashboardBorderSettings, setDashboardBorderSettings } = dashboardContext;
   const handleBorderToggle = (e: any) => {
@@ -78,19 +78,14 @@ const DashboardSettingsModal: React.FC<DashboardSettingsModalProps> = ({ visible
           </div>
           <div style={{ marginTop: 16 }}>
             <span>Border Thickness (px):</span>
-            <Slider
-              min={1}
-              max={10}
-              value={dashboardBorderSettings.thickness}
-              onChange={handleThicknessChange}
-            />
+            <Slider min={1} max={10} value={dashboardBorderSettings.thickness} onChange={handleThicknessChange} />
           </div>
           <div style={{ marginTop: 16 }}>
             <span>Border Style:</span>
             <Select
               value={dashboardBorderSettings.style}
               onChange={(value) => handleStyleChange(value as BorderStyleType)}
-              style={{ width: '100%' }}
+              style={{ width: "100%" }}
             >
               <Option value="solid">Solid</Option>
               <Option value="dashed">Dashed</Option>
@@ -102,7 +97,7 @@ const DashboardSettingsModal: React.FC<DashboardSettingsModalProps> = ({ visible
       <div style={{ marginTop: 16 }}>
         <span>Background Color:</span>
         <SketchPicker
-          color={dashboardBorderSettings.backgroundColor || '#ffffff'}
+          color={dashboardBorderSettings.backgroundColor || "#ffffff"}
           onChange={handleBackgroundColorChange}
         />
       </div>
@@ -112,7 +107,7 @@ const DashboardSettingsModal: React.FC<DashboardSettingsModalProps> = ({ visible
           min={300}
           max={733}
           step={50}
-          style={{ width: '100%' }}
+          style={{ width: "100%" }}
           value={dashboardBorderSettings.width ?? 733}
           onChange={handleWidthChange}
         />

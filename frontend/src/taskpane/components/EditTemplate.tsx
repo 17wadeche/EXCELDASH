@@ -1,9 +1,9 @@
 // src/taskpane/components/EditTemplate.tsx
-import React, { useEffect, useState, useContext } from 'react';
-import { Form, Input, Button, message } from 'antd';
-import { useParams, useNavigate } from 'react-router-dom';
-import { DashboardContext } from '../context/DashboardContext';
-import { DashboardItem } from './types'; 
+import React, { useEffect, useState, useContext } from "react";
+import { Form, Input, Button, message } from "antd";
+import { useParams, useNavigate } from "react-router-dom";
+import { DashboardContext } from "../context/DashboardContext";
+import { DashboardItem } from "./types";
 
 const EditTemplate: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -18,14 +18,14 @@ const EditTemplate: React.FC = () => {
       setTemplate(existingTemplate);
       form.setFieldsValue(existingTemplate);
     } else {
-      message.error('Template not found!');
-      navigate('/dashboard-list');
+      message.error("Template not found!");
+      navigate("/dashboard-list");
     }
   }, [id, dashboards, form, navigate]);
   const onFinish = (values: any) => {
     const { title, components } = values;
     if (!template) {
-      message.error('Template data is missing.');
+      message.error("Template data is missing.");
       return;
     }
     const updatedTemplate: DashboardItem = {
@@ -37,8 +37,8 @@ const EditTemplate: React.FC = () => {
     };
     editDashboard(updatedTemplate);
     saveAsTemplate();
-    message.success('Template updated successfully!');
-    navigate('/dashboard-list');
+    message.success("Template updated successfully!");
+    navigate("/dashboard-list");
   };
   if (!template) {
     return <div>Loading...</div>;
@@ -57,7 +57,7 @@ const EditTemplate: React.FC = () => {
       <Form.Item
         name="title"
         label="Template Title"
-        rules={[{ required: true, message: 'Please enter the template title' }]}
+        rules={[{ required: true, message: "Please enter the template title" }]}
       >
         <Input placeholder="Enter template title" />
       </Form.Item>

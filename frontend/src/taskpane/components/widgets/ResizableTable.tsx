@@ -1,11 +1,11 @@
 // src/taskpane/components/widgets/ResizableTitle.tsx
 
-import React from 'react';
-import { Resizable } from 'react-resizable';
-import 'react-resizable/css/styles.css';
+import React from "react";
+import { Resizable } from "react-resizable";
+import "react-resizable/css/styles.css";
 
 const ResizableTitle = (props: any) => {
-  const { onResize, width, onClick, className, style, children, ...restProps } = props;
+  const { onResize, width, style, children, ...restProps } = props;
 
   if (!width) {
     return <th {...restProps}>{children}</th>;
@@ -18,7 +18,7 @@ const ResizableTitle = (props: any) => {
       handle={
         <span
           className="react-resizable-handle"
-          onClick={e => {
+          onClick={(e) => {
             e.stopPropagation();
           }}
         />

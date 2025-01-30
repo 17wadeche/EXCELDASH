@@ -1,6 +1,6 @@
 // src/utils/excelUtils.ts
 /// <reference types="office-js" />
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 
 let workbookIdPromise: Promise<string> | null = null;
 export const isInDialog = (): boolean => {
@@ -10,7 +10,7 @@ export const isInDialog = (): boolean => {
 export const setWorkbookIdInProperties = async (workbookId: string): Promise<void> => {
   const lowerCaseId = workbookId.toLowerCase();
   if (isInDialog()) {
-    console.log('Running in dialog; skipping setWorkbookIdInProperties.');
+    console.log("Running in dialog; skipping setWorkbookIdInProperties.");
     return;
   }
   try {
@@ -27,7 +27,7 @@ export const setWorkbookIdInProperties = async (workbookId: string): Promise<voi
       console.log(`Workbook ID "${lowerCaseId}" set successfully in custom properties.`);
     });
   } catch (error) {
-    console.error('Error setting workbook ID in custom properties:', error);
+    console.error("Error setting workbook ID in custom properties:", error);
   }
 };
 
@@ -37,8 +37,8 @@ export const getWorkbookIdFromProperties = async (): Promise<string> => {
   }
   workbookIdPromise = (async () => {
     if (isInDialog()) {
-      console.log('Running in dialog; skipping getWorkbookIdFromProperties.');
-      return '';
+      console.log("Running in dialog; skipping getWorkbookIdFromProperties.");
+      return "";
     }
     try {
       return await Excel.run(async (context: Excel.RequestContext) => {
@@ -72,8 +72,8 @@ export const getWorkbookIdFromProperties = async (): Promise<string> => {
       if (error instanceof OfficeExtension.Error && error.code === "InvalidOperationInCellEditMode") {
         throw error;
       } else {
-        console.error('Error getting workbook ID from custom properties:', error);
-        return '';
+        console.error("Error getting workbook ID from custom properties:", error);
+        return "";
       }
     }
   })();

@@ -1,19 +1,18 @@
 // src/taskpane/components/widgets/GanttChartComponent.tsx
-import React, { useState, useEffect } from 'react';
-import { Row, Col } from 'antd';
-import { FrappeGantt } from 'react-frappe-gantt';
-import { Task } from '../types';
-import { Select, Button, message } from 'antd';
-import { v4 as uuidv4 } from 'uuid';
-import '../Dashboard.css';
-import AddTaskForm from './AddTaskForm';
+import React, { useState, useEffect } from "react";
+import { Row, Col } from "antd";
+import { FrappeGantt } from "react-frappe-gantt";
+import { Task } from "../types";
+import { Select, Button } from "antd";
+import "../Dashboard.css";
+import AddTaskForm from "./AddTaskForm";
 
 const { Option } = Select;
 
 interface GanttChartComponentProps {
   tasks: Task[];
   onTasksChange?: (updatedTasks: Task[]) => void;
-  titleAlignment?: 'left' | 'center';
+  titleAlignment?: "left" | "center";
   title?: string;
   arrowColor?: string;
   defaultProgressColor?: string;
@@ -22,12 +21,12 @@ interface GanttChartComponentProps {
 const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
   tasks: initialTasks,
   onTasksChange,
-  titleAlignment = 'left',
-  title = 'Gantt Chart',
-  arrowColor = '#7d7d7d',
-  defaultProgressColor = '#1890ff',
+  titleAlignment = "left",
+  title = "Gantt Chart",
+  arrowColor = "#7d7d7d",
+  defaultProgressColor = "#1890ff",
 }) => {
-  const [viewMode, setViewMode] = useState<'Day' | 'Week' | 'Month'>('Week');
+  const [viewMode, setViewMode] = useState<"Day" | "Week" | "Month">("Week");
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
   const [addTaskModalVisible, setAddTaskModalVisible] = useState(false);
 
@@ -36,10 +35,10 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
   }, [initialTasks]);
 
   const injectTaskColors = (tasks: Task[]) => {
-    const styleElementId = 'gantt-task-colors';
+    const styleElementId = "gantt-task-colors";
     let styleElement = document.getElementById(styleElementId) as HTMLStyleElement | null;
     if (!styleElement) {
-      styleElement = document.createElement('style') as HTMLStyleElement;
+      styleElement = document.createElement("style") as HTMLStyleElement;
       styleElement.id = styleElementId;
       document.head.appendChild(styleElement);
     }
@@ -82,18 +81,14 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
 
   const handleDateChange = (task: Task, start: Date, end: Date) => {
     const updatedTasks = tasks.map((t) =>
-      t.id === task.id
-        ? { ...t, start: start.toISOString().split('T')[0], end: end.toISOString().split('T')[0] }
-        : t
+      t.id === task.id ? { ...t, start: start.toISOString().split("T")[0], end: end.toISOString().split("T")[0] } : t
     );
     setTasks(updatedTasks);
     if (onTasksChange) onTasksChange(updatedTasks);
   };
 
   const handleProgressChange = (task: Task, progress: number) => {
-    const updatedTasks = tasks.map((t) =>
-      t.id === task.id ? { ...t, progress } : t
-    );
+    const updatedTasks = tasks.map((t) => (t.id === task.id ? { ...t, progress } : t));
     setTasks(updatedTasks);
     if (onTasksChange) onTasksChange(updatedTasks);
   };
@@ -102,15 +97,15 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
     <div
       className="gantt-chart-container"
       style={{
-        width: '100%',
-        height: '100%',
-        padding: '8px',
-        overflow: 'hidden',
-        border: '1px solid #ddd',
-        backgroundColor: '#fff',
-        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-        borderRadius: '8px',
-        position: 'relative', // Ensure relative positioning for internal elements
+        width: "100%",
+        height: "100%",
+        padding: "8px",
+        overflow: "hidden",
+        border: "1px solid #ddd",
+        backgroundColor: "#fff",
+        boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+        borderRadius: "8px",
+        position: "relative", // Ensure relative positioning for internal elements
       }}
     >
       {/* Drag Handle */}
@@ -118,21 +113,21 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
         className="drag-handle"
         style={{
           textAlign: titleAlignment,
-          background: '#f0f0f0',
-          padding: '8px',
-          cursor: 'move', // Indicate draggable area
-          borderBottom: '1px solid #ddd',
-          borderRadius: '8px 8px 0 0',
-          userSelect: 'none', // Prevent text selection during drag
+          background: "#f0f0f0",
+          padding: "8px",
+          cursor: "move", // Indicate draggable area
+          borderBottom: "1px solid #ddd",
+          borderRadius: "8px 8px 0 0",
+          userSelect: "none", // Prevent text selection during drag
         }}
       >
         <strong>{title}</strong>
       </div>
-      <Row justify="space-between" align="middle" style={{ margin: '16px 0', padding: '0 8px' }}>
+      <Row justify="space-between" align="middle" style={{ margin: "16px 0", padding: "0 8px" }}>
         <Col>
           <Select
             value={viewMode}
-            onChange={(value: 'Day' | 'Week' | 'Month') => setViewMode(value)}
+            onChange={(value: "Day" | "Week" | "Month") => setViewMode(value)}
             style={{ width: 120 }}
           >
             <Option value="Day">Day</Option>
@@ -149,13 +144,13 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
       <div
         className="gantt-chart-wrapper"
         style={{
-          overflowX: 'auto',
-          overflowY: 'auto',
-          padding: '0 8px',
-          height: 'calc(100% - 100px)',
+          overflowX: "auto",
+          overflowY: "auto",
+          padding: "0 8px",
+          height: "calc(100% - 100px)",
         }}
       >
-        <div style={{ minWidth: '2000px', height: '600px' }}>
+        <div style={{ minWidth: "2000px", height: "600px" }}>
           <FrappeGantt
             tasks={tasks}
             viewMode={viewMode}
@@ -165,10 +160,7 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
           />
         </div>
       </div>
-      <AddTaskForm
-        visible={addTaskModalVisible}
-        onCancel={() => setAddTaskModalVisible(false)}
-      />
+      <AddTaskForm visible={addTaskModalVisible} onCancel={() => setAddTaskModalVisible(false)} />
     </div>
   );
 };

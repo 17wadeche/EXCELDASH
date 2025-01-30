@@ -1,12 +1,12 @@
 // api.ts
-import axios from 'axios'; 
-import { DashboardItem, NewDashboard, TemplateItem, User, LoginResponse } from '../components/types';
+import axios from "axios"; 
+import { DashboardItem, NewDashboard, TemplateItem, User, LoginResponse } from "../components/types";
 
-const API_BASE_URL = 'https://happy-forest-059a9d710.4.azurestaticapps.net/api';
+const API_BASE_URL = "https://happy-forest-059a9d710.4.azurestaticapps.net/api";
 
 function decodeToken(token: string) {
   try {
-    const [, payload] = token.split('.');
+    const [, payload] = token.split(".");
     return JSON.parse(atob(payload));
   } catch {
     return null;
@@ -15,26 +15,26 @@ function decodeToken(token: string) {
 
 export function setAuthToken(token: string | null) {
   if (token) {
-    axios.defaults.headers.common['X-Custom-Auth'] = `Bearer ${token}`;
+    axios.defaults.headers.common["X-Custom-Auth"] = `Bearer ${token}`;
   } else {
-    delete axios.defaults.headers.common['X-Custom-Auth'];
+    delete axios.defaults.headers.common["X-Custom-Auth"];
   }
 }
 
-const existingToken = localStorage.getItem('token');
+const existingToken = localStorage.getItem("token");
 if (existingToken) {
-  console.log('[api.ts] Found existingToken in localStorage:', existingToken);
+  console.log("[api.ts] Found existingToken in localStorage:", existingToken);
   setAuthToken(existingToken);
   const decoded = decodeToken(existingToken);
   if (decoded?.sessionId) {
-    console.log('[api.ts] Extracted sessionId from token:', decoded.sessionId);
-    localStorage.setItem('sessionId', decoded.sessionId);
+    console.log("[api.ts] Extracted sessionId from token:", decoded.sessionId);
+    localStorage.setItem("sessionId", decoded.sessionId);
   }
 } else {
-  console.warn('[api.ts] No token found in localStorage on load.');
+  console.warn("[api.ts] No token found in localStorage on load.");
 }
 
-export const createCheckoutSession = async (plan: 'monthly' | 'yearly', email: string) => {
+export const createCheckoutSession = async (plan: "monthly" | "yearly", email: string) => {
   const response = await axios.post(`${API_BASE_URL}/create-checkout-session`, {
     plan,
     email,
@@ -47,8 +47,8 @@ export const checkSubscription = async (email: string) => {
     const response = await axios.get(`${API_BASE_URL}/check-subscription`, { params: { email } });
     return response.data;
   } catch (error: any) {
-    console.error('Error in checkSubscription:', error);
-    throw new Error(error.response?.data?.error || 'An unknown error occurred.');
+    console.error("Error in checkSubscription:", error);
+    throw new Error(error.response?.data?.error || "An unknown error occurred.");
   }
 };
 
@@ -57,21 +57,21 @@ export const loginUser = async (email: string, password: string): Promise<LoginR
     const response = await axios.post<LoginResponse>(`${API_BASE_URL}/login`, { email, password });
     const loginData = response.data;
     if (loginData.token) {
-      localStorage.setItem('token', loginData.token);
-      localStorage.setItem('refreshToken', loginData.refreshToken || '');
-      localStorage.setItem('userEmail', email);
+      localStorage.setItem("token", loginData.token);
+      localStorage.setItem("refreshToken", loginData.refreshToken || "");
+      localStorage.setItem("userEmail", email);
       setAuthToken(loginData.token);
       const decoded = decodeToken(loginData.token);
       if (decoded?.sessionId) {
-        localStorage.setItem('sessionId', decoded.sessionId);
+        localStorage.setItem("sessionId", decoded.sessionId);
       }
     }
     return loginData;
   } catch (error: any) {
-    console.error('Error in loginUser:', error);
+    console.error("Error in loginUser:", error);
     return {
       success: false,
-      message: error?.response?.data?.error || 'Login failed.',
+      message: error?.response?.data?.error || "Login failed.",
     };
   }
 };
@@ -87,8 +87,8 @@ export const verifySubscription = async (sessionId: string) => {
     });
     return response.data;
   } catch (error: any) {
-    console.error('Error in verifySubscription:', error);
-    throw new Error(error.response?.data?.error || 'An unknown error occurred.');
+    console.error("Error in verifySubscription:", error);
+    throw new Error(error.response?.data?.error || "An unknown error occurred.");
   }
 };
 
@@ -99,8 +99,8 @@ export const checkRegistration = async (email: string) => {
     });
     return response.data;
   } catch (error: any) {
-    console.error('Error in checkRegistration:', error);
-    throw new Error(error.response?.data?.error || 'An unknown error occurred.');
+    console.error("Error in checkRegistration:", error);
+    throw new Error(error.response?.data?.error || "An unknown error occurred.");
   }
 };
 
@@ -112,29 +112,29 @@ export const unsubscribeUser = async (email: string) => {
     );
     return response.data;
   } catch (error: any) {
-    console.error('Error in unsubscribeUser:', error);
-    throw new Error(error.response?.data?.error || 'An unknown error occurred.');
+    console.error("Error in unsubscribeUser:", error);
+    throw new Error(error.response?.data?.error || "An unknown error occurred.");
   }
 };
 
 export const getDashboards = async (): Promise<DashboardItem[]> => {
-  const token = localStorage.getItem('token');
-  console.log('[api.ts] getDashboards => token from localStorage?', token ? 'Yes' : 'No');
+  const token = localStorage.getItem("token");
+  console.log("[api.ts] getDashboards => token from localStorage?", token ? "Yes" : "No");
   if (!token) {
-    console.warn('[api.ts] No token found in localStorage; skipping getDashboards.');
+    console.warn("[api.ts] No token found in localStorage; skipping getDashboards.");
     return [];
   }
   try {
-    console.log('[api.ts] Sending GET /dashboards...');
+    console.log("[api.ts] Sending GET /dashboards...");
     const response = await axios.get(`${API_BASE_URL}/dashboards`, {
       headers: {
-        'X-Custom-Auth': `Bearer ${token}`,
+        "X-Custom-Auth": `Bearer ${token}`,
       },
     });
-    console.log('[api.ts] GET /dashboards response:', response.data);
+    console.log("[api.ts] GET /dashboards response:", response.data);
     return response.data;
   } catch (error: any) {
-    console.error('[api.ts] getDashboards => Error:', error);
+    console.error("[api.ts] getDashboards => Error:", error);
     throw error;
   }
 };
@@ -144,7 +144,7 @@ export const getDashboardById = async (id: string): Promise<DashboardItem> => {
   return response.data;
 };
 
-export const createDashboard = async (dashboard: Omit<NewDashboard, 'userEmail'>): Promise<DashboardItem> => {
+export const createDashboard = async (dashboard: Omit<NewDashboard, "userEmail">): Promise<DashboardItem> => {
   const response = await axios.post(`${API_BASE_URL}/dashboards`, dashboard);
   return response.data as DashboardItem;
 };
@@ -164,7 +164,7 @@ export const getTemplateById = async (id: string): Promise<TemplateItem> => {
   return response.data;
 };
 
-export const createTemplate = async (template: Omit<TemplateItem, 'userEmail'>): Promise<TemplateItem> => {
+export const createTemplate = async (template: Omit<TemplateItem, "userEmail">): Promise<TemplateItem> => {
   const response = await axios.post(`${API_BASE_URL}/templates`, template);
   return response.data as TemplateItem;
 };
@@ -184,7 +184,7 @@ export const deleteDashboardById = async (id: string): Promise<void> => {
 
 export const shareDashboard = async (dashboardId: string, otherEmail: string): Promise<void> => {
   await axios.put(`${API_BASE_URL}/dashboards/${dashboardId}/share`, {
-    action: 'add',
+    action: "add",
     email: otherEmail,
   });
   console.log(`Dashboard ${dashboardId} has been shared with ${otherEmail}.`);

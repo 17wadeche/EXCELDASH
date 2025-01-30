@@ -1,13 +1,12 @@
 /// <reference types="office-js" />
 // src/taskpane/components/EditWidgetForm.tsx
 
-import React, { useEffect, useState, useContext } from 'react';
-import { Form, Input, Space, Button, InputNumber, message, Select, Switch, Collapse, Radio } from 'antd';
-import { MinusCircleOutlined, PlusOutlined, SelectOutlined, ArrowUpOutlined, ArrowDownOutlined } from '@ant-design/icons';
-import moment from 'moment';
-import { DashboardContext } from '../context/DashboardContext';
-import { Widget, TextData, ChartData, GanttWidgetData, MetricData, TitleWidgetData } from './types';
-import { COLORS } from 'html2canvas/dist/types/css/types/color';
+import React, { useEffect, useState, useContext } from "react";
+import { Form, Input, Space, Button, InputNumber, message, Select, Switch, Collapse, Radio } from "antd";
+import { MinusCircleOutlined, PlusOutlined, SelectOutlined, ArrowUpOutlined, ArrowDownOutlined } from "@ant-design/icons";
+import moment from "moment";
+import { DashboardContext } from "../context/DashboardContext";
+import { Widget, TextData, ChartData, GanttWidgetData, MetricData, TitleWidgetData } from "./types";
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -26,7 +25,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
   const widgetId = widget.id;
   const { availableWorksheets, widgets } = useContext(DashboardContext)!;
   const [sheets, setSheets] = useState<string[]>([]);
-  const [chartType, setChartType] = useState<string>(widget.type === 'chart' ? (widget.data as ChartData).type : 'bar');
+  const [chartType, setChartType] = useState<string>(widget.type === "chart" ? (widget.data as ChartData).type : "bar");
   const [zIndex, setZIndex] = useState<number>(widget.zIndex || 0);
 
   useEffect(() => {
@@ -43,61 +42,60 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
 
   const getInitialValues = () => {
     switch (widget.type) {
-      case 'text':
+      case "text":
         return widget.data as TextData;
-      case 'title':
+      case "title":
         return widget.data as TitleWidgetData;
-      case 'chart': {
+      case "chart": {
         const data = widget.data as ChartData;
-        const datasets = data.datasets ?? [];
-        const useArea = data.type === 'line' && data.datasets.some((ds) => ds.fill);
+        const useArea = data.type === "line" && data.datasets.some((ds) => ds.fill);
         const initialValues: any = {
           zIndex: widget.zIndex || 0,
-          title: data.title || 'Chart',
-          chartType: useArea ? 'area' : data.type,
-          labels: (data.labels || []).join(', '),
-          worksheetName: data.worksheetName || sheets[0] || '',
-          associatedRange: data.associatedRange || '',
-          titleAlignment: data.titleAlignment || 'left',
-          xAxisType: data.scales?.x?.type || 'category',
-          xAxisTitle: data.scales?.x?.title?.text || '',
-          yAxisType: data.scales?.y?.type || 'linear',
-          yAxisTitle: data.scales?.y?.title?.text || '',
+          title: data.title || "Chart",
+          chartType: useArea ? "area" : data.type,
+          labels: (data.labels || []).join(", "),
+          worksheetName: data.worksheetName || sheets[0] || "",
+          associatedRange: data.associatedRange || "",
+          titleAlignment: data.titleAlignment || "left",
+          xAxisType: data.scales?.x?.type || "category",
+          xAxisTitle: data.scales?.x?.title?.text || "",
+          yAxisType: data.scales?.y?.type || "linear",
+          yAxisTitle: data.scales?.y?.title?.text || "",
           showLegend: data.plugins?.legend?.display !== false,
-          legendPosition: data.plugins?.legend?.position || 'bottom',
+          legendPosition: data.plugins?.legend?.position || "bottom",
           showDataLabels: data.plugins?.datalabels?.display ?? false,
-          dataLabelColor: data.plugins?.datalabels?.color || '#36A2EB',
+          dataLabelColor: data.plugins?.datalabels?.color || "#36A2EB",
           dataLabelFontSize: data.plugins?.datalabels?.font?.size || 12,
           enableTooltips: data.plugins?.tooltip?.enabled !== false,
-          tooltipTemplate: '',
+          tooltipTemplate: "",
           enableZoom: data.plugins?.zoom?.zoom?.wheel?.enabled || false,
           enablePan: data.plugins?.zoom?.pan?.enabled || false,
-          zoomMode: data.plugins?.zoom?.zoom?.mode || 'xy',
-          chartBackgroundColor: data.backgroundColor || '#ffffff',
-          gridLineColor: data.gridLineColor || 'rgba(0,0,0,0.1)',
-          locale: data.locale || 'en-US',
+          zoomMode: data.plugins?.zoom?.zoom?.mode || "xy",
+          chartBackgroundColor: data.backgroundColor || "#ffffff",
+          gridLineColor: data.gridLineColor || "rgba(0,0,0,0.1)",
+          locale: data.locale || "en-US",
           enableDynamicUpdates: data.dynamicUpdate?.enabled || false,
           updateInterval: data.dynamicUpdate?.interval || 5,
           datasets: (data.datasets || []).map((ds) => {
-            let dataString = '';
-            if ((ds.type as String) === 'boxplot' && Array.isArray(ds.data)) {
+            let dataString = "";
+            if ((ds.type as String) === "boxplot" && Array.isArray(ds.data)) {
               dataString = JSON.stringify(ds.data);
             } else if (Array.isArray(ds.data)) {
-              dataString = ds.data.join(', ');
+              dataString = ds.data.join(", ");
             } else {
               dataString = ds.data;
             }
             return {
               label: ds.label,
               data: dataString,
-              type: ds.type || 'bar',
+              type: ds.type || "bar",
               backgroundColor: ds.backgroundColor,
               borderColor: ds.borderColor,
               borderWidth: ds.borderWidth,
             };
           }),
         };
-        if (['pie', 'doughnut', 'polarArea'].includes(data.type)) {
+        if (["pie", "doughnut", "polarArea"].includes(data.type)) {
           const dataset = data.datasets[0];
           if (dataset.backgroundColor && Array.isArray(dataset.backgroundColor)) {
             initialValues.sliceColors = dataset.backgroundColor.map((color: string) => ({ color }));
@@ -105,7 +103,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
             initialValues.sliceColors = [];
           }
         }
-        if (data.type === 'bubble') {
+        if (data.type === "bubble") {
           const dataset = data.datasets[0];
           if (dataset.backgroundColor && Array.isArray(dataset.backgroundColor)) {
             initialValues.bubbleColors = dataset.backgroundColor.map((color: string) => ({ color }));
@@ -113,7 +111,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
             initialValues.bubbleColors = [];
           }
         }
-        if (data.type === 'funnel') {
+        if (data.type === "funnel") {
           const dataset = data.datasets[0];
           if (dataset.backgroundColor && Array.isArray(dataset.backgroundColor)) {
             initialValues.funnelColors = dataset.backgroundColor.map((color: string) => ({ color }));
@@ -123,25 +121,25 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
         }
         return initialValues;
       }
-      case 'gantt': {
+      case "gantt": {
         const data = widget.data as GanttWidgetData;
         return {
-          title: data.title || 'Gantt Chart',
+          title: data.title || "Gantt Chart",
           tasks: (data.tasks || []).map((task) => ({
             ...task,
             start: moment(task.start),
             end: moment(task.end),
-            dependencies: task.dependencies ? task.dependencies.toString() : '',
+            dependencies: task.dependencies ? task.dependencies.toString() : "",
           })),
         };
       }
-      case 'metric': {
+      case "metric": {
         const data = widget.data as MetricData;
         return {
           ...data,
-          titleAlignment: data.titleAlignment || 'left',
-          worksheetName: data.worksheetName || sheets[0] || '',
-          cellAddress: data.cellAddress || '',
+          titleAlignment: data.titleAlignment || "left",
+          worksheetName: data.worksheetName || sheets[0] || "",
+          cellAddress: data.cellAddress || "",
         };
       }
       default:
@@ -156,10 +154,10 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
 
   useEffect(() => {
     form.setFieldsValue(getInitialValues());
-    if (widget.type === 'chart') {
+    if (widget.type === "chart") {
       const cData = widget.data as ChartData;
       setChartType(cData.type);
-      if (['pie', 'doughnut', 'polarArea'].includes(cData.type)) {
+      if (["pie", "doughnut", "polarArea"].includes(cData.type)) {
         const ds0 = cData.datasets[0];
         if (Array.isArray(ds0.backgroundColor)) {
           form.setFieldsValue({
@@ -167,7 +165,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           });
         }
       }
-      if (cData.type === 'bubble') {
+      if (cData.type === "bubble") {
         const ds0 = cData.datasets[0];
         if (Array.isArray(ds0.backgroundColor)) {
           form.setFieldsValue({
@@ -175,7 +173,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           });
         }
       }
-      if (cData.type === 'boxplot') {
+      if (cData.type === "boxplot") {
         const ds0 = cData.datasets[0];
         if (Array.isArray(ds0.backgroundColor)) {
           form.setFieldsValue({
@@ -207,7 +205,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           />
           <Radio.Group
             onChange={(e) => {
-              const newZ = e.target.value === 'front' ? zIndex + 1 : Math.max(0, zIndex - 1);
+              const newZ = e.target.value === "front" ? zIndex + 1 : Math.max(0, zIndex - 1);
               setZIndex(newZ);
               form.setFieldsValue({ zIndex: newZ });
             }}
@@ -233,67 +231,66 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
   const handleFinish = (values: any) => {
     const cleanedValues: Record<string, any> = {};
     Object.entries(values).forEach(([k, v]) => {
-      if (v !== undefined && v !== '') {
+      if (v !== undefined && v !== "") {
         cleanedValues[k] = v;
       }
     });
     cleanedValues.zIndex = values.zIndex || 0;
     let updatedData: any;
     switch (widget.type) {
-      case 'text': {
+      case "text": {
         updatedData = cleanedValues;
         break;
       }
-      case 'title': {
+      case "title": {
         updatedData = cleanedValues;
         break;
       }
-      case 'chart': {
-        const finalChartType = cleanedValues.chartType === 'area' ? 'line' : cleanedValues.chartType;
+      case "chart": {
+        const finalChartType = cleanedValues.chartType === "area" ? "line" : cleanedValues.chartType;
         const noAxisTypes = [
-          'pie',
-          'doughnut',
-          'polarArea',
-          'radar',
-          'funnel',
-          'treemap',
+          "pie",
+          "doughnut",
+          "polarArea",
+          "radar",
+          "funnel",
+          "treemap",
         ];
         let sliceColorsArray: string[] = [];
         let bubbleColorsArray: string[] = [];
-        let boxplotColorsArray: string[] = [];
-        if (['pie', 'doughnut', 'polarArea'].includes(finalChartType)) {
+        if (["pie", "doughnut", "polarArea"].includes(finalChartType)) {
           const sc: { color: string }[] = cleanedValues.sliceColors || [];
           sliceColorsArray = sc.map((obj) => obj.color);
         }
-        if (finalChartType === 'bubble') {
+        if (finalChartType === "bubble") {
           const bc: { color: string }[] = cleanedValues.bubbleColors || [];
           bubbleColorsArray = bc.map((obj) => obj.color);
         }
-        if (finalChartType === 'boxplot') {
+        if (finalChartType === "boxplot") {
           const bc: { color: string }[] = cleanedValues.boxplotSampleColors || [];
           boxplotColorsArray = bc.map((obj) => obj.color);
         }
-        if (finalChartType === 'scatter' || finalChartType === 'bubble') {
-          cleanedValues.xAxisType = 'linear';
+        if (finalChartType === "scatter" || finalChartType === "bubble") {
+          cleanedValues.xAxisType = "linear";
         }
         updatedData = {
           title: cleanedValues.title,
           type: finalChartType,
           worksheetName: cleanedValues.worksheetName,
           associatedRange: cleanedValues.associatedRange,
-          labels: (cleanedValues.labels || '')
-            .split(',')
+          labels: (cleanedValues.labels || "")
+            .split(",")
             .map((s: string) => s.trim())
             .filter(Boolean),
           datasets: (cleanedValues.datasets || []).map((ds: any) => {
-            if (ds.type === 'scatter' || ds.type === 'bubble') {
+            if (ds.type === "scatter" || ds.type === "bubble") {
               const segments = ds.data
-                .split(';')
+                .split(";")
                 .map((s: string) => s.trim())
                 .filter(Boolean);
-              if (ds.type === 'bubble') {
+              if (ds.type === "bubble") {
                 const points = segments.map((seg: string) => {
-                  const [x, y, r] = seg.split(',').map((v: string) => parseFloat(v.trim()));
+                  const [x, y, r] = seg.split(",").map((v: string) => parseFloat(v.trim()));
                   return { x, y, r };
                 });
                 const backgroundColors = bubbleColorsArray;
@@ -303,12 +300,12 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                   data: points,
                   fill: false,
                   backgroundColor: backgroundColors,
-                  borderColor: ds.borderColor || '#4caf50',
+                  borderColor: ds.borderColor || "#4caf50",
                   borderWidth: ds.borderWidth || 1,
                 };
               } else {
                 const points = segments.map((seg: string) => {
-                  const [x, y] = seg.split(',').map((v: string) => parseFloat(v.trim()));
+                  const [x, y] = seg.split(",").map((v: string) => parseFloat(v.trim()));
                   return { x, y };
                 });
                 return {
@@ -316,29 +313,29 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                   type: ds.type,
                   data: points,
                   fill: false,
-                  backgroundColor: ds.backgroundColor || '#4caf50',
-                  borderColor: ds.borderColor || '#4caf50',
+                  backgroundColor: ds.backgroundColor || "#4caf50",
+                  borderColor: ds.borderColor || "#4caf50",
                   borderWidth: ds.borderWidth || 1,
                 };
               }
-            } else if (ds.type === 'boxplot') {
+            } else if (ds.type === "boxplot") {
               let parsed: number[][] = [];
-              const rawData = (ds.data || '').trim();
+              const rawData = (ds.data || "").trim();
               try {
-                if (rawData.startsWith('[')) {
+                if (rawData.startsWith("[")) {
                   parsed = JSON.parse(rawData);
                 } else if (rawData) {
-                  const rowStrings = rawData.split(';').map((r: String) => r.trim()).filter(Boolean);
+                  const rowStrings = rawData.split(";").map((r: String) => r.trim()).filter(Boolean);
                   parsed = rowStrings.map((rowStr: String) => {
-                    return rowStr.split(',').map((v: String) => parseFloat(v.trim()));
+                    return rowStr.split(",").map((v: String) => parseFloat(v.trim()));
                   });
                 }
               } catch (e) {
-                console.warn('BoxPlot data parse failed:', rawData, e);
+                console.warn("BoxPlot data parse failed:", rawData, e);
               }
               return {
                 label: ds.label,
-                type: 'boxplot',
+                type: "boxplot",
                 data: parsed,
                 datalabels: { display: false },
                 backgroundColor: ds.backgroundColor,
@@ -348,85 +345,85 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 whiskerColor: ds.whiskerColor || getRandomColor(),
                 borderWidth: ds.borderWidth || 1,
               };
-            } else if (ds.type === 'treemap') {
+            } else if (ds.type === "treemap") {
               let treemapData: any[] = [];
               if (Array.isArray(ds.tree) && ds.tree.length > 0) {
                 treemapData = ds.tree;
-              } else if (typeof ds.data === 'string' && ds.data.trim()) {
+              } else if (typeof ds.data === "string" && ds.data.trim()) {
                 const lines = ds.data
-                  .split('\n')
+                  .split("\n")
                   .map((l: any) => l.trim())
                   .filter(Boolean);
                 treemapData = lines.map((line: any) => {
-                  const [rawName, rawVal] = line.split(',').map((x: any) => x.trim());
+                  const [rawName, rawVal] = line.split(",").map((x: any) => x.trim());
                   return {
-                    name: rawName || 'Unnamed',
+                    name: rawName || "Unnamed",
                     value: parseFloat(rawVal) || 0,
                   };
                 });
               }
               treemapData = treemapData.map((item: any) => ({
-                name: item.Name ?? item.name ?? 'Unnamed',
+                name: item.Name ?? item.name ?? "Unnamed",
                 value: item.Value ?? item.value ?? 0,
               }));
               return {
-                label: ds.label || 'Treemap Data',
+                label: ds.label || "Treemap Data",
                 type: ds.type,
                 tree: treemapData,
-                key: 'value',
-                groups: ds.groups || ['name'],
+                key: "value",
+                groups: ds.groups || ["name"],
                 backgroundColor: getRandomColor(),
-                borderColor: ds.borderColor || '#333',
+                borderColor: ds.borderColor || "#333",
                 borderWidth: ds.borderWidth || 1,
                 datalabels: {
                   display: true,
-                  color: '#fff',
+                  color: "#fff",
                   formatter: (_value: any, context: any) => {
                     const { name, value } = context.raw ?? {};
-                    return `${name ?? 'Unnamed'} (${value ?? 0})`;
+                    return `${name ?? "Unnamed"} (${value ?? 0})`;
                   },
                   font: {
-                    weight: 'bold',
+                    weight: "bold",
                   },
                 },
               };
-            } else if (ds.type === 'funnel') {
-              const labels = (cleanedValues.labels || '')
-                .split(',')
+            } else if (ds.type === "funnel") {
+              const labels = (cleanedValues.labels || "")
+                .split(",")
                 .map((l: string) => l.trim())
                 .filter(Boolean);
               const funnelValues = ds.data
-                .split(',')
+                .split(",")
                 .map((v: string) => parseFloat(v.trim()))
                 .filter((v: number) => !isNaN(v));
 
               if (labels.length !== funnelValues.length) {
-                message.error('The number of labels must match the number of data points for the funnel chart.');
+                message.error("The number of labels must match the number of data points for the funnel chart.");
                 return null;
               }
-              const fc: { color: string }[] = form.getFieldValue('funnelColors') || [];
+              const fc: { color: string }[] = form.getFieldValue("funnelColors") || [];
               const funnelColors = fc.length ? fc.map((obj) => obj.color) : funnelValues.map(() => getRandomColor());
               return {
                 label: ds.label,
-                type: 'funnel',
+                type: "funnel",
                 data: funnelValues,
                 backgroundColor: funnelColors,
-                borderColor: ds.borderColor || '#4caf50',
+                borderColor: ds.borderColor || "#4caf50",
                 borderWidth: ds.borderWidth || 1,
                 options: { plugins: { funnel: { percent: false } } },
               };
             } else {
               let parsedValues: number[] = [];
-              if (typeof ds.data === 'string') {
-                parsedValues = ds.data.split(',').map((num: string) => Number(num.trim()));
+              if (typeof ds.data === "string") {
+                parsedValues = ds.data.split(",").map((num: string) => Number(num.trim()));
               } else if (Array.isArray(ds.data)) {
                 parsedValues = ds.data.map((n: any) => Number(n));
               } else {
                 parsedValues = [Number(ds.data)];
               }
-              const shouldFill = cleanedValues.chartType === 'area' || ds.type === 'area';
-              let finalBg = ds.backgroundColor || '#4caf50';
-              if (['pie', 'doughnut', 'polarArea'].includes(finalChartType) && sliceColorsArray.length) {
+              const shouldFill = cleanedValues.chartType === "area" || ds.type === "area";
+              let finalBg = ds.backgroundColor || "#4caf50";
+              if (["pie", "doughnut", "polarArea"].includes(finalChartType) && sliceColorsArray.length) {
                 finalBg = sliceColorsArray;
               }
               return {
@@ -435,54 +432,54 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 type: ds.type,
                 fill: shouldFill,
                 backgroundColor: finalBg,
-                borderColor: ds.borderColor || '#4caf50',
+                borderColor: ds.borderColor || "#4caf50",
                 borderWidth: ds.borderWidth || 1,
               };
             }
           }),
-          titleAlignment: cleanedValues.titleAlignment || 'left',
+          titleAlignment: cleanedValues.titleAlignment || "left",
           scales: noAxisTypes.includes(finalChartType)
             ? {}
             : {
                 x: {
-                  type: cleanedValues.xAxisType || 'category',
-                  time: cleanedValues.xAxisType === 'time' ? { parser: 'M/D/YYYY', unit: 'day' } : undefined,
+                  type: cleanedValues.xAxisType || "category",
+                  time: cleanedValues.xAxisType === "time" ? { parser: "M/D/YYYY", unit: "day" } : undefined,
                   title: {
                     display: !!cleanedValues.xAxisTitle,
-                    text: cleanedValues.xAxisTitle || '',
+                    text: cleanedValues.xAxisTitle || "",
                   },
                 },
                 y: {
-                  type: cleanedValues.yAxisType || 'linear',
+                  type: cleanedValues.yAxisType || "linear",
                   title: {
                     display: !!cleanedValues.yAxisTitle,
-                    text: cleanedValues.yAxisTitle || '',
+                    text: cleanedValues.yAxisTitle || "",
                   },
                 },
               },
           plugins: {
             legend: {
               display: cleanedValues.showLegend !== false,
-              position: cleanedValues.legendPosition || 'top',
+              position: cleanedValues.legendPosition || "top",
             },
             datalabels: {
               display: cleanedValues.showDataLabels,
-              color: cleanedValues.dataLabelColor || '#000',
+              color: cleanedValues.dataLabelColor || "#000",
               font: {
                 size: cleanedValues.dataLabelFontSize || 12,
               },
               formatter: (_value: any, context: any) => {
                 switch (chartType) {
-                  case 'pie':
-                  case 'doughnut':
-                  case 'polarArea':
+                  case "pie":
+                  case "doughnut":
+                  case "polarArea":
                     return context.label;
-                  case 'treemap':
+                  case "treemap":
                     return context.raw.name;
-                  case 'scatter':
-                  case 'bubble':
+                  case "scatter":
+                  case "bubble":
                     return `(${context.raw.x}, ${context.raw.y})`;
-                  case 'funnel':
+                  case "funnel":
                     return context.chart.data.labels[context.dataIndex];
                   default:
                     return context.formattedValue;
@@ -492,7 +489,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
             zoom: {
               pan: {
                 enabled: cleanedValues.enablePan || false,
-                mode: 'xy',
+                mode: "xy",
               },
               zoom: {
                 wheel: {
@@ -501,7 +498,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 pinch: {
                   enabled: cleanedValues.enableZoom || false,
                 },
-                mode: cleanedValues.zoomMode || 'xy',
+                mode: cleanedValues.zoomMode || "xy",
               },
             },
             tooltip: {
@@ -509,16 +506,16 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
               callbacks: {
                 label: function (context: any) {
                   const chartType = context.dataset.type;
-                  if (chartType === 'funnel') {
+                  if (chartType === "funnel") {
                     return `${context.formattedValue}`;
                   }
-                  if (chartType === 'treemap') {
+                  if (chartType === "treemap") {
                     const dataPoint = context.raw;
-                    const label = dataPoint.name || 'Name';
+                    const label = dataPoint.name || "Name";
                     const value = dataPoint.value || 0;
                     return `${label}: ${value}`;
                   } else {
-                    const label = context.label || '';
+                    const label = context.label || "";
                     const value = context.formattedValue;
                     return label ? `${label}: ${value}` : `${value}`;
                   }
@@ -526,18 +523,18 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
               },
             },
           },
-          backgroundColor: cleanedValues.chartBackgroundColor || '#ffffff',
-          gridLineColor: cleanedValues.gridLineColor || 'rgba(0, 0, 0, 0.1)',
-          locale: cleanedValues.locale || 'en-US',
+          backgroundColor: cleanedValues.chartBackgroundColor || "#ffffff",
+          gridLineColor: cleanedValues.gridLineColor || "rgba(0, 0, 0, 0.1)",
+          locale: cleanedValues.locale || "en-US",
           dynamicUpdate: {
             enabled: cleanedValues.enableDynamicUpdates || false,
             interval: cleanedValues.updateInterval || 5,
           },
-          ...(finalChartType === 'boxplot' && {title: cleanedValues.title || 'Box Plot'})
+          ...(finalChartType === "boxplot" && {title: cleanedValues.title || "Box Plot"})
         } as ChartData;
         break;
       }
-      case 'gantt': {
+      case "gantt": {
         const existing = widget.data as GanttWidgetData;
         const existingTasks = existing.tasks || [];
         const { arrowColor } = cleanedValues;
@@ -547,13 +544,13 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           return {
             ...oldTask,
             name: updated.name,
-            start: updated.start.format('YYYY-MM-DD'),
-            end: updated.end.format('YYYY-MM-DD'),
-            completed: updated.completed ? updated.completed.format('YYYY-MM-DD') : undefined,
+            start: updated.start.format("YYYY-MM-DD"),
+            end: updated.end.format("YYYY-MM-DD"),
+            completed: updated.completed ? updated.completed.format("YYYY-MM-DD") : undefined,
             progress: updated.progress,
             dependencies: Array.isArray(updated.dependencies)
               ? updated.dependencies
-              : (updated.dependencies || '').split(','),
+              : (updated.dependencies || "").split(","),
             color: updated.color || oldTask.color,
             progressColor: updated.progressColor || oldTask.progressColor,
           };
@@ -563,13 +560,13 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           .map((t: any) => ({
             id: t.id,
             name: t.name,
-            start: t.start.format('YYYY-MM-DD'),
-            end: t.end.format('YYYY-MM-DD'),
-            completed: t.completed ? t.completed.format('YYYY-MM-DD') : undefined,
+            start: t.start.format("YYYY-MM-DD"),
+            end: t.end.format("YYYY-MM-DD"),
+            completed: t.completed ? t.completed.format("YYYY-MM-DD") : undefined,
             progress: t.progress,
-            dependencies: Array.isArray(t.dependencies) ? t.dependencies : (t.dependencies || '').split(','),
-            color: t.color || '#FF0000',
-            progressColor: t.progressColor || '#00AABB',
+            dependencies: Array.isArray(t.dependencies) ? t.dependencies : (t.dependencies || "").split(","),
+            color: t.color || "#FF0000",
+            progressColor: t.progressColor || "#00AABB",
           }));
         updatedData = {
           ...existing,
@@ -579,11 +576,11 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
         };
         break;
       }
-      case 'metric': {
+      case "metric": {
         updatedData = {
           ...cleanedValues,
-          displayName: cleanedValues.displayName || 'Metric',
-          titleAlignment: cleanedValues.titleAlignment || 'left',
+          displayName: cleanedValues.displayName || "Metric",
+          titleAlignment: cleanedValues.titleAlignment || "left",
           worksheetName: cleanedValues.worksheetName,
           cellAddress: cleanedValues.cellAddress,
         };
@@ -597,37 +594,26 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
   };
 
   const getRandomColor = () => {
-    const letters = '0123456789ABCDEF';
-    let color = '#';
+    const letters = "0123456789ABCDEF";
+    let color = "#";
     for (let i = 0; i < 6; i++) {
       color += letters[Math.floor(Math.random() * 16)];
     }
     return color;
   };
 
-  function convertExcelDate(val: any): string {
-    if (typeof val === 'number' && val > 30000 && val < 60000) {
-      const jsDate = new Date((val - 25569) * 86400 * 1000);
-      const mm = String(jsDate.getMonth() + 1).padStart(2, '0');
-      const dd = String(jsDate.getDate() + 1).padStart(2, '0');
-      const yyyy = jsDate.getFullYear();
-      return `${yyyy}-${mm}-${dd}`;
-    }
-    return String(val);
-  }
-
   const loadDataForNewChartType = async (mainType: string, data: any[][], form: any) => {
     switch (mainType) {
-      case 'boxplot': {
+      case "boxplot": {
         if (data.length < 1) {
-          message.error('Box Plot data must include at least a header row, and one data row.');
+          message.error("Box Plot data must include at least a header row, and one data row.");
           return;
         }
         const boxLabels: string[] = [];
         const boxValues: number[][] = [];
         for (let i = 1; i < data.length; i++) {
           const row = data[i];
-          const sampleName = String(row[0]) || 'Sample';
+          const sampleName = String(row[0]) || "Sample";
           const q1 = Number(row[1]);
           const median = Number(row[2]);
           const q3 = Number(row[3]);
@@ -642,11 +628,11 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
         }
         const dataJson = JSON.stringify(boxValues);
         form.setFieldsValue({
-          labels: boxLabels.join(', '),
+          labels: boxLabels.join(", "),
           datasets: [
             {
-              label: 'BoxPlot Series',
-              type: 'boxplot',
+              label: "BoxPlot Series",
+              type: "boxplot",
               data: dataJson,
               backgroundColor: getRandomColor(),
               borderColor: getRandomColor(),
@@ -654,16 +640,16 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
             },
           ],
         });
-        message.success('Box Plot data loaded successfully!');
+        message.success("Box Plot data loaded successfully!");
         break;
       }
-      case 'treemap': {
+      case "treemap": {
         if (data.length < 2) {
-          message.error('Treemap requires 2+ rows: header + data.');
+          message.error("Treemap requires 2+ rows: header + data.");
           return;
         }
         const headerRow = data[0];
-        const labelStr = headerRow.join(',');
+        const labelStr = headerRow.join(",");
         const rawRows = data.slice(1);
         const treeItems = rawRows.map((row, rowIndex) => {
           const [rawName, rawValue] = row; 
@@ -672,13 +658,13 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           return { name, value };
         });
         const singleTreemapDataset = {
-          label: 'Treemap Data',
-          type: 'treemap',
+          label: "Treemap Data",
+          type: "treemap",
           tree: treeItems,
-          key: 'value',
-          groups: ['name'],
+          key: "value",
+          groups: ["name"],
           backgroundColor: treeItems.map(() => getRandomColor()),
-          borderColor: '#333',
+          borderColor: "#333",
           borderWidth: 1,
         };
         form.setFieldsValue({
@@ -686,33 +672,31 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           datasets: [singleTreemapDataset],
           treemapColors: [],
         });
-        message.success('Treemap data loaded from Excel, each line is its own dataset.');
+        message.success("Treemap data loaded from Excel, each line is its own dataset.");
         break;
       }
-      case 'funnel': {
+      case "funnel": {
         if (data.length < 2) {
-          message.error('Funnel requires at least 2 rows of data.');
+          message.error("Funnel requires at least 2 rows of data.");
           return;
         }
-        const headerRow = data[0];
-        const labelStr = headerRow.join(',');
         const rawRows = data.slice(1);
         const labels = rawRows.map((row) => row[0]);
         const values = rawRows.map((row) => Number(row[1]));
         form.setFieldsValue({
-          labels: labels.join(', '),
+          labels: labels.join(", "),
           datasets: [
             {
-              label: 'Funnel',
-              type: 'funnel',
-              data: values.join(', '),
+              label: "Funnel",
+              type: "funnel",
+              data: values.join(", "),
               backgroundColor: getRandomColor(),
               borderColor: getRandomColor(),
               borderWidth: 1,
             },
           ],
         });
-        message.success('Funnel data loaded from Excel.');
+        message.success("Funnel data loaded from Excel.");
         break;
       }
       default:
@@ -722,39 +706,39 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
 
   const handleLoadFromExcel = async () => {
     if (isPresenterMode) {
-      message.warning('Loading data from Excel is not available in full-screen mode.');
+      message.warning("Loading data from Excel is not available in full-screen mode.");
       return;
     }
     try {
-      const mainType = form.getFieldValue('chartType');
+      const mainType = form.getFieldValue("chartType");
       await Excel.run(async (context) => {
         const range = context.workbook.getSelectedRange();
-        range.load(['address', 'worksheet']);
+        range.load(["address", "worksheet"]);
         await context.sync();
         const worksheetName = range.worksheet.name;
-        const associatedRange = range.address.replace(/^.*!/, '');
+        const associatedRange = range.address.replace(/^.*!/, "");
         form.setFieldsValue({
           worksheetName,
           associatedRange,
         });
         const worksheet = context.workbook.worksheets.getItem(worksheetName);
         const dataRange = worksheet.getRange(associatedRange);
-        dataRange.load('values');
+        dataRange.load("values");
         await context.sync();
         const data = dataRange.values;
         console.log(`Loaded data for chartType="${mainType}":`, data);
-        if (['bar', 'line', 'pie', 'doughnut', 'radar', 'polarArea'].includes(mainType)) {
+        if (["bar", "line", "pie", "doughnut", "radar", "polarArea"].includes(mainType)) {
           if (data.length < 2) {
-            message.error('Selected range must have at least 2 rows (header + data).');
+            message.error("Selected range must have at least 2 rows (header + data).");
             return;
           }
           const labels = data[0].slice(1);
-          const isPieDoughnutPolar = ['pie', 'doughnut', 'polarArea'].includes(mainType);
+          const isPieDoughnutPolar = ["pie", "doughnut", "polarArea"].includes(mainType);
           const datasets = data.slice(1).map((row: any[]) => {
             const sliceColors = labels.map(() => getRandomColor());
             return {
               label: row[0],
-              data: row.slice(1).join(', '),
+              data: row.slice(1).join(", "),
               type: mainType,
               backgroundColor: isPieDoughnutPolar ? sliceColors : getRandomColor(),
               borderColor: getRandomColor(),
@@ -762,13 +746,13 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
             };
           });
           form.setFieldsValue({
-            labels: labels.join(', '),
+            labels: labels.join(", "),
             datasets,
           });
           message.success(`${mainType} data loaded from Excel.`);
-        } else if (mainType === 'scatter') {
+        } else if (mainType === "scatter") {
           if (data.length < 3) {
-            message.error('Scatter requires 3 rows: header, X row, Y row.');
+            message.error("Scatter requires 3 rows: header, X row, Y row.");
             return;
           }
           const xRow = data[1];
@@ -776,27 +760,27 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           const xVals = xRow.slice(1).map((v: any) => Number(v));
           const yVals = yRow.slice(1).map((v: any) => Number(v));
           if (xVals.length !== yVals.length) {
-            message.error('X row and Y row must have same # of points.');
+            message.error("X row and Y row must have same # of points.");
             return;
           }
-          const dataString = xVals.map((x: number, idx: number) => `${x},${yVals[idx]}`).join(';');
+          const dataString = xVals.map((x: number, idx: number) => `${x},${yVals[idx]}`).join(";");
           form.setFieldsValue({
-            labels: '',
+            labels: "",
             datasets: [
               {
-                label: 'Scatter Series',
+                label: "Scatter Series",
                 data: dataString,
-                type: 'scatter',
+                type: "scatter",
                 backgroundColor: getRandomColor(),
                 borderColor: getRandomColor(),
                 borderWidth: 1,
               },
             ],
           });
-          message.success('Scatter data loaded from Excel.');
-        } else if (mainType === 'bubble') {
+          message.success("Scatter data loaded from Excel.");
+        } else if (mainType === "bubble") {
           if (data.length < 4) {
-            message.error('Bubble requires 4 rows: header, X row, Y row, R row.');
+            message.error("Bubble requires 4 rows: header, X row, Y row, R row.");
             return;
           }
           const xRow = data[1];
@@ -806,11 +790,11 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           const yVals = yRow.slice(1).map((v: any) => Number(v));
           const rVals = rRow.slice(1).map((v: any) => Number(v));
           if (xVals.length !== yVals.length || yVals.length !== rVals.length) {
-            message.error('X, Y, R must have same # of points.');
+            message.error("X, Y, R must have same # of points.");
             return;
           }
           const headerRow = data[0].slice(1);
-          const labelsStr = headerRow.join(', ');
+          const labelsStr = headerRow.join(", ");
           const points = xVals.map((x: number, idx: number) => ({
             x,
             y: yVals[idx],
@@ -818,54 +802,54 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           }));
           const dataString = points
             .map((pt: { x: number; y: number; r: number }) => `${pt.x},${pt.y},${pt.r}`)
-            .join(';');
+            .join(";");
           form.setFieldsValue({
             labels: labelsStr,
             datasets: [
               {
-                label: 'Bubble Series',
+                label: "Bubble Series",
                 data: dataString,
-                type: 'bubble',
+                type: "bubble",
                 backgroundColor: getRandomColor(),
                 borderColor: getRandomColor(),
                 borderWidth: 1,
               },
             ],
           });
-          message.success('Bubble data loaded from Excel.');
+          message.success("Bubble data loaded from Excel.");
         } else {
           await loadDataForNewChartType(mainType, data, form);
         }
       });
     } catch (err) {
-      console.error('Error loading Excel data:', err);
-      message.error('Failed to load data from Excel.');
+      console.error("Error loading Excel data:", err);
+      message.error("Failed to load data from Excel.");
     }
   };
   useEffect(() => {
-    const rawLabels = form.getFieldValue('labels') || '';
-    const labelArr = rawLabels.split(',')
+    const rawLabels = form.getFieldValue("labels") || "";
+    const labelArr = rawLabels.split(",")
       .map((l: any) => l.trim())
       .filter(Boolean);
-    const currentSliceColors = form.getFieldValue('sliceColors') || [];
+    const currentSliceColors = form.getFieldValue("sliceColors") || [];
     if (currentSliceColors.length !== labelArr.length) {
       const updated = labelArr.map((_:any, idx:any) => currentSliceColors[idx] || getRandomColor());
       form.setFieldsValue({ sliceColors: updated });
     }
-  }, [form, form.getFieldValue('labels')]);
+  }, [form, form.getFieldValue("labels")]);
 
   useEffect(() => {
-    if (chartType === 'bubble') {
-      const dataSets = form.getFieldValue('datasets') || [];
-      const bubbleDS = dataSets.find((ds: any) => ds.type === 'bubble');
+    if (chartType === "bubble") {
+      const dataSets = form.getFieldValue("datasets") || [];
+      const bubbleDS = dataSets.find((ds: any) => ds.type === "bubble");
       if (!bubbleDS) return;
-      if (typeof bubbleDS.data === 'string') {
+      if (typeof bubbleDS.data === "string") {
         const segments = bubbleDS.data
-          .split(';')
+          .split(";")
           .map((s: string) => s.trim())
           .filter(Boolean);
         const neededCount = segments.length;
-        const currentBubbleColors = form.getFieldValue('bubbleColors') || [];
+        const currentBubbleColors = form.getFieldValue("bubbleColors") || [];
         if (currentBubbleColors.length !== neededCount) {
           const updated = [...currentBubbleColors];
           while (updated.length < neededCount) {
@@ -878,23 +862,23 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
         }
       }
     }
-  }, [chartType, form, form.getFieldValue('datasets')]);
+  }, [chartType, form, form.getFieldValue("datasets")]);
 
   useEffect(() => {
-    if (chartType === 'boxplot') {
-      const dataSets = form.getFieldValue('datasets') || [];
+    if (chartType === "boxplot") {
+      const dataSets = form.getFieldValue("datasets") || [];
       const boxplotDS = dataSets[0];
-      if (!boxplotDS || boxplotDS.type !== 'boxplot') return;
-      const labelStr = form.getFieldValue('labels') || '';
+      if (!boxplotDS || boxplotDS.type !== "boxplot") return;
+      const labelStr = form.getFieldValue("labels") || "";
       const labelArr = labelStr
-        .split(',')
+        .split(",")
         .map((s: string) => s.trim())
         .filter(Boolean);
-      const currentColors = form.getFieldValue(['datasets', 0, 'boxplotSampleColors']) || [];
+      const currentColors = form.getFieldValue(["datasets", 0, "boxplotSampleColors"]) || [];
       if (currentColors.length !== labelArr.length) {
         const updated = [...currentColors];
         while (updated.length < labelArr.length) {
-          updated.push({ color: '#000000' });
+          updated.push({ color: "#000000" });
         }
         if (updated.length > labelArr.length) {
           updated.splice(labelArr.length);
@@ -914,9 +898,9 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
 
   return (
     <Form form={form} layout="vertical" initialValues={getInitialValues()} onFinish={handleFinish}>
-      {widget.type === 'text' && (
+      {widget.type === "text" && (
         <>
-          <Form.Item name="content" label="Content" rules={[{ required: true, message: 'Please enter content' }]}>
+          <Form.Item name="content" label="Content" rules={[{ required: true, message: "Please enter content" }]}>
             <TextArea rows={4} />
           </Form.Item>
           <Form.Item name="fontSize" label="Font Size">
@@ -936,12 +920,12 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           </Form.Item>
         </>
       )}
-      {widget.type === 'title' && (
+      {widget.type === "title" && (
         <>
           <Form.Item
             name="content"
             label="Title Text"
-            rules={[{ required: true, message: 'Please enter the title text' }]}
+            rules={[{ required: true, message: "Please enter the title text" }]}
           >
             <Input />
           </Form.Item>
@@ -963,20 +947,20 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           </Form.Item>
         </>
       )}
-      {widget.type === 'chart' && (
+      {widget.type === "chart" && (
         <>
-          <Form.Item name="title" label="Chart Title" rules={[{ required: true, message: 'Please enter chart title' }]}>
+          <Form.Item name="title" label="Chart Title" rules={[{ required: true, message: "Please enter chart title" }]}>
             <Input />
           </Form.Item>
           <Form.Item
             name="chartType"
             label="Chart Type"
-            rules={[{ required: true, message: 'Please select chart type' }]}
+            rules={[{ required: true, message: "Please select chart type" }]}
           >
             <Select
               onChange={(value: string) => {
                 setChartType(value);
-                const currentDatasets = form.getFieldValue('datasets') || [];
+                const currentDatasets = form.getFieldValue("datasets") || [];
                 const updatedDatasets = currentDatasets.map((ds: any) => ({
                   ...ds,
                   type: value,
@@ -1004,12 +988,12 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
             rules={[
               ({ getFieldValue }) => ({
                 validator(_, value) {
-                  const cType = getFieldValue('chartType');
+                  const cType = getFieldValue("chartType");
                   if (["scatter", "bubble"].includes(cType)) {
                     return Promise.resolve();
                   }
                   if (!value || !value.trim()) {
-                    return Promise.reject(new Error('Please enter labels (header row).'));
+                    return Promise.reject(new Error("Please enter labels (header row)."));
                   }
                   return Promise.resolve();
                 },
@@ -1018,21 +1002,21 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           >
             <Input />
           </Form.Item>
-          {['pie', 'doughnut', 'polarArea'].includes(chartType) && (
+          {["pie", "doughnut", "polarArea"].includes(chartType) && (
             <Form.List name="sliceColors">
               {(fields) => (
                 <>
                   {fields.map(({ key, name, ...restField }, index) => {
-                    const rawLabels = form.getFieldValue('labels') || '';
-                    const labelArr = rawLabels.split(',').map((l: string) => l.trim()).filter(Boolean);
+                    const rawLabels = form.getFieldValue("labels") || "";
+                    const labelArr = rawLabels.split(",").map((l: string) => l.trim()).filter(Boolean);
                     const sliceLabel = labelArr[index] || `Slice #${index + 1}`;
                     return (
                       <Form.Item
                         {...restField}
                         key={key}
                         label={`Color for ${sliceLabel}`}
-                        name={[name, 'color']}
-                        rules={[{ required: true, message: 'Please pick a color' }]}
+                        name={[name, "color"]}
+                        rules={[{ required: true, message: "Please pick a color" }]}
                       >
                         <Input type="color" />
                       </Form.Item>
@@ -1042,14 +1026,14 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
               )}
             </Form.List>
           )}
-          {chartType === 'funnel' && (
+          {chartType === "funnel" && (
             <Collapse>
               <Collapse.Panel header="Funnel Colors" key="funnelColors">
                 <Form.List name="funnelColors">
                   {(fields) => {
-                    const rawLabels = form.getFieldValue('labels') || '';
+                    const rawLabels = form.getFieldValue("labels") || "";
                     const labelArr = rawLabels
-                      .split(',')
+                      .split(",")
                       .map((l: string) => l.trim())
                       .filter(Boolean);
                     return (
@@ -1060,9 +1044,9 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                             <Form.Item
                               {...restField}
                               key={key}
-                              name={[name, 'color']}
+                              name={[name, "color"]}
                               label={`Color for ${funnelLabel}`}
-                              rules={[{ required: true, message: 'Please pick a color' }]}
+                              rules={[{ required: true, message: "Please pick a color" }]}
                             >
                               <Input type="color" />
                             </Form.Item>
@@ -1078,7 +1062,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           <Form.Item
             name="worksheetName"
             label="Worksheet"
-            rules={[{ required: true, message: 'Please select a worksheet' }]}
+            rules={[{ required: true, message: "Please select a worksheet" }]}
           >
             <Select placeholder="Select worksheet">
               {availableWorksheets.map((sheet) => (
@@ -1092,10 +1076,10 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
             name="associatedRange"
             label="Data Range"
             rules={[
-              { required: true, message: 'Please enter a data range' },
+              { required: true, message: "Please enter a data range" },
               {
                 pattern: /^[A-Za-z]{1,3}[1-9][0-9]{0,6}:[A-Za-z]{1,3}[1-9][0-9]{0,6}$/,
-                message: 'Please enter a valid range (e.g., A1:B10)',
+                message: "Please enter a valid range (e.g., A1:B10)",
               },
             ]}
           >
@@ -1116,18 +1100,18 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                     key={key}
                     style={{
                       marginBottom: 16,
-                      borderBottom: '1px solid #eee',
+                      borderBottom: "1px solid #eee",
                       paddingBottom: 16,
                     }}
                   >
                     <Form.Item
                       {...restField}
-                      name={[name, 'label']}
+                      name={[name, "label"]}
                       label="Dataset Label"
                       rules={[
                         {
                           required: true,
-                          message: 'Please enter dataset label',
+                          message: "Please enter dataset label",
                         },
                       ]}
                     >
@@ -1135,17 +1119,17 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                     </Form.Item>
                     <Form.Item
                       {...restField}
-                      name={[name, 'type']}
+                      name={[name, "type"]}
                       label="Dataset Chart Type"
                       initialValue="line"
                       rules={[
                         {
                           required: true,
-                          message: 'Please select chart type for this dataset',
+                          message: "Please select chart type for this dataset",
                         },
                       ]}
                     >
-                      <Select disabled={['pie', 'doughnut', 'polarArea'].includes(chartType)}>
+                      <Select disabled={["pie", "doughnut", "polarArea"].includes(chartType)}>
                         <Option value="bar">Bar</Option>
                         <Option value="line">Line</Option>
                         <Option value="pie">Pie</Option>
@@ -1167,34 +1151,34 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                       noStyle
                     >
                       {() => {
-                        const dsType = form.getFieldValue(['datasets', name, 'type']);
-                        if (dsType === 'treemap') {
+                        const dsType = form.getFieldValue(["datasets", name, "type"]);
+                        if (dsType === "treemap") {
                           return (
                             <>
-                              <Form.List name={[name, 'tree']}>
+                              <Form.List name={[name, "tree"]}>
                                 {(dataFields, { add: addData, remove: removeData }) => (
                                   <>
                                     {dataFields.map(({ key: dataKey, name: dataName, ...dataRestField }) => (
                                       <Space
                                         key={dataKey}
-                                        style={{ display: 'flex', marginBottom: 8 }}
+                                        style={{ display: "flex", marginBottom: 8 }}
                                         align="baseline"
                                       >
                                         <Form.Item
                                           {...dataRestField}
-                                          name={[dataName, 'name']}
-                                          rules={[{ required: true, message: 'Missing label' }]}
+                                          name={[dataName, "name"]}
+                                          rules={[{ required: true, message: "Missing label" }]}
                                         >
                                           <Input placeholder="Name" />
                                         </Form.Item>
                                         <Form.Item
                                           {...dataRestField}
-                                          name={[dataName, 'value']}
+                                          name={[dataName, "value"]}
                                           rules={[
-                                            { required: true, message: 'Missing value' },
+                                            { required: true, message: "Missing value" },
                                             {
-                                              type: 'number',
-                                              message: 'Value must be a number',
+                                              type: "number",
+                                              message: "Value must be a number",
                                             },
                                           ]}
                                         >
@@ -1213,33 +1197,33 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                               </Form.List>
                             </>
                           );
-                        } else if (dsType === 'boxplot') {
+                        } else if (dsType === "boxplot") {
                           return (
                             <>
                               <Form.Item
                                 {...restField}
-                                name={[name, 'data']}
+                                name={[name, "data"]}
                                 label="BoxPlot Data (JSON or CSV)"
                               >
                                 <TextArea rows={2} />
                               </Form.Item>
                               <Form.Item
                                 {...restField}
-                                name={[name, 'outlierColor']}
+                                name={[name, "outlierColor"]}
                                 label="Outlier Color"
                               >
                                 <Input type="color" />
                               </Form.Item>
                               <Form.Item
                                 {...restField}
-                                name={[name, 'medianColor']}
+                                name={[name, "medianColor"]}
                                 label="Median Color"
                               >
                                 <Input type="color" />
                               </Form.Item>
                               <Form.Item
                                 {...restField}
-                                name={[name, 'whiskerColor']}
+                                name={[name, "whiskerColor"]}
                                 label="Whisker Color"
                               >
                                 <Input type="color" />
@@ -1250,40 +1234,40 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                           return (
                             <Form.Item
                               {...restField}
-                              name={[name, 'data']}
+                              name={[name, "data"]}
                               label="Data Points"
                               rules={[
                                 {
                                   required: true,
-                                  message: 'Please enter data points',
+                                  message: "Please enter data points",
                                 },
                                 {
                                   validator: (_, value) => {
-                                    const dsType = form.getFieldValue(['datasets', name, 'type']);
+                                    const dsType = form.getFieldValue(["datasets", name, "type"]);
                                     if (!value) return Promise.resolve();
-                                    if (dsType === 'bubble') {
+                                    if (dsType === "bubble") {
                                       const segments = value
-                                        .split(';')
+                                        .split(";")
                                         .map((s: string) => s.trim())
                                         .filter(Boolean);
                                       for (let seg of segments) {
-                                        const parts = seg.split(',').map((v: string) => v.trim());
+                                        const parts = seg.split(",").map((v: string) => v.trim());
                                         if (parts.length !== 3 || parts.some((p: string) => isNaN(Number(p)))) {
                                           return Promise.reject(
-                                            new Error('Bubble data must be "x,y,r" triplets, separated by semicolons.')
+                                            new Error("Bubble data must be x,y,r triplets, separated by semicolons.")
                                           );
                                         }
                                       }
-                                    } else if (dsType === 'scatter') {
+                                    } else if (dsType === "scatter") {
                                       const segments = value
-                                        .split(';')
+                                        .split(";")
                                         .map((s: string) => s.trim())
                                         .filter(Boolean);
                                       for (let seg of segments) {
-                                        const parts = seg.split(',').map((v: string) => v.trim());
+                                        const parts = seg.split(",").map((v: string) => v.trim());
                                         if (parts.length !== 2 || parts.some((p: string) => isNaN(Number(p)))) {
                                           return Promise.reject(
-                                            new Error('Scatter data must be "x,y" pairs, separated by semicolons.')
+                                            new Error("Scatter data must be x,y pairs, separated by semicolons.")
                                           );
                                         }
                                       }
@@ -1299,15 +1283,15 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                         }
                       }}
                     </Form.Item>
-                    {![ 'pie', 'doughnut', 'polarArea', 'bubble', 'funnel'].includes(chartType) && (
+                    {![ "pie", "doughnut", "polarArea", "bubble", "funnel"].includes(chartType) && (
                       <Form.Item
                         {...restField}
-                        name={[name, 'backgroundColor']}
+                        name={[name, "backgroundColor"]}
                         label="Background Color"
                         rules={[
                           {
                             required: true,
-                            message: 'Please pick a background color',
+                            message: "Please pick a background color",
                           },
                         ]}
                       >
@@ -1316,12 +1300,12 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                     )}
                     <Form.Item
                       {...restField}
-                      name={[name, 'borderColor']}
+                      name={[name, "borderColor"]}
                       label="Border Color"
                       rules={[
                         {
                           required: true,
-                          message: 'Please pick a border color',
+                          message: "Please pick a border color",
                         },
                       ]}
                     >
@@ -1329,18 +1313,18 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                     </Form.Item>
                     <Form.Item
                       {...restField}
-                      name={[name, 'borderWidth']}
+                      name={[name, "borderWidth"]}
                       label="Border Width"
                       rules={[
                         {
                           required: true,
-                          message: 'Please enter border width',
+                          message: "Please enter border width",
                         },
                       ]}
                     >
                       <InputNumber min={0} />
                     </Form.Item>
-                    {!['pie', 'doughnut', 'polarArea'].includes(chartType) && (
+                    {!["pie", "doughnut", "polarArea"].includes(chartType) && (
                       <Button
                         type="dashed"
                         onClick={() => remove(name)}
@@ -1352,17 +1336,17 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                     )}
                   </div>
                 ))}
-                {!['pie', 'doughnut', 'polarArea'].includes(chartType) && (
+                {!["pie", "doughnut", "polarArea"].includes(chartType) && (
                   <Form.Item>
                     <Button
                       type="dashed"
                       onClick={() =>
                         add({
-                          label: '',
-                          type: 'bar',
-                          data: '',
-                          backgroundColor: '#4caf50',
-                          borderColor: '#4caf50',
+                          label: "",
+                          type: "bar",
+                          data: "",
+                          backgroundColor: "#4caf50",
+                          borderColor: "#4caf50",
                           borderWidth: 1,
                         })
                       }
@@ -1376,11 +1360,14 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
               </>
             )}
           </Form.List>
-          {chartType === 'boxplot' && (
+          {chartType === "boxplot" && (
             <Form.List name="boxplotSampleColors">
               {(fields) => {
-                const labelStr = form.getFieldValue('labels') || '';
-                const labelArr = labelStr.split(',').map((s: String) => s.trim()).filter(Boolean);
+                const labelStr = form.getFieldValue("labels") || "";
+                const labelArr = labelStr
+                  .split(",")
+                  .map((s: String) => s.trim())
+                  .filter(Boolean);
                 return (
                   <>
                     {fields.map(({ key, name, ...restField }, index) => {
@@ -1389,9 +1376,9 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                         <Form.Item
                           {...restField}
                           key={key}
-                          name={[name, 'color']}
+                          name={[name, "color"]}
                           label={`Color for ${sampleLabel}`}
-                          rules={[{ required: true, message: 'Please pick a color' }]}
+                          rules={[{ required: true, message: "Please pick a color" }]}
                         >
                           <Input type="color" />
                         </Form.Item>
@@ -1402,7 +1389,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
               }}
             </Form.List>
           )}
-          {chartType === 'bubble' && (
+          {chartType === "bubble" && (
             <Collapse>
               <Collapse.Panel header="Bubble Colors" key="bubbleColors">
                 <Form.List name="bubbleColors">
@@ -1412,9 +1399,9 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                         <Form.Item
                           {...restField}
                           key={key}
-                          name={[name, 'color']}
+                          name={[name, "color"]}
                           label={`Color for Bubble #${index + 1}`}
-                          rules={[{ required: true, message: 'Please pick a color' }]}
+                          rules={[{ required: true, message: "Please pick a color" }]}
                         >
                           <Input type="color" />
                         </Form.Item>
@@ -1426,14 +1413,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
             </Collapse>
           )}
           <Collapse>
-            {![
-              'pie',
-              'doughnut',
-              'polarArea',
-              'radar',
-              'funnel',
-              'treemap',
-            ].includes(chartType) && (
+            {!["pie", "doughnut", "polarArea", "radar", "funnel", "treemap"].includes(chartType) && (
               <>
                 <Panel header="Axis Settings" key="axis">
                   <Form.Item label="X-Axis Type" name="xAxisType">
@@ -1479,7 +1459,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                   </Form.Item>
                 </Panel>
                 <Panel header="Styling" key="styling">
-                  {![ 'pie', 'doughnut', 'polarArea', 'bubble', 'funnel' ].includes(chartType) && (
+                  {!["pie", "doughnut", "polarArea", "bubble", "funnel"].includes(chartType) && (
                     <Form.Item label="Chart Background Color" name="chartBackgroundColor">
                       <Input type="color" />
                     </Form.Item>
@@ -1521,12 +1501,12 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           </Form.Item>
         </>
       )}
-      {widget.type === 'gantt' && (
+      {widget.type === "gantt" && (
         <>
           <Form.Item
             name="title"
             label="Gantt Chart Title"
-            rules={[{ required: true, message: 'Please enter Gantt chart title' }]}
+            rules={[{ required: true, message: "Please enter Gantt chart title" }]}
           >
             <Input />
           </Form.Item>
@@ -1538,27 +1518,27 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                     key={key}
                     style={{
                       marginBottom: 16,
-                      borderBottom: '1px solid #eee',
+                      borderBottom: "1px solid #eee",
                       paddingBottom: 16,
                     }}
                   >
-                    <Form.Item {...restField} name={[name, 'id']} hidden>
+                    <Form.Item {...restField} name={[name, "id"]} hidden>
                       <Input />
                     </Form.Item>
-                    <Form.Item {...restField} name={[name, 'name']} label="Task Name" tooltip="Non-editable">
+                    <Form.Item {...restField} name={[name, "name"]} label="Task Name" tooltip="Non-editable">
                       <Input disabled />
                     </Form.Item>
                     <Form.Item
                       {...restField}
-                      name={[name, 'color']}
+                      name={[name, "color"]}
                       label="Task Color"
-                      rules={[{ required: true, message: 'Please pick a task color' },]}
+                      rules={[{ required: true, message: "Please pick a task color" },]}
                     >
                       <Input type="color" />
                     </Form.Item>
                     <Form.Item
                       {...restField}
-                      name={[name, 'progressColor']}
+                      name={[name, "progressColor"]}
                       label="Progress Fill Color"
                       initialValue="#00AABB"
                     >
@@ -1571,12 +1551,12 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           </Form.List>
         </>
       )}
-      {widget.type === 'metric' && (
+      {widget.type === "metric" && (
         <>
           <Form.Item
             name="worksheetName"
             label="Worksheet"
-            rules={[{ required: true, message: 'Please select a worksheet' }]}
+            rules={[{ required: true, message: "Please select a worksheet" }]}
           >
             <Select placeholder="Select worksheet">
               {availableWorksheets.map((sheet) => (
@@ -1590,10 +1570,10 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
             name="cellAddress"
             label="Linked Cell"
             rules={[
-              { required: true, message: 'Please select a cell' },
+              { required: true, message: "Please select a cell" },
               {
                 pattern: /^[A-Za-z]{1,3}[1-9][0-9]{0,6}$/,
-                message: 'Please enter a valid cell address (e.g., E8)',
+                message: "Please enter a valid cell address (e.g., E8)",
               },
             ]}
           >
@@ -1604,26 +1584,26 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
               icon={<SelectOutlined />}
               onClick={async () => {
                 if (Office.context.ui?.messageParent) {
-                  Office.context.ui.messageParent(JSON.stringify({ type: 'selectCell', widgetId }));
+                  Office.context.ui.messageParent(JSON.stringify({ type: "selectCell", widgetId }));
                 } else {
                   try {
                     await Excel.run(async (context) => {
                       const rng = context.workbook.getSelectedRange();
-                      rng.load(['address', 'worksheet']);
+                      rng.load(["address", "worksheet"]);
                       await context.sync();
                       const selectedSheet = rng.worksheet;
-                      selectedSheet.load('name');
+                      selectedSheet.load("name");
                       await context.sync();
                       const sheetName = selectedSheet.name;
-                      const address = rng.address.includes('!') ? rng.address.split('!')[1] : rng.address;
+                      const address = rng.address.includes("!") ? rng.address.split("!")[1] : rng.address;
                       form.setFieldsValue({
                         cellAddress: address,
                         worksheetName: sheetName,
                       });
                     });
                   } catch (err) {
-                    console.error('Error selecting cell:', err);
-                    message.error('Failed to select cell from Excel.');
+                    console.error("Error selecting cell:", err);
+                    message.error("Failed to select cell from Excel.");
                   }
                 }
               }}
@@ -1634,7 +1614,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           <Form.Item
             name="format"
             label="Display Format"
-            rules={[{ required: true, message: 'Please select a display format' }]}
+            rules={[{ required: true, message: "Please select a display format" }]}
           >
             <Select placeholder="Select format">
               <Option value="percentage">Percentage (%)</Option>
@@ -1648,14 +1628,14 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           <Form.Item
             name="targetValue"
             label="Target Value"
-            rules={[{ required: true, message: 'Please enter a target value' }]}
+            rules={[{ required: true, message: "Please enter a target value" }]}
           >
             <InputNumber placeholder="Enter target" />
           </Form.Item>
           <Form.Item
             name="comparison"
             label="Comparison Type"
-            rules={[{ required: true, message: 'Please select a comparison type' }]}
+            rules={[{ required: true, message: "Please select a comparison type" }]}
           >
             <Select placeholder="Select comparison type">
               <Option value="greater">Greater or Equal</Option>
@@ -1665,7 +1645,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           <Form.Item
             name="fontSize"
             label="Font Size"
-            rules={[{ required: true, message: 'Please enter a font size' }]}
+            rules={[{ required: true, message: "Please enter a font size" }]}
           >
             <InputNumber min={12} max={100} placeholder="Font size" />
           </Form.Item>

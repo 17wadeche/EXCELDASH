@@ -1,9 +1,8 @@
 // src/taskpane/components/SelectTableModal.tsx
-import React, { useEffect, useState, useContext } from 'react';
-import { Modal, Select, message } from 'antd';
-import { DashboardContext } from '../context/DashboardContext';
-import { TableWidget, TableData } from '../components/types'; 
-import TableWidgetComponent from './widgets/TableWidget';
+import React, { useEffect, useState, useContext } from "react";
+import { Modal, Select, message } from "antd";
+import { DashboardContext } from "../context/DashboardContext";
+import { TableWidget, TableData } from "../components/types";
 const { Option } = Select;
 
 interface SelectTableModalProps {
@@ -16,9 +15,9 @@ interface SelectTableModalProps {
 const SelectTableModal: React.FC<SelectTableModalProps> = ({ visible, widget, onComplete, onCancel }) => {
   const dashboardContext = useContext(DashboardContext);
   if (!dashboardContext) {
-    throw new Error('DashboardContext must be used within a DashboardProvider');
+    throw new Error("DashboardContext must be used within a DashboardProvider");
   }
-  const { getAvailableTables, updateWidget } = dashboardContext;
+  const { updateWidget } = dashboardContext;
   const [tables, setTables] = useState<{ name: string; sheetName: string }[]>([]);
   const [selectedTable, setSelectedTable] = useState<{ name: string; sheetName: string } | null>(null);
   useEffect(() => {
@@ -26,10 +25,10 @@ const SelectTableModal: React.FC<SelectTableModalProps> = ({ visible, widget, on
       const fetchTables = async () => {
         const availableTables = await dashboardContext.getAvailableTables();
         if (availableTables.length === 0) {
-          message.warning('No tables found in the Excel workbook.');
+          message.warning("No tables found in the Excel workbook.");
           onCancel();
         } else {
-          setTables(availableTables.map(t => ({ name: t.name, sheetName: t.sheetName })));
+          setTables(availableTables.map((t) => ({ name: t.name, sheetName: t.sheetName })));
         }
       };
       fetchTables();
@@ -51,28 +50,22 @@ const SelectTableModal: React.FC<SelectTableModalProps> = ({ visible, widget, on
         },
       };
       onComplete(updatedWidget);
-      message.success('Table widget added successfully!');
+      message.success("Table widget added successfully!");
     } else {
-      message.warning('Please select a table.');
+      message.warning("Please select a table.");
     }
   };
   return (
-    <Modal
-      title="Select a Table to Add"
-      open={visible}
-      onOk={handleOk}
-      onCancel={onCancel}
-      okText="Add Table"
-    >
+    <Modal title="Select a Table to Add" open={visible} onOk={handleOk} onCancel={onCancel} okText="Add Table">
       <Select
-        style={{ width: '100%' }}
+        style={{ width: "100%" }}
         placeholder="Select an Excel table"
         onChange={(value) => {
-          const table = tables.find(t => t.name === value);
+          const table = tables.find((t) => t.name === value);
           setSelectedTable(table || null);
         }}
       >
-        {tables.map(table => (
+        {tables.map((table) => (
           <Option key={table.name} value={table.name}>
             {table.name} (Sheet: {table.sheetName})
           </Option>

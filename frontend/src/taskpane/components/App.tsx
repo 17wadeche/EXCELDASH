@@ -1,22 +1,22 @@
 // src/taskpane/components/App.tsx
 
-import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import CustomLayout from './CustomLayout';
-import DashboardPage from './DashboardPage';
-import DashboardList from './DashboardList';
-import CreateDashboard from './CreateDashboard';
-import Dashboard from './Dashboard';
-import RegisterPage from './RegisterPage';
-import LoginPage from './LoginPage';
-import SubscribePage from './SubscribePage';
-import EditTemplate from './EditTemplate';
-import ForgotPasswordPage from './ForgotPasswordPage';
-import ResetPasswordPage from './ResetPasswordPage';
-import EnterResetCodePage from './EnterResetCodePage';
-import { DashboardProvider } from '../context/DashboardContext';
-import PrivateRoute from './PrivateRoute';
-import { AuthProvider } from '../context/AuthContext';
+import React from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
+import CustomLayout from "./CustomLayout";
+import DashboardPage from "./DashboardPage";
+import DashboardList from "./DashboardList";
+import CreateDashboard from "./CreateDashboard";
+import Dashboard from "./Dashboard";
+import RegisterPage from "./RegisterPage";
+import LoginPage from "./LoginPage";
+import SubscribePage from "./SubscribePage";
+import EditTemplate from "./EditTemplate";
+import ForgotPasswordPage from "./ForgotPasswordPage";
+import ResetPasswordPage from "./ResetPasswordPage";
+import EnterResetCodePage from "./EnterResetCodePage";
+import { DashboardProvider } from "../context/DashboardContext";
+import PrivateRoute from "./PrivateRoute";
+import { AuthProvider } from "../context/AuthContext";
 
 const App: React.FC = () => {
   return (
