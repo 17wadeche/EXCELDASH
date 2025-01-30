@@ -34,7 +34,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const token = localStorage.getItem("token");
       const email = localStorage.getItem("userEmail");
       if (token && email) {
-        setAuthState({ isLoggedIn: true, isVerified: false, isLoading: true });
+        setAuthState({ isLoggedIn: true, isVerified: true, isLoading: true });
         try {
           const registration = await checkRegistration(email);
           if (registration.registered) {
