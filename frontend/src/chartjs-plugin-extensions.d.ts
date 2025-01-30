@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // chartjs-plugin-extensions.d.ts
 
 import { AnnotationOptions } from "chartjs-plugin-annotation";

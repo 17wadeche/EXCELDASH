@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 // src/utils/excelUtils.ts
 /// <reference types="office-js" />
 import { v4 as uuidv4 } from "uuid";

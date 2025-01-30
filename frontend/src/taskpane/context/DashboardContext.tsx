@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 /// <reference types="office-js" />
 // src/taskpane/context/DashboardContext.tsx
 import React, { createContext, useState, useEffect, useCallback, useRef } from "react";

@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 // src/taskpane/components/SelectRangeButton.tsx
 
 import React, { useContext } from "react";

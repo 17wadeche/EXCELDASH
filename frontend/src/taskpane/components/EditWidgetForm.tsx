@@ -266,10 +266,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           const bc: { color: string }[] = cleanedValues.bubbleColors || [];
           bubbleColorsArray = bc.map((obj) => obj.color);
         }
-        if (finalChartType === "boxplot") {
-          const bc: { color: string }[] = cleanedValues.boxplotSampleColors || [];
-          boxplotColorsArray = bc.map((obj) => obj.color);
-        }
         if (finalChartType === "scatter" || finalChartType === "bubble") {
           cleanedValues.xAxisType = "linear";
         }

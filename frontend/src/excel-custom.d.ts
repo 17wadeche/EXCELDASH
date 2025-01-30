@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 // src/excel-custom.d.ts
 
 import "office-js";

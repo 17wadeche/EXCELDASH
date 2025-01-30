@@ -18,7 +18,7 @@ const CreateDashboard: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const navigate = useNavigate();
   const {
-    setDashboardTitle:
+    setDashboardTitle,
     setWidgets,
     setCurrentWorkbookId,
     setCurrentDashboardId,
