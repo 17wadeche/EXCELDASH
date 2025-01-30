@@ -1675,12 +1675,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
       message.error("Failed to migrate widgets to use associatedRange.");
     }
   };
-  const promptUserToSelectWorksheetAndRange = async (): Promise<{ worksheetName: string; associatedRange: string }> => {
-    return {
-      worksheetName: "Sheet1",
-      associatedRange: "A1:B4",
-    };
-  };
   const importChartImageFromExcel = async () => {
     if (!currentDashboardId || !currentDashboard) {
       console.warn("No current dashboard ID or dashboard available.");
