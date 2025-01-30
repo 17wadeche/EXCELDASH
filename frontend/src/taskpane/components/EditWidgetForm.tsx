@@ -189,11 +189,16 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
     }
     setZIndex(widget.zIndex || 0);
   }, [widget, form]);
+  useEffect(() => {
+    const { maxZ, minZ } = getZIndexBounds();
+    setZIndex(widget.zIndex || maxZ + 1);
+  }, [widgets]);
   const getZIndexBounds = () => {
-    const zIndices = widgets.map((w) => w.zIndex || 0);
-    const maxZ = Math.max(...zIndices);
-    const minZ = Math.min(...zIndices);
-    return { maxZ, minZ };
+    const zIndices = widgets?.map((w) => w.zIndex || 0) || [0];
+    return {
+      maxZ: Math.max(...zIndices),
+      minZ: Math.min(...zIndices),
+    };
   };
   const renderZIndexControls = () => {
     const { maxZ, minZ } = getZIndexBounds();
@@ -203,7 +208,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           <InputNumber min={0} value={zIndex} onChange={(value) => setZIndex(value || 0)} />
           <Radio.Group
             onChange={(e) => {
-              const newZ = e.target.value === "front" ? zIndex + 1 : Math.max(0, zIndex - 1);
+              const newZ = e.target.value === "front" ? maxZ + 1 : Math.max(0, minZ - 1);
               setZIndex(newZ);
               form.setFieldsValue({ zIndex: newZ });
             }}
