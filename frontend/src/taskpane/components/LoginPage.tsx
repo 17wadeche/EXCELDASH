@@ -31,7 +31,7 @@ const LoginPage: React.FC = () => {
       if (response.success) {
         setAuthState({
           isLoggedIn: true,
-          isVerified: false,
+          isVerified: true,
           isLoading: true,
         });
         message.success("Login successful.");
