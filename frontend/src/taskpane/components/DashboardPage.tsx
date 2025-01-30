@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 // src/taskpane/components/DashboardPage.tsx
 
 import React, { useContext, useEffect, useState } from "react";
@@ -42,7 +43,7 @@ const DashboardPage: React.FC = () => {
             }
           }
         } else {
-          console.log("No ID? No problem. Let’s create a brand-spankin’ new blank dashboard!");
+          console.log("No ID? No problem. Let’s create a brand new blank dashboard!");
           const newDashboard: DashboardItem = {
             id: uuidv4(),
             title: "Untitled Dashboard",

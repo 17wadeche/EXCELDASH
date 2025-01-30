@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 // src/taskpane/components/ResetPasswordPage.tsx
 
 import React, { useState } from "react";

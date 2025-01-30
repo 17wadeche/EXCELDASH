@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable no-undef */
 // src/taskpane/components/CustomLayout.tsx
 
 import React, { useContext, useState } from "react";
@@ -148,7 +150,7 @@ const CustomLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) =>
               <Menu.Item key="save-version" icon={<SaveOutlined />} onClick={saveDashboardVersion}>
                 Save Version
               </Menu.Item>
-              <Menu.Item 
+              <Menu.Item
                 key="version-history"
                 icon={<HistoryOutlined />}
                 onClick={() => setIsVersionHistoryVisible(true)}
@@ -175,7 +177,7 @@ const CustomLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) =>
           </div>
         </Content>
         {isInDashboard && (
-          <Modal title="Submit Feedback" open={isFeedbackModalVisible} onCancel={handleFeedbackCancel} footer={null} >
+          <Modal title="Submit Feedback" open={isFeedbackModalVisible} onCancel={handleFeedbackCancel} footer={null}>
             <Form form={feedbackForm} onFinish={handleFeedbackSubmit}>
               <Form.Item name="name" label="Name">
                 <Input placeholder="Your name (optional)" />

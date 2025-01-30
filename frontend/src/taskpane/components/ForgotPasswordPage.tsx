@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 // src/taskpane/components/ForgotPasswordPage.tsx
 import React, { useState } from "react";
 import { Layout, Form, Input, Button, message, Typography } from "antd";

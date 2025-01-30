@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 // src/taskpane/components/LoginPage.tsx
 
 import React, { useState, useContext } from "react";

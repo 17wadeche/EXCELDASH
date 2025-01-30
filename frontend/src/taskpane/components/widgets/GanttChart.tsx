@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 // src/taskpane/components/widgets/GanttChartComponent.tsx
 import React, { useState, useEffect } from "react";
 import { Row, Col } from "antd";

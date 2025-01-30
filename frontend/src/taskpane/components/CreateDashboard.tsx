@@ -113,10 +113,7 @@ const CreateDashboard: React.FC = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [fetchedTemplates, fetchedDashboards] = await Promise.all([
-          getTemplates(),
-          getDashboards(),
-        ]);
+        const [fetchedTemplates, fetchedDashboards] = await Promise.all([getTemplates(), getDashboards()]);
         setTemplates(fetchedTemplates);
         setDashboards(fetchedDashboards);
       } catch (error) {
@@ -244,7 +241,7 @@ const CreateDashboard: React.FC = () => {
                 { range: "A42", text: "Funnel Chart Data", bold: true, fontSize: 14 },
                 { range: "A50", text: "Treemap Chart Data", bold: true, fontSize: 14 },
               ];
-              headers.forEach(header => {
+              headers.forEach((header) => {
                 const headerRange = exampleSheet.getRange(header.range);
                 headerRange.values = [[header.text]];
                 if (header.bold) {
@@ -268,26 +265,20 @@ const CreateDashboard: React.FC = () => {
               exampleSheet.getRange("A15:F15").values = [["Value", 45, 25, 15, 10, 5]];
               // ========== RADAR CHART DATA ==========
               exampleSheet.getRange("A18:F18").values = [
-                ["", "Strength", "Speed", "Agility", "Intelligence", "Endurance"]
+                ["", "Strength", "Speed", "Agility", "Intelligence", "Endurance"],
               ];
               exampleSheet.getRange("A19:F19").values = [["Series1", 10, 8, 6, 7, 9]];
               exampleSheet.getRange("A20:F20").values = [["Series2", 5, 6, 9, 7, 4]];
               // ========== POLAR AREA CHART DATA ==========
-              exampleSheet.getRange("A23:F23").values = [
-                ["", "North", "East", "South", "West", "Center"]
-              ];
+              exampleSheet.getRange("A23:F23").values = [["", "North", "East", "South", "West", "Center"]];
               exampleSheet.getRange("A24:F24").values = [["Value", 11, 16, 9, 14, 5]];
               // ========== BUBBLE CHART DATA ==========
-              exampleSheet.getRange("A27:E27").values = [
-                ["", "Point1", "Point2", "Point3", "Point4"]
-              ];
+              exampleSheet.getRange("A27:E27").values = [["", "Point1", "Point2", "Point3", "Point4"]];
               exampleSheet.getRange("A28:E28").values = [["X", 5, 10, 15, 20]];
               exampleSheet.getRange("A29:E29").values = [["Y", 10, 15, 5, 12]];
               exampleSheet.getRange("A30:E30").values = [["R", 10, 20, 15, 25]];
               // ========== SCATTER CHART DATA ==========
-              exampleSheet.getRange("A33:E33").values = [
-                ["", "Point1", "Point2", "Point3", "Point4"]
-              ];
+              exampleSheet.getRange("A33:E33").values = [["", "Point1", "Point2", "Point3", "Point4"]];
               exampleSheet.getRange("A34:E34").values = [["X", 1, 2, 3, 4]];
               exampleSheet.getRange("A35:E35").values = [["Y", 2, 5, 3, 7]];
               // ========== BOX PLOT DATA ==========

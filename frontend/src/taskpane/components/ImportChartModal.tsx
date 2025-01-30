@@ -1,3 +1,6 @@
+/* eslint-disable office-addins/call-sync-before-read */
+/* eslint-disable office-addins/load-object-before-read */
+/* eslint-disable no-undef */
 // src/taskpane/components/ImportChartModal.tsx
 
 import React, { useState, useEffect, useContext } from "react";

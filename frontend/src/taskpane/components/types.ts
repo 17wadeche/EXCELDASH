@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // src/taskpane/components/types.ts
 
 import { ColumnType } from "antd/lib/table/interface";
@@ -79,17 +80,23 @@ export type Widget =
   | TableWidget
   | LineWidget;
 
-
-export type WidgetData<T extends WidgetType> =
-  T extends "title" ? TitleWidgetData :
-  T extends "text" ? TextData :
-  T extends "chart" ? ChartData :
-  T extends "gantt" ? GanttWidgetData :
-  T extends "image" ? ImageWidgetData :
-  T extends "metric" ? MetricData :
-  T extends "table" ? TableData :
-  T extends "line" ? LineWidgetData :
-  never;
+export type WidgetData<T extends WidgetType> = T extends "title"
+  ? TitleWidgetData
+  : T extends "text"
+    ? TextData
+    : T extends "chart"
+      ? ChartData
+      : T extends "gantt"
+        ? GanttWidgetData
+        : T extends "image"
+          ? ImageWidgetData
+          : T extends "metric"
+            ? MetricData
+            : T extends "table"
+              ? TableData
+              : T extends "line"
+                ? LineWidgetData
+                : never;
 
 export interface MetricData {
   worksheetName: string;
@@ -102,7 +109,7 @@ export interface MetricData {
   fontSize: number;
   textColor: string;
   backgroundColor: string;
-  titleAlignment: "left" | "center"| "right";
+  titleAlignment: "left" | "center" | "right";
 }
 
 export interface TableItem {
@@ -167,7 +174,7 @@ export interface ChartData {
   labels: string[];
   scales?: {
     x?: {
-      type?: "category" | "linear" | "logarithmic"| "time";
+      type?: "category" | "linear" | "logarithmic" | "time";
       title?: {
         display?: boolean;
         text?: string;
@@ -238,7 +245,7 @@ export { ChartType, ChartDataset };
 export type ComponentData = TextData | ChartData | GanttWidgetData;
 export interface DashboardComponent {
   id: string;
-  type: "gantt" | "chart" | "text" | "image"| "metric" | "table" | "line";
+  type: "gantt" | "chart" | "text" | "image" | "metric" | "table" | "line";
   data: WidgetData<WidgetType>;
 }
 export type GridLayoutItem = Layout;

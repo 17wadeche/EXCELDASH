@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 // src/taskpane/components/widgets/SalesChart.tsx
 
 import React, { useRef, useEffect } from "react";
@@ -13,7 +14,7 @@ import {
   TimeSeriesScale,
   Tooltip,
   Legend,
-  TimeScale
+  TimeScale,
 } from "chart.js/auto";
 import { Bar, Line, Pie, Doughnut, Radar, Scatter, Bubble, PolarArea, Chart as BaseChart } from "react-chartjs-2";
 import "chartjs-adapter-moment";
@@ -54,7 +55,17 @@ const TreemapChart: React.FC<any> = (props) => {
 };
 
 const FunnelChart: React.FC<any> = (props) => {
-  return <BaseChart type="funnel" {...props} options={{ ...props.options, plugins: { ...props.options.plugins }, elements: { trapezoid: { width: 0.8, spacing: 2 }}}}/>;
+  return (
+    <BaseChart
+      type="funnel"
+      {...props}
+      options={{
+        ...props.options,
+        plugins: { ...props.options.plugins },
+        elements: { trapezoid: { width: 0.8, spacing: 2 } },
+      }}
+    />
+  );
 };
 
 const BoxPlotChart: React.FC<any> = (props) => {

@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 // src/taskpane/components/PromptWidgetDetailsModal.tsx
 
 import React from "react";
@@ -10,11 +11,7 @@ interface PromptWidgetDetailsModalProps {
   onCancel: () => void;
 }
 
-const PromptWidgetDetailsModal: React.FC<PromptWidgetDetailsModalProps> = ({
-  widget,
-  onComplete,
-  onCancel,
-}) => {
+const PromptWidgetDetailsModal: React.FC<PromptWidgetDetailsModalProps> = ({ widget, onComplete, onCancel }) => {
   const [form] = Form.useForm();
 
   const handleOk = () => {

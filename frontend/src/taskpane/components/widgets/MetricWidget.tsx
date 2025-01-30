@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 // src/taskpane/components/widgets/MetricWidget.tsx
 
 import React, { useEffect, useState, useContext } from "react";
@@ -114,7 +115,7 @@ const MetricWidget: React.FC<MetricWidgetProps> = ({ id, data }) => {
         }}
       >
         <Tooltip title="Drag Metric Widget" placement="top">
-          <Title level={4} style={{ margin: 0, fontSize: "12px"  }}>
+          <Title level={4} style={{ margin: 0, fontSize: "12px" }}>
             {data.displayName && data.displayName.trim() !== "" ? data.displayName : "Metric"}
           </Title>
         </Tooltip>

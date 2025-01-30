@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-key */
 // src/taskpane/components/VersionHistoryModal.tsx
 
 import React, { useContext } from "react";
@@ -23,8 +24,7 @@ const VersionHistoryModal: React.FC<VersionHistoryModalProps> = ({ visible, onCl
   }
   const versions = currentDashboard.versions;
   return (
-    <Modal title="Version History" open={visible} onCancel={onClose} footer={null}
-    >
+    <Modal title="Version History" open={visible} onCancel={onClose} footer={null}>
       <List
         dataSource={versions.sort((a, b) => (a.timestamp < b.timestamp ? 1 : -1))}
         renderItem={(version: DashboardVersion) => (

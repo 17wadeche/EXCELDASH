@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable no-undef */
 // src/taskpane/components/DashboardList.tsx
 
 import React, { useContext, useState, useEffect } from "react";
@@ -74,7 +76,7 @@ const DashboardList: React.FC = () => {
   const fetchUsers = async (query: string) => {
     try {
       setSearchingUsers(true);
-      const response = await searchUsers(query); 
+      const response = await searchUsers(query);
       setSearchedUsers(response);
     } catch (error: any) {
       console.error("Error searching users:", error);

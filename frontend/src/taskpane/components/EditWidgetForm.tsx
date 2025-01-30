@@ -1,9 +1,19 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable office-addins/load-object-before-read */
+/* eslint-disable office-addins/no-navigational-load */
+/* eslint-disable no-undef */
 /// <reference types="office-js" />
 // src/taskpane/components/EditWidgetForm.tsx
 
 import React, { useEffect, useState, useContext } from "react";
 import { Form, Input, Space, Button, InputNumber, message, Select, Switch, Collapse, Radio } from "antd";
-import { MinusCircleOutlined, PlusOutlined, SelectOutlined, ArrowUpOutlined, ArrowDownOutlined } from "@ant-design/icons";
+import {
+  MinusCircleOutlined,
+  PlusOutlined,
+  SelectOutlined,
+  ArrowUpOutlined,
+  ArrowDownOutlined,
+} from "@ant-design/icons";
 import moment from "moment";
 import { DashboardContext } from "../context/DashboardContext";
 import { Widget, TextData, ChartData, GanttWidgetData, MetricData, TitleWidgetData } from "./types";
@@ -186,7 +196,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
   }, [widget, form]);
 
   const getZIndexBounds = () => {
-    const zIndices = widgets.map(w => w.zIndex || 0);
+    const zIndices = widgets.map((w) => w.zIndex || 0);
     const maxZ = Math.max(...zIndices);
     const minZ = Math.min(...zIndices);
     return { maxZ, minZ };
@@ -198,11 +208,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
     return (
       <Form.Item label="Layer Position" name="zIndex">
         <Space>
-          <InputNumber
-            min={0}
-            value={zIndex}
-            onChange={(value) => setZIndex(value || 0)}
-          />
+          <InputNumber min={0} value={zIndex} onChange={(value) => setZIndex(value || 0)} />
           <Radio.Group
             onChange={(e) => {
               const newZ = e.target.value === "front" ? zIndex + 1 : Math.max(0, zIndex - 1);
@@ -248,14 +254,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
       }
       case "chart": {
         const finalChartType = cleanedValues.chartType === "area" ? "line" : cleanedValues.chartType;
-        const noAxisTypes = [
-          "pie",
-          "doughnut",
-          "polarArea",
-          "radar",
-          "funnel",
-          "treemap",
-        ];
+        const noAxisTypes = ["pie", "doughnut", "polarArea", "radar", "funnel", "treemap"];
         let sliceColorsArray: string[] = [];
         let bubbleColorsArray: string[] = [];
         if (["pie", "doughnut", "polarArea"].includes(finalChartType)) {
@@ -321,7 +320,10 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 if (rawData.startsWith("[")) {
                   parsed = JSON.parse(rawData);
                 } else if (rawData) {
-                  const rowStrings = rawData.split(";").map((r: String) => r.trim()).filter(Boolean);
+                  const rowStrings = rawData
+                    .split(";")
+                    .map((r: String) => r.trim())
+                    .filter(Boolean);
                   parsed = rowStrings.map((rowStr: String) => {
                     return rowStr.split(",").map((v: String) => parseFloat(v.trim()));
                   });
@@ -526,7 +528,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
             enabled: cleanedValues.enableDynamicUpdates || false,
             interval: cleanedValues.updateInterval || 5,
           },
-          ...(finalChartType === "boxplot" && {title: cleanedValues.title || "Box Plot"})
+          ...(finalChartType === "boxplot" && { title: cleanedValues.title || "Box Plot" }),
         } as ChartData;
         break;
       }
@@ -648,7 +650,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
         const labelStr = headerRow.join(",");
         const rawRows = data.slice(1);
         const treeItems = rawRows.map((row, rowIndex) => {
-          const [rawName, rawValue] = row; 
+          const [rawName, rawValue] = row;
           const name = String(rawName || `Item ${rowIndex + 1}`).trim();
           const value = parseFloat(String(rawValue).trim()) || 0;
           return { name, value };
@@ -824,12 +826,13 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
   };
   useEffect(() => {
     const rawLabels = form.getFieldValue("labels") || "";
-    const labelArr = rawLabels.split(",")
+    const labelArr = rawLabels
+      .split(",")
       .map((l: any) => l.trim())
       .filter(Boolean);
     const currentSliceColors = form.getFieldValue("sliceColors") || [];
     if (currentSliceColors.length !== labelArr.length) {
-      const updated = labelArr.map((_:any, idx:any) => currentSliceColors[idx] || getRandomColor());
+      const updated = labelArr.map((_: any, idx: any) => currentSliceColors[idx] || getRandomColor());
       form.setFieldsValue({ sliceColors: updated });
     }
   }, [form, form.getFieldValue("labels")]);
@@ -1004,7 +1007,10 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 <>
                   {fields.map(({ key, name, ...restField }, index) => {
                     const rawLabels = form.getFieldValue("labels") || "";
-                    const labelArr = rawLabels.split(",").map((l: string) => l.trim()).filter(Boolean);
+                    const labelArr = rawLabels
+                      .split(",")
+                      .map((l: string) => l.trim())
+                      .filter(Boolean);
                     const sliceLabel = labelArr[index] || `Slice #${index + 1}`;
                     return (
                       <Form.Item
@@ -1196,32 +1202,16 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                         } else if (dsType === "boxplot") {
                           return (
                             <>
-                              <Form.Item
-                                {...restField}
-                                name={[name, "data"]}
-                                label="BoxPlot Data (JSON or CSV)"
-                              >
+                              <Form.Item {...restField} name={[name, "data"]} label="BoxPlot Data (JSON or CSV)">
                                 <TextArea rows={2} />
                               </Form.Item>
-                              <Form.Item
-                                {...restField}
-                                name={[name, "outlierColor"]}
-                                label="Outlier Color"
-                              >
+                              <Form.Item {...restField} name={[name, "outlierColor"]} label="Outlier Color">
                                 <Input type="color" />
                               </Form.Item>
-                              <Form.Item
-                                {...restField}
-                                name={[name, "medianColor"]}
-                                label="Median Color"
-                              >
+                              <Form.Item {...restField} name={[name, "medianColor"]} label="Median Color">
                                 <Input type="color" />
                               </Form.Item>
-                              <Form.Item
-                                {...restField}
-                                name={[name, "whiskerColor"]}
-                                label="Whisker Color"
-                              >
+                              <Form.Item {...restField} name={[name, "whiskerColor"]} label="Whisker Color">
                                 <Input type="color" />
                               </Form.Item>
                             </>
@@ -1279,7 +1269,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                         }
                       }}
                     </Form.Item>
-                    {![ "pie", "doughnut", "polarArea", "bubble", "funnel"].includes(chartType) && (
+                    {!["pie", "doughnut", "polarArea", "bubble", "funnel"].includes(chartType) && (
                       <Form.Item
                         {...restField}
                         name={[name, "backgroundColor"]}
@@ -1528,7 +1518,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                       {...restField}
                       name={[name, "color"]}
                       label="Task Color"
-                      rules={[{ required: true, message: "Please pick a task color" },]}
+                      rules={[{ required: true, message: "Please pick a task color" }]}
                     >
                       <Input type="color" />
                     </Form.Item>
