@@ -35,7 +35,7 @@ const LoginPage: React.FC = () => {
           isLoading: true,
         });
         message.success("Login successful.");
-        navigate("dashboard-list");
+        navigate("/create");
       } else {
         message.error(response.message || "Login failed.");
         setAuthState({
