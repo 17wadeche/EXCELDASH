@@ -7,7 +7,6 @@ interface TitleWidgetProps {
 
 const TitleWidgetComponent: React.FC<TitleWidgetProps> = ({ data }) => {
   const { content, fontSize, textColor, backgroundColor, titleAlignment } = data;
-
   const style: React.CSSProperties = {
     fontSize,
     color: textColor,
@@ -16,7 +15,6 @@ const TitleWidgetComponent: React.FC<TitleWidgetProps> = ({ data }) => {
     margin: 0,
     padding: "10px",
   };
-
   return <h1 style={style}>{content}</h1>;
 };
 

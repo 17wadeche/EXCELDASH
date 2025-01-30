@@ -26,11 +26,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     isVerified: false,
     isLoading: false,
   });
-
   const setAuthState = (state: Partial<AuthState>) => {
     setAuthStateInternal((prevState) => ({ ...prevState, ...state }));
   };
-
   useEffect(() => {
     const initializeAuth = async () => {
       const token = localStorage.getItem("token");
@@ -53,7 +51,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
       }
     };
-
     initializeAuth();
   }, []);
 

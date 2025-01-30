@@ -34,7 +34,6 @@ const SelectTableModal: React.FC<SelectTableModalProps> = ({ visible, widget, on
       fetchTables();
     }
   }, [visible, dashboardContext, onCancel]);
-
   const handleOk = () => {
     if (selectedTable) {
       updateWidget(widget.id, {

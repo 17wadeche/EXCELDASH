@@ -5,7 +5,7 @@
 import React, { useState } from "react";
 import { Layout, Form, Input, Button, message, Modal } from "antd";
 import { useNavigate } from "react-router-dom";
-import { createCheckoutSession, checkSubscription } from "./../utils/api";
+import { createCheckoutSession } from "./../utils/api";
 
 const { Content } = Layout;
 
@@ -14,7 +14,6 @@ const SubscribePage: React.FC = () => {
   const [isSubscriptionModalVisible, setIsSubscriptionModalVisible] = useState(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const navigate = useNavigate();
-
   const initiateCheckout = async (plan: "monthly" | "yearly") => {
     if (!email) {
       message.error("Email is required for subscription.");
@@ -32,26 +31,9 @@ const SubscribePage: React.FC = () => {
       setIsSubscriptionModalVisible(false);
     }
   };
-
   const handleSubscribe = () => {
     setIsSubscriptionModalVisible(true);
   };
-
-  const handleSubscriptionSuccess = async () => {
-    try {
-      const subscriptionStatus = await checkSubscription(email);
-      if (subscriptionStatus.subscribed) {
-        message.success("Subscription successful!");
-        navigate("/create");
-      } else {
-        message.error("Subscription not confirmed.");
-      }
-    } catch (error) {
-      console.error("Error checking subscription:", error);
-      message.error("Failed to verify subscription.");
-    }
-  };
-
   return (
     <Layout style={{ padding: "24px", minHeight: "100vh" }}>
       <Content>
