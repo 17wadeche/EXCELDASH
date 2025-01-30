@@ -322,162 +322,172 @@ const CreateDashboard: React.FC = () => {
         </Dropdown>
       </Header>
       <Content style={{ padding: "24px", background: "#f0f2f5" }}>
-        <Row justify="center" gutter={[100, 24]}>
-          <Col xs={24} sm={20} md={16} lg={12}>
-            <Card
-              bordered={false}
-              style={{
-                borderRadius: "12px",
-                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-                background: "#fff",
-              }}
-            >
-              <Form layout="vertical" onFinish={handleCreate}>
-                <Form.Item
-                  label="Dashboard Title"
-                  name="dashboardTitle"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Please input the dashboard title!",
-                    },
-                  ]}
+        {loading ? (
+          <div style={{ textAlign: "center", padding: "50px 0" }}>
+            <Spin tip="Loading templates..." size="large" />
+          </div>
+        ) : (
+          <>
+            <Row justify="center" gutter={[100, 24]}>
+              <Col xs={24} sm={20} md={16} lg={12}>
+                <Card
+                  bordered={false}
+                  style={{
+                    borderRadius: "12px",
+                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+                    background: "#fff",
+                  }}
                 >
-                  <Input
-                    placeholder="Enter dashboard title"
-                    value={dashboardTitle}
-                    onChange={(e) => setDashboardTitle(e.target.value)}
-                    prefix={<PlusOutlined />}
-                    allowClear
-                    size="large"
-                  />
-                </Form.Item>
-                <Form.Item>
-                  <Button
-                    type="primary"
-                    htmlType="submit"
-                    block
-                    disabled={!dashboardTitle.trim()}
-                    loading={isLoading}
-                    size="large"
-                    icon={<FolderAddOutlined />}
-                    style={{
-                      borderRadius: "8px",
-                      height: "50px",
-                      fontSize: "16px",
-                      backgroundColor: "#1890ff",
-                      borderColor: "#1890ff",
-                      transition: "background-color 0.3s ease",
-                    }}
-                    onMouseEnter={(e) => {
-                      (e.target as HTMLButtonElement).style.backgroundColor = "#40a9ff";
-                    }}
-                    onMouseLeave={(e) => {
-                      (e.target as HTMLButtonElement).style.backgroundColor = "#1890ff";
-                    }}
-                  >
-                    Create Dashboard
-                  </Button>
-                </Form.Item>
-              </Form>
-            </Card>
-          </Col>
-        </Row>
-        <Divider />
-        <Row justify="center" gutter={[16, 24]}>
-          <Col xs={24} sm={20} md={16} lg={12}>
-            <div style={{ textAlign: "center", marginBottom: "20px" }}>
-              <h2 style={{ fontWeight: "600", color: "#001529" }}>Choose a Template</h2>
-              <p style={{ color: "#595959" }}>Select a template to quickly create a new dashboard.</p>
-            </div>
-            <Search
-              placeholder="Search Templates"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              enterButton
-              allowClear
-              size="large"
-              style={{ marginBottom: "20px" }}
-            />
-            {loading ? (
-              <div style={{ textAlign: "center", padding: "50px 0" }}>
-                <Spin tip="Loading templates..." size="large" />
-              </div>
-            ) : filteredTemplates.length > 0 ? (
-              <List
-                grid={{
-                  gutter: 16,
-                  xs: 1,
-                  sm: 2,
-                  md: 3,
-                  lg: 4,
-                  xl: 4,
-                  xxl: 6,
-                }}
-                dataSource={filteredTemplates}
-                locale={{
-                  emptyText: <Empty description="No Templates Found" />,
-                }}
-                renderItem={(template) => (
-                  <List.Item>
-                    <Card
-                      hoverable
-                      actions={[
-                        <Tooltip title="Create Dashboard from Template" key="create">
-                          <Button
-                            type="primary"
-                            shape="circle"
-                            icon={<FolderAddOutlined />}
-                            onClick={() => createDashboardFromTemplate(template)}
-                          />
-                        </Tooltip>,
-                        <Tooltip title="Delete Template" key="delete">
-                          <Button
-                            type="default"
-                            danger
-                            shape="circle"
-                            icon={<DeleteOutlined />}
-                            onClick={() => confirmDeleteTemplate(template.id)}
-                          />
-                        </Tooltip>,
+                  <Form layout="vertical" onFinish={handleCreate}>
+                    <Form.Item
+                      label="Dashboard Title"
+                      name="dashboardTitle"
+                      rules={[
+                        {
+                          required: true,
+                          message: "Please input the dashboard title!",
+                        },
                       ]}
-                      style={{
-                        borderRadius: "12px",
-                        overflow: "hidden",
-                        transition: "transform 0.3s ease, box-shadow 0.3s ease",
-                      }}
-                      onMouseEnter={(e) => {
-                        (e.currentTarget as HTMLElement).style.transform = "scale(1.03)";
-                        (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 16px rgba(0, 0, 0, 0.2)";
-                      }}
-                      onMouseLeave={(e) => {
-                        (e.currentTarget as HTMLElement).style.transform = "scale(1)";
-                        (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 12px rgba(0, 0, 0, 0.1)";
-                      }}
                     >
-                      <Card.Meta title={<span style={{ fontSize: "18px", fontWeight: "500" }}>{template.name}</span>} />
-                    </Card>
-                  </List.Item>
+                      <Input
+                        placeholder="Enter dashboard title"
+                        value={dashboardTitle}
+                        onChange={(e) => setDashboardTitle(e.target.value)}
+                        prefix={<PlusOutlined />}
+                        allowClear
+                        size="large"
+                      />
+                    </Form.Item>
+                    <Form.Item>
+                      <Button
+                        type="primary"
+                        htmlType="submit"
+                        block
+                        disabled={!dashboardTitle.trim()}
+                        loading={isLoading}
+                        size="large"
+                        icon={<FolderAddOutlined />}
+                        style={{
+                          borderRadius: "8px",
+                          height: "50px",
+                          fontSize: "16px",
+                          backgroundColor: "#1890ff",
+                          borderColor: "#1890ff",
+                          transition: "background-color 0.3s ease",
+                        }}
+                        onMouseEnter={(e) => {
+                          (e.target as HTMLButtonElement).style.backgroundColor = "#40a9ff";
+                        }}
+                        onMouseLeave={(e) => {
+                          (e.target as HTMLButtonElement).style.backgroundColor = "#1890ff";
+                        }}
+                      >
+                        Create Dashboard
+                      </Button>
+                    </Form.Item>
+                  </Form>
+                </Card>
+              </Col>
+            </Row>
+            <Divider />
+            <Row justify="center" gutter={[16, 24]}>
+              <Col xs={24} sm={20} md={16} lg={12}>
+                <div style={{ textAlign: "center", marginBottom: "20px" }}>
+                  <h2 style={{ fontWeight: "600", color: "#001529" }}>Choose a Template</h2>
+                  <p style={{ color: "#595959" }}>Select a template to quickly create a new dashboard.</p>
+                </div>
+                <Search
+                  placeholder="Search Templates"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  enterButton
+                  allowClear
+                  size="large"
+                  style={{ marginBottom: "20px" }}
+                />
+                {loading ? (
+                  <div style={{ textAlign: "center", padding: "50px 0" }}>
+                    <Spin tip="Loading templates..." size="large" />
+                  </div>
+                ) : filteredTemplates.length > 0 ? (
+                  <List
+                    grid={{
+                      gutter: 16,
+                      xs: 1,
+                      sm: 2,
+                      md: 3,
+                      lg: 4,
+                      xl: 4,
+                      xxl: 6,
+                    }}
+                    dataSource={filteredTemplates}
+                    locale={{
+                      emptyText: <Empty description="No Templates Found" />,
+                    }}
+                    renderItem={(template) => (
+                      <List.Item>
+                        <Card
+                          hoverable
+                          actions={[
+                            <Tooltip title="Create Dashboard from Template" key="create">
+                              <Button
+                                type="primary"
+                                shape="circle"
+                                icon={<FolderAddOutlined />}
+                                onClick={() => createDashboardFromTemplate(template)}
+                              />
+                            </Tooltip>,
+                            <Tooltip title="Delete Template" key="delete">
+                              <Button
+                                type="default"
+                                danger
+                                shape="circle"
+                                icon={<DeleteOutlined />}
+                                onClick={() => confirmDeleteTemplate(template.id)}
+                              />
+                            </Tooltip>,
+                          ]}
+                          style={{
+                            borderRadius: "12px",
+                            overflow: "hidden",
+                            transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                          }}
+                          onMouseEnter={(e) => {
+                            (e.currentTarget as HTMLElement).style.transform = "scale(1.03)";
+                            (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 16px rgba(0, 0, 0, 0.2)";
+                          }}
+                          onMouseLeave={(e) => {
+                            (e.currentTarget as HTMLElement).style.transform = "scale(1)";
+                            (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 12px rgba(0, 0, 0, 0.1)";
+                          }}
+                        >
+                          <Card.Meta
+                            title={<span style={{ fontSize: "18px", fontWeight: "500" }}>{template.name}</span>}
+                          />
+                        </Card>
+                      </List.Item>
+                    )}
+                  />
+                ) : (
+                  <Empty description="No Templates Available" />
                 )}
-              />
-            ) : (
-              <Empty description="No Templates Available" />
+              </Col>
+            </Row>
+            {previewTemplate && (
+              <Modal
+                open={!!previewTemplate}
+                title={`Preview: ${previewTemplate.name}`}
+                footer={null}
+                onCancel={() => setPreviewTemplate(null)}
+                width={800}
+                centered
+                bodyStyle={{ maxHeight: "70vh", overflowY: "auto" }}
+                destroyOnClose
+              >
+                <p>Preview functionality has been removed.</p>
+              </Modal>
             )}
-          </Col>
-        </Row>
-        {previewTemplate && (
-          <Modal
-            open={!!previewTemplate}
-            title={`Preview: ${previewTemplate.name}`}
-            footer={null}
-            onCancel={() => setPreviewTemplate(null)}
-            width={800}
-            centered
-            bodyStyle={{ maxHeight: "70vh", overflowY: "auto" }}
-            destroyOnClose
-          >
-            <p>Preview functionality has been removed.</p>
-          </Modal>
+          </>
         )}
       </Content>
     </Layout>
