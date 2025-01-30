@@ -368,6 +368,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                   display: true,
                   color: "#fff",
                   formatter: (_value: any, context: any) => {
+                    console.log("Treemap raw data:", context.raw);
                     const original = context.raw?._data ?? {};
                     const realName = original.name ?? "Unnamed";
                     const realValue = original.value ?? 0;
