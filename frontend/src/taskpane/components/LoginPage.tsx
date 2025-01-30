@@ -16,13 +16,10 @@ const LoginPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const navigate = useNavigate();
   const authContext = useContext(AuthContext);
-
   if (!authContext) {
     throw new Error("AuthContext must be used within an AuthProvider");
   }
-
   const { setAuthState } = authContext;
-
   const handleLogin = async () => {
     if (!email || !password) {
       message.error("Please enter your email and password.");
@@ -57,7 +54,6 @@ const LoginPage: React.FC = () => {
       });
     }
   };
-
   return (
     <Layout style={{ padding: "24px", minHeight: "100vh" }}>
       <Content>

@@ -242,7 +242,6 @@ const SalesChart = ({ data, type }: SalesChartProps) => {
       },
     },
   };
-
   const handleChartClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
     const chart = chartRef.current;
     if (!chart) return;
@@ -254,7 +253,6 @@ const SalesChart = ({ data, type }: SalesChartProps) => {
       console.log(`Clicked on data point: ${dataValue}`);
     }
   };
-
   const noAxisTypes = ["pie", "doughnut", "radar", "polarArea", "treemap", "funnel"];
   if (noAxisTypes.includes(type)) {
     chartOptions.scales = {};

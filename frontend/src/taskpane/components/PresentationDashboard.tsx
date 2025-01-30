@@ -27,13 +27,11 @@ const ResponsiveGridLayout = WidthProvider(Responsive);
 
 const PresentationDashboard: React.FC = () => {
   const { widgets, layouts, dashboardBorderSettings } = useContext(DashboardContext)!;
-
   const borderStyle: React.CSSProperties = dashboardBorderSettings?.showBorder
     ? {
         border: `${dashboardBorderSettings.thickness}px ${dashboardBorderSettings.style} ${dashboardBorderSettings.color}`,
       }
     : {};
-
   return (
     <div id="dashboard-container" className="presentation-dashboard-wrapper" style={borderStyle}>
       <div className="presentation-container">

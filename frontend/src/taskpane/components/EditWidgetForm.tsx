@@ -37,7 +37,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
   const [sheets, setSheets] = useState<string[]>([]);
   const [chartType, setChartType] = useState<string>(widget.type === "chart" ? (widget.data as ChartData).type : "bar");
   const [zIndex, setZIndex] = useState<number>(widget.zIndex || 0);
-
   useEffect(() => {
     const initialValues = getInitialValues();
     form.setFieldsValue({
@@ -45,11 +44,9 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
       zIndex: widget.zIndex || 0,
     });
   }, [widget, form]);
-
   useEffect(() => {
     setSheets(availableWorksheets);
   }, [availableWorksheets]);
-
   const getInitialValues = () => {
     switch (widget.type) {
       case "text":
@@ -156,12 +153,10 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
         return {};
     }
   };
-
   useEffect(() => {
     setZIndex(widget.zIndex || 0);
     form.setFieldsValue(getInitialValues());
   }, [widget, form]);
-
   useEffect(() => {
     form.setFieldsValue(getInitialValues());
     if (widget.type === "chart") {
@@ -194,17 +189,14 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
     }
     setZIndex(widget.zIndex || 0);
   }, [widget, form]);
-
   const getZIndexBounds = () => {
     const zIndices = widgets.map((w) => w.zIndex || 0);
     const maxZ = Math.max(...zIndices);
     const minZ = Math.min(...zIndices);
     return { maxZ, minZ };
   };
-
   const renderZIndexControls = () => {
     const { maxZ, minZ } = getZIndexBounds();
-
     return (
       <Form.Item label="Layer Position" name="zIndex">
         <Space>
@@ -233,7 +225,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
       </Form.Item>
     );
   };
-
   const handleFinish = (values: any) => {
     const cleanedValues: Record<string, any> = {};
     Object.entries(values).forEach(([k, v]) => {
@@ -590,7 +581,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
     updatedData.zIndex = values.zIndex;
     onSubmit(updatedData);
   };
-
   const getRandomColor = () => {
     const letters = "0123456789ABCDEF";
     let color = "#";
@@ -599,7 +589,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
     }
     return color;
   };
-
   const loadDataForNewChartType = async (mainType: string, data: any[][], form: any) => {
     switch (mainType) {
       case "boxplot": {
@@ -701,7 +690,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
         message.info(`No import logic for chart type: ${mainType}`);
     }
   };
-
   const handleLoadFromExcel = async () => {
     if (isPresenterMode) {
       message.warning("Loading data from Excel is not available in full-screen mode.");
@@ -836,7 +824,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
       form.setFieldsValue({ sliceColors: updated });
     }
   }, [form, form.getFieldValue("labels")]);
-
   useEffect(() => {
     if (chartType === "bubble") {
       const dataSets = form.getFieldValue("datasets") || [];
@@ -862,7 +849,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
       }
     }
   }, [chartType, form, form.getFieldValue("datasets")]);
-
   useEffect(() => {
     if (chartType === "boxplot") {
       const dataSets = form.getFieldValue("datasets") || [];
@@ -894,7 +880,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
       }
     }
   }, [chartType]);
-
   return (
     <Form form={form} layout="vertical" initialValues={getInitialValues()} onFinish={handleFinish}>
       {widget.type === "text" && (

@@ -16,23 +16,18 @@ interface LineSettingsModalProps {
 
 const LineSettingsModal: React.FC<LineSettingsModalProps> = ({ visible, data, onSave, onCancel }) => {
   const [lineData, setLineData] = React.useState<LineWidgetData>(data);
-
   const handleColorChange = (color: any) => {
     setLineData({ ...lineData, color: color.hex });
   };
-
   const handleThicknessChange = (value: number) => {
     setLineData({ ...lineData, thickness: value });
   };
-
   const handleStyleChange = (value: "solid" | "dashed" | "dotted") => {
     setLineData({ ...lineData, style: value });
   };
-
   const handleOrientationChange = (value: "horizontal" | "vertical") => {
     setLineData({ ...lineData, orientation: value });
   };
-
   return (
     <Modal open={visible} onOk={() => onSave(lineData)} onCancel={onCancel} title="Line Settings">
       <div style={{ marginBottom: 16 }}>

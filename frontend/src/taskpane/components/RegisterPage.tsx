@@ -13,7 +13,6 @@ const RegisterPage: React.FC = () => {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const navigate = useNavigate();
-
   const handleRegister = async () => {
     if (!email || !password) {
       message.error("Please enter your email and password.");
@@ -31,7 +30,6 @@ const RegisterPage: React.FC = () => {
       setIsLoading(false);
     }
   };
-
   return (
     <Layout style={{ padding: "24px", minHeight: "100vh" }}>
       <Content>

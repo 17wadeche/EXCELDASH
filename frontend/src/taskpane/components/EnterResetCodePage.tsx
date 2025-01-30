@@ -14,9 +14,7 @@ const EnterResetCodePage: React.FC = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
-
   const navigate = useNavigate();
-
   const handleResetPassword = async () => {
     if (!code || !newPassword || !confirmPassword) {
       message.error("Please fill in all fields.");
@@ -26,7 +24,6 @@ const EnterResetCodePage: React.FC = () => {
       message.error("Passwords do not match.");
       return;
     }
-
     setIsLoading(true);
     try {
       await resetPassword(code, newPassword);
@@ -39,7 +36,6 @@ const EnterResetCodePage: React.FC = () => {
       setIsLoading(false);
     }
   };
-
   return (
     <Layout style={{ padding: "24px", minHeight: "100vh" }}>
       <Content>
@@ -50,7 +46,6 @@ const EnterResetCodePage: React.FC = () => {
             <Form.Item label="Reset Code" required>
               <Input placeholder="6-digit code" value={code} onChange={(e) => setCode(e.target.value)} />
             </Form.Item>
-
             <Form.Item label="New Password" required>
               <Input.Password
                 placeholder="Enter new password"
@@ -58,7 +53,6 @@ const EnterResetCodePage: React.FC = () => {
                 onChange={(e) => setNewPassword(e.target.value)}
               />
             </Form.Item>
-
             <Form.Item label="Confirm Password" required>
               <Input.Password
                 placeholder="Confirm new password"
@@ -66,7 +60,6 @@ const EnterResetCodePage: React.FC = () => {
                 onChange={(e) => setConfirmPassword(e.target.value)}
               />
             </Form.Item>
-
             <Form.Item>
               <Button type="primary" onClick={handleResetPassword} loading={isLoading} block>
                 Reset Password

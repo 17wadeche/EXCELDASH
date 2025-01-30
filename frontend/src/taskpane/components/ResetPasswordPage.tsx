@@ -17,13 +17,11 @@ const ResetPasswordPage: React.FC = () => {
   const location = useLocation();
   const query = new URLSearchParams(location.search);
   const token = query.get("token");
-
   if (!token) {
     message.error("Invalid or missing token.");
     navigate("/login");
     return null;
   }
-
   const handleResetPassword = async () => {
     if (!newPassword || !confirmPassword) {
       message.error("Please fill in all fields.");
@@ -45,7 +43,6 @@ const ResetPasswordPage: React.FC = () => {
       setIsLoading(false);
     }
   };
-
   return (
     <Layout style={{ padding: "24px", minHeight: "100vh" }}>
       <Content>

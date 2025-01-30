@@ -9,11 +9,9 @@ interface LineWidgetProps {
 
 const LineWidget: React.FC<LineWidgetProps> = ({ data }) => {
   const { color, thickness, style, orientation } = data;
-
   let lineStyle: React.CSSProperties = {
     backgroundColor: color,
   };
-
   if (orientation === "horizontal") {
     lineStyle = {
       position: "absolute",
@@ -37,7 +35,6 @@ const LineWidget: React.FC<LineWidgetProps> = ({ data }) => {
       borderLeftColor: color,
     };
   }
-
   return (
     <div
       className="drag-handle"

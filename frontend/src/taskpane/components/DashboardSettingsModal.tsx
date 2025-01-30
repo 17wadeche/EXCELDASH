@@ -48,14 +48,12 @@ const DashboardSettingsModal: React.FC<DashboardSettingsModalProps> = ({ visible
       backgroundColor: color.hex,
     });
   };
-
   const handleWidthChange = (value: number | null) => {
     setDashboardBorderSettings({
       ...dashboardBorderSettings,
       width: value ?? 733,
     });
   };
-
   return (
     <Modal
       open={visible}

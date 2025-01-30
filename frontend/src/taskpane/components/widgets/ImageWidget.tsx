@@ -10,12 +10,12 @@ interface ImageWidgetProps {
 const ImageWidget: React.FC<ImageWidgetProps> = ({ data }) => {
   return (
     <div
-      className="drag-handle" // Make the entire component draggable
+      className="drag-handle"
       style={{
         padding: "0px",
         height: "100%",
         position: "relative",
-        cursor: "move", // Add cursor style for visual feedback
+        cursor: "move",
       }}
     >
       <img src={data.src} alt="Imported Chart" style={{ width: "100%" }} />

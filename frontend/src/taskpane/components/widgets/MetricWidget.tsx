@@ -6,7 +6,7 @@ import { Typography, Button, InputNumber, Tooltip, message } from "antd";
 import { ArrowUpOutlined, ArrowDownOutlined, EditOutlined, CheckOutlined, CloseOutlined } from "@ant-design/icons";
 import { DashboardContext } from "../../context/DashboardContext";
 import { MetricData } from "../types";
-import "../Dashboard.css"; // Ensure consistent styling
+import "../Dashboard.css";
 
 const { Title } = Typography;
 
@@ -20,24 +20,19 @@ const MetricWidget: React.FC<MetricWidgetProps> = ({ id, data }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [inputValue, setInputValue] = useState<number>(data.currentValue || 0);
   const [isLoading, setIsLoading] = useState(false);
-
   useEffect(() => {
     console.log("MetricWidget data:", data);
     setInputValue(data.currentValue || 0);
   }, [data]);
-
   const currentValue = data.currentValue;
-
   const isMetricGood =
     data.comparison === "greater" ? currentValue >= data.targetValue : currentValue <= data.targetValue;
-
   const arrowIcon = isMetricGood ? (
     <ArrowUpOutlined className="metric-arrow" />
   ) : (
     <ArrowDownOutlined className="metric-arrow" />
   );
   const color = isMetricGood ? "#3f8600" : "#cf1322";
-
   const formatValue = (value: number) => {
     switch (data.format) {
       case "percentage":
@@ -49,7 +44,6 @@ const MetricWidget: React.FC<MetricWidgetProps> = ({ id, data }) => {
         return value.toLocaleString();
     }
   };
-
   const formatTargetValue = (value: number) => {
     switch (data.format) {
       case "percentage":
@@ -61,7 +55,6 @@ const MetricWidget: React.FC<MetricWidgetProps> = ({ id, data }) => {
         return value.toLocaleString();
     }
   };
-
   const handleSave = async () => {
     if (inputValue === data.currentValue) {
       setIsEditing(false);
@@ -79,12 +72,10 @@ const MetricWidget: React.FC<MetricWidgetProps> = ({ id, data }) => {
       setIsEditing(false);
     }
   };
-
   const handleCancel = () => {
     setInputValue(data.currentValue || 0);
     setIsEditing(false);
   };
-
   return (
     <div
       className="metric-widget-container"
@@ -99,7 +90,6 @@ const MetricWidget: React.FC<MetricWidgetProps> = ({ id, data }) => {
         position: "relative",
       }}
     >
-      {/* Drag Handle */}
       <div
         className="drag-handle metric-header"
         style={{
@@ -120,7 +110,6 @@ const MetricWidget: React.FC<MetricWidgetProps> = ({ id, data }) => {
           </Title>
         </Tooltip>
       </div>
-      {/* Metric Value Section */}
       <div
         className="metric-value"
         style={{
@@ -146,7 +135,6 @@ const MetricWidget: React.FC<MetricWidgetProps> = ({ id, data }) => {
           <span className="metric-number">{formatValue(currentValue)}</span>
         )}
       </div>
-      {/* Target Value Section */}
       <div
         className="metric-target-value"
         style={{

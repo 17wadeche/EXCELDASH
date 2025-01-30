@@ -7,7 +7,7 @@ import { DragOutlined } from "@ant-design/icons";
 
 interface TextWidgetProps {
   data: TextData;
-  onUpdate?: (updatedData: Partial<TextData>) => void; // Optional
+  onUpdate?: (updatedData: Partial<TextData>) => void;
 }
 const TextWidget: React.FC<TextWidgetProps> = ({ data }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -16,38 +16,37 @@ const TextWidget: React.FC<TextWidgetProps> = ({ data }) => {
       className="text-widget widget-card"
       bordered={false}
       style={{
-        backgroundColor: data.backgroundColor || "white", // Applies to the entire Card
+        backgroundColor: data.backgroundColor || "white",
         boxShadow: "none",
         border: "none",
         padding: 0,
         margin: 0,
       }}
       bodyStyle={{
-        backgroundColor: data.backgroundColor || "white", // Applies to the Card"s body
-        padding: "0px", // Remove padding from body
-        borderTop: "none", // Ensure no top border on the body
+        backgroundColor: data.backgroundColor || "white",
+        padding: "0px",
+        borderTop: "none",
       }}
     >
       <div
         className="drag-handle text-widget-header"
         style={{
-          backgroundColor: data.backgroundColor || "white", // Ensure header background color
-          cursor: "move", // Indicates draggable area
-          padding: "8px 12px", // Padding for better aesthetics
-          borderBottom: "none", // Explicitly set no border
-          position: "relative", // For positioning child elements if needed
+          backgroundColor: data.backgroundColor || "white",
+          cursor: "move",
+          padding: "8px 12px",
+          borderBottom: "none",
+          position: "relative",
           display: "flex",
           alignItems: "center",
         }}
-        // Event handlers to track hover state
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
         {isHovered && (
           <DragOutlined
             style={{
-              marginRight: "8px", // Space between icon and other elements
-              transition: "opacity 0.3s ease", // Smooth transition
+              marginRight: "8px",
+              transition: "opacity 0.3s ease",
             }}
           />
         )}
@@ -57,7 +56,7 @@ const TextWidget: React.FC<TextWidgetProps> = ({ data }) => {
         style={{
           color: data.textColor || "#000000",
           fontSize: data.fontSize ? `${data.fontSize}px` : "inherit",
-          padding: "12px", // Padding for better layout
+          padding: "12px",
           textAlign: data.titleAlignment || "center",
         }}
       >

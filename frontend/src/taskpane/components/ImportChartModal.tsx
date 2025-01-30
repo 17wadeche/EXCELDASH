@@ -18,13 +18,11 @@ const ImportChartModal: React.FC<ImportChartModalProps> = ({ visible, onCancel }
   const [availableCharts, setAvailableCharts] = useState<{ key: string; name: string }[]>([]);
   const [selectedChartId, setSelectedChartId] = useState<string>("");
   const { addWidget } = useContext(DashboardContext)!;
-
   useEffect(() => {
     if (visible) {
       fetchCharts();
     }
   }, [visible]);
-
   const fetchCharts = async () => {
     try {
       await Excel.run(async (context) => {
@@ -32,7 +30,6 @@ const ImportChartModal: React.FC<ImportChartModalProps> = ({ visible, onCancel }
         const charts = sheet.charts;
         charts.load("items");
         await context.sync();
-
         if (charts.items.length > 0) {
           const chartOptions = charts.items.map((chart) => ({
             key: chart.id,
@@ -50,7 +47,6 @@ const ImportChartModal: React.FC<ImportChartModalProps> = ({ visible, onCancel }
       onCancel();
     }
   };
-
   const handleOk = async () => {
     if (!selectedChartId) {
       message.warning("Please select a chart.");
@@ -62,10 +58,8 @@ const ImportChartModal: React.FC<ImportChartModalProps> = ({ visible, onCancel }
         const chart = sheet.charts.getItem(selectedChartId);
         const image = chart.getImage();
         await context.sync();
-
         const base64Image = image.value;
         const imageSrc = `data:image/png;base64,${base64Image}`;
-
         const imageData = { src: imageSrc };
         addWidget("image", imageData);
         message.success("Chart image imported from Excel successfully.");
@@ -77,7 +71,6 @@ const ImportChartModal: React.FC<ImportChartModalProps> = ({ visible, onCancel }
       onCancel();
     }
   };
-
   return (
     <Modal title="Select a Chart to Import" open={visible} onOk={handleOk} onCancel={onCancel}>
       <Select style={{ width: "100%" }} placeholder="Select a chart" onChange={(value) => setSelectedChartId(value)}>

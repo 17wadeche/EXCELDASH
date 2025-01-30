@@ -1,7 +1,7 @@
+/* eslint-disable no-undef */
 /* eslint-disable react/display-name */
 /* eslint-disable react/prop-types */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable no-undef */
 // src/taskpane/components/Dashboard.tsx
 
 import React, { useState, useEffect, useRef, useContext, useMemo, useCallback } from "react";
@@ -58,7 +58,6 @@ import jsPDF from "jspdf";
 import PresentationDashboard from "./PresentationDashboard";
 import axios from "axios";
 import { useParams } from "react-router-dom";
-
 const ResponsiveGridLayout = WidthProvider(Responsive);
 const defaultTitleWidget: Widget = {
   id: "dashboard-title",
@@ -71,7 +70,6 @@ const defaultTitleWidget: Widget = {
     titleAlignment: "center",
   } as TitleWidgetData,
 };
-
 interface DashboardProps {
   isPresenterMode?: boolean;
   closePresenterMode?: () => void;
@@ -79,7 +77,6 @@ interface DashboardProps {
   dashboardBorderSettings?: DashboardBorderSettings;
   isFullScreen?: boolean;
 }
-
 async function generatePdfBlobFromDom(dashboardElement: HTMLDivElement): Promise<Blob> {
   const originalStyles = saveOriginalStyles(dashboardElement);
   try {
@@ -139,7 +136,6 @@ function restoreOriginalStyles(el: HTMLDivElement, styles: any) {
   el.style.margin = styles.elMargin;
   el.style.padding = styles.elPadding;
 }
-
 const Dashboard: React.FC<DashboardProps> = React.memo(
   ({ isPresenterMode = false, closePresenterMode, isFullScreen }) => {
     const {
@@ -150,8 +146,6 @@ const Dashboard: React.FC<DashboardProps> = React.memo(
       refreshAllCharts,
       layouts,
       setLayouts,
-      setWidgets,
-      setDashboardBorderSettings,
       updateLayoutsForNewWidgets,
       undo,
       dashboardBorderSettings,
@@ -170,7 +164,7 @@ const Dashboard: React.FC<DashboardProps> = React.memo(
       refreshTableWidgetData,
     } = useContext(DashboardContext)!;
     const { id } = useParams<{ id: string }>();
-    const [isFullscreenActive, setIsFullscreenActive] = useState(false);
+    const [isFullscreenActive] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const isEditingEnabled = !isPresenterMode && !isFullscreenActive && !isFullScreen && !isSaving;
     const borderStyle: React.CSSProperties = useMemo(() => {
@@ -180,7 +174,6 @@ const Dashboard: React.FC<DashboardProps> = React.memo(
           }
         : {};
     }, [dashboardBorderSettings]);
-
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [isCollapsed, setIsCollapsed] = useState(false);
     const dashboardRef = useRef<HTMLDivElement>(null);
@@ -188,8 +181,8 @@ const Dashboard: React.FC<DashboardProps> = React.memo(
     const [editingWidget, setEditingWidget] = useState<Widget | null>(null);
     const isUpdatingFromItem = useRef(false);
     const prevLayoutsRef = useRef<{ [key: string]: GridLayoutItem[] }>({});
-    const [isPresentationMode, setIsPresentationMode] = useState(false);
-    const [fullScreenDialog, setFullScreenDialog] = useState<Office.Dialog | null>(null);
+    const [isPresentationMode] = useState(false);
+    const [fullScreenDialog] = useState<Office.Dialog | null>(null);
     const [isAutoSaveEnabled, setIsAutoSaveEnabled] = useState<boolean>(false);
     const dashboardWidth = dashboardBorderSettings.width
       ? Math.min(Math.max(dashboardBorderSettings.width, 300), 733)
@@ -205,17 +198,8 @@ const Dashboard: React.FC<DashboardProps> = React.memo(
           }
         : {}),
     };
-
-    const isOfficeInitialized =
-      typeof Office !== "undefined" &&
-      Office.context &&
-      Office.context.ui &&
-      typeof Office.context.ui.displayDialogAsync === "function";
-
-    const [theme, setTheme] = useState("light-theme");
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [currentWidget, setCurrentWidget] = useState<Widget | null>(null);
-
     const handleRefresh = useCallback(async () => {
       if (isPresenterMode) {
         return;
@@ -224,7 +208,6 @@ const Dashboard: React.FC<DashboardProps> = React.memo(
       await refreshAllCharts();
       setIsRefreshing(false);
     }, [isPresenterMode, refreshAllCharts]);
-
     useEffect(() => {
       if (isPresenterMode) return;
       if (!layouts) return;
@@ -242,7 +225,6 @@ const Dashboard: React.FC<DashboardProps> = React.memo(
         updateLayoutsForNewWidgets(widgetsWithoutLayout);
       }
     }, [widgets, isPresenterMode, layouts, updateLayoutsForNewWidgets]);
-
     const handlePresentDashboard = async () => {
       if (!dashboardRef.current) {
         message.error("Dashboard container not found.");
@@ -302,56 +284,6 @@ const Dashboard: React.FC<DashboardProps> = React.memo(
       newWin.document.write(htmlContent);
       newWin.document.close();
     };
-
-    const handleExitPresentationMode = () => {
-      setIsPresentationMode(false);
-    };
-
-    const handleDialogMessage = (args: Office.DialogParentMessageReceivedEventArgs) => {
-      const messageFromChild = JSON.parse(args.message);
-      if (isPresenterMode && messageFromChild.type === "getDataFromRange") {
-        fullScreenDialog?.messageChild(
-          JSON.stringify({
-            type: "dataFromRangeError",
-            widgetId: messageFromChild.widgetId,
-            error: "Data loading is disabled in full-screen mode.",
-          })
-        );
-        return;
-      }
-      switch (messageFromChild.type) {
-        case "getDataFromRange": {
-          const { widgetId, worksheetName, associatedRange } = messageFromChild;
-          Excel.run(async (context) => {
-            try {
-              const sheet = context.workbook.worksheets.getItem(worksheetName);
-              const range = sheet.getRange(associatedRange);
-              range.load("values");
-              await context.sync();
-              const data = range.values;
-              fullScreenDialog?.messageChild(
-                JSON.stringify({
-                  type: "dataFromRange",
-                  widgetId: widgetId,
-                  data: data,
-                })
-              );
-            } catch (error: any) {
-              console.error("Error getting data from range:", error);
-              fullScreenDialog?.messageChild(
-                JSON.stringify({
-                  type: "dataFromRangeError",
-                  widgetId: widgetId,
-                  error: error.message || error.toString(),
-                })
-              );
-            }
-          });
-          break;
-        }
-      }
-    };
-
     useEffect(() => {
       if (fullScreenDialog && !isUpdatingFromItem.current) {
         const dashboardData = {
@@ -396,7 +328,6 @@ const Dashboard: React.FC<DashboardProps> = React.memo(
         prevLayoutsRef.current = currentDashboard.layouts;
       }
     }, [currentDashboard, setLayouts]);
-
     const handleSave = useCallback(async () => {
       if (!currentDashboardId || !currentDashboard) return;
       setIsSaving(true);
@@ -440,13 +371,10 @@ const Dashboard: React.FC<DashboardProps> = React.memo(
       setCurrentDashboard,
       setDashboards,
     ]);
-
     const isSavingRef = useRef(isSaving);
-
     useEffect(() => {
       isSavingRef.current = isSaving;
     }, [isSaving]);
-
     const debouncedSave = useMemo(
       () =>
         debounce(async () => {
@@ -456,7 +384,6 @@ const Dashboard: React.FC<DashboardProps> = React.memo(
         }, 300000),
       [handleSave]
     );
-
     useEffect(() => {
       if (isAutoSaveEnabled) {
         debouncedSave();
@@ -465,7 +392,6 @@ const Dashboard: React.FC<DashboardProps> = React.memo(
         debouncedSave.cancel();
       };
     }, [widgets, layouts, isAutoSaveEnabled, debouncedSave]);
-
     const handleLayoutChange = useCallback(
       (_currentLayout: GridLayoutItem[], allLayouts: { [key: string]: GridLayoutItem[] }) => {
         const syncedLayouts = { ...layouts };
@@ -495,7 +421,6 @@ const Dashboard: React.FC<DashboardProps> = React.memo(
       },
       [addWidget]
     );
-
     const handleRemoveWidget = useCallback(
       (id: string) => {
         const widgetToRemove = widgets.find((widget) => widget.id === id);
@@ -509,7 +434,6 @@ const Dashboard: React.FC<DashboardProps> = React.memo(
       },
       [widgets, removeWidget]
     );
-
     const handleEditWidget = useCallback((widget: Widget) => {
       setEditingWidget(widget);
       if (widget.type === "line") {
@@ -519,7 +443,6 @@ const Dashboard: React.FC<DashboardProps> = React.memo(
         setIsModalVisible(true);
       }
     }, []);
-
     const handleLineSettingsSave = useCallback(
       (updatedData: LineWidgetData) => {
         if (editingWidget) {
@@ -530,17 +453,14 @@ const Dashboard: React.FC<DashboardProps> = React.memo(
       },
       [editingWidget, updateWidget]
     );
-
     const handleLineSettingsCancel = useCallback(() => {
       setIsLineSettingsModalVisible(false);
       setEditingWidget(null);
     }, []);
-
     const handleModalCancel = useCallback(() => {
       setIsModalVisible(false);
       setCurrentWidget(null);
     }, []);
-
     const handleModalOk = useCallback(
       (updatedData: any) => {
         if (currentWidget) {
@@ -551,7 +471,6 @@ const Dashboard: React.FC<DashboardProps> = React.memo(
       },
       [currentWidget, updateWidget]
     );
-
     const widgetElements = useMemo(() => {
       const sortedWidgets = [...widgets].sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
       return sortedWidgets.map((widget) => {
@@ -777,14 +696,14 @@ const Dashboard: React.FC<DashboardProps> = React.memo(
                 e.preventDefault();
                 return false;
               }
-              return true; // Ensure all code paths return a value
+              return true;
             }}
             onResizeStart={(_layout, _oldItem, _newItem, _placeholder, e, _element) => {
               if (isSaving) {
                 e.preventDefault();
                 return false;
               }
-              return true; // Ensure all code paths return a value
+              return true;
             }}
             compactType={null}
             preventCollision={false}

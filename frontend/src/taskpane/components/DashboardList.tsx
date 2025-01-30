@@ -67,12 +67,10 @@ const DashboardList: React.FC = () => {
     setUserSearchTerm("");
     setSearchedUsers([]);
   };
-
   const closeShareModal = () => {
     setIsShareModalVisible(false);
     setShareDashboardId(null);
   };
-
   const fetchUsers = async (query: string) => {
     try {
       setSearchingUsers(true);
@@ -85,7 +83,6 @@ const DashboardList: React.FC = () => {
       setSearchingUsers(false);
     }
   };
-
   useEffect(() => {
     const timer = setTimeout(() => {
       if (userSearchTerm.length > 1) {
@@ -97,7 +94,6 @@ const DashboardList: React.FC = () => {
 
     return () => clearTimeout(timer);
   }, [userSearchTerm]);
-
   const handleSelectUserToShare = async (email: string) => {
     if (!shareDashboardId) return;
     try {
@@ -108,7 +104,6 @@ const DashboardList: React.FC = () => {
       message.error(error?.response?.data?.error || "Failed to share dashboard.");
     }
   };
-
   const handleDelete = (id: string) => {
     Modal.confirm({
       title: "Are you sure you want to delete this dashboard?",
@@ -122,17 +117,14 @@ const DashboardList: React.FC = () => {
       maskClosable: true,
     });
   };
-
   const handleView = (id: string) => {
     setCurrentDashboardId(id);
     navigate(`/dashboard/${id}`);
   };
-
   const handleEdit = (id: string) => {
     setCurrentDashboardId(id);
     navigate(`/dashboard/${id}/edit`);
   };
-
   const handleCreateNew = () => {
     navigate("/create");
   };
@@ -150,11 +142,9 @@ const DashboardList: React.FC = () => {
     setEditDashboardId(null);
     setEditTitle("");
   };
-
   return (
     <Layout style={{ padding: "24px", background: "#f0f2f5", minHeight: "100vh" }}>
       <Content>
-        {/* Header Section */}
         <Row justify="space-between" align="middle" style={{ marginBottom: "24px" }}>
           <Col>
             <Title level={2} style={{ margin: 0 }}>
@@ -185,10 +175,7 @@ const DashboardList: React.FC = () => {
             />
           </Col>
         </Row>
-
         <Divider />
-
-        {/* Dashboard List */}
         {loading ? (
           <div style={{ textAlign: "center", padding: "50px 0" }}>
             <Spin tip="Loading Dashboards..." size="large" />

@@ -12,7 +12,6 @@ const ForgotPasswordPage: React.FC = () => {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const navigate = useNavigate();
-
   const handleRequestReset = async () => {
     if (!email) {
       message.error("Please enter your email.");
@@ -30,7 +29,6 @@ const ForgotPasswordPage: React.FC = () => {
       setIsLoading(false);
     }
   };
-
   return (
     <Layout style={{ padding: "24px", minHeight: "100vh" }}>
       <Content>

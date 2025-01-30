@@ -13,7 +13,6 @@ interface PromptWidgetDetailsModalProps {
 
 const PromptWidgetDetailsModal: React.FC<PromptWidgetDetailsModalProps> = ({ widget, onComplete, onCancel }) => {
   const [form] = Form.useForm();
-
   const handleOk = () => {
     form
       .validateFields()
@@ -32,7 +31,6 @@ const PromptWidgetDetailsModal: React.FC<PromptWidgetDetailsModalProps> = ({ wid
         console.log("Validate Failed:", info);
       });
   };
-
   return (
     <Modal
       open={true}

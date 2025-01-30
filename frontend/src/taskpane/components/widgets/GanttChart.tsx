@@ -75,11 +75,9 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
     });
     setTasks(updatedTasks);
   };
-
   useEffect(() => {
     injectTaskColors(tasks);
   }, [tasks, defaultProgressColor]);
-
   const handleDateChange = (task: Task, start: Date, end: Date) => {
     const updatedTasks = tasks.map((t) =>
       t.id === task.id ? { ...t, start: start.toISOString().split("T")[0], end: end.toISOString().split("T")[0] } : t
@@ -87,13 +85,11 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
     setTasks(updatedTasks);
     if (onTasksChange) onTasksChange(updatedTasks);
   };
-
   const handleProgressChange = (task: Task, progress: number) => {
     const updatedTasks = tasks.map((t) => (t.id === task.id ? { ...t, progress } : t));
     setTasks(updatedTasks);
     if (onTasksChange) onTasksChange(updatedTasks);
   };
-
   return (
     <div
       className="gantt-chart-container"
@@ -106,20 +102,19 @@ const GanttChartComponent: React.FC<GanttChartComponentProps> = ({
         backgroundColor: "#fff",
         boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
         borderRadius: "8px",
-        position: "relative", // Ensure relative positioning for internal elements
+        position: "relative",
       }}
     >
-      {/* Drag Handle */}
       <div
         className="drag-handle"
         style={{
           textAlign: titleAlignment,
           background: "#f0f0f0",
           padding: "8px",
-          cursor: "move", // Indicate draggable area
+          cursor: "move",
           borderBottom: "1px solid #ddd",
           borderRadius: "8px 8px 0 0",
-          userSelect: "none", // Prevent text selection during drag
+          userSelect: "none",
         }}
       >
         <strong>{title}</strong>

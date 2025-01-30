@@ -30,7 +30,6 @@ import { AuthContext } from "../context/AuthContext";
 
 const { Header, Content } = Layout;
 const { Search } = Input;
-
 const CreateDashboard: React.FC = () => {
   const [dashboardTitle] = useState("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -44,7 +43,6 @@ const CreateDashboard: React.FC = () => {
     setLayouts,
     setDashboards,
   } = useContext(DashboardContext)!;
-
   const [searchTerm, setSearchTerm] = useState("");
   const [templates, setTemplates] = useState<TemplateItem[]>([]);
   const [previewTemplate, setPreviewTemplate] = useState<TemplateItem | null>(null);
@@ -54,7 +52,6 @@ const CreateDashboard: React.FC = () => {
     throw new Error("AuthContext must be used within an AuthProvider");
   }
   const { isLoggedIn, isVerified } = authContext;
-
   const handleLogout = () => {
     Modal.confirm({
       title: "Are you sure you want to logout?",
@@ -72,7 +69,6 @@ const CreateDashboard: React.FC = () => {
       },
     });
   };
-
   const handleUnsubscribe = () => {
     Modal.confirm({
       title: "Are you sure you want to unsubscribe?",
@@ -97,7 +93,6 @@ const CreateDashboard: React.FC = () => {
       },
     });
   };
-
   const menu = (
     <Menu>
       <Menu.Item key="unsubscribe" onClick={handleUnsubscribe}>
@@ -108,7 +103,6 @@ const CreateDashboard: React.FC = () => {
       </Menu.Item>
     </Menu>
   );
-
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -125,7 +119,6 @@ const CreateDashboard: React.FC = () => {
     };
     fetchData();
   }, [setDashboards]);
-
   const handleCreate = async () => {
     if (!dashboardTitle.trim()) {
       message.error("Dashboard title cannot be empty.");
@@ -162,7 +155,6 @@ const CreateDashboard: React.FC = () => {
       setLoading(false);
     }
   };
-
   const createDashboardFromTemplate = async (template: any) => {
     if (!currentWorkbookId) {
       message.error("No workbook ID found. Cannot create dashboard from template.");
@@ -185,7 +177,6 @@ const CreateDashboard: React.FC = () => {
       message.error("Failed to create dashboard from template.");
     }
   };
-
   const confirmDeleteTemplate = (id: string) => {
     Modal.confirm({
       title: "Are you sure you want to delete this template?",
@@ -196,7 +187,6 @@ const CreateDashboard: React.FC = () => {
       maskClosable: true,
     });
   };
-
   const deleteTemplate = async (id: string) => {
     setIsLoading(true);
     try {
@@ -211,11 +201,9 @@ const CreateDashboard: React.FC = () => {
       setIsLoading(false);
     }
   };
-
   const filteredTemplates = templates.filter((template) =>
     template.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
   useEffect(() => {
     const initializeExcel = async () => {
       if (isLoggedIn && isVerified) {
@@ -395,9 +383,7 @@ const CreateDashboard: React.FC = () => {
             </Card>
           </Col>
         </Row>
-
         <Divider />
-
         <Row justify="center" gutter={[16, 24]}>
           <Col xs={24} sm={20} md={16} lg={12}>
             <div style={{ textAlign: "center", marginBottom: "20px" }}>
@@ -479,7 +465,6 @@ const CreateDashboard: React.FC = () => {
             )}
           </Col>
         </Row>
-
         {previewTemplate && (
           <Modal
             open={!!previewTemplate}
