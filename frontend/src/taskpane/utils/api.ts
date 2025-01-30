@@ -67,7 +67,10 @@ export const loginUser = async (email: string, password: string): Promise<LoginR
         localStorage.setItem("sessionId", decoded.sessionId);
       }
     }
-    return loginData;
+    return {
+      ...loginData,
+      success: true,
+    };
   } catch (error: any) {
     console.error("Error in loginUser:", error);
     return {
