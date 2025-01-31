@@ -471,8 +471,11 @@ const Dashboard: React.FC<DashboardProps> = React.memo(
       },
       [currentWidget, updateWidget]
     );
+    const sortWidgetsByZIndex = (widgets: Widget[]): Widget[] => {
+      return [...widgets].sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
+    };
     const widgetElements = useMemo(() => {
-      const sortedWidgets = [...widgets].sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
+      const sortedWidgets = sortWidgetsByZIndex(widgets);
       return sortedWidgets.map((widget) => {
         let content;
         if (widget.type === "text") {
