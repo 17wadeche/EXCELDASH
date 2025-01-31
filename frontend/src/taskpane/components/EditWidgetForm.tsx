@@ -381,9 +381,8 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                     display: true,
                     color: "#fff",
                     formatter: (_value: any, context: any) => {
-                      console.log("Treemap raw:", context.raw);
-                      console.log("Treemap raw.data:", context.raw?.data);
-                      return "";
+                      console.log("Treemap node:", context.raw);
+                      return context.raw.name + " (" + context.raw.value + ")";
                     },
                     font: {
                       weight: "bold",
