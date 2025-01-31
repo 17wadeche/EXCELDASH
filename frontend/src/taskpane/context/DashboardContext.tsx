@@ -1872,6 +1872,30 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
                   datasets: [updatedDataset],
                 };
                 return { ...widget, data: updatedChartData };
+              } else if (chartData.type === "treemap") {
+                const rows = data.slice(1);
+                const treeData = rows.map((row, index) => {
+                  const name = row[0] || `Item ${index + 1}`;
+                  const value = Number(row[1]) || 0;
+                  return { name, value };
+                });
+                const existingDS = chartData.datasets[0] || {};
+                const updatedDataset = {
+                  ...existingDS,
+                  tree: treeData,
+                  type: "treemap",
+                  label: existingDS.label || "Treemap Data",
+                  key: "value",
+                  backgroundColor: existingDS.backgroundColor || treeData.map(() => getRandomColor()),
+                  borderColor: existingDS.borderColor ?? "#000000",
+                  borderWidth: existingDS.borderWidth ?? 1,
+                } as any;
+                const updatedChartData: ChartData = {
+                  ...chartData,
+                  labels: data[0].slice(1),
+                  datasets: [updatedDataset],
+                } as any;
+                return { ...widget, data: updatedChartData };
               } else if (multiDatasetTypes.includes(chartData.type)) {
                 const labels = data[0].slice(1);
                 const updatedDatasets = data.slice(1).map((row, rowIndex) => {
