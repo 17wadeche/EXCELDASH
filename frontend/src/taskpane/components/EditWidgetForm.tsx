@@ -381,9 +381,9 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                     display: true,
                     color: "#fff",
                     formatter: (_value: any, context: any) => {
-                      const raw = context.raw;
-                      if (!raw) return "";
-                      return `${raw.g[0]} (${raw.v})`;
+                      const node = context.raw?.data;
+                      if (!node) return "";
+                      return `${node.name} (${node.value})`;
                     },
                     font: {
                       weight: "bold",
