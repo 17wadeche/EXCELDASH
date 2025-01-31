@@ -480,8 +480,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                   case "doughnut":
                   case "polarArea":
                     return context.label;
-                  case "treemap":
-                    return context.raw.name;
                   case "scatter":
                   case "bubble":
                     return `(${context.raw.x}, ${context.raw.y})`;
