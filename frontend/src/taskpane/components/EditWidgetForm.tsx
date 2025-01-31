@@ -378,7 +378,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                   if (ctx.type !== "data") {
                     return "transparent";
                   }
-                  return ctx.raw?._data?.color || "gray";
+                  return ctx.raw?._data?.color || "green";
                 },
                 borderColor: ds.borderColor || "#333",
                 borderWidth: ds.borderWidth || 1,
@@ -397,7 +397,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                     if (ctx.type !== "data") return;
                     const node = ctx.raw?._data;
                     if (!node) return "";
-                    return [node.name, "(" + ctx.raw.v + ")"];
+                    return node.name + "\n(" + ctx.raw.v + ")";
                   },
                 },
               };
