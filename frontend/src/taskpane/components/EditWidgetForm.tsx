@@ -382,6 +382,11 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 },
                 borderColor: ds.borderColor || "#333",
                 borderWidth: ds.borderWidth || 1,
+                plugins: {
+                  datalabels: {
+                    display: false,
+                  },
+                },
                 labels: {
                   display: true,
                   align: "left",
