@@ -373,19 +373,26 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 tree: treemapData,
                 groups: [],
                 key: "value",
-                backgroundColor: getRandomColor(),
+                spacing: 1,
+                backgroundColor(ctx: any) {
+                  if (ctx.type !== "data") {
+                    return "transparent";
+                  }
+                  return ctx.raw?._data?.color || "gray";
+                },
                 borderColor: ds.borderColor || "#333",
                 borderWidth: ds.borderWidth || 1,
-                plugins: {
-                  datalabels: {
-                    display: true,
-                    color: "#fff",
-                    formatter: null,
-                    font: {
-                      weight: "bold",
-                    },
-                    clip: false,
-                    clamp: true,
+                labels: {
+                  display: true,
+                  align: "left",
+                  position: "top",
+                  color: ["white", "whiteSmoke"],
+                  font: [{ size: 20, weight: "bold" }, { size: 12 }],
+                  formatter(ctx: any) {
+                    if (ctx.type !== "data") return;
+                    const node = ctx.raw?._data;
+                    if (!node) return "";
+                    return [node.name, "Value is " + ctx.raw.v];
                   },
                 },
               };
