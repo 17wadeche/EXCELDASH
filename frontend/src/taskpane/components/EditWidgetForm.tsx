@@ -484,6 +484,8 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                     return `(${context.raw.x}, ${context.raw.y})`;
                   case "funnel":
                     return context.chart.data.labels[context.dataIndex];
+                  case "treemap":
+                    return context.raw.name + " (" + context.raw.value + ")";
                   default:
                     return context.formattedValue;
                 }
