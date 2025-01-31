@@ -506,15 +506,20 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
             tooltip: {
               enabled: cleanedValues.enableTooltips !== false,
               callbacks: {
-                label: function (context: any) {
-                  const chartType = context.dataset.type;
-                  if (chartType === "treemap") {
-                    const dataPoint = context.raw;
-                    const label = dataPoint.name || "Name";
-                    const value = dataPoint.value || 0;
-                    return `${label}: ${value}`;
+                title: function (contexts: any) {
+                  if (!contexts.length) return "";
+                  if (contexts[0].dataset.type === "treemap") {
+                    const dataPoint = contexts[0].raw;
+                    return dataPoint?.name || "Name";
                   }
-                  return context.label || context.formattedValue;
+                  return contexts[0].label || "";
+                },
+                label: function (context: any) {
+                  if (context.dataset.type === "treemap") {
+                    const dataPoint = context.raw;
+                    return `Value: ${dataPoint?.value ?? 0}`;
+                  }
+                  return context.formattedValue;
                 },
               },
             },
