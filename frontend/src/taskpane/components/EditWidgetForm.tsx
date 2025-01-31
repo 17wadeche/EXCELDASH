@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable office-addins/load-object-before-read */
+/* eslint-disable no-undef */
 /// <reference types="office-js" />
 // src/taskpane/components/EditWidgetForm.tsx
 
@@ -532,12 +535,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           },
           ...(finalChartType === "boxplot" && { title: cleanedValues.title || "Box Plot" }),
         } as ChartData;
-        if (cleanedValues.trendlineEnabled && cleanedValues.trendlineLinear) {
-          updatedData.plugins = {
-            ...updatedData.plugins,
-            trendlineLinear: cleanedValues.trendlineLinear,
-          };
-        }
         break;
       }
       case "gantt": {
@@ -716,6 +713,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
       const mainType = form.getFieldValue("chartType");
       await Excel.run(async (context) => {
         const range = context.workbook.getSelectedRange();
+        // eslint-disable-next-line office-addins/no-navigational-load
         range.load(["address", "worksheet"]);
         await context.sync();
         const worksheetName = range.worksheet.name;
@@ -1501,21 +1499,21 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 <Form.Item
                   name={["trendlineLinear", "colorMin"]}
                   label="Trendline Min Color"
-                  rules={[{ required: true, message: "Please select a minimum color for the trendline" }]}
+                  rules={[{ required: false, message: "Please select a minimum color for the trendline" }]}
                 >
                   <Input type="color" />
                 </Form.Item>
                 <Form.Item
                   name={["trendlineLinear", "colorMax"]}
                   label="Trendline Max Color"
-                  rules={[{ required: true, message: "Please select a maximum color for the trendline" }]}
+                  rules={[{ required: false, message: "Please select a maximum color for the trendline" }]}
                 >
                   <Input type="color" />
                 </Form.Item>
                 <Form.Item
                   name={["trendlineLinear", "lineStyle"]}
                   label="Trendline Style"
-                  rules={[{ required: true, message: "Please select a line style for the trendline" }]}
+                  rules={[{ required: false, message: "Please select a line style for the trendline" }]}
                 >
                   <Select>
                     <Option value="solid">Solid</Option>
@@ -1527,7 +1525,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 <Form.Item
                   name={["trendlineLinear", "width"]}
                   label="Trendline Width"
-                  rules={[{ required: true, message: "Please enter the trendline width" }]}
+                  rules={[{ required: false, message: "Please enter the trendline width" }]}
                 >
                   <InputNumber min={1} max={10} />
                 </Form.Item>
@@ -1540,9 +1538,10 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 <Form.Item name={["trendlineLinear", "projection"]} label="Extend Trendline" valuePropName="checked">
                   <Switch />
                 </Form.Item>
-
-                {/* Trendline Label Configuration */}
-                <Form.Item label="Trendline Label" shouldUpdate={(prev, curr) => prev.trendlineEnabled !== curr.trendlineEnabled}>
+                <Form.Item
+                  label="Trendline Label"
+                  shouldUpdate={(prev, curr) => prev.trendlineEnabled !== curr.trendlineEnabled}
+                >
                   {() =>
                     trendlineEnabled ? (
                       <Form.List name={["trendlineLinear", "label"]}>
@@ -1554,7 +1553,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                                   {...restField}
                                   name={[name, "color"]}
                                   label="Label Color"
-                                  rules={[{ required: true, message: "Please select a label color" }]}
+                                  rules={[{ required: false, message: "Please select a label color" }]}
                                 >
                                   <Input type="color" />
                                 </Form.Item>
@@ -1562,7 +1561,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                                   {...restField}
                                   name={[name, "text"]}
                                   label="Label Text"
-                                  rules={[{ required: true, message: "Please enter label text" }]}
+                                  rules={[{ required: false, message: "Please enter label text" }]}
                                 >
                                   <Input placeholder="Label Text" />
                                 </Form.Item>
@@ -1586,7 +1585,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                                   {...restField}
                                   name={[name, "offset"]}
                                   label="Label Offset"
-                                  rules={[{ required: true, message: "Please enter label offset" }]}
+                                  rules={[{ required: false, message: "Please enter label offset" }]}
                                 >
                                   <InputNumber min={0} max={100} />
                                 </Form.Item>
@@ -1612,7 +1611,10 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                     ) : null
                   }
                 </Form.Item>
-                <Form.Item label="Trendline Legend" shouldUpdate={(prev, curr) => prev.trendlineEnabled !== curr.trendlineEnabled}>
+                <Form.Item
+                  label="Trendline Legend"
+                  shouldUpdate={(prev, curr) => prev.trendlineEnabled !== curr.trendlineEnabled}
+                >
                   {() =>
                     trendlineEnabled ? (
                       <Form.List name={["trendlineLinear", "legend"]}>
@@ -1624,7 +1626,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                                   {...restField}
                                   name={[name, "text"]}
                                   label="Legend Text"
-                                  rules={[{ required: true, message: "Please enter legend text" }]}
+                                  rules={[{ required: false, message: "Please enter legend text" }]}
                                 >
                                   <Input placeholder="Legend Text" />
                                 </Form.Item>
@@ -1632,7 +1634,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                                   {...restField}
                                   name={[name, "strokeStyle"]}
                                   label="Stroke Style"
-                                  rules={[{ required: true, message: "Please select stroke style color" }]}
+                                  rules={[{ required: false, message: "Please select stroke style color" }]}
                                 >
                                   <Input type="color" />
                                 </Form.Item>
@@ -1640,7 +1642,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                                   {...restField}
                                   name={[name, "fillStyle"]}
                                   label="Fill Style"
-                                  rules={[{ required: true, message: "Please select fill style color" }]}
+                                  rules={[{ required: false, message: "Please select fill style color" }]}
                                 >
                                   <Input type="color" />
                                 </Form.Item>
@@ -1648,7 +1650,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                                   {...restField}
                                   name={[name, "lineCap"]}
                                   label="Line Cap"
-                                  rules={[{ required: true, message: "Please select line cap style" }]}
+                                  rules={[{ required: false, message: "Please select line cap style" }]}
                                 >
                                   <Select>
                                     <Option value="butt">Butt</Option>
@@ -1660,7 +1662,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                                   {...restField}
                                   name={[name, "lineDash"]}
                                   label="Line Dash"
-                                  rules={[{ required: true, message: "Please enter line dash pattern" }]}
+                                  rules={[{ required: false, message: "Please enter line dash pattern" }]}
                                 >
                                   <Input placeholder="e.g., 5,5" />
                                 </Form.Item>
@@ -1668,7 +1670,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                                   {...restField}
                                   name={[name, "lineWidth"]}
                                   label="Line Width"
-                                  rules={[{ required: true, message: "Please enter line width" }]}
+                                  rules={[{ required: false, message: "Please enter line width" }]}
                                 >
                                   <InputNumber min={1} max={10} />
                                 </Form.Item>
@@ -1779,6 +1781,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                   try {
                     await Excel.run(async (context) => {
                       const rng = context.workbook.getSelectedRange();
+                      // eslint-disable-next-line office-addins/no-navigational-load
                       rng.load(["address", "worksheet"]);
                       await context.sync();
                       const selectedSheet = rng.worksheet;
