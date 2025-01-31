@@ -378,11 +378,11 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 borderWidth: ds.borderWidth || 1,
                 plugins: {
                   datalabels: {
-                    display: cleanedValues.showDataLabels,
-                    color: cleanedValues.dataLabelColor || "#fff",
+                    display: true,
+                    color: "#fff",
                     formatter: (_value: any, context: any) => {
                       if (!context.raw) return "";
-                      const { name = "Unnamed", value = 0 } = context.raw;
+                      const { name, value } = context.raw;
                       return `${name} (${value})`;
                     },
                     font: {
