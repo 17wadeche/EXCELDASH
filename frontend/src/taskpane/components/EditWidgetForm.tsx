@@ -1,7 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable office-addins/load-object-before-read */
-/* eslint-disable office-addins/no-navigational-load */
-/* eslint-disable no-undef */
 /// <reference types="office-js" />
 // src/taskpane/components/EditWidgetForm.tsx
 
