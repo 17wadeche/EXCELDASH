@@ -3,7 +3,7 @@
 // src/taskpane/components/CustomLayout.tsx
 
 import React, { useContext, useState } from "react";
-import { Layout, Menu, Button, Modal, Form, Input, message } from "antd";
+import { Layout, Menu, Button, Modal, Form, Input, message, Tooltip } from "antd";
 import { Link, useLocation, useNavigate, Outlet } from "react-router-dom";
 import {
   PlusOutlined,
@@ -52,6 +52,7 @@ const CustomLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) =>
     emailDashboard,
     saveAsTemplate,
     saveDashboardVersion,
+    isFetching,
   } = dashboardContext;
   const isInDashboard = location.pathname.startsWith("/dashboard");
   const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
@@ -97,8 +98,18 @@ const CustomLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) =>
           <Menu.Item key="/create" icon={<PlusOutlined />}>
             <Link to="/create">Create Dashboard</Link>
           </Menu.Item>
-          <Menu.Item key="/dashboard-list" icon={<UnorderedListOutlined />}>
-            <Link to="/dashboard-list">Dashboard List</Link>
+          <Menu.Item
+            key="/dashboard-list"
+            icon={<UnorderedListOutlined />}
+            disabled={isFetching}
+          >
+            {isFetching ? (
+              <Tooltip title="Loading, please wait...">
+                <span style={{ cursor: 'not-allowed', color: 'rgba(0,0,0,0.25)' }}>Dashboard List</span>
+              </Tooltip>
+            ) : (
+              <Link to="/dashboard-list">Dashboard List</Link>
+            )}
           </Menu.Item>
           {isInDashboard && (
             <SubMenu key="add-visuals" icon={<PictureOutlined />} title="Add Visuals">

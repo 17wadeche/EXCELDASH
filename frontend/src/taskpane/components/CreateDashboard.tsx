@@ -42,6 +42,8 @@ const CreateDashboard: React.FC = () => {
     currentWorkbookId,
     setLayouts,
     setDashboards,
+    isFetching,
+    setIsFetching,
   } = useContext(DashboardContext)!;
   const [searchTerm, setSearchTerm] = useState("");
   const [templates, setTemplates] = useState<TemplateItem[]>([]);
@@ -105,6 +107,7 @@ const CreateDashboard: React.FC = () => {
   );
   useEffect(() => {
     const fetchData = async () => {
+      setIsFetching(true);
       setLoading(true);
       try {
         const [fetchedTemplates, fetchedDashboards] = await Promise.all([getTemplates(), getDashboards()]);
@@ -114,6 +117,7 @@ const CreateDashboard: React.FC = () => {
         console.error("Error fetching data:", error);
         message.error("Failed to fetch templates/dashboards.");
       } finally {
+        setIsFetching(false);
         setLoading(false);
       }
     };
@@ -239,41 +243,31 @@ const CreateDashboard: React.FC = () => {
                   headerRange.format.font.size = header.fontSize;
                 }
               });
-              // ========== BAR CHART DATA ==========
               exampleSheet.getRange("A2:D2").values = [["", "Jan", "Feb", "Mar"]];
               exampleSheet.getRange("A3:D3").values = [["Sales", 10, 20, 30]];
-              // ========== LINE CHART DATA ==========
               exampleSheet.getRange("A6:E6").values = [["", "Jan", "Feb", "Mar", "Apr"]];
               exampleSheet.getRange("A7:E7").values = [["Sales", 5000, 7000, 4000, 9000]];
-              // ========== PIE CHART DATA ==========
               exampleSheet.getRange("A10:F10").values = [["", "Red", "Blue", "Green", "Yellow", "Purple"]];
               exampleSheet.getRange("A11:F11").values = [["Value", 30, 25, 20, 15, 10]];
-              // ========== DOUGHNUT CHART DATA ==========
               exampleSheet.getRange("A14:F14").values = [["", "Group A", "Group B", "Group C", "Group D", "Group E"]];
               exampleSheet.getRange("A15:F15").values = [["Value", 45, 25, 15, 10, 5]];
-              // ========== RADAR CHART DATA ==========
               exampleSheet.getRange("A18:F18").values = [
                 ["", "Strength", "Speed", "Agility", "Intelligence", "Endurance"],
               ];
               exampleSheet.getRange("A19:F19").values = [["Series1", 10, 8, 6, 7, 9]];
               exampleSheet.getRange("A20:F20").values = [["Series2", 5, 6, 9, 7, 4]];
-              // ========== POLAR AREA CHART DATA ==========
               exampleSheet.getRange("A23:F23").values = [["", "North", "East", "South", "West", "Center"]];
               exampleSheet.getRange("A24:F24").values = [["Value", 11, 16, 9, 14, 5]];
-              // ========== BUBBLE CHART DATA ==========
               exampleSheet.getRange("A27:E27").values = [["", "Point1", "Point2", "Point3", "Point4"]];
               exampleSheet.getRange("A28:E28").values = [["X", 5, 10, 15, 20]];
               exampleSheet.getRange("A29:E29").values = [["Y", 10, 15, 5, 12]];
               exampleSheet.getRange("A30:E30").values = [["R", 10, 20, 15, 25]];
-              // ========== SCATTER CHART DATA ==========
               exampleSheet.getRange("A33:E33").values = [["", "Point1", "Point2", "Point3", "Point4"]];
               exampleSheet.getRange("A34:E34").values = [["X", 1, 2, 3, 4]];
               exampleSheet.getRange("A35:E35").values = [["Y", 2, 5, 3, 7]];
-              // ========== BOX PLOT DATA ==========
               exampleSheet.getRange("A38:F38").values = [["", "Q1", "Median", "Q3", "Min", "Max"]];
               exampleSheet.getRange("A39:F39").values = [["Sample1", 10, 20, 30, 5, 35]];
               exampleSheet.getRange("A40:F40").values = [["Sample2", 15, 25, 40, 10, 45]];
-              // ========== FUNNEL CHART DATA ==========
               exampleSheet.getRange("A43:B43").values = [["Stage", "Value"]];
               exampleSheet.getRange("A44:B48").values = [
                 ["Prospects", 200],
@@ -282,7 +276,6 @@ const CreateDashboard: React.FC = () => {
                 ["Negotiation", 30],
                 ["Closed", 15],
               ];
-              // ========== TREEMAP CHART DATA ==========
               exampleSheet.getRange("A51:B51").values = [["Name", "Value"]];
               exampleSheet.getRange("A52:B56").values = [
                 ["Category A", 10],

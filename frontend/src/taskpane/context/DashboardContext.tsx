@@ -105,6 +105,8 @@ interface DashboardContextProps {
   dashboardBorderSettings: DashboardBorderSettings;
   setDashboardBorderSettings: React.Dispatch<React.SetStateAction<DashboardBorderSettings>>;
   refreshAllCharts: () => void;
+  isFetching: boolean;
+  setIsFetching: (loading: boolean) => void;
 }
 interface DashboardProviderProps {
   children: React.ReactNode;
@@ -135,6 +137,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
     initialWidgets && initialWidgets.length > 0 ? initialWidgets : [defaultTitleWidget]
   );
   const [dashboards, setDashboards] = useState<DashboardItem[]>([]);
+  const [isFetching, setIsFetching] = useState<boolean>(false);
   const [dashboardTitle, setDashboardTitle] = useState<string>("My Dashboard");
   const [isFullscreenActive, setIsFullscreenActive] = useState(false);
   const [currentDashboard, setCurrentDashboard] = useState<DashboardItem | null>(null);
@@ -2703,6 +2706,8 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
         applyDataValidation,
         refreshAllCharts,
         updateLayoutsForNewWidgets,
+        isFetching,
+        setIsFetching,
         addTaskToGantt,
         currentWorkbookId,
         setCurrentWorkbookId,

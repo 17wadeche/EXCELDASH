@@ -512,7 +512,6 @@ const Dashboard: React.FC<DashboardProps> = React.memo(
             />
           );
         }
-
         return (
           <div
             key={widget.id}
