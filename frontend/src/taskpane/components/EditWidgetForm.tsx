@@ -374,12 +374,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 groups: [],
                 key: "value",
                 spacing: 1,
-                backgroundColor(ctx: any) {
-                  if (ctx.type !== "data") {
-                    return "transparent";
-                  }
-                  return ctx.raw?._data?.color || "green";
-                },
+                backgroundColor: getRandomColor(),
                 borderColor: ds.borderColor || "#333",
                 borderWidth: ds.borderWidth || 1,
                 plugins: {
@@ -391,7 +386,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                   display: true,
                   align: "left",
                   position: "top",
-                  color: ["white", "whiteSmoke"],
+                  color: getRandomColor(),
                   font: [{ size: 12, weight: "bold" }, { size: 10 }],
                   formatter(ctx: any) {
                     if (ctx.type !== "data") return;
