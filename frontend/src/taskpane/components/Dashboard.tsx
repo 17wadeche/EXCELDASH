@@ -472,7 +472,7 @@ const Dashboard: React.FC<DashboardProps> = React.memo(
       [currentWidget, updateWidget]
     );
     const sortWidgetsByZIndex = (widgets: Widget[]): Widget[] => {
-      return [...widgets].sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
+      return [...widgets].sort((a, b) => (b.zIndex || 0) - (a.zIndex || 0));
     };
     const widgetElements = useMemo(() => {
       const sortedWidgets = sortWidgetsByZIndex(widgets);
@@ -713,6 +713,7 @@ const Dashboard: React.FC<DashboardProps> = React.memo(
             allowOverlap={true}
             margin={[0, 0]}
             containerPadding={[0, 0]}
+            useCSSTransforms={false}
           >
             {widgetElements}
           </ResponsiveGridLayout>
