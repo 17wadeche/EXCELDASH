@@ -505,23 +505,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
             },
             tooltip: {
               enabled: cleanedValues.enableTooltips !== false,
-              callbacks: {
-                title: function (contexts: any) {
-                  if (!contexts.length) return "";
-                  if (contexts[0].dataset.type === "treemap") {
-                    const dataPoint = contexts[0].raw;
-                    return dataPoint?.name || "Name";
-                  }
-                  return contexts[0].label || "";
-                },
-                label: function (context: any) {
-                  if (context.dataset.type === "treemap") {
-                    const dataPoint = context.raw;
-                    return `Value: ${dataPoint?.value ?? 0}`;
-                  }
-                  return context.formattedValue;
-                },
-              },
             },
           },
           backgroundColor: cleanedValues.chartBackgroundColor || "#ffffff",
