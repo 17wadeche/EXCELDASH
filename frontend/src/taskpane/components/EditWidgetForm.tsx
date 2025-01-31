@@ -368,13 +368,13 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 }));
               }
               return {
-                label: ds.label || "Treemap Data",
+                label: "",
                 type: "treemap",
                 tree: treemapData,
                 groups: [],
                 key: "value",
                 spacing: 1,
-                backgroundColor: getRandomColor(),
+                backgroundColor: ds.backgroundColor || getRandomColor(),
                 borderColor: ds.borderColor || "#333",
                 borderWidth: ds.borderWidth || 1,
                 plugins: {
@@ -392,7 +392,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                     if (ctx.type !== "data") return;
                     const node = ctx.raw?._data;
                     if (!node) return "";
-                    return node.name + "\n(" + ctx.raw.v + ")";
+                    return node.name + "\n" + "(" + ctx.raw.v + ")";
                   },
                 },
               };
