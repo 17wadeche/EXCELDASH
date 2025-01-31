@@ -125,12 +125,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
             initialValues.funnelColors = [];
           }
         }
-        if (data.plugins?.trendlineLinear) {
-          initialValues.trendlineEnabled = true;
-          initialValues.trendlineLinear = data.plugins.trendlineLinear;
-        } else {
-          initialValues.trendlineEnabled = false;
-        }
         return initialValues;
       }
       case "gantt": {

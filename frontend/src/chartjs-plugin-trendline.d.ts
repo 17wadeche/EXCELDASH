@@ -1,5 +1,4 @@
 // src/types/chartjs-plugin-trendline.d.ts
-
 import 'chart.js';
 
 declare module 'chart.js' {
@@ -12,5 +11,10 @@ declare module 'chart.js' {
       projection?: boolean;
       [key: string]: any;
     };
+    legend?: any;
+    tooltip?: any;
+    zoom?: any;
+    annotation?: any;
+    datalabels?: any;
   }
 }
