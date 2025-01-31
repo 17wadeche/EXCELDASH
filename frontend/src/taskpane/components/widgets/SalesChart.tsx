@@ -25,7 +25,6 @@ import { FunnelController, TrapezoidElement } from "chartjs-chart-funnel";
 import { HierarchicalScale } from "chartjs-plugin-hierarchical";
 import type { ChartData, ChartOptions, ChartType, ChartDataset } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
-import chartTrendline from "chartjs-plugin-trendline";
 
 ChartJS.register(
   CategoryScale,
@@ -33,7 +32,6 @@ ChartJS.register(
   BarElement,
   LineElement,
   PointElement,
-  chartTrendline,
   Title,
   Tooltip,
   Legend,
@@ -128,7 +126,6 @@ interface ExtendedChartData<TType extends ChartType = ChartType, TData = unknown
     zoom?: any;
     annotation?: any;
     datalabels?: any;
-    trendlineLinear?: any;
   };
   backgroundColor?: string;
   gridLineColor?: string;
@@ -182,13 +179,6 @@ const SalesChart = ({ data, type }: SalesChartProps) => {
       zoom: data.plugins?.zoom || {},
       annotation: data.plugins?.annotation || {},
       datalabels: data.plugins?.datalabels || {},
-      ...(data.plugins?.trendlineLinear && ["bar", "line", "scatter"].includes(type)
-        ? {
-            trendlineLinear: {
-              ...data.plugins.trendlineLinear,
-            },
-          }
-        : {}),
     },
     scales: {
       x: {

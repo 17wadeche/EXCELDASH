@@ -36,15 +36,12 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
   const [sheets, setSheets] = useState<string[]>([]);
   const [chartType, setChartType] = useState<string>(widget.type === "chart" ? (widget.data as ChartData).type : "bar");
   const [zIndex, setZIndex] = useState<number>(widget.zIndex || 0);
-  const [trendlineEnabled, setTrendlineEnabled] = useState<boolean>(false);
   useEffect(() => {
     const initialValues = getInitialValues();
     form.setFieldsValue({
       ...initialValues,
       zIndex: widget.zIndex || 0,
-      trendlineEnabled: initialValues.plugins?.trendlineLinear ? true : false,
     });
-    setTrendlineEnabled(!!initialValues.plugins?.trendlineLinear);
   }, [widget, form]);
   useEffect(() => {
     setSheets(availableWorksheets);
@@ -527,13 +524,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 },
               },
             },
-            ...(cleanedValues.trendlineEnabled && cleanedValues.trendlineLinear
-              ? {
-                  trendlineLinear: {
-                    ...cleanedValues.trendlineLinear,
-                  },
-                }
-              : {}),
           },
           backgroundColor: cleanedValues.chartBackgroundColor || "#ffffff",
           gridLineColor: cleanedValues.gridLineColor || "rgba(0, 0, 0, 0.1)",
@@ -1492,214 +1482,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
               <Option value="center">Center</Option>
             </Select>
           </Form.Item>
-          <Form.Item name="trendlineEnabled" label="Enable Trendline" valuePropName="checked">
-            <Switch
-              onChange={(checked: boolean) => {
-                setTrendlineEnabled(checked);
-                if (!checked) {
-                  form.setFieldsValue({ trendlineLinear: undefined });
-                }
-              }}
-            />
-          </Form.Item>
-          {trendlineEnabled && (
-            <Collapse defaultActiveKey={["trendline"]}>
-              <Panel header="Trendline Configuration" key="trendline">
-                <Form.Item
-                  name={["trendlineLinear", "colorMin"]}
-                  label="Trendline Min Color"
-                  rules={[{ required: false, message: "Please select a minimum color for the trendline" }]}
-                >
-                  <Input type="color" />
-                </Form.Item>
-                <Form.Item
-                  name={["trendlineLinear", "colorMax"]}
-                  label="Trendline Max Color"
-                  rules={[{ required: false, message: "Please select a maximum color for the trendline" }]}
-                >
-                  <Input type="color" />
-                </Form.Item>
-                <Form.Item
-                  name={["trendlineLinear", "lineStyle"]}
-                  label="Trendline Style"
-                  rules={[{ required: false, message: "Please select a line style for the trendline" }]}
-                >
-                  <Select>
-                    <Option value="solid">Solid</Option>
-                    <Option value="dashed">Dashed</Option>
-                    <Option value="dotted">Dotted</Option>
-                    <Option value="dashdot">Dash-Dot</Option>
-                  </Select>
-                </Form.Item>
-                <Form.Item
-                  name={["trendlineLinear", "width"]}
-                  label="Trendline Width"
-                  rules={[{ required: false, message: "Please enter the trendline width" }]}
-                >
-                  <InputNumber min={1} max={10} />
-                </Form.Item>
-                <Form.Item name={["trendlineLinear", "xAxisKey"]} label="Trendline X-Axis Key">
-                  <Input placeholder="Optional X-Axis Key" />
-                </Form.Item>
-                <Form.Item name={["trendlineLinear", "yAxisKey"]} label="Trendline Y-Axis Key">
-                  <Input placeholder="Optional Y-Axis Key" />
-                </Form.Item>
-                <Form.Item name={["trendlineLinear", "projection"]} label="Extend Trendline" valuePropName="checked">
-                  <Switch />
-                </Form.Item>
-                <Form.Item
-                  label="Trendline Label"
-                  shouldUpdate={(prev, curr) => prev.trendlineEnabled !== curr.trendlineEnabled}
-                >
-                  {() =>
-                    trendlineEnabled ? (
-                      <Form.List name={["trendlineLinear", "label"]}>
-                        {(fields, { add, remove }) => (
-                          <>
-                            {fields.map(({ key, name, ...restField }) => (
-                              <Space key={key} style={{ display: "flex", marginBottom: 8 }} align="baseline">
-                                <Form.Item
-                                  {...restField}
-                                  name={[name, "color"]}
-                                  label="Label Color"
-                                  rules={[{ required: false, message: "Please select a label color" }]}
-                                >
-                                  <Input type="color" />
-                                </Form.Item>
-                                <Form.Item
-                                  {...restField}
-                                  name={[name, "text"]}
-                                  label="Label Text"
-                                  rules={[{ required: false, message: "Please enter label text" }]}
-                                >
-                                  <Input placeholder="Label Text" />
-                                </Form.Item>
-                                <Form.Item
-                                  {...restField}
-                                  name={[name, "display"]}
-                                  label="Display Label"
-                                  valuePropName="checked"
-                                >
-                                  <Switch />
-                                </Form.Item>
-                                <Form.Item
-                                  {...restField}
-                                  name={[name, "displayValue"]}
-                                  label="Display Value"
-                                  valuePropName="checked"
-                                >
-                                  <Switch />
-                                </Form.Item>
-                                <Form.Item
-                                  {...restField}
-                                  name={[name, "offset"]}
-                                  label="Label Offset"
-                                  rules={[{ required: false, message: "Please enter label offset" }]}
-                                >
-                                  <InputNumber min={0} max={100} />
-                                </Form.Item>
-                                <Form.Item
-                                  {...restField}
-                                  name={[name, "percentage"]}
-                                  label="Display as Percentage"
-                                  valuePropName="checked"
-                                >
-                                  <Switch />
-                                </Form.Item>
-                                <MinusCircleOutlined onClick={() => remove(name)} />
-                              </Space>
-                            ))}
-                            <Form.Item>
-                              <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
-                                Add Trendline Label
-                              </Button>
-                            </Form.Item>
-                          </>
-                        )}
-                      </Form.List>
-                    ) : null
-                  }
-                </Form.Item>
-                <Form.Item
-                  label="Trendline Legend"
-                  shouldUpdate={(prev, curr) => prev.trendlineEnabled !== curr.trendlineEnabled}
-                >
-                  {() =>
-                    trendlineEnabled ? (
-                      <Form.List name={["trendlineLinear", "legend"]}>
-                        {(fields, { add, remove }) => (
-                          <>
-                            {fields.map(({ key, name, ...restField }) => (
-                              <Space key={key} style={{ display: "flex", marginBottom: 8 }} align="baseline">
-                                <Form.Item
-                                  {...restField}
-                                  name={[name, "text"]}
-                                  label="Legend Text"
-                                  rules={[{ required: false, message: "Please enter legend text" }]}
-                                >
-                                  <Input placeholder="Legend Text" />
-                                </Form.Item>
-                                <Form.Item
-                                  {...restField}
-                                  name={[name, "strokeStyle"]}
-                                  label="Stroke Style"
-                                  rules={[{ required: false, message: "Please select stroke style color" }]}
-                                >
-                                  <Input type="color" />
-                                </Form.Item>
-                                <Form.Item
-                                  {...restField}
-                                  name={[name, "fillStyle"]}
-                                  label="Fill Style"
-                                  rules={[{ required: false, message: "Please select fill style color" }]}
-                                >
-                                  <Input type="color" />
-                                </Form.Item>
-                                <Form.Item
-                                  {...restField}
-                                  name={[name, "lineCap"]}
-                                  label="Line Cap"
-                                  rules={[{ required: false, message: "Please select line cap style" }]}
-                                >
-                                  <Select>
-                                    <Option value="butt">Butt</Option>
-                                    <Option value="round">Round</Option>
-                                    <Option value="square">Square</Option>
-                                  </Select>
-                                </Form.Item>
-                                <Form.Item
-                                  {...restField}
-                                  name={[name, "lineDash"]}
-                                  label="Line Dash"
-                                  rules={[{ required: false, message: "Please enter line dash pattern" }]}
-                                >
-                                  <Input placeholder="e.g., 5,5" />
-                                </Form.Item>
-                                <Form.Item
-                                  {...restField}
-                                  name={[name, "lineWidth"]}
-                                  label="Line Width"
-                                  rules={[{ required: false, message: "Please enter line width" }]}
-                                >
-                                  <InputNumber min={1} max={10} />
-                                </Form.Item>
-                                <MinusCircleOutlined onClick={() => remove(name)} />
-                              </Space>
-                            ))}
-                            <Form.Item>
-                              <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
-                                Add Trendline Legend
-                              </Button>
-                            </Form.Item>
-                          </>
-                        )}
-                      </Form.List>
-                    ) : null
-                  }
-                </Form.Item>
-              </Panel>
-            </Collapse>
-          )}
         </>
       )}
       {widget.type === "gantt" && (
