@@ -128,6 +128,15 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
             initialValues.funnelColors = [];
           }
         }
+        if (data.type === "treemap") {
+          const dataset = data.datasets[0];
+          if (Array.isArray(dataset.tree)) {
+            initialValues.datasets[0] = {
+              ...dataset,
+              tree: dataset.tree,
+            };
+          }
+        }
         return initialValues;
       }
       case "gantt": {
@@ -375,8 +384,8 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                   color: cleanedValues.dataLabelColor || "#fff",
                   formatter: (_value: any, context: any) => {
                     if (!context.raw) return "";
-                    const { g = "Unnamed", v = 0 } = context.raw;
-                    return `${g} (${v})`;
+                    const { name = "Unnamed", value = 0 } = context.raw;
+                    return `${name} (${value})`;
                   },
                   font: {
                     weight: "bold",
