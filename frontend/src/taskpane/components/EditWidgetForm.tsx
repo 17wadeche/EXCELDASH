@@ -341,31 +341,30 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
               };
             } else if (ds.type === "treemap") {
               let treemapData: any[] = [];
-              if (Array.isArray(ds.tree) && ds.tree.length > 0) {
-                treemapData = ds.tree;
-              } else if (typeof ds.data === "string" && ds.data.trim()) {
+              if (typeof ds.data === "string" && ds.data.trim()) {
                 const lines = ds.data
                   .split("\n")
                   .map((l: any) => l.trim())
                   .filter(Boolean);
-                treemapData = lines.map((line: any) => {
-                  const [rawName, rawVal] = line.split(",").map((x: any) => x.trim());
+                treemapData = lines.map((line: string) => {
+                  const [rawName, rawVal] = line.split(",").map((x: string) => x.trim());
                   return {
                     name: rawName || "Unnamed",
                     value: parseFloat(rawVal) || 0,
                   };
                 });
+              } else if (Array.isArray(ds.tree) && ds.tree.length > 0) {
+                treemapData = ds.tree.map((item: any) => ({
+                  name: item.name || "Unnamed",
+                  value: item.value || 0,
+                }));
               }
-              treemapData = treemapData.map((item: any) => ({
-                name: item.Name ?? item.name ?? "Unnamed",
-                value: item.Value ?? item.value ?? 0,
-              }));
               return {
                 label: ds.label || "Treemap Data",
-                type: ds.type,
+                type: "treemap",
                 tree: treemapData,
-                key: "value",
                 groups: [],
+                key: "value",
                 backgroundColor: getRandomColor(),
                 borderColor: ds.borderColor || "#333",
                 borderWidth: ds.borderWidth || 1,
@@ -373,14 +372,9 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                   display: true,
                   color: "#fff",
                   formatter: (_value: any, context: any) => {
-                    console.log("Treemap raw data:", context.raw);
-                    const item = context.raw?._data || {};
-                    const raw = context.raw || {};
-                    const label = raw.g ?? "Unnamed";
-                    const val = raw.v ?? 0;
-                    console.log(`${raw.g ?? "Unnamed"} (${raw.v ?? 0})`);
-                    console.log(`${item.name ?? "Unnamed"} (${item.value ?? 0})`);
-                    return `${label} (${val})`;
+                    if (!context.raw) return "";
+                    const { g = "Unnamed", v = 0 } = context.raw;
+                    return `${g} (${v})`;
                   },
                   font: {
                     weight: "bold",
