@@ -508,19 +508,13 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
               callbacks: {
                 label: function (context: any) {
                   const chartType = context.dataset.type;
-                  if (chartType === "funnel") {
-                    return `${context.formattedValue}`;
-                  }
                   if (chartType === "treemap") {
                     const dataPoint = context.raw;
                     const label = dataPoint.name || "Name";
                     const value = dataPoint.value || 0;
                     return `${label}: ${value}`;
-                  } else {
-                    const label = context.label || "";
-                    const value = context.formattedValue;
-                    return label ? `${label}: ${value}` : `${value}`;
                   }
+                  return context.label || context.formattedValue;
                 },
               },
             },
