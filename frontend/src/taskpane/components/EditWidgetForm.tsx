@@ -376,16 +376,20 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 backgroundColor: getRandomColor(),
                 borderColor: ds.borderColor || "#333",
                 borderWidth: ds.borderWidth || 1,
-                datalabels: {
-                  display: cleanedValues.showDataLabels,
-                  color: cleanedValues.dataLabelColor || "#fff",
-                  formatter: (_value: any, context: any) => {
-                    if (!context.raw) return "";
-                    const { name = "Unnamed", value = 0 } = context.raw;
-                    return `${name} (${value})`;
-                  },
-                  font: {
-                    weight: "bold",
+                plugins: {
+                  datalabels: {
+                    display: cleanedValues.showDataLabels,
+                    color: cleanedValues.dataLabelColor || "#fff",
+                    formatter: (_value: any, context: any) => {
+                      if (!context.raw) return "";
+                      const { name = "Unnamed", value = 0 } = context.raw;
+                      return `${name} (${value})`;
+                    },
+                    font: {
+                      weight: "bold",
+                    },
+                    clip: false,
+                    clamp: true,
                   },
                 },
               };

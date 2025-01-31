@@ -242,6 +242,14 @@ const SalesChart = ({ data, type }: SalesChartProps) => {
       },
     },
   };
+  if (type === "treemap") {
+    (chartOptions.plugins as any).treemap = {
+      labels: {
+        display: false,
+      },
+    };
+  }
+
   const handleChartClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
     const chart = chartRef.current;
     if (!chart) return;
