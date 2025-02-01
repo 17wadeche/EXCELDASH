@@ -134,13 +134,13 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           }
         }
         if (data.type === "treemap") {
-          const ds0 = data.datasets[0];
-          if (Array.isArray(ds0.tree)) {
+          const dsAny = data.datasets[0] as any;
+          if (Array.isArray(dsAny.tree)) {
             initialValues.datasets[0] = {
-              ...ds0,
-              tree: ds0.tree,
-              plugins: ds0.plugins || {},
-              labels: ds0.labels || {},
+              ...dsAny,
+              tree: dsAny.tree,
+              plugins: dsAny.plugins || {},
+              labels: dsAny.labels || {},
             };
           }
         }
