@@ -84,7 +84,13 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           updateInterval: data.dynamicUpdate?.interval || 5,
           datasets: (data.datasets || []).map((ds) => {
             let dataString = "";
-            if ((ds.type as String) === "boxplot" && Array.isArray(ds.data)) {
+            if (ds.type === "scatter" && Array.isArray(ds.data)) {
+              dataString = ds.data.map((point: { x: number; y: number }) => `${point.x},${point.y}`).join("; ");
+            } else if (ds.type === "bubble" && Array.isArray(ds.data)) {
+              dataString = ds.data
+                .map((point: { x: number; y: number; r: number }) => `${point.x},${point.y},${point.r}`)
+                .join("; ");
+            } else if ((ds.type as String) === "boxplot" && Array.isArray(ds.data)) {
               dataString = JSON.stringify(ds.data);
             } else if (Array.isArray(ds.data)) {
               dataString = ds.data.join(", ");
