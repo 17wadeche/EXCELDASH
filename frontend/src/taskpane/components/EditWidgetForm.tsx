@@ -1454,15 +1454,19 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                   <Option value="right">Right</Option>
                 </Select>
               </Form.Item>
-              <Form.Item label="Show Data Labels" name="showDataLabels" valuePropName="checked">
-                <Switch />
-              </Form.Item>
-              <Form.Item label="Data Label Color" name="dataLabelColor">
-                <Input type="color" />
-              </Form.Item>
-              <Form.Item label="Data Label Font Size" name="dataLabelFontSize">
-                <InputNumber min={8} max={24} />
-              </Form.Item>
+              {chartType !== "treemap" && (
+                <>
+                  <Form.Item label="Show Data Labels" name="showDataLabels" valuePropName="checked">
+                    <Switch />
+                  </Form.Item>
+                  <Form.Item label="Data Label Color" name="dataLabelColor">
+                    <Input type="color" />
+                  </Form.Item>
+                  <Form.Item label="Data Label Font Size" name="dataLabelFontSize">
+                    <InputNumber min={8} max={24} />
+                  </Form.Item>
+                </>
+              )}
             </Panel>
           </Collapse>
           <Form.Item name="titleAlignment" label="Title Alignment">
