@@ -280,11 +280,19 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
         if (finalChartType === "scatter" || finalChartType === "bubble") {
           cleanedValues.xAxisType = "linear";
         }
+        const topLevelLabels =
+          finalChartType !== "treemap"
+            ? (cleanedValues.labels || "")
+                .split(",")
+                .map((label: string) => label.trim())
+                .filter(Boolean)
+            : [];
         updatedData = {
           title: cleanedValues.title,
           type: finalChartType,
           worksheetName: cleanedValues.worksheetName,
           associatedRange: cleanedValues.associatedRange,
+          ...(finalChartType !== "treemap" && { labels: topLevelLabels }),
           labels: (cleanedValues.labels || "")
             .split(",")
             .map((s: string) => s.trim())
@@ -397,7 +405,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                   color: "#000",
                   font: [{ size: 12, weight: "bold" }, { size: 10 }],
                   formatter(ctx: any) {
-                    if (ctx.type !== "data") return;
+                    if (ctx.type !== "data") return "";
                     const node = ctx.raw?._data;
                     if (!node) return "";
                     return [node.name, `(${ctx.raw.v})`];
@@ -413,7 +421,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 .split(",")
                 .map((v: string) => parseFloat(v.trim()))
                 .filter((v: number) => !isNaN(v));
-
               if (labels.length !== funnelValues.length) {
                 message.error("The number of labels must match the number of data points for the funnel chart.");
                 return null;
