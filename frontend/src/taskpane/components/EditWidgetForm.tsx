@@ -387,12 +387,12 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                   align: "left",
                   position: "top",
                   color: "#000",
-                  font: [{ size: 10, weight: "bold" }, { size: 8 }],
+                  font: [{ size: 12, weight: "bold" }, { size: 10 }],
                   formatter(ctx: any) {
                     if (ctx.type !== "data") return;
                     const node = ctx.raw?._data;
                     if (!node) return "";
-                    return [node.name, `(${ctx.raw.v})`];
+                    return `${node.name} (${node.value})`;
                   },
                 },
               };
