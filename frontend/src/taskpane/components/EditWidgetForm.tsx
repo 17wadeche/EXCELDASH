@@ -392,7 +392,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                     if (ctx.type !== "data") return;
                     const node = ctx.raw?._data;
                     if (!node) return "";
-                    return node.name + "\n" + "(" + ctx.raw.v + ")";
+                    return [node.name, `(${ctx.raw.v})`];
                   },
                 },
               };
