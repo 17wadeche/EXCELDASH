@@ -492,8 +492,13 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                   case "polarArea":
                     return context.label;
                   case "scatter":
-                  case "bubble":
-                    return `(${context.raw.x}, ${context.raw.y})`;
+                  case "bubble": {
+                    const pt = context.raw;
+                    if (!pt || typeof pt.x !== "number" || typeof pt.y !== "number") {
+                      return "";
+                    }
+                    return `(${pt.x}, ${pt.y})`;
+                  }
                   case "funnel":
                     return context.chart.data.labels[context.dataIndex];
                   case "treemap":
