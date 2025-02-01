@@ -386,7 +386,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                   display: true,
                   align: "left",
                   position: "top",
-                  color: "#fff",
+                  color: "#000",
                   font: [{ size: 12, weight: "bold" }, { size: 10 }],
                   formatter(ctx: any) {
                     if (ctx.type !== "data") return;
