@@ -368,7 +368,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 }));
               }
               return {
-                label: "",
+                label: "Treemap",
                 type: "treemap",
                 tree: treemapData,
                 groups: [],
@@ -387,7 +387,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                   align: "left",
                   position: "top",
                   color: "#000",
-                  font: [{ size: 12, weight: "bold" }, { size: 10 }],
+                  font: [{ size: 10, weight: "bold" }, { size: 8 }],
                   formatter(ctx: any) {
                     if (ctx.type !== "data") return;
                     const node = ctx.raw?._data;
