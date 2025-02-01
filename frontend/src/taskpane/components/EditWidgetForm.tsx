@@ -366,6 +366,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 borderWidth: ds.borderWidth || 1,
               };
             } else if (ds.type === "treemap") {
+              const dsAny = ds as any;
               let treemapData: any[] = [];
               if (typeof ds.data === "string" && ds.data.trim()) {
                 const lines = ds.data
@@ -403,10 +404,10 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 },
                 labels: {
                   display: true,
-                  align: ds.labels?.align ?? "left",
-                  position: ds.labels?.position ?? "top",
-                  color: ds.labels?.color ?? "#000",
-                  font: ds.labels?.font ?? [{ size: 12, weight: "bold" }, { size: 10 }],
+                  align: dsAny.labels?.align ?? "left",
+                  position: dsAny.labels?.position ?? "top",
+                  color: dsAny.labels?.color ?? "#000",
+                  font: dsAny.labels?.font ?? [{ size: 12, weight: "bold" }, { size: 10 }],
                   formatter(ctx: any) {
                     if (ctx.type !== "data") return "";
                     const node = ctx.raw?._data;
