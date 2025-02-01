@@ -134,11 +134,13 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
           }
         }
         if (data.type === "treemap") {
-          const dataset = data.datasets[0];
-          if (Array.isArray(dataset.tree)) {
+          const ds0 = data.datasets[0];
+          if (Array.isArray(ds0.tree)) {
             initialValues.datasets[0] = {
-              ...dataset,
-              tree: dataset.tree,
+              ...ds0,
+              tree: ds0.tree,
+              plugins: ds0.plugins || {},
+              labels: ds0.labels || {},
             };
           }
         }
@@ -383,27 +385,28 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                   value: item.value || 0,
                 }));
               }
+              const userWantsDataLabels = cleanedValues.showDataLabels;
               return {
-                label: "Treemap",
+                label: ds.label || "Treemap",
                 type: "treemap",
                 tree: treemapData,
-                groups: [],
-                key: "value",
-                spacing: 1,
+                groups: ds.groups || [],
+                key: ds.key || "value",
+                spacing: ds.spacing || 1,
                 backgroundColor: ds.backgroundColor || getRandomColor(),
                 borderColor: ds.borderColor || "#333",
                 borderWidth: ds.borderWidth || 1,
                 plugins: {
                   datalabels: {
-                    display: false,
+                    display: !!userWantsDataLabels,
                   },
                 },
                 labels: {
                   display: true,
-                  align: "left",
-                  position: "top",
-                  color: "#000",
-                  font: [{ size: 12, weight: "bold" }, { size: 10 }],
+                  align: ds.labels?.align ?? "left",
+                  position: ds.labels?.position ?? "top",
+                  color: ds.labels?.color ?? "#000",
+                  font: ds.labels?.font ?? [{ size: 12, weight: "bold" }, { size: 10 }],
                   formatter(ctx: any) {
                     if (ctx.type !== "data") return "";
                     const node = ctx.raw?._data;
@@ -1203,6 +1206,22 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                                   </>
                                 )}
                               </Form.List>
+                              <Form.Item
+                                {...restField}
+                                name={[name, "plugins", "datalabels", "display"]}
+                                valuePropName="checked"
+                                label="Treemap DataLabels?"
+                              >
+                                <Switch />
+                              </Form.Item>
+                              <Form.Item
+                                {...restField}
+                                name={[name, "labels", "display"]}
+                                valuePropName="checked"
+                                label="Show Treemap Labels?"
+                              >
+                                <Switch />
+                              </Form.Item>
                             </>
                           );
                         } else if (dsType === "boxplot") {
