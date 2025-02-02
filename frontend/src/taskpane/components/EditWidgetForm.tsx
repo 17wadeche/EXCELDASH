@@ -149,7 +149,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 tree: dsAny.tree,
                 plugins: {
                   datalabels: {
-                    display: dsAny.plugins?.datalabels?.display ?? false,
+                    display: dsAny.plugins?.datalabels?.display ?? true,
                   },
                 },
                 labels: {
