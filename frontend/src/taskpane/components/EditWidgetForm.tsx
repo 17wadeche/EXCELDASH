@@ -136,12 +136,24 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
         if (data.type === "treemap") {
           const dsAny = data.datasets[0] as any;
           if (Array.isArray(dsAny.tree)) {
-            initialValues.datasets[0] = {
-              ...dsAny,
-              tree: dsAny.tree,
-              plugins: dsAny.plugins || {},
-              labels: dsAny.labels || {},
-            };
+            initialValues.datasets = [
+              {
+                ...dsAny,
+                tree: dsAny.tree,
+                plugins: {
+                  datalabels: {
+                    display: dsAny.plugins?.datalabels?.display ?? false,
+                  },
+                },
+                labels: {
+                  display: dsAny.labels?.display ?? true,
+                  align: dsAny.labels?.align ?? "left",
+                  position: dsAny.labels?.position ?? "top",
+                  color: dsAny.labels?.color ?? "#000",
+                  font: dsAny.labels?.font ?? [{ size: 12, weight: "bold" }, { size: 10 }],
+                },
+              },
+            ];
           }
         }
         return initialValues;
@@ -368,8 +380,8 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
             } else if (ds.type === "treemap") {
               const dsAny = ds as any;
               let treemapData: any[] = [];
-              if (typeof ds.data === "string" && ds.data.trim()) {
-                const lines = ds.data
+              if (typeof dsAny.data === "string" && dsAny.data.trim()) {
+                const lines = dsAny.data
                   .split("\n")
                   .map((l: any) => l.trim())
                   .filter(Boolean);
@@ -380,13 +392,12 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                     value: parseFloat(rawVal) || 0,
                   };
                 });
-              } else if (Array.isArray(ds.tree) && ds.tree.length > 0) {
-                treemapData = ds.tree.map((item: any) => ({
+              } else if (Array.isArray(dsAny.tree)) {
+                treemapData = dsAny.tree.map((item: any) => ({
                   name: item.name || "Unnamed",
                   value: item.value || 0,
                 }));
               }
-              const userWantsDataLabels = cleanedValues.showDataLabels;
               return {
                 label: ds.label || "Treemap",
                 type: "treemap",
@@ -399,11 +410,11 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 borderWidth: ds.borderWidth || 1,
                 plugins: {
                   datalabels: {
-                    display: !!userWantsDataLabels,
+                    display: dsAny.plugins?.datalabels?.display ?? false,
                   },
                 },
                 labels: {
-                  display: true,
+                  display: dsAny.labels?.display ?? true,
                   align: dsAny.labels?.align ?? "left",
                   position: dsAny.labels?.position ?? "top",
                   color: dsAny.labels?.color ?? "#000",
