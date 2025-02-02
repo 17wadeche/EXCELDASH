@@ -46,6 +46,12 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
   useEffect(() => {
     setSheets(availableWorksheets);
   }, [availableWorksheets]);
+  const defaultTreemapFormatter = (ctx: any) => {
+    if (ctx.type !== "data") return "";
+    const node = ctx.raw?._data;
+    if (!node) return "";
+    return [node.name, `(${ctx.raw.v})`];
+  };
   const getInitialValues = () => {
     switch (widget.type) {
       case "text":
@@ -136,6 +142,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
         if (data.type === "treemap") {
           const dsAny = data.datasets[0] as any;
           if (Array.isArray(dsAny.tree)) {
+            initialValues.datasets = initialValues.datasets || [];
             initialValues.datasets = [
               {
                 ...dsAny,
@@ -147,10 +154,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 },
                 labels: {
                   display: dsAny.labels?.display ?? true,
-                  align: dsAny.labels?.align ?? "left",
-                  position: dsAny.labels?.position ?? "top",
-                  color: dsAny.labels?.color ?? "#000",
-                  font: dsAny.labels?.font ?? [{ size: 12, weight: "bold" }, { size: 10 }],
+                  formatter: dsAny.labels?.formatter ?? defaultTreemapFormatter,
                 },
               },
             ];
