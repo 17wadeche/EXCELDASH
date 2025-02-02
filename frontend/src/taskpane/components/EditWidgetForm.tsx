@@ -1222,14 +1222,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                               >
                                 <Switch />
                               </Form.Item>
-                              <Form.Item
-                                {...restField}
-                                name={[name, "labels", "display"]}
-                                valuePropName="checked"
-                                label="Show Treemap Labels?"
-                              >
-                                <Switch />
-                              </Form.Item>
                             </>
                           );
                         } else if (dsType === "boxplot") {
