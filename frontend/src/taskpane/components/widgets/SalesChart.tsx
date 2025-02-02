@@ -150,17 +150,6 @@ const SalesChart = ({ data, type }: SalesChartProps) => {
     };
   }, []);
   console.log("SalesChart Datasets:", data.datasets);
-  useEffect(() => {
-    if (type !== "treemap") return;
-    const chart = chartRef.current;
-    if (!chart) return;
-    chart.options?.plugins?.datalabels && (chart.options.plugins.datalabels.display = false);
-    chart.update();
-    setTimeout(() => {
-      chart.options?.plugins?.datalabels && (chart.options.plugins.datalabels.display = true);
-      chart.update();
-    }, 500);
-  }, [type, data]);
   const chartOptions: ChartOptions = {
     responsive: true,
     maintainAspectRatio: false,

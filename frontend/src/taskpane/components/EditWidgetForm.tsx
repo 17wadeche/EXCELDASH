@@ -149,11 +149,11 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 tree: dsAny.tree,
                 plugins: {
                   datalabels: {
-                    display: dsAny.plugins?.datalabels?.display ?? true,
+                    display: dsAny.plugins?.datalabels?.display ?? false,
                   },
                 },
                 labels: {
-                  display: dsAny.labels?.display ?? true,
+                  display: dsAny.labels?.display ?? false,
                   formatter: dsAny.labels?.formatter ?? defaultTreemapFormatter,
                 },
               },
@@ -498,7 +498,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
               position: cleanedValues.legendPosition || "top",
             },
             datalabels: {
-              display: cleanedValues.showDataLabels,
+              display: cleanedValues.showDataLabels !== false,
               color: cleanedValues.dataLabelColor || "#000",
               font: {
                 size: cleanedValues.dataLabelFontSize || 12,
