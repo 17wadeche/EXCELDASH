@@ -420,10 +420,6 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 },
                 labels: {
                   display: dsAny.labels?.display ?? true,
-                  align: dsAny.labels?.align ?? "left",
-                  position: dsAny.labels?.position ?? "top",
-                  color: dsAny.labels?.color ?? "#000",
-                  font: dsAny.labels?.font ?? [{ size: 12, weight: "bold" }, { size: 10 }],
                   formatter: userFormatter,
                 },
               };
