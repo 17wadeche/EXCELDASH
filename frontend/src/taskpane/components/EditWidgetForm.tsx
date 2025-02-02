@@ -141,6 +141,13 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
         }
         if (data.type === "treemap") {
           const dsAny = data.datasets[0] as any;
+          dsAny.plugins = dsAny.plugins || {};
+          dsAny.plugins.datalabels = dsAny.plugins.datalabels || {};
+          dsAny.plugins.datalabels.display = true;
+          dsAny.labels = dsAny.labels || {};
+          if (typeof dsAny.labels.display === "undefined") {
+            dsAny.labels.display = true;
+          }
           if (Array.isArray(dsAny.tree)) {
             initialValues.datasets = initialValues.datasets || [];
             initialValues.datasets = [
@@ -149,12 +156,12 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                 tree: dsAny.tree,
                 plugins: {
                   datalabels: {
-                    display: dsAny.plugins?.datalabels?.display ?? false,
+                    display: true,
                   },
                 },
                 labels: {
-                  display: dsAny.labels?.display ?? false,
-                  formatter: dsAny.labels?.formatter ?? defaultTreemapFormatter,
+                  display: true,
+                  formatter: dsAny.labels.formatter,
                 },
               },
             ];
