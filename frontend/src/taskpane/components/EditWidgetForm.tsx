@@ -402,6 +402,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                   value: item.value || 0,
                 }));
               }
+              const userFormatter = dsAny.labels?.formatter ?? defaultTreemapFormatter;
               return {
                 label: ds.label || "Treemap",
                 type: "treemap",
@@ -423,12 +424,7 @@ const EditWidgetForm: React.FC<EditWidgetFormProps> = ({ widget, onSubmit, onCan
                   position: dsAny.labels?.position ?? "top",
                   color: dsAny.labels?.color ?? "#000",
                   font: dsAny.labels?.font ?? [{ size: 12, weight: "bold" }, { size: 10 }],
-                  formatter(ctx: any) {
-                    if (ctx.type !== "data") return "";
-                    const node = ctx.raw?._data;
-                    if (!node) return "";
-                    return [node.name, `(${ctx.raw.v})`];
-                  },
+                  formatter: userFormatter,
                 },
               };
             } else if (ds.type === "funnel") {
