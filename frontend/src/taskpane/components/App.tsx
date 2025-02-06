@@ -16,6 +16,7 @@ import ResetPasswordPage from "./ResetPasswordPage";
 import EnterResetCodePage from "./EnterResetCodePage";
 import { DashboardProvider } from "../context/DashboardContext";
 import { AuthProvider } from "../context/AuthContext";
+import AuthRedirect from "./AuthRedirect";
 
 const App: React.FC = () => {
   return (
@@ -23,7 +24,7 @@ const App: React.FC = () => {
       <DashboardProvider>
         <Routes>
           <Route path="/" element={<CustomLayout />}>
-            <Route index element={<Navigate to="create" replace />} />
+            <Route index element={<AuthRedirect />} />
             <Route path="create" element={<CreateDashboard />} />
             <Route path="dashboard-editor" element={<DashboardPage />} />
             <Route path="template/:id/edit" element={<EditTemplate />} />
