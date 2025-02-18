@@ -98,14 +98,10 @@ const CustomLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) =>
           <Menu.Item key="/create" icon={<PlusOutlined />}>
             <Link to="/create">Create Dashboard</Link>
           </Menu.Item>
-          <Menu.Item
-            key="/dashboard-list"
-            icon={<UnorderedListOutlined />}
-            disabled={isFetching}
-          >
+          <Menu.Item key="/dashboard-list" icon={<UnorderedListOutlined />} disabled={isFetching}>
             {isFetching ? (
               <Tooltip title="Loading, please wait...">
-                <span style={{ cursor: 'not-allowed', color: 'rgba(0,0,0,0.25)' }}>Dashboard List</span>
+                <span style={{ cursor: "not-allowed", color: "rgba(0,0,0,0.25)" }}>Dashboard List</span>
               </Tooltip>
             ) : (
               <Link to="/dashboard-list">Dashboard List</Link>

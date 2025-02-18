@@ -18,7 +18,6 @@ import { DashboardProvider } from "../context/DashboardContext";
 import { AuthProvider } from "../context/AuthContext";
 import AuthRedirect from "./AuthRedirect";
 
-
 const App: React.FC = () => {
   return (
     <AuthProvider>

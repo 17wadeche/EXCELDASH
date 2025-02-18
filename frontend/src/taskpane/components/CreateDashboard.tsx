@@ -42,7 +42,6 @@ const CreateDashboard: React.FC = () => {
     currentWorkbookId,
     setLayouts,
     setDashboards,
-    isFetching,
     setIsFetching,
   } = useContext(DashboardContext)!;
   const [searchTerm, setSearchTerm] = useState("");
@@ -356,7 +355,6 @@ const CreateDashboard: React.FC = () => {
                         type="primary"
                         htmlType="submit"
                         block
-                        disabled={!dashboardTitle.trim()}
                         loading={isLoading}
                         size="large"
                         icon={<FolderAddOutlined />}
