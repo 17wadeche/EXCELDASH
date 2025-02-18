@@ -31,11 +31,10 @@ import { AuthContext } from "../context/AuthContext";
 const { Header, Content } = Layout;
 const { Search } = Input;
 const CreateDashboard: React.FC = () => {
-  const [dashboardTitle] = useState("");
+  const [dashboardTitle, setDashboardTitle] = useState("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const navigate = useNavigate();
   const {
-    setDashboardTitle,
     setWidgets,
     setCurrentWorkbookId,
     setCurrentDashboardId,
